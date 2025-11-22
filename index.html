@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StoneCraft - Premium Sandstone & Kota Stone</title>
+    <title>StoneCraft - Premium Stone Applications</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -30,9 +30,16 @@
         header {
             background-color: #fff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            width: 100%;
             z-index: 100;
+            transition: transform 0.3s ease;
+        }
+        
+        header.hidden {
+            transform: translateY(-100%);
         }
         
         .top-bar {
@@ -162,18 +169,23 @@
             display: block;
         }
         
+        /* Main Content */
+        .main-content {
+            margin-top: 70px;
+        }
+        
         /* Hero Section - Mobile Optimized */
         .hero {
             background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');
             background-size: cover;
             background-position: center;
             color: white;
-            padding: 60px 0;
+            padding: 40px 0;
             text-align: center;
         }
         
         .hero h1 {
-            font-size: 28px;
+            font-size: 24px;
             margin-bottom: 15px;
             line-height: 1.3;
         }
@@ -224,7 +236,7 @@
             background-color: #a3780a;
         }
         
-        /* Main Categories Section */
+        /* Uses Section */
         .section-title {
             text-align: center;
             margin: 40px 0 25px;
@@ -245,140 +257,158 @@
             transform: translateX(-50%);
         }
         
-        .main-categories {
+        .uses-categories {
             display: grid;
             grid-template-columns: 1fr;
             gap: 15px;
             margin-bottom: 40px;
         }
         
-        .main-category-card {
+        .use-category {
+            background: white;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s;
-            background: white;
         }
         
-        .main-category-card:hover {
+        .use-category:hover {
             transform: translateY(-5px);
         }
         
-        .main-category-img {
-            height: 180px;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-        
-        .main-category-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.7);
+        .use-header {
+            background: #333;
             color: white;
-            padding: 12px;
-        }
-        
-        .main-category-overlay h3 {
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-        
-        .main-category-overlay p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        /* Stone Types Grid */
-        .stone-types {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin: 25px 0 40px;
-        }
-        
-        .stone-type-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            transition: transform 0.3s;
-        }
-        
-        .stone-type-card:hover {
-            transform: translateY(-3px);
-        }
-        
-        .stone-type-img {
-            height: 120px;
-            background-size: cover;
-            background-position: center;
-        }
-        
-        .stone-type-content {
-            padding: 12px;
+            padding: 15px;
             text-align: center;
         }
         
-        .stone-type-content h4 {
-            font-size: 15px;
+        .use-header h3 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .use-patterns {
+            padding: 15px;
+        }
+        
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .pattern-card {
+            background: #f9f9f9;
+            border-radius: 6px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .pattern-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .pattern-img {
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .pattern-info {
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .pattern-info h4 {
+            font-size: 14px;
             margin-bottom: 5px;
             color: #333;
         }
         
-        .stone-type-content p {
-            font-size: 13px;
+        .pattern-info p {
+            font-size: 12px;
             color: #666;
         }
         
-        /* Products Section */
-        .products {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-            margin-bottom: 40px;
+        /* Pattern Detail Modal */
+        .pattern-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
         }
         
-        .product-card {
-            border: 1px solid #eee;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s;
+        .pattern-modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
             background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
         }
         
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+            z-index: 1;
         }
         
-        .product-img {
-            height: 160px;
+        .modal-img {
+            height: 200px;
             background-size: cover;
             background-position: center;
+            border-radius: 8px 8px 0 0;
         }
         
-        .product-content {
-            padding: 15px;
+        .modal-info {
+            padding: 20px;
         }
         
-        .product-content h3 {
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-        
-        .product-price {
-            font-weight: bold;
-            color: #b8860b;
-            font-size: 16px;
+        .modal-info h3 {
+            font-size: 20px;
             margin-bottom: 10px;
+            color: #333;
         }
         
-        .product-actions {
+        .modal-info p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .pattern-types {
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .type-tag {
+            background: #b8860b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
         }
         
         /* Features Section */
@@ -485,6 +515,10 @@
         
         /* Desktop Styles */
         @media (min-width: 768px) {
+            .main-content {
+                margin-top: 90px;
+            }
+            
             .top-bar {
                 display: block;
                 font-size: 14px;
@@ -520,15 +554,15 @@
             }
             
             .hero {
-                padding: 100px 0;
+                padding: 80px 0;
             }
             
             .hero h1 {
-                font-size: 42px;
+                font-size: 36px;
             }
             
             .hero p {
-                font-size: 20px;
+                font-size: 18px;
                 max-width: 700px;
             }
             
@@ -537,19 +571,18 @@
                 margin: 60px 0 35px;
             }
             
-            .main-categories {
+            .uses-categories {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 25px;
             }
             
-            .stone-types {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 20px;
+            .pattern-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
             }
             
-            .products {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 25px;
+            .pattern-img {
+                height: 120px;
             }
             
             .features {
@@ -565,11 +598,11 @@
         }
         
         @media (min-width: 992px) {
-            .main-categories {
+            .uses-categories {
                 grid-template-columns: repeat(3, 1fr);
             }
             
-            .products {
+            .pattern-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
         }
@@ -584,21 +617,34 @@
         </div>
         <ul class="mobile-nav-links">
             <li><a href="#">Home</a></li>
-            <li><a href="#">Sandstone</a></li>
-            <li><a href="#">Kota Stone</a></li>
-            <li><a href="#">Flooring</a></li>
-            <li><a href="#">Wall Decoration</a></li>
-            <li><a href="#">Bathroom</a></li>
-            <li><a href="#">Outdoor</a></li>
-            <li><a href="#">Wood Effect</a></li>
-            <li><a href="#">Clearance</a></li>
+            <li><a href="#flooring">Flooring</a></li>
+            <li><a href="#wall-decoration">Wall Decoration</a></li>
+            <li><a href="#bathroom">Bathroom</a></li>
+            <li><a href="#outdoor">Outdoor</a></li>
+            <li><a href="#wood-effect">Wood Effect</a></li>
+            <li><a href="#clearance">Clearance</a></li>
             <li><a href="#">Contact</a></li>
         </ul>
     </div>
     <div class="overlay" id="overlay"></div>
 
+    <!-- Pattern Detail Modal -->
+    <div class="pattern-modal" id="patternModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            <div class="modal-img" id="modalImg"></div>
+            <div class="modal-info">
+                <h3 id="modalTitle">Pattern Title</h3>
+                <p id="modalDescription">Pattern description will appear here.</p>
+                <div class="pattern-types" id="modalTypes">
+                    <!-- Types will be added dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Header Section -->
-    <header>
+    <header id="mainHeader">
         <div class="top-bar">
             <div class="container top-bar-content">
                 <div class="contact-info">
@@ -632,173 +678,183 @@
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1>Premium Sandstone & Kota Stone</h1>
-            <p>Natural stone solutions for modern living spaces. Durable, elegant, and perfect for any application.</p>
-            <a href="#" class="btn">Explore Collection</a>
-        </div>
-    </section>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h1>Premium Stone Applications & Patterns</h1>
+                <p>Discover the perfect stone patterns for every application in your home and outdoor spaces.</p>
+                <a href="#" class="btn">Explore Patterns</a>
+            </div>
+        </section>
 
-    <!-- Page 2 Button -->
-    <div class="page2-btn-container">
-        <a href="page2.html">
-            <button class="page2-btn">Go to Page 2</button>
-        </a>
+        <!-- Page 2 Button -->
+        <div class="page2-btn-container">
+            <a href="page2.html">
+                <button class="page2-btn">Go to Page 2</button>
+            </a>
+        </div>
+
+        <!-- Uses Section -->
+        <section class="container">
+            <h2 class="section-title">Stone Applications & Uses</h2>
+            <div class="uses-categories">
+                
+                <!-- Flooring Uses -->
+                <div class="use-category" id="flooring">
+                    <div class="use-header">
+                        <h3>Flooring Applications</h3>
+                    </div>
+                    <div class="use-patterns">
+                        <div class="pattern-grid">
+                            <div class="pattern-card" data-pattern="herringbone" data-img="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Herringbone Pattern</h4>
+                                    <p>Square & Rectangular tiles</p>
+                                </div>
+                            </div>
+                            
+                            <div class="pattern-card" data-pattern="checkerboard" data-img="https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Checkerboard</h4>
+                                    <p>Square tiles alternating colors</p>
+                                </div>
+                            </div>
+                            
+                            <div class="pattern-card" data-pattern="random" data-img="https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Random Layout</h4>
+                                    <p>Mixed sizes natural look</p>
+                                </div>
+                            </div>
+                            
+                            <div class="pattern-card" data-pattern="brick" data-img="https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Brick Pattern</h4>
+                                    <p>Rectangular tiles offset</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Wall Decoration Uses -->
+                <div class="use-category" id="wall-decoration">
+                    <div class="use-header">
+                        <h3>Wall Decoration</h3>
+                    </div>
+                    <div class="use-patterns">
+                        <div class="pattern-grid">
+                            <div class="pattern-card" data-pattern="accent-wall" data-img="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Accent Wall</h4>
+                                    <p>Feature wall with stone</p>
+                                </div>
+                            </div>
+                            
+                            <div class="pattern-card" data-pattern="mosaic" data-img="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Mosaic Patterns</h4>
+                                    <p>Small tiles artistic design</p>
+                                </div>
+                            </div>
+                            
+                            <div class="pattern-card" data-pattern="vertical" data-img="https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Vertical Layout</h4>
+                                    <p>Tall rectangular tiles</p>
+                                </div>
+                            </div>
+                            
+                            <div class="pattern-card" data-pattern="mixed" data-img="https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Mixed Materials</h4>
+                                    <p>Stone with other materials</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bathroom Uses -->
+                <div class="use-category" id="bathroom">
+                    <div class="use-header">
+                        <h3>Bathroom Applications</h3>
+                    </div>
+                    <div class="use-patterns">
+                        <div class="pattern-grid">
+                            <div class="pattern-card" data-pattern="shower" data-img="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Shower Walls</h4>
+                                    <p>Water-resistant patterns</p>
+                                </div>
+                            </div>
+                            
+                            <div class="pattern-card" data-pattern="vanity" data-img="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Vanity Backsplash</h4>
+                                    <p>Behind sink area</p>
+                                </div>
+                            </div>
+                            
+                            <div class="pattern-card" data-pattern="bathroom-floor" data-img="https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Bathroom Floor</h4>
+                                    <p>Slip-resistant options</p>
+                                </div>
+                            </div>
+                            
+                            <div class="pattern-card" data-pattern="bath-surround" data-img="https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                                <div class="pattern-img"></div>
+                                <div class="pattern-info">
+                                    <h4>Bath Surround</h4>
+                                    <p>Around bathtub area</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Add more use categories as needed -->
+                
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <div class="feature">
+                    <i class="fas fa-truck"></i>
+                    <h3>Free Shipping</h3>
+                    <p>Free shipping on all orders over $500</p>
+                </div>
+                
+                <div class="feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Quality Guarantee</h3>
+                    <p>30-day money back guarantee on all products</p>
+                </div>
+                
+                <div class="feature">
+                    <i class="fas fa-headset"></i>
+                    <h3>Expert Support</h3>
+                    <p>Our team is here to help with any questions</p>
+                </div>
+            </div>
+        </section>
     </div>
-
-    <!-- Main Categories Section -->
-    <section class="container">
-        <h2 class="section-title">Our Stone Collections</h2>
-        <div class="main-categories">
-            <div class="main-category-card">
-                <div class="main-category-img" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');">
-                    <div class="main-category-overlay">
-                        <h3>Sandstone</h3>
-                        <p>Natural texture for beautiful applications</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="main-category-card">
-                <div class="main-category-img" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');">
-                    <div class="main-category-overlay">
-                        <h3>Kota Stone</h3>
-                        <p>Durable and elegant natural stone</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="main-category-card">
-                <div class="main-category-img" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');">
-                    <div class="main-category-overlay">
-                        <h3>Clearance Sale</h3>
-                        <p>Limited stock at discounted prices</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stone Types Section -->
-    <section class="container">
-        <h2 class="section-title">Stone Types & Finishes</h2>
-        <div class="stone-types">
-            <div class="stone-type-card">
-                <div class="stone-type-img" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80');"></div>
-                <div class="stone-type-content">
-                    <h4>Square Tiles</h4>
-                    <p>Perfect for modern designs</p>
-                </div>
-            </div>
-            
-            <div class="stone-type-card">
-                <div class="stone-type-img" style="background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80');"></div>
-                <div class="stone-type-content">
-                    <h4>Natural Finish</h4>
-                    <p>Rustic and authentic look</p>
-                </div>
-            </div>
-            
-            <div class="stone-type-card">
-                <div class="stone-type-img" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80');"></div>
-                <div class="stone-type-content">
-                    <h4>Polished</h4>
-                    <p>Shiny and reflective surface</p>
-                </div>
-            </div>
-            
-            <div class="stone-type-card">
-                <div class="stone-type-img" style="background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80');"></div>
-                <div class="stone-type-content">
-                    <h4>Wood Effect</h4>
-                    <p>Stone with wood appearance</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Products Section -->
-    <section class="container">
-        <h2 class="section-title">Featured Products</h2>
-        <div class="products">
-            <div class="product-card">
-                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80');"></div>
-                <div class="product-content">
-                    <h3>Kota Blue Stone</h3>
-                    <p>Premium quality for flooring</p>
-                    <p class="product-price">$18.99 / sq. ft.</p>
-                    <div class="product-actions">
-                        <a href="#" class="btn">Add to Cart</a>
-                        <a href="#"><i class="far fa-heart"></i></a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="product-card">
-                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80');"></div>
-                <div class="product-content">
-                    <h3>Natural Sandstone</h3>
-                    <p>Perfect for wall cladding</p>
-                    <p class="product-price">$22.50 / sq. ft.</p>
-                    <div class="product-actions">
-                        <a href="#" class="btn">Add to Cart</a>
-                        <a href="#"><i class="far fa-heart"></i></a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="product-card">
-                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80');"></div>
-                <div class="product-content">
-                    <h3>Outdoor Paving Stone</h3>
-                    <p>Weather-resistant for gardens</p>
-                    <p class="product-price">$16.75 / sq. ft.</p>
-                    <div class="product-actions">
-                        <a href="#" class="btn">Add to Cart</a>
-                        <a href="#"><i class="far fa-heart"></i></a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="product-card">
-                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80');"></div>
-                <div class="product-content">
-                    <h3>Stone Countertop Slab</h3>
-                    <p>Elegant for kitchen countertops</p>
-                    <p class="product-price">$45.99 / sq. ft.</p>
-                    <div class="product-actions">
-                        <a href="#" class="btn">Add to Cart</a>
-                        <a href="#"><i class="far fa-heart"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features">
-        <div class="container">
-            <div class="feature">
-                <i class="fas fa-truck"></i>
-                <h3>Free Shipping</h3>
-                <p>Free shipping on all orders over $500</p>
-            </div>
-            
-            <div class="feature">
-                <i class="fas fa-shield-alt"></i>
-                <h3>Quality Guarantee</h3>
-                <p>30-day money back guarantee on all products</p>
-            </div>
-            
-            <div class="feature">
-                <i class="fas fa-headset"></i>
-                <h3>Expert Support</h3>
-                <p>Our team is here to help with any questions</p>
-            </div>
-        </div>
-    </section>
 
     <!-- Footer -->
     <footer>
@@ -816,13 +872,13 @@
                 </div>
                 
                 <div class="footer-column">
-                    <h3>Stone Types</h3>
+                    <h3>Applications</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Sandstone</a></li>
-                        <li><a href="#">Kota Stone</a></li>
-                        <li><a href="#">Flooring Tiles</a></li>
-                        <li><a href="#">Wall Cladding</a></li>
-                        <li><a href="#">Outdoor Paving</a></li>
+                        <li><a href="#flooring">Flooring</a></li>
+                        <li><a href="#wall-decoration">Wall Decoration</a></li>
+                        <li><a href="#bathroom">Bathroom</a></li>
+                        <li><a href="#outdoor">Outdoor</a></li>
+                        <li><a href="#wood-effect">Wood Effect</a></li>
                     </ul>
                 </div>
                 
@@ -855,6 +911,70 @@
     </footer>
 
     <script>
+        // Pattern data
+        const patternData = {
+            'herringbone': {
+                title: 'Herringbone Pattern',
+                description: 'Classic herringbone pattern using rectangular stone tiles arranged in a V-shape. Perfect for creating visual interest in flooring applications.',
+                types: ['Square', 'Rectangular', 'Polished', 'Natural']
+            },
+            'checkerboard': {
+                title: 'Checkerboard Pattern',
+                description: 'Traditional checkerboard design using alternating square stone tiles of different colors or finishes.',
+                types: ['Square', 'Polished', 'Matte']
+            },
+            'random': {
+                title: 'Random Layout',
+                description: 'Organic random pattern using mixed sizes of stone tiles for a natural, rustic appearance.',
+                types: ['Mixed Sizes', 'Natural', 'Rustic']
+            },
+            'brick': {
+                title: 'Brick Pattern',
+                description: 'Classic brick layout with rectangular stone tiles offset by half their width in each row.',
+                types: ['Rectangular', 'Offset', 'Traditional']
+            },
+            'accent-wall': {
+                title: 'Accent Wall',
+                description: 'Feature wall created with stone tiles to draw attention and add texture to a room.',
+                types: ['Various Shapes', 'Textured', 'Feature Wall']
+            },
+            'mosaic': {
+                title: 'Mosaic Patterns',
+                description: 'Artistic designs created with small stone tiles arranged in intricate patterns or pictures.',
+                types: ['Small Tiles', 'Artistic', 'Custom Designs']
+            },
+            'vertical': {
+                title: 'Vertical Layout',
+                description: 'Tall rectangular stone tiles installed vertically to create the illusion of height in a space.',
+                types: ['Rectangular', 'Vertical', 'Modern']
+            },
+            'mixed': {
+                title: 'Mixed Materials',
+                description: 'Combining stone with other materials like wood or metal for unique decorative effects.',
+                types: ['Mixed Materials', 'Contemporary', 'Custom']
+            },
+            'shower': {
+                title: 'Shower Walls',
+                description: 'Water-resistant stone patterns specifically designed for shower areas with proper sealing.',
+                types: ['Water-Resistant', 'Sealed', 'Bathroom']
+            },
+            'vanity': {
+                title: 'Vanity Backsplash',
+                description: 'Stone application behind bathroom sinks and vanities for both protection and style.',
+                types: ['Backsplash', 'Protected', 'Decorative']
+            },
+            'bathroom-floor': {
+                title: 'Bathroom Floor',
+                description: 'Slip-resistant stone flooring options specifically designed for bathroom environments.',
+                types: ['Slip-Resistant', 'Bathroom', 'Safe']
+            },
+            'bath-surround': {
+                title: 'Bath Surround',
+                description: 'Stone tiling around bathtub areas creating a luxurious and waterproof surface.',
+                types: ['Waterproof', 'Luxury', 'Bathtub']
+            }
+        };
+
         // Mobile Navigation
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const closeMobileNav = document.getElementById('closeMobileNav');
@@ -879,30 +999,70 @@
             document.body.style.overflow = 'auto';
         });
         
-        // Add to cart buttons
-        const addToCartButtons = document.querySelectorAll('.product-actions .btn');
-        addToCartButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                alert('Product added to cart!');
+        // Pattern Modal
+        const patternModal = document.getElementById('patternModal');
+        const modalClose = document.getElementById('modalClose');
+        const modalImg = document.getElementById('modalImg');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDescription = document.getElementById('modalDescription');
+        const modalTypes = document.getElementById('modalTypes');
+        
+        // Add click events to pattern cards
+        document.querySelectorAll('.pattern-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const pattern = this.getAttribute('data-pattern');
+                const imgUrl = this.getAttribute('data-img');
+                
+                if (patternData[pattern]) {
+                    modalImg.style.backgroundImage = `url('${imgUrl}')`;
+                    modalTitle.textContent = patternData[pattern].title;
+                    modalDescription.textContent = patternData[pattern].description;
+                    
+                    // Clear previous types
+                    modalTypes.innerHTML = '';
+                    
+                    // Add new types
+                    patternData[pattern].types.forEach(type => {
+                        const typeTag = document.createElement('span');
+                        typeTag.className = 'type-tag';
+                        typeTag.textContent = type;
+                        modalTypes.appendChild(typeTag);
+                    });
+                    
+                    patternModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
             });
         });
         
-        // Wishlist buttons
-        const wishlistButtons = document.querySelectorAll('.fa-heart');
-        wishlistButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (this.classList.contains('far')) {
-                    this.classList.remove('far');
-                    this.classList.add('fas');
-                    alert('Added to wishlist!');
-                } else {
-                    this.classList.remove('fas');
-                    this.classList.add('far');
-                    alert('Removed from wishlist!');
-                }
-            });
+        modalClose.addEventListener('click', function() {
+            patternModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
+        
+        patternModal.addEventListener('click', function(e) {
+            if (e.target === patternModal) {
+                patternModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Header hide on scroll
+        let lastScrollTop = 0;
+        const header = document.getElementById('mainHeader');
+        
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scroll down
+                header.classList.add('hidden');
+            } else {
+                // Scroll up
+                header.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
         });
     </script>
 </body>
