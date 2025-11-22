@@ -26,7 +26,7 @@
             padding: 0 15px;
         }
         
-        /* Header Styles - Mobile First */
+        /* Header Styles */
         header {
             background-color: #fff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -35,11 +35,6 @@
             left: 0;
             width: 100%;
             z-index: 100;
-            transition: transform 0.3s ease;
-        }
-        
-        header.hidden {
-            transform: translateY(-100%);
         }
         
         .main-header {
@@ -89,84 +84,64 @@
             font-size: 14px;
         }
         
-        /* Uses Top Bar */
+        /* Uses Top Bar - Auto Fit */
         .uses-top-bar {
             background: #333;
             padding: 0;
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        
-        .uses-top-bar::-webkit-scrollbar {
-            display: none;
         }
         
         .uses-container {
-            display: inline-flex;
-            padding: 0 10px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .use-item {
+            flex: 1;
+            min-width: 120px;
+            position: relative;
         }
         
         .use-link {
-            display: inline-block;
+            display: block;
             color: white;
             text-decoration: none;
-            padding: 12px 20px;
+            padding: 12px 8px;
             font-size: 14px;
             font-weight: 500;
+            text-align: center;
             transition: all 0.3s;
             position: relative;
+            cursor: pointer;
         }
         
         .use-link:hover {
             background: #b8860b;
         }
         
-        .use-link.active {
-            background: #b8860b;
-        }
-        
-        /* Use Details Panel */
+        /* Use Details Panel - Hover Activated */
         .use-details-panel {
-            position: fixed;
-            top: 0;
-            right: -100%;
+            position: absolute;
+            top: 100%;
+            left: 0;
             width: 100%;
-            height: 100%;
             background: white;
             z-index: 1000;
-            transition: right 0.3s ease;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 0 0 8px 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
         }
         
-        .use-details-panel.active {
-            right: 0;
-        }
-        
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            background: #333;
-            color: white;
-        }
-        
-        .panel-header h3 {
-            font-size: 20px;
-            margin: 0;
-        }
-        
-        .close-panel {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: white;
+        .use-item:hover .use-details-panel {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            max-height: 500px;
         }
         
         .panel-content {
@@ -174,33 +149,35 @@
         }
         
         .use-image {
-            height: 200px;
+            height: 150px;
             background-size: cover;
             background-position: center;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
         }
         
         .use-description {
-            font-size: 16px;
+            font-size: 14px;
             color: #666;
-            margin-bottom: 20px;
-            line-height: 1.6;
+            margin-bottom: 15px;
+            line-height: 1.5;
         }
         
         .types-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 20px;
+            gap: 10px;
         }
         
         .type-card {
             background: #f9f9f9;
-            border-radius: 8px;
+            border-radius: 6px;
             overflow: hidden;
             transition: all 0.3s;
             cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
         
         .type-card:hover {
@@ -209,24 +186,24 @@
         }
         
         .type-img {
-            height: 120px;
+            height: 80px;
             background-size: cover;
             background-position: center;
         }
         
         .type-info {
-            padding: 12px;
+            padding: 10px;
             text-align: center;
         }
         
         .type-info h4 {
-            font-size: 14px;
-            margin-bottom: 5px;
+            font-size: 12px;
+            margin-bottom: 4px;
             color: #333;
         }
         
         .type-info p {
-            font-size: 12px;
+            font-size: 10px;
             color: #666;
         }
         
@@ -235,7 +212,7 @@
             margin-top: 120px;
         }
         
-        /* Hero Section - Mobile Optimized */
+        /* Hero Section */
         .hero {
             background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');
             background-size: cover;
@@ -479,6 +456,34 @@
                 gap: 20px;
             }
             
+            .use-item {
+                min-width: 140px;
+            }
+            
+            .use-link {
+                padding: 12px 15px;
+                font-size: 15px;
+            }
+            
+            .use-details-panel {
+                width: 300px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-10px);
+            }
+            
+            .use-item:hover .use-details-panel {
+                transform: translateX(-50%) translateY(0);
+            }
+            
+            .types-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+            
+            .type-img {
+                height: 100px;
+            }
+            
             .hero {
                 padding: 80px 0;
             }
@@ -502,15 +507,6 @@
                 gap: 25px;
             }
             
-            .use-details-panel {
-                width: 400px;
-            }
-            
-            .types-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-            }
-            
             .features {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 30px;
@@ -531,25 +527,29 @@
             .types-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
+            
+            .use-item {
+                min-width: 160px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .use-item {
+                min-width: 100px;
+            }
+            
+            .use-link {
+                padding: 10px 5px;
+                font-size: 12px;
+            }
+            
+            .types-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Use Details Panel -->
-    <div class="use-details-panel" id="useDetailsPanel">
-        <div class="panel-header">
-            <h3 id="panelTitle">Use Details</h3>
-            <button class="close-panel" id="closePanel"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="panel-content">
-            <div class="use-image" id="panelImage"></div>
-            <p class="use-description" id="panelDescription">Description will appear here.</p>
-            <div class="types-grid" id="panelTypes">
-                <!-- Types will be added dynamically -->
-            </div>
-        </div>
-    </div>
-
     <!-- Header Section -->
     <header id="mainHeader">
         <div class="main-header">
@@ -571,16 +571,73 @@
             </div>
         </div>
         
-        <!-- Uses Top Bar -->
+        <!-- Uses Top Bar - Auto Fit -->
         <div class="uses-top-bar">
-            <div class="uses-container">
-                <a href="#" class="use-link" data-use="flooring">Flooring</a>
-                <a href="#" class="use-link" data-use="wall">Wall Decoration</a>
-                <a href="#" class="use-link" data-use="bathroom">Bathroom</a>
-                <a href="#" class="use-link" data-use="outdoor">Outdoor</a>
-                <a href="#" class="use-link" data-use="wood-effect">Wood Effect</a>
-                <a href="#" class="use-link" data-use="acoustic">Acoustic Panels</a>
-                <a href="#" class="use-link" data-use="clearance">Clearance</a>
+            <div class="container uses-container">
+                <div class="use-item">
+                    <div class="use-link">Flooring</div>
+                    <div class="use-details-panel" data-use="flooring">
+                        <div class="panel-content">
+                            <div class="use-image"></div>
+                            <p class="use-description">Premium stone flooring solutions for residential and commercial spaces.</p>
+                            <div class="types-grid">
+                                <!-- Types will be added dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="use-item">
+                    <div class="use-link">Wall Decoration</div>
+                    <div class="use-details-panel" data-use="wall">
+                        <div class="panel-content">
+                            <div class="use-image"></div>
+                            <p class="use-description">Transform your walls with beautiful stone cladding and decorative patterns.</p>
+                            <div class="types-grid">
+                                <!-- Types will be added dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="use-item">
+                    <div class="use-link">Bathroom</div>
+                    <div class="use-details-panel" data-use="bathroom">
+                        <div class="panel-content">
+                            <div class="use-image"></div>
+                            <p class="use-description">Create luxurious and functional bathroom spaces with water-resistant stone.</p>
+                            <div class="types-grid">
+                                <!-- Types will be added dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="use-item">
+                    <div class="use-link">Outdoor</div>
+                    <div class="use-details-panel" data-use="outdoor">
+                        <div class="panel-content">
+                            <div class="use-image"></div>
+                            <p class="use-description">Durable and weather-resistant stone solutions for outdoor spaces.</p>
+                            <div class="types-grid">
+                                <!-- Types will be added dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="use-item">
+                    <div class="use-link">Wood Effect</div>
+                    <div class="use-details-panel" data-use="wood-effect">
+                        <div class="panel-content">
+                            <div class="use-image"></div>
+                            <p class="use-description">Stone with wood appearance for natural and elegant designs.</p>
+                            <div class="types-grid">
+                                <!-- Types will be added dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -711,128 +768,98 @@
         // Use data
         const useData = {
             'flooring': {
-                title: 'Flooring Applications',
-                description: 'Premium stone flooring solutions for residential and commercial spaces. Our stone flooring offers durability, easy maintenance, and timeless beauty that complements any interior design style.',
                 image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                description: 'Premium stone flooring solutions for residential and commercial spaces. Our stone flooring offers durability, easy maintenance, and timeless beauty.',
                 types: [
-                    { name: 'Herringbone Pattern', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Classic V-shape pattern' },
-                    { name: 'Checkerboard', image: 'https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Alternating square tiles' },
-                    { name: 'Random Layout', image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Mixed sizes natural look' },
-                    { name: 'Brick Pattern', image: 'https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Offset rectangular tiles' }
+                    { name: 'Herringbone Pattern', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'herringbone-flooring.html' },
+                    { name: 'Checkerboard', image: 'https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'checkerboard-flooring.html' },
+                    { name: 'Random Layout', image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'random-layout.html' },
+                    { name: 'Brick Pattern', image: 'https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'brick-pattern.html' }
                 ]
             },
             'wall': {
-                title: 'Wall Decoration',
-                description: 'Transform your walls with beautiful stone cladding and decorative patterns. Create feature walls, accent areas, or complete room transformations with our premium stone wall solutions.',
                 image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                description: 'Transform your walls with beautiful stone cladding and decorative patterns. Create feature walls and accent areas.',
                 types: [
-                    { name: 'Accent Wall', image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Feature wall with stone' },
-                    { name: 'Mosaic Patterns', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Artistic small tile designs' },
-                    { name: 'Vertical Layout', image: 'https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Tall rectangular tiles' },
-                    { name: 'Mixed Materials', image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Stone with other materials' }
+                    { name: 'Accent Wall', image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'accent-wall.html' },
+                    { name: 'Mosaic Patterns', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'mosaic-patterns.html' },
+                    { name: 'Vertical Layout', image: 'https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'vertical-layout.html' },
+                    { name: 'Mixed Materials', image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'mixed-materials.html' }
                 ]
             },
             'bathroom': {
-                title: 'Bathroom Applications',
-                description: 'Create luxurious and functional bathroom spaces with our water-resistant stone solutions. Perfect for showers, vanities, floors, and bath surrounds with proper sealing and slip-resistant options.',
                 image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                description: 'Create luxurious and functional bathroom spaces with our water-resistant stone solutions for showers and vanities.',
                 types: [
-                    { name: 'Shower Walls', image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Water-resistant patterns' },
-                    { name: 'Vanity Backsplash', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Behind sink area' },
-                    { name: 'Bathroom Floor', image: 'https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Slip-resistant options' },
-                    { name: 'Bath Surround', image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Around bathtub area' }
+                    { name: 'Shower Walls', image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'shower-walls.html' },
+                    { name: 'Vanity Backsplash', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'vanity-backsplash.html' },
+                    { name: 'Bathroom Floor', image: 'https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'bathroom-floor.html' },
+                    { name: 'Bath Surround', image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'bath-surround.html' }
                 ]
             },
             'outdoor': {
-                title: 'Outdoor Applications',
-                description: 'Durable and weather-resistant stone solutions for outdoor spaces including patios, pathways, pool decks, and driveways. Designed to withstand the elements while maintaining beauty.',
                 image: 'https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                description: 'Durable and weather-resistant stone solutions for outdoor spaces including patios, pathways, and driveways.',
                 types: [
-                    { name: 'Patio Paving', image: 'https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Outdoor living spaces' },
-                    { name: 'Pathways', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Garden and walkway stones' },
-                    { name: 'Pool Deck', image: 'https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Non-slip pool areas' },
-                    { name: 'Driveway', image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', description: 'Durable driveway stones' }
+                    { name: 'Patio Paving', image: 'https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'patio-paving.html' },
+                    { name: 'Pathways', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'pathways.html' },
+                    { name: 'Pool Deck', image: 'https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'pool-deck.html' },
+                    { name: 'Driveway', image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'driveway.html' }
+                ]
+            },
+            'wood-effect': {
+                image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                description: 'Stone with wood appearance for natural and elegant designs that combine durability with aesthetic appeal.',
+                types: [
+                    { name: 'Wood Plank Tiles', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'wood-plank-tiles.html' },
+                    { name: 'Rustic Wood Effect', image: 'https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'rustic-wood.html' },
+                    { name: 'Modern Wood Grain', image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'modern-wood.html' },
+                    { name: 'Weathered Wood', image: 'https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80', page: 'weathered-wood.html' }
                 ]
             }
         };
 
-        // Use Details Panel
-        const useDetailsPanel = document.getElementById('useDetailsPanel');
-        const closePanel = document.getElementById('closePanel');
-        const panelTitle = document.getElementById('panelTitle');
-        const panelImage = document.getElementById('panelImage');
-        const panelDescription = document.getElementById('panelDescription');
-        const panelTypes = document.getElementById('panelTypes');
-        
-        // Add click events to use links
-        document.querySelectorAll('.use-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const useType = this.getAttribute('data-use');
+        // Initialize use panels
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all use panels
+            document.querySelectorAll('.use-details-panel').forEach(panel => {
+                const useType = panel.getAttribute('data-use');
                 
                 if (useData[useType]) {
-                    // Update panel content
-                    panelTitle.textContent = useData[useType].title;
-                    panelImage.style.backgroundImage = `url('${useData[useType].image}')`;
-                    panelDescription.textContent = useData[useType].description;
+                    const useImage = panel.querySelector('.use-image');
+                    const useDescription = panel.querySelector('.use-description');
+                    const typesGrid = panel.querySelector('.types-grid');
+                    
+                    // Set image and description
+                    useImage.style.backgroundImage = `url('${useData[useType].image}')`;
+                    useDescription.textContent = useData[useType].description;
                     
                     // Clear previous types
-                    panelTypes.innerHTML = '';
+                    typesGrid.innerHTML = '';
                     
-                    // Add new types
+                    // Add types
                     useData[useType].types.forEach(type => {
-                        const typeCard = document.createElement('div');
+                        const typeCard = document.createElement('a');
                         typeCard.className = 'type-card';
+                        typeCard.href = type.page;
                         typeCard.innerHTML = `
                             <div class="type-img" style="background-image: url('${type.image}')"></div>
                             <div class="type-info">
                                 <h4>${type.name}</h4>
-                                <p>${type.description}</p>
+                                <p>Click to view products</p>
                             </div>
                         `;
-                        
-                        // Add click event to type card
-                        typeCard.addEventListener('click', function() {
-                            // Redirect to product page or open modal
-                            window.location.href = `products.html?type=${encodeURIComponent(type.name)}`;
-                        });
-                        
-                        panelTypes.appendChild(typeCard);
+                        typesGrid.appendChild(typeCard);
                     });
-                    
-                    // Show panel
-                    useDetailsPanel.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                    
-                    // Update active link
-                    document.querySelectorAll('.use-link').forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
                 }
             });
         });
-        
-        closePanel.addEventListener('click', function() {
-            useDetailsPanel.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        });
-        
-        // Header hide on scroll
-        let lastScrollTop = 0;
-        const header = document.getElementById('mainHeader');
-        
-        window.addEventListener('scroll', function() {
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scroll down - hide header
-                header.classList.add('hidden');
-            } else {
-                // Scroll up - show header
-                header.classList.remove('hidden');
-            }
-            
-            lastScrollTop = scrollTop;
+
+        // Prevent click on use links
+        document.querySelectorAll('.use-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+            });
         });
     </script>
 </body>
