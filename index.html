@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StoneCraft UK - Premium Natural Stone & Marble Suppliers</title>
-    <meta name="description" content="UK's leading supplier of premium natural stone, marble, sandstone & limestone. Free UK delivery. Trusted by homeowners & professionals.">
+    <title>StoneCraft UK - Premium Stone & Porcelain</title>
+    <meta name="description" content="UK's leading supplier of premium natural stone & porcelain. Built on generations of commercial trust and excellence. Free UK delivery.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        /* Base Styles */
         * {
             margin: 0;
             padding: 0;
@@ -18,724 +20,380 @@
             background-color: #ffffff;
             color: #333;
             line-height: 1.6;
+            padding-top: 130px; /* Space for Top Trust Bar (30px) + Main Header (100px) */
         }
         
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 20px; 
+        }
+
+        /* --- Global Components --- */
+        .section-title { 
+            text-align: center; 
+            margin: 60px 0 40px; 
+            font-size: 32px; 
+            color: #333; 
+            position: relative; 
+            padding-bottom: 15px; 
+            font-weight: 600;
+        }
+        .section-title:after { 
+            content: ''; 
+            position: absolute; 
+            width: 80px; 
+            height: 3px; 
+            background: #b8860b; 
+            bottom: 0; 
+            left: 50%; 
+            transform: translateX(-50%); 
+        }
+        .btn-primary {
+            display: inline-block;
+            background-color: #b8860b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #9c750b;
         }
         
-        /* Header Styles */
+        /* --- HEADER & NAVIGATION --- */
         header {
             background-color: #fff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 100;
-            transition: transform 0.3s ease;
+            top: 0; left: 0; width: 100%; z-index: 1000;
+            transition: top 0.3s ease-in-out; 
         }
         
-        header.hidden {
-            transform: translateY(-100%);
-        }
-        
-        /* Main Header */
-        .main-header {
-            padding: 15px 0;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-        }
-        
-        .logo h1 {
-            font-size: 28px;
-            color: #333;
-            font-weight: 700;
-        }
-        
-        .logo span {
-            color: #b8860b;
-        }
-        
-        .trust-info {
-            flex: 1;
+        /* Smart Header: Hides completely */
+        header.header-hidden { top: -130px; /* Hide both top bar and main header */ }
+
+        /* [NEW] Trust Info Top Bar */
+        .trust-top-bar {
+            background-color: #444; 
+            color: white; 
+            padding: 5px 0;
+            font-size: 13px;
             text-align: center;
-            padding: 0 20px;
         }
-        
-        .trust-info p {
-            font-size: 14px;
-            color: #555;
+        .trust-top-bar p {
             margin: 0;
         }
-        
-        .user-actions {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .user-action {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: #555;
-            font-size: 12px;
-        }
-        
-        .user-action i {
-            font-size: 20px;
-            margin-bottom: 3px;
-        }
-        
-        .user-action:hover {
+        .trust-top-bar span {
             color: #b8860b;
-        }
-        
-        /* Uses Top Bar - Always Visible */
-        .uses-top-bar {
-            background: #333;
-            padding: 0;
-            position: relative;
-        }
-        
-        .uses-container {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-        }
-        
-        .use-item {
-            flex: 1;
-            min-width: 120px;
-            position: static;
-        }
-        
-        .use-link {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 15px 10px;
-            font-size: 14px;
-            font-weight: 500;
-            text-align: center;
-            transition: all 0.3s;
-            position: relative;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-        }
-        
-        .use-link:hover, .use-link.active {
-            background: #b8860b;
-            border-bottom: 3px solid #fff;
-        }
-        
-        /* Mega Menu */
-        .mega-menu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            background: white;
-            z-index: 1000;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            padding: 30px 0;
-        }
-        
-        .mega-menu.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        
-        .patterns-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding: 0 20px;
-        }
-        
-        .pattern-item {
-            text-align: center;
-            cursor: pointer;
-        }
-        
-        .pattern-image {
-            width: 100%;
-            height: 180px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            transition: transform 0.3s ease;
-        }
-        
-        .pattern-item:hover .pattern-image {
-            transform: scale(1.05);
-        }
-        
-        .pattern-name {
-            font-size: 14px;
-            color: #333;
-            font-weight: 500;
-        }
-        
-        /* Stone Type Banner */
-        .stone-banner {
-            background: linear-gradient(135deg, #b8860b, #a3780a);
-            color: white;
-            padding: 8px 0;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        /* Product Banners */
-        .product-banners {
-            padding: 40px 0;
-            background: #f9f9f9;
-        }
-        
-        .banner-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-        
-        .product-banner {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        
-        .product-banner:hover {
-            transform: translateY(-5px);
-        }
-        
-        .banner-image {
-            height: 200px;
-            background-size: cover;
-            background-position: center;
-            width: 100%;
-        }
-        
-        .banner-content {
-            padding: 20px;
-            text-align: center;
-            background: white;
-        }
-        
-        .banner-content h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        
-        .banner-content p {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 15px;
-        }
-        
-        /* Uses Images Section */
-        .uses-images {
-            padding: 60px 0;
-        }
-        
-        .uses-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-        
-        .use-image-item {
-            text-align: center;
-        }
-        
-        .use-image-link {
-            display: block;
-            text-decoration: none;
-            color: #333;
-        }
-        
-        .use-image {
-            height: 200px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            transition: transform 0.3s;
-        }
-        
-        .use-image-link:hover .use-image {
-            transform: scale(1.05);
-        }
-        
-        .use-image-name {
-            font-size: 16px;
-            font-weight: 500;
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-top: 180px;
-        }
-        
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            padding: 80px 0;
-            text-align: center;
-        }
-        
-        .hero h1 {
-            font-size: 36px;
-            margin-bottom: 20px;
-            line-height: 1.3;
-        }
-        
-        .hero p {
-            font-size: 18px;
-            max-width: 600px;
-            margin: 0 auto 30px;
-        }
-        
-        .btn {
-            display: inline-block;
-            background: #b8860b;
-            color: white;
-            padding: 14px 30px;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.3s;
             font-weight: 600;
         }
         
-        .btn:hover {
-            background: #a3780a;
-        }
-        
-        /* Categories Section */
-        .section-title {
-            text-align: center;
-            margin: 60px 0 40px;
-            font-size: 32px;
-            color: #333;
-            position: relative;
-            padding-bottom: 15px;
-        }
-        
-        .section-title:after {
-            content: '';
-            position: absolute;
-            width: 80px;
-            height: 3px;
-            background: #b8860b;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .categories-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-            margin-bottom: 50px;
-        }
-        
-        .category-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
-        
-        .category-card:hover {
-            transform: translateY(-10px);
-        }
-        
-        .category-img {
-            height: 250px;
-            background-size: cover;
-            background-position: center;
-            width: 100%;
-        }
-        
-        .category-content {
-            padding: 25px;
-            text-align: center;
-        }
-        
-        .category-content h3 {
-            font-size: 20px;
-            margin-bottom: 12px;
-            color: #333;
-        }
-        
-        .category-content p {
-            font-size: 15px;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        
-        /* Products Grid */
-        .products-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-            margin: 40px 0;
-        }
-        
-        .product-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
-        
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .product-img {
-            height: 220px;
-            background-size: cover;
-            background-position: center;
-            width: 100%;
-        }
-        
-        .product-content {
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .product-content h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        
-        .product-price {
-            font-weight: bold;
-            color: #b8860b;
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
-        
-        /* Features Section */
-        .features {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-            margin: 50px 0;
-            padding: 40px 0;
-            background-color: #f9f9f9;
-        }
-        
-        .feature {
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .feature i {
-            font-size: 40px;
-            color: #b8860b;
-            margin-bottom: 15px;
-        }
-        
-        .feature h3 {
-            margin-bottom: 12px;
-            font-size: 20px;
-        }
-        
-        .feature p {
-            font-size: 15px;
-            color: #666;
-        }
-        
-        /* Footer */
-        footer {
-            background-color: #222;
-            color: #ddd;
-            padding: 50px 0 20px;
-        }
-        
-        .footer-content {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        
-        .footer-column h3 {
-            color: white;
-            margin-bottom: 20px;
-            font-size: 18px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #b8860b;
-            display: inline-block;
-        }
-        
-        .footer-links {
-            list-style: none;
-        }
-        
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-        
-        .footer-links a {
-            color: #ddd;
-            text-decoration: none;
-            transition: color 0.3s;
-            font-size: 14px;
-        }
-        
-        .footer-links a:hover {
-            color: #b8860b;
-        }
-        
-        .social-links {
+        .main-header { padding: 15px 0; border-bottom: 1px solid #eee; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo h1 { font-size: 28px; color: #333; font-weight: 700; }
+        .logo span { color: #b8860b; font-weight: 800; }
+        /* [MOVED] Removed trust-info div from here */
+        .user-actions { display: flex; align-items: center; gap: 20px; }
+        .user-action { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #555; font-size: 12px; }
+        .user-action i { font-size: 18px; margin-bottom: 3px; color: #b8860b; }
+
+        .search-bar {
             display: flex;
-            gap: 15px;
-            margin-top: 20px;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            padding: 5px 15px;
+            margin-left: 20px;
+            max-width: 300px;
+            flex-grow: 1;
+        }
+        .search-bar input { border: none; outline: none; flex-grow: 1; padding: 5px; font-size: 14px; }
+        .search-bar button { background: none; border: none; color: #b8860b; cursor: pointer; font-size: 16px; }
+
+        .uses-top-bar { background: #333; padding: 0; }
+        .uses-container { display: flex; justify-content: space-between; flex-wrap: wrap; }
+        .use-item { flex: 1; min-width: 120px; position: relative; }
+        .use-link { 
+            display: block; color: white; text-decoration: none; padding: 15px 10px; 
+            font-size: 14px; font-weight: 500; text-align: center; 
+            transition: all 0.3s; cursor: pointer; border-bottom: 3px solid transparent; 
+        }
+        .use-link:hover { background: #444; border-bottom: 3px solid #b8860b; }
+
+        /* --- MEGA MENU STYLES --- */
+        .dropdown-menu {
+            position: absolute; 
+            top: 100%; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            min-width: 900px; 
+            max-width: 95vw; 
+            background: #fff; 
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            display: none; 
+            padding: 25px; 
+            border-top: 3px solid #b8860b; 
+            z-index: 999;
+            border-radius: 0 0 8px 8px;
+        }
+        .use-item:hover .dropdown-menu,
+        .dropdown-menu.active { display: block; }
+        
+        .use-item.align-left .dropdown-menu { left: 0; right: auto; transform: none; }
+        .use-item.align-right .dropdown-menu { left: auto; right: 0; transform: none; }
+        
+        .dropdown-content { 
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 20px; 
         }
         
-        .social-links a {
+        .menu-tile {
+            text-decoration: none; 
+            display: flex; 
+            flex-direction: column; 
+            border-radius: 8px; 
+            overflow: hidden;
+            box-shadow: 0 0px 10px rgba(0,0,0,0.1); 
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            border: 1px solid #eee;
+            text-align: center; 
+        }
+        .menu-tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            border-color: #b8860b; 
+        }
+        
+        .menu-tile-image {
+            width: 100%; 
+            height: 150px; 
+            background-size: cover; 
+            background-position: center;
+            flex-shrink: 0; 
+            transition: transform 0.3s ease;
+        }
+
+        .menu-tile:hover .menu-tile-image { transform: scale(1.05); }
+        .menu-tile-title {
+            color: #333; 
+            padding: 10px 5px;
+            font-size: 15px;
+            font-weight: 600; 
+            flex-grow: 1; 
+        }
+        .menu-tile:hover .menu-tile-title { color: #b8860b; }
+
+        /* --- Other Sections --- */
+        .hero-banner-section {
+            width: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('https://picsum.photos/id/431/1800/800'); 
+            background-size: cover;
+            background-position: center;
             color: white;
-            background: #444;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            padding: 120px 0;
+            text-align: center;
+            min-height: 400px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.3s;
+        }
+        .hero-banner-section h1 { font-size: 48px; margin-bottom: 15px; font-weight: 700; }
+        .hero-banner-section p { font-size: 20px; font-weight: 300; }
+
+        .trust-symbol-row { background-color: #ffffff; color: #333; padding: 20px 0; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .symbol-container { display: flex; justify-content: space-around; align-items: center; gap: 20px; flex-wrap: wrap;}
+        .symbol-item { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 500; color: #444;}
+        .symbol-item i { color: #b8860b; font-size: 24px; }
+
+        .product-banners { padding: 60px 0; background: #f9f9f9; }
+        .banner-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        
+        .uses-images { padding: 60px 0; background: #f4f4f4; }
+        .uses-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+
+        .item-card-link { 
+            border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); transition: transform 0.4s, box-shadow 0.4s; 
+            text-decoration: none; display: flex; flex-direction: column; overflow: hidden; 
+            background: white; position: relative; min-height: 250px; 
+        }
+        .item-card-link:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,0.2); }
+        
+        .item-card-image { 
+            width: 100%; height: 100%; background-size: cover; background-position: center; 
+            position: absolute; transition: transform 0.5s ease;
+        }
+        .item-card-link:hover .item-card-image { transform: scale(1.05); }
+
+        .item-card-title-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: rgba(0, 0, 0, 0.7); color: white; padding: 15px; 
+            font-size: 18px; font-weight: 600; text-align: center;
+            transition: background-color 0.3s;
         }
         
-        .social-links a:hover {
-            background: #b8860b;
-        }
+        .product-banners .item-card-title-overlay { opacity: 0; transform: translateY(100%); transition: opacity 0.3s, transform 0.3s; border-radius: 0 0 12px 12px; }
+        .product-banners .item-card-link:hover .item-card-title-overlay { opacity: 1; transform: translateY(0); }
         
-        .copyright {
-            text-align: center;
-            padding-top: 25px;
-            border-top: 1px solid #444;
+        .uses-images .item-card-title-overlay { opacity: 1; background: rgba(0, 0, 0, 0.6); }
+        .uses-images .item-card-link:hover .item-card-title-overlay { background: #b8860b; }
+        
+        #categories { padding: 60px 0 80px; }
+        .categories-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .category-card {
+            display: flex; flex-direction: column; text-decoration: none; color: #333;
+            border-radius: 12px; overflow: hidden; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s; background: #fff;
+        }
+        .category-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); }
+        .category-img {
+            width: 100%; height: 200px; background-size: cover; background-position: center;
+            border-bottom: 4px solid #b8860b; transition: transform 0.3s;
+        }
+        .category-card:hover .category-img { transform: scale(1.05); }
+        .category-content { padding: 20px; text-align: center; }
+        .category-content h3 { font-size: 24px; margin-bottom: 10px; color: #b8860b; }
+        .category-content p { font-size: 15px; color: #666; margin-bottom: 5px; }
+
+        /* --- FOOTER (PROPER) --- */
+        footer {
+            background: #222;
+            color: #ccc;
+            padding: 40px 0;
             font-size: 14px;
         }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+        footer h4 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 16px;
+            position: relative;
+            padding-bottom: 8px;
+        }
+        footer h4:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 2px;
+            width: 30px;
+            background: #b8860b;
+        }
+        footer ul { list-style: none; }
+        footer ul li a {
+            color: #ccc;
+            text-decoration: none;
+            display: block;
+            padding: 5px 0;
+            transition: color 0.2s;
+        }
+        footer ul li a:hover { color: #b8860b; padding-left: 5px; }
         
-        /* Desktop Styles */
-        @media (min-width: 768px) {
-            .main-content {
-                margin-top: 180px;
-            }
-            
-            .categories-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 30px;
-            }
-            
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 30px;
-            }
-            
-            .features {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 40px;
-                padding: 60px 0;
-            }
-            
-            .footer-content {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 40px;
-            }
-            
-            .patterns-grid {
-                grid-template-columns: repeat(6, 1fr);
-            }
+        .contact-info p { margin-bottom: 10px; }
+        .social-icons a { color: white; margin-right: 15px; font-size: 18px; transition: color 0.2s; }
+        .social-icons a:hover { color: #b8860b; }
+
+        .copyright {
+            text-align: center;
+            margin-top: 30px;
+            border-top: 1px solid #444;
+            padding-top: 20px;
         }
         
-        @media (min-width: 992px) {
-            .categories-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .trust-info { display: none; } /* Trust info in main header is removed, only top bar remains */
+            .main-header .header-content { flex-wrap: wrap; justify-content: center; gap: 10px; }
+            .logo { flex-basis: 100%; text-align: center; }
+            .search-bar { order: 1; width: 95%; max-width: none; margin: 10px auto; }
             
-            .products-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            .uses-container { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+            .use-item { min-width: 150px; flex-shrink: 0; }
             
-            .use-item {
-                min-width: 160px;
-            }
+            .dropdown-menu { min-width: 100%; width: 100%; left: 0; right: auto; transform: none; border-radius: 0; }
+            .use-item.align-left .dropdown-menu,
+            .use-item.align-right .dropdown-menu { left: 0; right: auto; }
+            .dropdown-content { grid-template-columns: repeat(2, 1fr); }
         }
-        
-        /* Mobile Styles */
-        @media (max-width: 767px) {
-            .main-content {
-                margin-top: 220px;
-            }
-            
-            .header-content {
-                flex-wrap: wrap;
-            }
-            
-            .trust-info {
-                order: 3;
-                flex-basis: 100%;
-                margin-top: 10px;
-                padding: 0;
-            }
-            
-            .category-img, .product-img {
-                height: 200px;
-            }
-            
-            .pattern-image {
-                height: 120px;
-            }
-            
-            .hero {
-                padding: 60px 0;
-            }
-            
-            .hero h1 {
-                font-size: 28px;
-            }
-            
-            .hero p {
-                font-size: 16px;
-            }
-            
-            .banner-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .uses-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .use-item {
-                min-width: 100px;
-            }
-            
-            .use-link {
-                padding: 12px 5px;
-                font-size: 12px;
-            }
-            
-            .patterns-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-            }
-            
-            .uses-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .user-actions {
-                gap: 10px;
-            }
-            
-            .user-action {
-                font-size: 10px;
-            }
-            
-            .user-action i {
-                font-size: 16px;
-            }
+        @media (max-width: 576px) {
+            body { padding-top: 160px; }
+            .dropdown-content { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+            footer h4:after { left: 50%; transform: translateX(-50%); }
         }
     </style>
 </head>
 <body>
-    <!-- Header Section -->
     <header id="mainHeader">
-        <!-- Main Header -->
-        <div class="main-header">
+        <div class="trust-top-bar">
+            <div class="container">
+                <p><span>**UK's Premium Natural Stone Supplier**</span> | Trusted by Homeowners & Professionals | Free Delivery on orders over £500</p>
+            </div>
+        </div>
+        
+        <div class="main-header" id="mainHeaderContent">
             <div class="container header-content">
-                <div class="logo">
-                    <h1>Stone<span>Craft</span></h1>
+                <div class="logo"><h1>Stone<span>Craft</span></h1></div>
+                <div class="search-bar">
+                    <input type="text" placeholder="Search for products, colours..." aria-label="Search for products">
+                    <button type="submit"><i class="fas fa-search"></i></button>
                 </div>
-                
-                <div class="trust-info">
-                    <p>Free UK Delivery Over £500 | Rated 4.8/5 by UK Customers | British Stone Federation Member</p>
-                </div>
-                
                 <div class="user-actions">
-                    <a href="#" class="user-action">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Location</span>
-                    </a>
-                    <a href="#" class="user-action">
-                        <i class="fas fa-user"></i>
-                        <span>Sign In</span>
-                    </a>
-                    <a href="#" class="user-action">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span>Cart (0)</span>
-                    </a>
+                    <a href="#" class="user-action"><i class="fas fa-map-marker-alt"></i><span>Location</span></a>
+                    <a href="#" class="user-action"><i class="fas fa-user"></i><span>Sign In</span></a>
+                    <a href="#" class="user-action"><i class="fas fa-shopping-cart"></i><span>Cart (0)</span></a>
                 </div>
             </div>
         </div>
 
-        <!-- Uses Top Bar - Always Visible -->
-        <div class="uses-top-bar">
+        <nav class="uses-top-bar" aria-label="Stone Categories">
             <div class="container uses-container">
+                
                 <div class="use-item">
                     <div class="use-link">Flooring</div>
-                    <div class="mega-menu">
-                        <div class="patterns-grid">
-                            <a href="/flooring/herringbone" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Herringbone</div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-content">
+                            <a href="/flooring/porcelain" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/23/400/250');"></div>
+                                <div class="menu-tile-title">Indoor Porcelain</div>
                             </a>
-                            <a href="/flooring/checkerboard" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Checkerboard</div>
+                            <a href="/flooring/marble" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/17/400/250');"></div>
+                                <div class="menu-tile-title">Luxury Marble</div>
                             </a>
-                            <a href="/flooring/random-layout" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Random Layout</div>
+                            <a href="/flooring/slate" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/35/400/250');"></div>
+                                <div class="menu-tile-title">Natural Slate</div>
                             </a>
-                            <a href="/flooring/brick-pattern" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Brick Pattern</div>
+                            <a href="/flooring/wood" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/272/400/250');"></div>
+                                <div class="menu-tile-title">Wood Effect</div>
                             </a>
-                            <a href="/flooring/diagonal" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Diagonal</div>
+                            <a href="/flooring/granite" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/273/400/250');"></div>
+                                <div class="menu-tile-title">Granite Flooring</div>
                             </a>
-                            <a href="/flooring/hexagon" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Hexagon</div>
+                            <a href="/flooring/terracotta" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/274/400/250');"></div>
+                                <div class="menu-tile-title">Terracotta Tiles</div>
+                            </a>
+                            <a href="/flooring/vinyl" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/350/400/250');"></div>
+                                <div class="menu-tile-title">Vinyl Planks</div>
+                            </a>
+                            <a href="/flooring/cement" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/351/400/250');"></div>
+                                <div class="menu-tile-title">Cement Look</div>
                             </a>
                         </div>
                     </div>
@@ -743,450 +401,329 @@
                 
                 <div class="use-item">
                     <div class="use-link">Wall Decoration</div>
-                    <div class="mega-menu">
-                        <div class="patterns-grid">
-                            <a href="/wall-decoration/accent-wall" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Accent Wall</div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-content">
+                            <a href="/wall/splitface" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/275/400/250');"></div>
+                                <div class="menu-tile-title">Split-Face Tiles</div>
                             </a>
-                            <a href="/wall-decoration/mosaic" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Mosaic</div>
+                            <a href="/wall/cladding" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/276/400/250');"></div>
+                                <div class="menu-tile-title">External Cladding</div>
                             </a>
-                            <a href="/wall-decoration/vertical" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Vertical</div>
+                            <a href="/wall/mosaic" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/277/400/250');"></div>
+                                <div class="menu-tile-title">Mosaic Tiles</div>
                             </a>
-                            <a href="/wall-decoration/mixed-materials" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Mixed Materials</div>
-                            </a>
-                            <a href="/wall-decoration/feature-wall" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Feature Wall</div>
-                            </a>
-                            <a href="/wall-decoration/stack-stone" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Stack Stone</div>
+                            <a href="/wall/feature" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/278/400/250');"></div>
+                                <div class="menu-tile-title">Feature Walls</div>
                             </a>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="use-item">
                     <div class="use-link">Bathroom</div>
-                    <div class="mega-menu">
-                        <div class="patterns-grid">
-                            <a href="/bathroom/shower-walls" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Shower Walls</div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-content">
+                            <a href="/bath/wetroom" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/265/400/250');"></div>
+                                <div class="menu-tile-title">Wetroom Tiles</div>
                             </a>
-                            <a href="/bathroom/vanity" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Vanity</div>
+                            <a href="/bath/vanity" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/279/400/250');"></div>
+                                <div class="menu-tile-title">Vanity Tops</div>
                             </a>
-                            <a href="/bathroom/bathroom-floor" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Bathroom Floor</div>
+                            <a href="/bath/marble" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/280/400/250');"></div>
+                                <div class="menu-tile-title">Marble Panels</div>
                             </a>
-                            <a href="/bathroom/bath-surround" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Bath Surround</div>
-                            </a>
-                            <a href="/bathroom/steam-room" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Steam Room</div>
-                            </a>
-                            <a href="/bathroom/subway-tile" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Subway Tile</div>
+                            <a href="/bath/porcelain" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/281/400/250');"></div>
+                                <div class="menu-tile-title">Porcelain Walls</div>
                             </a>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="use-item">
                     <div class="use-link">Outdoor</div>
-                    <div class="mega-menu">
-                        <div class="patterns-grid">
-                            <a href="/outdoor/patio-paving" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Patio Paving</div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-content">
+                            <a href="/outdoor/paving" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/201/400/250');"></div>
+                                <div class="menu-tile-title">Porcelain Paving</div>
                             </a>
-                            <a href="/outdoor/pathways" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Pathways</div>
+                            <a href="/outdoor/sandstone" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/269/400/250');"></div>
+                                <div class="menu-tile-title">Natural Sandstone</div>
                             </a>
-                            <a href="/outdoor/pool-deck" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Pool Deck</div>
+                            <a href="/outdoor/limestone" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/21/400/250');"></div>
+                                <div class="menu-tile-title">Limestone Slabs</div>
                             </a>
-                            <a href="/outdoor/driveway" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Driveway</div>
-                            </a>
-                            <a href="/outdoor/garden" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Garden</div>
-                            </a>
-                            <a href="/outdoor/cobblestone" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Cobblestone</div>
+                            <a href="/outdoor/setts" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/282/400/250');"></div>
+                                <div class="menu-tile-title">Driveway Setts</div>
                             </a>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="use-item">
                     <div class="use-link">Wood Effect</div>
-                    <div class="mega-menu">
-                        <div class="patterns-grid">
-                            <a href="/wood-effect/wood-plank" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Wood Plank</div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-content">
+                            <a href="/wood/oak" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/40/400/250');"></div>
+                                <div class="menu-tile-title">Oak Effect</div>
                             </a>
-                            <a href="/wood-effect/rustic-wood" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Rustic Wood</div>
+                            <a href="/wood/walnut" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/41/400/250');"></div>
+                                <div class="menu-tile-title">Dark Walnut</div>
                             </a>
-                            <a href="/wood-effect/modern-wood" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Modern Wood</div>
+                            <a href="/wood/grey" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/42/400/250');"></div>
+                                <div class="menu-tile-title">Grey Washed</div>
                             </a>
-                            <a href="/wood-effect/weathered-wood" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Weathered Wood</div>
-                            </a>
-                            <a href="/wood-effect/reclaimed" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Reclaimed</div>
-                            </a>
-                            <a href="/wood-effect/wood-grain" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Wood Grain</div>
+                            <a href="/wood/light" class="menu-tile">
+                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/43/400/250');"></div>
+                                <div class="menu-tile-title">Light Pine</div>
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </nav>
     </header>
-
-    <!-- Stone Type Banner -->
-    <div class="stone-banner">
-        <div class="container">
-            Premium Sandstone, Marble, Limestone & Granite Collections - Natural Stone for UK Homes
+    
+    <main class="main-content">
+        
+        <section class="hero-banner-section" role="region" aria-label="StoneCraft UK Home Banner">
+            <div class="container">
+                <h1>Generations of Trust: UK's Premium Stone & Porcelain Suppliers.</h1>
+                <p>The perfect foundation for your home, built on quality and commercial excellence.</p>
+                <a href="/shop" class="btn-primary" style="margin-top: 25px;">Explore Collections</a>
+            </div>
+        </section>
+        
+        <div class="trust-symbol-row">
+            <div class="container symbol-container">
+                <div class="symbol-item"><i class="fas fa-certificate"></i> Certified Quality</div>
+                <div class="symbol-item"><i class="fas fa-truck"></i> Free UK Delivery</div>
+                <div class="symbol-item"><i class="fas fa-star"></i> Rated Excellent</div>
+                <div class="symbol-item"><i class="fas fa-handshake"></i> Commercial Trust</div>
+            </div>
         </div>
-    </div>
+        
+        <hr>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Product Banners -->
         <section class="product-banners">
             <div class="container">
+                <h2 class="section-title">Exclusive Collections</h2>
                 <div class="banner-grid">
-                    <div class="product-banner">
-                        <div class="banner-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');"></div>
-                        <div class="banner-content">
-                            <h3>Sandstone Collection</h3>
-                            <p>Durable and elegant sandstone for all your flooring needs</p>
-                            <a href="#" class="btn">Explore Sandstone</a>
-                        </div>
-                    </div>
-                    
-                    <div class="product-banner">
-                        <div class="banner-image" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');"></div>
-                        <div class="banner-content">
-                            <h3>Marble & Limestone</h3>
-                            <p>Luxurious marble and limestone for sophisticated interiors</p>
-                            <a href="#" class="btn">View Collection</a>
-                        </div>
-                    </div>
-                    
-                    <div class="product-banner">
-                        <div class="banner-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');"></div>
-                        <div class="banner-content">
-                            <h3>Outdoor Paving</h3>
-                            <p>Weather-resistant stone for patios, pathways and driveways</p>
-                            <a href="#" class="btn">Explore Paving</a>
-                        </div>
-                    </div>
+                    <a href="/collection/italian-marble" class="item-card-link" aria-label="View Luxury Italian Marble Collection">
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/16/400/400');"></div> 
+                        <div class="item-card-title-overlay">Luxury Italian Marble</div>
+                    </a>
+                    <a href="/collection/porcelain-outdoor" class="item-card-link" aria-label="View Outdoor Porcelain Paving">
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/201/400/400');"></div>
+                        <div class="item-card-title-overlay">Outdoor Porcelain Paving</div>
+                    </a>
+                    <a href="/collection/limestone-specials" class="item-card-link" aria-label="View Heritage Limestone Specials">
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/21/400/400');"></div>
+                        <div class="item-card-title-overlay">Heritage Limestone</div>
+                    </a>
                 </div>
             </div>
         </section>
+        
+        <hr>
 
-        <!-- Uses Images Section -->
         <section class="uses-images">
             <div class="container">
-                <h2 class="section-title">Explore Our Stone Applications</h2>
+                <h2 class="section-title">Shop By Application: Where Will You Use Your Stone?</h2>
                 <div class="uses-grid">
-                    <a href="/flooring" class="use-image-item">
-                        <div class="use-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                        <div class="use-image-name">Flooring</div>
+                    <a href="/shop/kitchens" class="item-card-link" aria-label="Shop stone for Kitchens">
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/264/400/300');"></div>
+                        <div class="item-card-title-overlay">Kitchen Flooring & Walls</div>
                     </a>
-                    
-                    <a href="/wall-decoration" class="use-image-item">
-                        <div class="use-image" style="background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                        <div class="use-image-name">Wall Decoration</div>
+                    <a href="/shop/bathrooms" class="item-card-link" aria-label="Shop stone for Bathrooms">
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/265/400/300');"></div>
+                        <div class="item-card-title-overlay">Bathroom Wetrooms & Vanity</div>
                     </a>
-                    
-                    <a href="/bathroom" class="use-image-item">
-                        <div class="use-image" style="background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                        <div class="use-image-name">Bathroom</div>
+                    <a href="/shop/patios" class="item-card-link" aria-label="Shop stone for Patios and Gardens">
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/266/400/300');"></div>
+                        <div class="item-card-title-overlay">Outdoor Paving & Patios</div>
                     </a>
-                    
-                    <a href="/outdoor" class="use-image-item">
-                        <div class="use-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                        <div class="use-image-name">Outdoor</div>
+                    <a href="/shop/walls" class="item-card-link" aria-label="Shop stone for Feature Walls">
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/267/400/300');"></div>
+                        <div class="item-card-title-overlay">Interior Feature Walls</div>
                     </a>
                 </div>
             </div>
         </section>
-
-        <!-- Hero Section -->
-        <section class="hero">
+        
+        <hr>
+        
+        <section id="categories">
             <div class="container">
-                <h1>Premium Natural Stone for UK Homes & Gardens</h1>
-                <p>Discover our extensive collection of high-quality sandstone, marble, limestone and granite products for every application</p>
-                <a href="#" class="btn">Explore UK Stone Collection</a>
-            </div>
-        </section>
-
-        <!-- Categories Section -->
-        <section class="container">
-            <h2 class="section-title">Our UK Stone Collections</h2>
-            <div class="categories-grid">
-                <div class="category-card">
-                    <div class="category-img" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');"></div>
-                    <div class="category-content">
-                        <h3>Sandstone Flooring</h3>
-                        <p>Durable and elegant sandstone flooring perfect for UK homes and commercial spaces</p>
-                        <a href="#" class="btn">View Sandstone</a>
-                    </div>
-                </div>
-                
-                <div class="category-card">
-                    <div class="category-img" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');"></div>
-                    <div class="category-content">
-                        <h3>Marble & Limestone</h3>
-                        <p>Luxurious marble and limestone for sophisticated interiors and feature walls</p>
-                        <a href="#" class="btn">View Marble</a>
-                    </div>
-                </div>
-                
-                <div class="category-card">
-                    <div class="category-img" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');"></div>
-                    <div class="category-content">
-                        <h3>Outdoor Paving</h3>
-                        <p>Weather-resistant stone for UK patios, pathways, driveways and pool decks</p>
-                        <a href="#" class="btn">View Paving</a>
-                    </div>
+                <h2 class="section-title">Shop By Stone Type</h2>
+                <div class="categories-grid">
+                    <a href="/stone/porcelain" class="category-card" aria-label="Shop Porcelain Tiles">
+                        <div class="category-img" style="background-image: url('https://picsum.photos/id/268/400/250');"></div>
+                        <div class="category-content">
+                            <h3>Porcelain Tiles</h3>
+                            <p>Modern, extremely durable, and low-maintenance. Perfect for indoor and outdoor.</p>
+                            <span class="btn-primary">Shop Porcelain</span>
+                        </div>
+                    </a>
+                    <a href="/stone/sandstone" class="category-card" aria-label="Shop Natural Sandstone">
+                        <div class="category-img" style="background-image: url('https://picsum.photos/id/269/400/250');"></div>
+                        <div class="category-content">
+                            <h3>Natural Sandstone</h3>
+                            <p>Classic, textured paving stone, offering a naturally beautiful finish for patios.</p>
+                            <span class="btn-primary">Shop Sandstone</span>
+                        </div>
+                    </a>
+                    <a href="/stone/marble" class="category-card" aria-label="Shop Premium Marble">
+                        <div class="category-img" style="background-image: url('https://picsum.photos/id/270/400/250');"></div>
+                        <div class="category-content">
+                            <h3>Premium Marble</h3>
+                            <p>Luxury stone for countertops and walls, reflecting opulence and timeless style.</p>
+                            <span class="btn-primary">Shop Marble</span>
+                        </div>
+                    </a>
                 </div>
             </div>
         </section>
-
-        <!-- Products Section -->
-        <section class="container">
-            <h2 class="section-title">UK Best Sellers</h2>
-            <div class="products-grid">
-                <div class="product-card">
-                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80');"></div>
-                    <div class="product-content">
-                        <h3>Kota Blue Stone</h3>
-                        <p class="product-price">£18.99 / sq. m.</p>
-                        <a href="#" class="btn">Add to Cart</a>
-                    </div>
-                </div>
-                
-                <div class="product-card">
-                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80');"></div>
-                    <div class="product-content">
-                        <h3>Natural Sandstone</h3>
-                        <p class="product-price">£22.50 / sq. m.</p>
-                        <a href="#" class="btn">Add to Cart</a>
-                    </div>
-                </div>
-                
-                <div class="product-card">
-                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80');"></div>
-                    <div class="product-content">
-                        <h3>Outdoor Paving Stone</h3>
-                        <p class="product-price">£16.75 / sq. m.</p>
-                        <a href="#" class="btn">Add to Cart</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section class="features">
-            <div class="container">
-                <div class="feature">
-                    <i class="fas fa-truck"></i>
-                    <h3>Free UK Delivery</h3>
-                    <p>Free shipping on all orders over £500 across the UK</p>
-                </div>
-                
-                <div class="feature">
-                    <i class="fas fa-headset"></i>
-                    <h3>UK Expert Support</h3>
-                    <p>Our UK-based team is here to help with any questions</p>
-                </div>
-                
-                <div class="feature">
-                    <i class="fas fa-award"></i>
-                    <h3>Quality Assured</h3>
-                    <p>All our products meet the highest quality standards</p>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- Footer -->
+        
+    </main>
+    
     <footer>
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>StoneCraft UK</h3>
-                    <p>UK's leading supplier of premium natural stone solutions. Quality materials, expert craftsmanship, trusted by homeowners & professionals across the UK.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-pinterest"></i></a>
+            <div class="footer-grid">
+                <div>
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/delivery">Delivery Information</a></li>
+                        <li><a href="/contact">Contact Us</a></li>
+                        <li><a href="/faq">FAQ</a></li>
+                        <li><a href="/blog">Our Blog</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Categories</h4>
+                    <ul>
+                        <li><a href="/product/porcelain">Porcelain Paving</a></li>
+                        <li><a href="/product/sandstone">Sandstone Slabs</a></li>
+                        <li><a href="/product/limestone">Limestone Tiles</a></li>
+                        <li><a href="/product/cladding">Wall Cladding</a></li>
+                        <li><a href="/product/split-face">Split Face Tiles</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Customer Service</h4>
+                    <ul>
+                        <li><a href="/returns">Returns & Refunds</a></li>
+                        <li><a href="/samples">Order a Sample</a></li>
+                        <li><a href="/trade">Trade Accounts</a></li>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/terms">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="contact-info">
+                    <h4>Get In Touch</h4>
+                    <p>StoneCraft UK Ltd.</p>
+                    <p><i class="fas fa-phone-alt" style="color: #b8860b;"></i> Call us: 0800 123 4567</p>
+                    <p><i class="fas fa-envelope" style="color: #b8860b;"></i> Email: sales@stonecraft.co.uk</p>
+                    <div class="social-icons" style="margin-top: 20px;">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
                     </div>
                 </div>
-                
-                <div class="footer-column">
-                    <h3>Stone Applications</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Sandstone Flooring</a></li>
-                        <li><a href="#">Marble & Limestone</a></li>
-                        <li><a href="#">Outdoor Paving UK</a></li>
-                        <li><a href="#">Bathroom Stone</a></li>
-                        <li><a href="#">Wood Effect Stone</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Customer Service</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Contact Us</a></li>
-                        <li><a href="#">UK Shipping Policy</a></li>
-                        <li><a href="#">Returns & Refunds</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">My Account</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>UK Contact Info</h3>
-                    <ul class="footer-links">
-                        <li><i class="fas fa-map-marker-alt"></i> StoneCraft House, 123 Stone Street, London, UK</li>
-                        <li><i class="fas fa-phone"></i> 020 7123 4567</li>
-                        <li><i class="fas fa-envelope"></i> info@stonecraft.co.uk</li>
-                        <li><i class="fas fa-clock"></i> Mon-Fri: 9am-6pm</li>
-                    </ul>
-                </div>
             </div>
-            
             <div class="copyright">
-                <p>&copy; 2023 StoneCraft UK. All Rights Reserved. Registered in England No. 12345678</p>
+                &copy; 2025 StoneCraft UK Ltd. All rights reserved.
             </div>
         </div>
     </footer>
 
     <script>
-        // Header hide on scroll
+        // --- 1. Smart Header Logic ---
         let lastScrollTop = 0;
         const header = document.getElementById('mainHeader');
-        
-        window.addEventListener('scroll', function() {
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scroll down - hide header
-                header.classList.add('hidden');
-            } else {
-                // Scroll up - show header
-                header.classList.remove('hidden');
-            }
-            
-            lastScrollTop = scrollTop;
-        });
+        // Calculate the height of the entire fixed header (including the new trust bar)
+        const headerHeight = header.offsetHeight; 
 
-        // Enhanced hover/click functionality for mega menus
-        document.addEventListener('DOMContentLoaded', function() {
-            const useItems = document.querySelectorAll('.use-item');
-            let activeMenu = null;
-            
-            // Function to close all menus
-            function closeAllMenus() {
-                useItems.forEach(item => {
-                    const menu = item.querySelector('.mega-menu');
-                    const link = item.querySelector('.use-link');
-                    menu.classList.remove('active');
-                    link.classList.remove('active');
-                });
-                activeMenu = null;
+        window.addEventListener('scroll', () => {
+            let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (currentScroll > lastScrollTop && currentScroll > headerHeight) {
+                header.classList.add('header-hidden');
+            } else {
+                header.classList.remove('header-hidden');
             }
             
-            // Set up event listeners for each use-item
-            useItems.forEach(item => {
-                const menu = item.querySelector('.mega-menu');
-                const link = item.querySelector('.use-link');
-                
-                // Mouse enter - open menu
-                item.addEventListener('mouseenter', function() {
-                    closeAllMenus();
-                    menu.classList.add('active');
-                    link.classList.add('active');
-                    activeMenu = item;
-                });
-                
-                // Mouse leave - close menu after delay
-                item.addEventListener('mouseleave', function(e) {
-                    // Check if we're moving to a submenu
-                    const relatedTarget = e.relatedTarget;
-                    if (relatedTarget && !item.contains(relatedTarget) && !menu.contains(relatedTarget)) {
-                        setTimeout(() => {
-                            if (activeMenu === item) {
-                                closeAllMenus();
-                            }
-                        }, 300);
-                    }
-                });
-                
-                // Click - toggle menu (for mobile/touch devices)
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+            lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; 
+        }, false);
+
+
+        // --- 2. Smart Dropdown Alignment Logic (Fix for Left, Right, and Center) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const useItems = document.querySelectorAll('.use-item');
+            
+            // Expected width of the mega menu (from CSS min-width)
+            const dropdownMenuWidth = 900; 
+            const safetyMargin = 30; 
+            
+            const alignDropdown = (item) => {
+                const viewportWidth = window.innerWidth;
+
+                // Reset alignment classes first
+                item.classList.remove('align-left', 'align-right');
+
+                // Only apply smart alignment on desktop screens (wider than 992px)
+                if (viewportWidth > 992) { 
+                    const itemRect = item.getBoundingClientRect();
                     
-                    if (menu.classList.contains('active')) {
-                        // Menu is open, close it
-                        closeAllMenus();
-                    } else {
-                        // Menu is closed, open it and close others
-                        closeAllMenus();
-                        menu.classList.add('active');
-                        link.classList.add('active');
-                        activeMenu = item;
+                    // Center point of the parent item relative to the viewport
+                    const itemCenter = itemRect.left + (itemRect.width / 2);
+                    
+                    // 1. Left Edge Check
+                    const menuLeftEdge = itemCenter - (dropdownMenuWidth / 2);
+
+                    if (menuLeftEdge < safetyMargin) {
+                        item.classList.add('align-left');
+                        return;
                     }
+
+                    // 2. Right Edge Check
+                    const menuRightEdge = itemCenter + (dropdownMenuWidth / 2);
+                    
+                    if (menuRightEdge > (viewportWidth - safetyMargin)) {
+                        item.classList.add('align-right');
+                        return;
+                    }
+                }
+            };
+
+            // Add event listeners for mouse actions
+            useItems.forEach(item => {
+                item.addEventListener('mouseenter', () => alignDropdown(item));
+                
+                item.addEventListener('mouseleave', () => {
+                    item.classList.remove('align-left', 'align-right');
                 });
             });
-            
-            // Close menus when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.use-item') && !e.target.closest('.mega-menu')) {
-                    closeAllMenus();
-                }
-            });
-            
-            // Close menus when pressing Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeAllMenus();
-                }
+
+            // Re-check alignment if the window is resized
+            window.addEventListener('resize', () => {
+                useItems.forEach(item => alignDropdown(item));
             });
         });
     </script>
