@@ -21,6 +21,11 @@
             color: #333;
             line-height: 1.6;
             padding-top: 80px; /* Reduced for mobile */
+            transition: margin-left 0.3s ease;
+        }
+        
+        body.sidebar-open {
+            margin-left: 280px;
         }
         
         .container { 
@@ -65,13 +70,138 @@
             background-color: #9c750b;
         }
         
+        /* --- SIDEBAR STYLES --- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: #fff;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .sidebar.open {
+            left: 0;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            background: #333;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sidebar-header h3 {
+            font-size: 18px;
+            color: #b8860b;
+        }
+        
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .sidebar-content {
+            padding: 20px;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 15px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover {
+            background: #f5f5f5;
+            color: #b8860b;
+        }
+        
+        .sidebar-menu a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-categories {
+            margin-top: 30px;
+        }
+        
+        .sidebar-categories h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #b8860b;
+            padding-bottom: 5px;
+        }
+        
+        .category-list {
+            list-style: none;
+        }
+        
+        .category-list li {
+            margin-bottom: 8px;
+        }
+        
+        .category-list a {
+            display: block;
+            padding: 8px 15px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .category-list a:hover {
+            color: #b8860b;
+        }
+        
+        /* Overlay for sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
+        }
+        
         /* --- HEADER & NAVIGATION --- */
         header {
             background-color: #fff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             position: fixed;
-            top: 0; left: 0; width: 100%; z-index: 1000;
-            transition: top 0.3s ease-in-out; 
+            top: 0; left: 0; width: 100%; z-index: 999;
+            transition: top 0.3s ease-in-out, left 0.3s ease; 
+        }
+        
+        body.sidebar-open header {
+            left: 280px;
+            width: calc(100% - 280px);
         }
         
         /* Smart Header: Hides completely */
@@ -107,6 +237,9 @@
             gap: 10px;
         }
         .logo { 
+            display: flex;
+            align-items: center;
+            gap: 15px;
             flex-shrink: 0;
         }
         .logo h1 { 
@@ -118,6 +251,19 @@
         .logo span { 
             color: #b8860b; 
             font-weight: 800; 
+        }
+        
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: #b8860b;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .search-bar {
@@ -811,6 +957,26 @@
                 left: 50%;
                 transform: translateX(-50%);
             }
+            
+            /* Mobile sidebar adjustments */
+            body.sidebar-open {
+                margin-left: 0;
+                overflow: hidden;
+            }
+            
+            .sidebar {
+                width: 280px;
+                left: -280px;
+            }
+            
+            .sidebar.open {
+                left: 0;
+            }
+            
+            body.sidebar-open header {
+                left: 0;
+                width: 100%;
+            }
         }
         
         @media (max-width: 576px) {
@@ -917,6 +1083,56 @@
     </style>
 </head>
 <body>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>StoneCraft Menu</h3>
+            <button class="close-sidebar" id="closeSidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sidebar-content">
+            <ul class="sidebar-menu">
+                <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="/products"><i class="fas fa-th-large"></i> All Products</a></li>
+                <li><a href="/collections"><i class="fas fa-gem"></i> Collections</a></li>
+                <li><a href="/samples"><i class="fas fa-box-open"></i> Order Samples</a></li>
+                <li><a href="/projects"><i class="fas fa-images"></i> Our Projects</a></li>
+                <li><a href="/about"><i class="fas fa-info-circle"></i> About Us</a></li>
+                <li><a href="/contact"><i class="fas fa-envelope"></i> Contact</a></li>
+            </ul>
+            
+            <div class="sidebar-categories">
+                <h4>Stone Categories</h4>
+                <ul class="category-list">
+                    <li><a href="/category/porcelain">Porcelain Tiles</a></li>
+                    <li><a href="/category/marble">Marble</a></li>
+                    <li><a href="/category/granite">Granite</a></li>
+                    <li><a href="/category/limestone">Limestone</a></li>
+                    <li><a href="/category/sandstone">Sandstone</a></li>
+                    <li><a href="/category/slate">Slate</a></li>
+                    <li><a href="/category/travertine">Travertine</a></li>
+                    <li><a href="/category/quartzite">Quartzite</a></li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-categories">
+                <h4>Applications</h4>
+                <ul class="category-list">
+                    <li><a href="/application/flooring">Flooring</a></li>
+                    <li><a href="/application/walls">Wall Cladding</a></li>
+                    <li><a href="/application/bathrooms">Bathrooms</a></li>
+                    <li><a href="/application/kitchens">Kitchens</a></li>
+                    <li><a href="/application/outdoor">Outdoor Paving</a></li>
+                    <li><a href="/application/feature-walls">Feature Walls</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
     <header id="mainHeader">
         <div class="trust-top-bar">
             <div class="container">
@@ -926,7 +1142,12 @@
         
         <div class="main-header" id="mainHeaderContent">
             <div class="container header-content">
-                <div class="logo"><h1>Stone<span>Craft</span></h1></div>
+                <div class="logo">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Stone<span>Craft</span></h1>
+                </div>
                 
                 <div class="search-bar">
                     <input type="text" placeholder="Search for products, colours..." aria-label="Search for products">
@@ -1186,6 +1407,36 @@
     </footer>
 
     <script>
+        // --- Sidebar Functionality ---
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const body = document.body;
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.add('active');
+            body.classList.add('sidebar-open');
+        }
+
+        function closeSidebarFunc() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            body.classList.remove('sidebar-open');
+        }
+
+        sidebarToggle.addEventListener('click', openSidebar);
+        closeSidebar.addEventListener('click', closeSidebarFunc);
+        sidebarOverlay.addEventListener('click', closeSidebarFunc);
+
+        // Close sidebar when pressing Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeSidebarFunc();
+            }
+        });
+
         // --- Smart Header Hide on Scroll ---
         let lastScrollTop = 0;
         const header = document.getElementById('mainHeader');
