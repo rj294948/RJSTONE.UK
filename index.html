@@ -20,29 +20,31 @@
             background-color: #ffffff;
             color: #333;
             line-height: 1.6;
-            padding-top: 100px; /* Reduced from 130px */
+            padding-top: 80px;
+            transition: margin-left 0.3s ease;
+            overflow-x: hidden;
         }
         
         .container { 
             max-width: 1200px; 
             margin: 0 auto; 
-            padding: 0 20px; 
+            padding: 0 15px; 
         }
 
         /* --- Global Components --- */
         .section-title { 
             text-align: center; 
-            margin: 60px 0 40px; 
-            font-size: 32px; 
+            margin: 40px 0 30px;
+            font-size: 28px; 
             color: #333; 
             position: relative; 
-            padding-bottom: 15px; 
+            padding-bottom: 12px; 
             font-weight: 600;
         }
         .section-title:after { 
             content: ''; 
             position: absolute; 
-            width: 80px; 
+            width: 60px; 
             height: 3px; 
             background: #b8860b; 
             bottom: 0; 
@@ -59,9 +61,133 @@
             font-weight: 500;
             margin-top: 15px;
             transition: background-color 0.3s;
+            font-size: 14px;
         }
         .btn-primary:hover {
             background-color: #9c750b;
+        }
+        
+        /* --- SIDEBAR STYLES --- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 1001;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .sidebar.open {
+            left: 0;
+        }
+        
+        .sidebar-header {
+            padding: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #b8860b;
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-header h3 {
+            font-size: 22px;
+            color: #333;
+        }
+        
+        .sidebar-header h3 span {
+            color: #b8860b;
+        }
+        
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: #333;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .sidebar-content {
+            padding: 10px 0;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+        
+        .sidebar-section h4 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        
+        .sidebar-applications {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .sidebar-app {
+            display: flex;
+            flex-direction: column;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .sidebar-app:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .sidebar-app-image {
+            width: 100%;
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .sidebar-app-content {
+            padding: 15px;
+            background: white;
+        }
+        
+        .sidebar-app-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #b8860b;
+        }
+        
+        .sidebar-app-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        /* Overlay for sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
         }
         
         /* --- HEADER & NAVIGATION --- */
@@ -69,25 +195,26 @@
             background-color: #fff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             position: fixed;
-            top: 0; left: 0; width: 100%; z-index: 1000;
+            top: 0; left: 0; width: 100%; z-index: 999;
             transition: top 0.3s ease-in-out; 
         }
         
         /* Smart Header: Hides completely */
-        header.header-hidden { top: -100px; /* Reduced from -130px */ }
+        header.header-hidden { top: -80px; }
 
         /* Trust Info Top Bar */
         .trust-top-bar {
             background-color: #444; 
             color: white; 
             padding: 5px 0;
-            font-size: 13px;
+            font-size: 12px;
             text-align: center;
         }
         .trust-top-bar p {
             margin: 0;
             white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;
         }
         .trust-top-bar span {
             color: #b8860b;
@@ -95,27 +222,78 @@
         }
         
         .main-header { 
-            padding: 10px 0; /* Reduced from 15px 0 */
+            padding: 8px 0; 
             border-bottom: 1px solid #eee; 
         }
         .header-content { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
+            gap: 10px;
+        }
+        .logo { 
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-shrink: 0;
         }
         .logo h1 { 
-            font-size: 28px; 
+            font-size: 22px; 
             color: #333; 
             font-weight: 700; 
+            white-space: nowrap;
         }
         .logo span { 
             color: #b8860b; 
             font-weight: 800; 
         }
+        
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: #b8860b;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 6px 12px;
+            flex-grow: 1;
+            max-width: 400px;
+            margin: 0 10px;
+        }
+        .search-bar input { 
+            border: none; 
+            outline: none; 
+            flex-grow: 1; 
+            padding: 6px; 
+            font-size: 13px; 
+            background: transparent;
+        }
+        .search-bar button { 
+            background: none; 
+            border: none; 
+            color: #b8860b; 
+            cursor: pointer; 
+            font-size: 14px; 
+            padding: 0;
+            width: 20px;
+        }
+
         .user-actions { 
             display: flex; 
             align-items: center; 
-            gap: 20px; 
+            gap: 15px; 
+            flex-shrink: 0;
         }
         .user-action { 
             display: flex; 
@@ -123,37 +301,13 @@
             align-items: center; 
             text-decoration: none; 
             color: #555; 
-            font-size: 12px; 
+            font-size: 11px; 
+            min-width: 50px;
         }
         .user-action i { 
-            font-size: 18px; 
-            margin-bottom: 3px; 
-            color: #b8860b; 
-        }
-
-        .search-bar {
-            display: flex;
-            align-items: center;
-            border: 1px solid #ddd;
-            border-radius: 25px;
-            padding: 5px 15px;
-            margin-left: 20px;
-            max-width: 300px;
-            flex-grow: 1;
-        }
-        .search-bar input { 
-            border: none; 
-            outline: none; 
-            flex-grow: 1; 
-            padding: 5px; 
-            font-size: 14px; 
-        }
-        .search-bar button { 
-            background: none; 
-            border: none; 
-            color: #b8860b; 
-            cursor: pointer; 
             font-size: 16px; 
+            margin-bottom: 2px; 
+            color: #b8860b; 
         }
 
         .uses-top-bar { 
@@ -163,18 +317,16 @@
         .uses-container { 
             display: flex; 
             justify-content: space-between; 
-            flex-wrap: wrap; 
         }
         .use-item { 
             flex: 1; 
-            min-width: 120px; 
             position: relative; 
         }
         .use-link { 
             display: block; 
             color: white; 
             text-decoration: none; 
-            padding: 10px 8px; /* Reduced padding */
+            padding: 12px 8px;
             font-size: 14px; 
             font-weight: 500; 
             text-align: center; 
@@ -195,36 +347,30 @@
         .dropdown-menu {
             position: absolute; 
             top: 100%; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            min-width: 900px; 
-            max-width: 95vw; 
+            left: 0;
+            width: 100%;
             background: #fff; 
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             display: none; 
-            padding: 25px; 
+            padding: 20px; 
             border-top: 3px solid #b8860b; 
             z-index: 999;
-            border-radius: 0 0 8px 8px;
         }
         .use-item:hover .dropdown-menu { display: block; }
 
-        .use-item.align-left .dropdown-menu { left: 0; right: auto; transform: none; }
-        .use-item.align-right .dropdown-menu { left: auto; right: 0; transform: none; }
-        
         .dropdown-content { 
             display: grid;
             grid-template-columns: repeat(4, 1fr); 
-            gap: 20px; 
+            gap: 15px; 
         }
         
         .menu-tile {
             text-decoration: none; 
             display: flex; 
             flex-direction: column; 
-            border-radius: 8px; 
+            border-radius: 6px; 
             overflow: hidden;
-            box-shadow: 0 0px 10px rgba(0,0,0,0.1); 
+            box-shadow: 0 0px 8px rgba(0,0,0,0.1); 
             transition: transform 0.2s, box-shadow 0.2s;
             background: white;
             border: 1px solid #eee;
@@ -232,13 +378,13 @@
         }
         .menu-tile:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.15);
             border-color: #b8860b; 
         }
         
         .menu-tile-image {
             width: 100%; 
-            height: 150px; 
+            height: 120px; 
             background-size: cover; 
             background-position: center;
             flex-shrink: 0; 
@@ -249,7 +395,7 @@
         .menu-tile-title {
             color: #333; 
             padding: 10px 5px;
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 600; 
             flex-grow: 1; 
         }
@@ -262,7 +408,7 @@
             background-size: cover;
             background-position: center;
             color: white;
-            padding: 100px 0; /* Reduced from 120px */
+            padding: 60px 0;
             text-align: center;
             min-height: 400px;
             display: flex;
@@ -270,13 +416,15 @@
             justify-content: center;
         }
         .hero-banner-section h1 { 
-            font-size: 48px; 
+            font-size: 32px; 
             margin-bottom: 15px; 
             font-weight: 700; 
+            line-height: 1.2;
         }
         .hero-banner-section p { 
-            font-size: 20px; 
+            font-size: 16px; 
             font-weight: 300; 
+            margin-bottom: 10px;
         }
 
         .trust-symbol-row { 
@@ -288,47 +436,48 @@
         }
         .symbol-container { 
             display: flex; 
-            justify-content: space-around; 
+            justify-content: space-between; 
             align-items: center; 
-            gap: 20px; 
-            flex-wrap: wrap;
+            gap: 10px; 
         }
         .symbol-item { 
             display: flex; 
             align-items: center; 
-            gap: 10px; 
-            font-size: 16px; 
+            gap: 8px; 
+            font-size: 14px; 
             font-weight: 500; 
             color: #444;
+            flex: 1;
+            justify-content: center;
         }
         .symbol-item i { 
             color: #b8860b; 
-            font-size: 24px; 
+            font-size: 18px; 
         }
 
         .product-banners { 
-            padding: 60px 0; 
+            padding: 50px 0;
             background: #f9f9f9; 
         }
         .banner-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 30px; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 20px; 
         }
         
         .uses-images { 
-            padding: 60px 0; 
+            padding: 50px 0;
             background: #f4f4f4; 
         }
         .uses-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 20px; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
         }
 
         .item-card-link { 
-            border-radius: 12px; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15); 
+            border-radius: 10px; 
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12); 
             transition: transform 0.4s, box-shadow 0.4s; 
             text-decoration: none; 
             display: flex; 
@@ -336,11 +485,11 @@
             overflow: hidden; 
             background: white; 
             position: relative; 
-            min-height: 250px; 
+            height: 280px; 
         }
         .item-card-link:hover { 
-            transform: translateY(-8px); 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2); 
+            transform: translateY(-5px); 
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15); 
         }
         
         .item-card-image { 
@@ -363,7 +512,7 @@
             background: rgba(0, 0, 0, 0.7); 
             color: white; 
             padding: 15px; 
-            font-size: 18px; 
+            font-size: 16px; 
             font-weight: 600; 
             text-align: center;
             transition: background-color 0.3s;
@@ -373,7 +522,7 @@
             opacity: 0; 
             transform: translateY(100%); 
             transition: opacity 0.3s, transform 0.3s; 
-            border-radius: 0 0 12px 12px; 
+            border-radius: 0 0 10px 10px; 
         }
         .product-banners .item-card-link:hover .item-card-title-overlay { 
             opacity: 1; 
@@ -389,19 +538,19 @@
         }
         
         #categories { 
-            padding: 60px 0 80px; 
+            padding: 50px 0;
         }
         .categories-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 30px; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 20px; 
         }
         .category-card {
             display: flex; 
             flex-direction: column; 
             text-decoration: none; 
             color: #333;
-            border-radius: 12px; 
+            border-radius: 10px; 
             overflow: hidden; 
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s, box-shadow 0.3s; 
@@ -409,45 +558,46 @@
         }
         .category-card:hover { 
             transform: translateY(-5px); 
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); 
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15); 
         }
         .category-img {
             width: 100%; 
             height: 200px; 
             background-size: cover; 
             background-position: center;
-            border-bottom: 4px solid #b8860b; 
+            border-bottom: 3px solid #b8860b; 
             transition: transform 0.3s;
         }
         .category-card:hover .category-img { 
             transform: scale(1.05); 
         }
         .category-content { 
-            padding: 20px; 
+            padding: 15px; 
             text-align: center; 
         }
         .category-content h3 { 
-            font-size: 24px; 
+            font-size: 18px; 
             margin-bottom: 10px; 
             color: #b8860b; 
         }
         .category-content p { 
-            font-size: 15px; 
+            font-size: 14px; 
             color: #666; 
-            margin-bottom: 5px; 
+            margin-bottom: 10px; 
+            line-height: 1.4;
         }
 
-        /* --- FOOTER (PROPER) --- */
+        /* --- FOOTER --- */
         footer {
             background: #222;
             color: #ccc;
-            padding: 40px 0;
-            font-size: 14px;
+            padding: 40px 0 20px;
+            font-size: 13px;
         }
         .footer-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
         }
         footer h4 {
             color: #fff;
@@ -457,10 +607,6 @@
             padding-bottom: 8px;
             text-align: left;
         }
-        footer .contact-info h4 { 
-            text-align: left; 
-        }
-
         footer h4:after {
             content: '';
             position: absolute;
@@ -477,8 +623,9 @@
             color: #ccc;
             text-decoration: none;
             display: block;
-            padding: 5px 0;
+            padding: 6px 0;
             transition: color 0.2s;
+            font-size: 13px;
         }
         footer ul li a:hover { 
             color: #b8860b; 
@@ -486,17 +633,25 @@
         }
         
         .contact-info p { 
-            margin-bottom: 10px; 
+            margin-bottom: 12px; 
+            display: flex;
+            align-items: center;
+            font-size: 13px;
         }
         .contact-info p i { 
             color: #b8860b; 
             margin-right: 8px; 
+            width: 16px;
         }
 
+        .social-icons { 
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
         .social-icons a { 
             color: white; 
-            margin-right: 15px; 
-            font-size: 18px; 
+            font-size: 16px; 
             transition: color 0.2s; 
         }
         .social-icons a:hover { 
@@ -507,7 +662,8 @@
             text-align: center;
             margin-top: 30px;
             border-top: 1px solid #444;
-            padding-top: 20px;
+            padding-top: 15px;
+            font-size: 12px;
         }
         
         /* --- MOBILE MENU TOGGLE --- */
@@ -516,131 +672,152 @@
             background: none;
             border: none;
             color: white;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
-            padding: 5px;
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            z-index: 1001;
+            padding: 8px;
         }
 
-        /* Responsive Adjustments */
+        /* ========== MOBILE RESPONSIVE STYLES ========== */
         @media (max-width: 1200px) {
-            .dropdown-menu {
-                min-width: 800px;
+            .container {
+                padding: 0 20px;
             }
+            
             .dropdown-content {
                 grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .hero-banner-section h1 {
+                font-size: 28px;
             }
         }
         
         @media (max-width: 992px) {
-            .trust-top-bar p {
-                font-size: 11px;
-                padding: 0 10px;
-                white-space: normal;
+            .header-content {
+                flex-wrap: nowrap;
             }
             
-            .main-header .header-content { 
-                flex-wrap: wrap; 
-                justify-content: center; 
-                gap: 10px; 
-            }
-            .logo { 
-                flex-basis: 100%; 
-                text-align: center; 
-            }
             .logo h1 {
-                font-size: 24px;
-            }
-            .search-bar { 
-                order: 1; 
-                width: 95%; 
-                max-width: none; 
-                margin: 10px auto; 
-            }
-            .user-actions { 
-                flex-basis: 100%; 
-                justify-content: space-around; 
-                gap: 15px;
-            }
-            .user-action span {
-                font-size: 11px;
-            }
-
-            .uses-container { 
-                overflow-x: auto; 
-                flex-wrap: nowrap; 
-                -webkit-overflow-scrolling: touch; 
-            }
-            .use-item { 
-                min-width: 150px; 
-                flex-shrink: 0; 
+                font-size: 20px;
             }
             
-            .dropdown-menu { 
-                min-width: 100%; 
-                width: 100%; 
-                left: 0; 
-                right: auto; 
-                transform: none; 
-                border-radius: 0; 
-            }
-            .use-item.align-left .dropdown-menu,
-            .use-item.align-right .dropdown-menu { 
-                left: 0; 
-                right: auto; 
-            }
-            .dropdown-content { 
-                grid-template-columns: repeat(2, 1fr); 
+            .search-bar {
+                margin: 0 8px;
             }
             
-            footer h4 { 
-                text-align: center; 
-            }
-            footer h4:after { 
-                left: 50%; 
-                transform: translateX(-50%); 
+            .user-actions {
+                gap: 12px;
             }
             
-            .hero-banner-section {
-                padding: 80px 0;
-                min-height: 350px;
-            }
-            .hero-banner-section h1 {
-                font-size: 36px;
-            }
-            .hero-banner-section p {
-                font-size: 18px;
+            .user-action {
+                min-width: 45px;
+                font-size: 10px;
             }
             
-            .symbol-container {
-                gap: 15px;
-            }
-            .symbol-item {
+            .user-action i {
                 font-size: 14px;
             }
+            
+            .uses-container {
+                flex-wrap: wrap;
+            }
+            
+            .use-item {
+                flex: 1 0 33.33%;
+                min-width: 120px;
+            }
+            
+            .use-link {
+                padding: 10px 5px;
+                font-size: 13px;
+            }
+            
+            .dropdown-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .banner-grid,
+            .categories-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .uses-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 25px;
+            }
+            
+            .hero-banner-section h1 {
+                font-size: 26px;
+            }
+            
+            .hero-banner-section p {
+                font-size: 15px;
+            }
+            
+            .symbol-item {
+                font-size: 13px;
+            }
+            
             .symbol-item i {
-                font-size: 20px;
+                font-size: 16px;
             }
         }
         
         @media (max-width: 768px) {
             body {
-                padding-top: 90px; /* Further reduced for mobile */
+                padding-top: 70px;
             }
             
             header.header-hidden {
-                top: -90px; /* Adjusted to match new padding */
+                top: -70px;
             }
             
             .trust-top-bar {
-                padding: 3px 0;
+                padding: 4px 0;
+                font-size: 11px;
             }
             
             .main-header {
-                padding: 8px 0;
+                padding: 6px 0;
+            }
+            
+            .header-content {
+                gap: 8px;
+            }
+            
+            .logo h1 {
+                font-size: 18px;
+            }
+            
+            .search-bar {
+                padding: 5px 10px;
+                border-radius: 18px;
+            }
+            
+            .search-bar input {
+                font-size: 12px;
+                padding: 4px;
+            }
+            
+            .search-bar button {
+                font-size: 12px;
+            }
+            
+            .user-actions {
+                gap: 10px;
+            }
+            
+            .user-action {
+                min-width: 40px;
+                font-size: 9px;
+            }
+            
+            .user-action i {
+                font-size: 13px;
             }
             
             .uses-top-bar {
@@ -649,6 +826,10 @@
             
             .mobile-menu-toggle {
                 display: block;
+                position: absolute;
+                top: 8px;
+                right: 15px;
+                z-index: 1001;
             }
             
             .uses-container {
@@ -665,18 +846,19 @@
             }
             
             .uses-container.mobile-open {
-                max-height: 500px;
+                max-height: 450px;
                 overflow-y: auto;
             }
             
             .use-item {
-                min-width: 100%;
+                flex: 1 0 100%;
                 border-bottom: 1px solid #444;
             }
             
             .use-link {
                 padding: 12px 15px;
                 text-align: left;
+                font-size: 14px;
             }
             
             .dropdown-menu {
@@ -684,7 +866,7 @@
                 transform: none;
                 box-shadow: none;
                 border-top: none;
-                padding: 10px 15px;
+                padding: 12px 15px;
                 background: #444;
                 display: none;
             }
@@ -695,108 +877,264 @@
             
             .dropdown-content {
                 grid-template-columns: 1fr;
-                gap: 10px;
+                gap: 12px;
             }
             
             .menu-tile {
                 flex-direction: row;
                 align-items: center;
                 text-align: left;
+                padding: 8px;
             }
             
             .menu-tile-image {
-                width: 80px;
-                height: 60px;
+                width: 70px;
+                height: 50px;
                 flex-shrink: 0;
+                border-radius: 5px;
             }
             
             .menu-tile-title {
-                padding: 0 10px;
+                padding: 0 12px;
+                font-size: 13px;
+            }
+            
+            .hero-banner-section {
+                padding: 40px 0;
+                min-height: 300px;
             }
             
             .hero-banner-section h1 {
-                font-size: 28px;
+                font-size: 22px;
             }
+            
             .hero-banner-section p {
-                font-size: 16px;
+                font-size: 14px;
             }
             
             .section-title {
-                font-size: 26px;
-                margin: 40px 0 30px;
+                font-size: 22px;
+                margin: 30px 0 20px;
             }
             
             .banner-grid,
             .uses-grid,
             .categories-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 15px;
+            }
+            
+            .item-card-link {
+                height: 220px;
             }
             
             .symbol-container {
-                flex-direction: column;
-                gap: 10px;
+                flex-wrap: nowrap;
+                gap: 5px;
+            }
+            
+            .symbol-item {
+                font-size: 11px;
+                gap: 5px;
+            }
+            
+            .symbol-item i {
+                font-size: 14px;
             }
             
             .footer-grid {
                 grid-template-columns: 1fr;
+                gap: 20px;
                 text-align: center;
+            }
+            
+            footer h4:after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            /* Desktop sidebar hidden */
+            .sidebar-toggle {
+                display: none;
             }
         }
         
         @media (max-width: 576px) {
             body { 
-                padding-top: 85px; 
+                padding-top: 65px; 
             }
             
             header.header-hidden {
-                top: -85px;
+                top: -65px;
             }
             
             .container {
                 padding: 0 15px;
             }
             
-            .hero-banner-section {
-                padding: 60px 0;
-                min-height: 300px;
+            .logo h1 {
+                font-size: 16px;
             }
             
-            .hero-banner-section h1 { 
-                font-size: 24px; 
-            }
-            .hero-banner-section p { 
-                font-size: 14px; 
+            .search-bar {
+                margin: 0 5px;
+                max-width: 180px;
             }
             
-            .section-title {
-                font-size: 22px;
-            }
-            
-            .btn-primary {
-                padding: 8px 16px;
-                font-size: 14px;
+            .search-bar input {
+                font-size: 11px;
             }
             
             .user-actions {
-                gap: 10px;
+                gap: 8px;
             }
             
             .user-action span {
                 display: none;
             }
             
-            .search-bar {
-                margin-left: 0;
+            .user-action i {
+                font-size: 16px;
+                margin-bottom: 0;
+            }
+            
+            .hero-banner-section {
+                padding: 30px 0;
+                min-height: 250px;
+            }
+            
+            .hero-banner-section h1 { 
+                font-size: 20px; 
+            }
+            
+            .hero-banner-section p { 
+                font-size: 13px; 
+            }
+            
+            .section-title {
+                font-size: 20px;
+            }
+            
+            .btn-primary {
+                padding: 8px 16px;
+                font-size: 13px;
             }
             
             .trust-top-bar p {
+                white-space: normal;
+                line-height: 1.3;
                 font-size: 10px;
+            }
+            
+            .symbol-item {
+                font-size: 10px;
+            }
+            
+            .symbol-item i {
+                font-size: 12px;
+            }
+            
+            /* Mobile sidebar visible */
+            .sidebar-toggle {
+                display: flex;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .logo h1 {
+                font-size: 14px;
+            }
+            
+            .search-bar {
+                max-width: 150px;
+            }
+            
+            .search-bar input::placeholder {
+                font-size: 10px;
+            }
+            
+            .user-actions {
+                gap: 5px;
+            }
+            
+            .user-action i {
+                font-size: 14px;
+            }
+            
+            .symbol-item {
+                font-size: 9px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Stone<span>Craft</span> Applications</h3>
+            <button class="close-sidebar" id="closeSidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-section">
+                <h4>Stone Applications</h4>
+                <div class="sidebar-applications">
+                    <a href="/application/flooring" class="sidebar-app">
+                        <div class="sidebar-app-image" style="background-image: url('https://picsum.photos/id/26/600/400');"></div>
+                        <div class="sidebar-app-content">
+                            <div class="sidebar-app-title">Flooring</div>
+                            <div class="sidebar-app-desc">Durable and elegant stone flooring for all interior spaces</div>
+                        </div>
+                    </a>
+                    
+                    <a href="/application/walls" class="sidebar-app">
+                        <div class="sidebar-app-image" style="background-image: url('https://picsum.photos/id/27/600/400');"></div>
+                        <div class="sidebar-app-content">
+                            <div class="sidebar-app-title">Wall Cladding</div>
+                            <div class="sidebar-app-desc">Beautiful stone walls for interior and exterior applications</div>
+                        </div>
+                    </a>
+                    
+                    <a href="/application/bathrooms" class="sidebar-app">
+                        <div class="sidebar-app-image" style="background-image: url('https://picsum.photos/id/28/600/400');"></div>
+                        <div class="sidebar-app-content">
+                            <div class="sidebar-app-title">Bathrooms</div>
+                            <div class="sidebar-app-desc">Water-resistant stone for luxurious bathroom spaces</div>
+                        </div>
+                    </a>
+                    
+                    <a href="/application/kitchens" class="sidebar-app">
+                        <div class="sidebar-app-image" style="background-image: url('https://picsum.photos/id/29/600/400');"></div>
+                        <div class="sidebar-app-content">
+                            <div class="sidebar-app-title">Kitchens</div>
+                            <div class="sidebar-app-desc">Stunning countertops and backsplashes for kitchens</div>
+                        </div>
+                    </a>
+                    
+                    <a href="/application/outdoor" class="sidebar-app">
+                        <div class="sidebar-app-image" style="background-image: url('https://picsum.photos/id/30/600/400');"></div>
+                        <div class="sidebar-app-content">
+                            <div class="sidebar-app-title">Outdoor Paving</div>
+                            <div class="sidebar-app-desc">Weather-resistant stone for patios and outdoor areas</div>
+                        </div>
+                    </a>
+                    
+                    <a href="/application/feature-walls" class="sidebar-app">
+                        <div class="sidebar-app-image" style="background-image: url('https://picsum.photos/id/31/600/400');"></div>
+                        <div class="sidebar-app-content">
+                            <div class="sidebar-app-title">Feature Walls</div>
+                            <div class="sidebar-app-desc">Create stunning focal points with natural stone</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <header id="mainHeader">
         <div class="trust-top-bar">
             <div class="container">
@@ -806,11 +1144,18 @@
         
         <div class="main-header" id="mainHeaderContent">
             <div class="container header-content">
-                <div class="logo"><h1>Stone<span>Craft</span></h1></div>
+                <div class="logo">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Stone<span>Craft</span></h1>
+                </div>
+                
                 <div class="search-bar">
                     <input type="text" placeholder="Search for products, colours..." aria-label="Search for products">
                     <button type="submit"><i class="fas fa-search"></i></button>
                 </div>
+                
                 <div class="user-actions">
                     <a href="#" class="user-action"><i class="fas fa-map-marker-alt"></i><span>Location</span></a>
                     <a href="#" class="user-action"><i class="fas fa-user"></i><span>Sign In</span></a>
@@ -841,26 +1186,6 @@
                                 <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/35/400/250');"></div>
                                 <div class="menu-tile-title">Natural Slate</div>
                             </a>
-                            <a href="/flooring/wood" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/272/400/250');"></div>
-                                <div class="menu-tile-title">Wood Effect</div>
-                            </a>
-                            <a href="/flooring/granite" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/273/400/250');"></div>
-                                <div class="menu-tile-title">Granite Flooring</div>
-                            </a>
-                            <a href="/flooring/terracotta" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/274/400/250');"></div>
-                                <div class="menu-tile-title">Terracotta Tiles</div>
-                            </a>
-                            <a href="/flooring/vinyl" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/350/400/250');"></div>
-                                <div class="menu-tile-title">Vinyl Planks</div>
-                            </a>
-                            <a href="/flooring/cement" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/351/400/250');"></div>
-                                <div class="menu-tile-title">Cement Look</div>
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -876,14 +1201,6 @@
                             <a href="/wall/cladding" class="menu-tile">
                                 <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/276/400/250');"></div>
                                 <div class="menu-tile-title">External Cladding</div>
-                            </a>
-                            <a href="/wall/mosaic" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/277/400/250');"></div>
-                                <div class="menu-tile-title">Mosaic Tiles</div>
-                            </a>
-                            <a href="/wall/feature" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/278/400/250');"></div>
-                                <div class="menu-tile-title">Feature Walls</div>
                             </a>
                         </div>
                     </div>
@@ -901,14 +1218,6 @@
                                 <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/279/400/250');"></div>
                                 <div class="menu-tile-title">Vanity Tops</div>
                             </a>
-                            <a href="/bath/marble" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/280/400/250');"></div>
-                                <div class="menu-tile-title">Marble Panels</div>
-                            </a>
-                            <a href="/bath/porcelain" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/281/400/250');"></div>
-                                <div class="menu-tile-title">Porcelain Walls</div>
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -924,14 +1233,6 @@
                             <a href="/outdoor/sandstone" class="menu-tile">
                                 <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/269/400/250');"></div>
                                 <div class="menu-tile-title">Natural Sandstone</div>
-                            </a>
-                            <a href="/outdoor/limestone" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/21/400/250');"></div>
-                                <div class="menu-tile-title">Limestone Slabs</div>
-                            </a>
-                            <a href="/outdoor/setts" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/282/400/250');"></div>
-                                <div class="menu-tile-title">Driveway Setts</div>
                             </a>
                         </div>
                     </div>
@@ -949,14 +1250,6 @@
                                 <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/41/400/250');"></div>
                                 <div class="menu-tile-title">Dark Walnut</div>
                             </a>
-                            <a href="/wood/grey" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/42/400/250');"></div>
-                                <div class="menu-tile-title">Grey Washed</div>
-                            </a>
-                            <a href="/wood/light" class="menu-tile">
-                                <div class="menu-tile-image" style="background-image: url('https://picsum.photos/id/43/400/250');"></div>
-                                <div class="menu-tile-title">Light Pine</div>
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -970,7 +1263,7 @@
             <div class="container">
                 <h1>Generations of Trust: UK's Premium Stone & Porcelain Suppliers.</h1>
                 <p>The perfect foundation for your home, built on quality and commercial excellence.</p>
-                <a href="/shop" class="btn-primary" style="margin-top: 25px;">Explore Collections</a>
+                <a href="/shop" class="btn-primary">Explore Collections</a>
             </div>
         </section>
         
@@ -983,62 +1276,56 @@
             </div>
         </div>
         
-        <hr>
-
         <section class="product-banners">
             <div class="container">
                 <h2 class="section-title">Exclusive Collections</h2>
                 <div class="banner-grid">
                     <a href="/collection/italian-marble" class="item-card-link" aria-label="View Luxury Italian Marble Collection">
-                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/16/400/400');"></div> 
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/16/600/400');"></div> 
                         <div class="item-card-title-overlay">Luxury Italian Marble</div>
                     </a>
                     <a href="/collection/porcelain-outdoor" class="item-card-link" aria-label="View Outdoor Porcelain Paving">
-                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/201/400/400');"></div>
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/201/600/400');"></div>
                         <div class="item-card-title-overlay">Outdoor Porcelain Paving</div>
                     </a>
                     <a href="/collection/limestone-specials" class="item-card-link" aria-label="View Heritage Limestone Specials">
-                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/21/400/400');"></div>
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/21/600/400');"></div>
                         <div class="item-card-title-overlay">Heritage Limestone</div>
                     </a>
                 </div>
             </div>
         </section>
         
-        <hr>
-
         <section class="uses-images">
             <div class="container">
                 <h2 class="section-title">Shop By Application: Where Will You Use Your Stone?</h2>
                 <div class="uses-grid">
                     <a href="/shop/kitchens" class="item-card-link" aria-label="Shop stone for Kitchens">
-                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/264/400/300');"></div>
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/264/600/400');"></div>
                         <div class="item-card-title-overlay">Kitchen Flooring & Walls</div>
                     </a>
                     <a href="/shop/bathrooms" class="item-card-link" aria-label="Shop stone for Bathrooms">
-                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/265/400/300');"></div>
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/265/600/400');"></div>
                         <div class="item-card-title-overlay">Bathroom Wetrooms & Vanity</div>
                     </a>
                     <a href="/shop/patios" class="item-card-link" aria-label="Shop stone for Patios and Gardens">
-                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/266/400/300');"></div>
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/266/600/400');"></div>
                         <div class="item-card-title-overlay">Outdoor Paving & Patios</div>
                     </a>
                     <a href="/shop/walls" class="item-card-link" aria-label="Shop stone for Feature Walls">
-                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/267/400/300');"></div>
+                        <div class="item-card-image" style="background-image: url('https://picsum.photos/id/267/600/400');"></div>
                         <div class="item-card-title-overlay">Interior Feature Walls</div>
                     </a>
                 </div>
             </div>
         </section>
         
-        <hr>
-        
         <section id="categories">
             <div class="container">
                 <h2 class="section-title">Shop By Stone Type</h2>
                 <div class="categories-grid">
                     <a href="/stone/porcelain" class="category-card" aria-label="Shop Porcelain Tiles">
-                        <div class="category-img" style="background-image: url('https://picsum.photos/id/268/400/250');"></div>
+                        <div class="category-img" style="background-image: url('https://picsum.photos/id/268/600/400');"></div>
                         <div class="category-content">
                             <h3>Porcelain Tiles</h3>
                             <p>Modern, extremely durable, and low-maintenance. Perfect for indoor and outdoor.</p>
@@ -1046,7 +1333,7 @@
                         </div>
                     </a>
                     <a href="/stone/sandstone" class="category-card" aria-label="Shop Natural Sandstone">
-                        <div class="category-img" style="background-image: url('https://picsum.photos/id/269/400/250');"></div>
+                        <div class="category-img" style="background-image: url('https://picsum.photos/id/269/600/400');"></div>
                         <div class="category-content">
                             <h3>Natural Sandstone</h3>
                             <p>Classic, textured paving stone, offering a naturally beautiful finish for patios.</p>
@@ -1054,7 +1341,7 @@
                         </div>
                     </a>
                     <a href="/stone/marble" class="category-card" aria-label="Shop Premium Marble">
-                        <div class="category-img" style="background-image: url('https://picsum.photos/id/270/400/250');"></div>
+                        <div class="category-img" style="background-image: url('https://picsum.photos/id/270/600/400');"></div>
                         <div class="category-content">
                             <h3>Premium Marble</h3>
                             <p>Luxury stone for countertops and walls, reflecting opulence and timeless style.</p>
@@ -1102,9 +1389,9 @@
                 </div>
                 <div class="contact-info">
                     <h4>Get In Touch</h4>
-                    <p>StoneCraft UK Ltd.</p>
+                    <p><i class="fas fa-building"></i> StoneCraft UK Ltd.</p>
                     <p><i class="fas fa-phone"></i> 0800 123 4567</p>
-                    <p><i class="fas fa-envelope"></i> <a href="mailto:sales@stonecraft.co.uk" style="color:#ccc; text-decoration: none;">sales@stonecraft.co.uk</a></p>
+                    <p><i class="fas fa-envelope"></i> sales@stonecraft.co.uk</p>
                     <p style="margin-top: 15px;">Follow Us:</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f" aria-label="Facebook"></i></a>
@@ -1122,6 +1409,33 @@
     </footer>
 
     <script>
+        // --- Sidebar Functionality ---
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.add('active');
+        }
+
+        function closeSidebarFunc() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+        }
+
+        sidebarToggle.addEventListener('click', openSidebar);
+        closeSidebar.addEventListener('click', closeSidebarFunc);
+        sidebarOverlay.addEventListener('click', closeSidebarFunc);
+
+        // Close sidebar when pressing Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeSidebarFunc();
+            }
+        });
+
         // --- Smart Header Hide on Scroll ---
         let lastScrollTop = 0;
         const header = document.getElementById('mainHeader');
@@ -1136,7 +1450,7 @@
                 // Upscroll or at the very top - remove the class to show the header
                 header.classList.remove('header-hidden');
             }
-            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or when at the top
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
         });
 
         // --- Mobile Menu Toggle ---
