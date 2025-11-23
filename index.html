@@ -123,6 +123,7 @@
             transition: all 0.3s; cursor: pointer; border-bottom: 3px solid transparent; 
         }
         .use-link:hover { background: #444; border-bottom: 3px solid #b8860b; }
+        .use-item.active .use-link { background: #444; border-bottom: 3px solid #b8860b; }
 
         /* --- MEGA MENU STYLES --- */
         .dropdown-menu {
@@ -140,9 +141,9 @@
             z-index: 999;
             border-radius: 0 0 8px 8px;
         }
-        .use-item:hover .dropdown-menu,
-        .dropdown-menu.active { display: block; }
-        
+        /* .use-item:hover .dropdown-menu, */ /* Handled by JS for better mobile control */
+        .use-item:hover .dropdown-menu { display: block; }
+
         .use-item.align-left .dropdown-menu { left: 0; right: auto; transform: none; }
         .use-item.align-right .dropdown-menu { left: auto; right: 0; transform: none; }
         
@@ -278,7 +279,10 @@
             font-size: 16px;
             position: relative;
             padding-bottom: 8px;
+            text-align: left; /* Ensure alignment is correct */
         }
+        footer .contact-info h4 { text-align: left; } /* Contact info title */
+
         footer h4:after {
             content: '';
             position: absolute;
@@ -299,6 +303,8 @@
         footer ul li a:hover { color: #b8860b; padding-left: 5px; }
         
         .contact-info p { margin-bottom: 10px; }
+        .contact-info p i { color: #b8860b; margin-right: 8px; }
+
         .social-icons a { color: white; margin-right: 15px; font-size: 18px; transition: color 0.2s; }
         .social-icons a:hover { color: #b8860b; }
 
@@ -312,11 +318,12 @@
 
         /* Responsive Adjustments */
         @media (max-width: 992px) {
-            .trust-info { display: none; } /* Trust info in main header is removed, only top bar remains */
+            .trust-info { display: none; } 
             .main-header .header-content { flex-wrap: wrap; justify-content: center; gap: 10px; }
             .logo { flex-basis: 100%; text-align: center; }
             .search-bar { order: 1; width: 95%; max-width: none; margin: 10px auto; }
-            
+            .user-actions { flex-basis: 100%; justify-content: space-around; }
+
             .uses-container { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
             .use-item { min-width: 150px; flex-shrink: 0; }
             
@@ -324,12 +331,16 @@
             .use-item.align-left .dropdown-menu,
             .use-item.align-right .dropdown-menu { left: 0; right: auto; }
             .dropdown-content { grid-template-columns: repeat(2, 1fr); }
+            
+            footer h4 { text-align: center; }
+            footer h4:after { left: 50%; transform: translateX(-50%); }
         }
         @media (max-width: 576px) {
             body { padding-top: 160px; }
+            .hero-banner-section h1 { font-size: 32px; }
+            .hero-banner-section p { font-size: 16px; }
             .dropdown-content { grid-template-columns: 1fr; }
             .footer-grid { grid-template-columns: 1fr; }
-            footer h4:after { left: 50%; transform: translateX(-50%); }
         }
     </style>
 </head>
@@ -637,93 +648,79 @@
                 <div class="contact-info">
                     <h4>Get In Touch</h4>
                     <p>StoneCraft UK Ltd.</p>
-                    <p><i class="fas fa-phone-alt" style="color: #b8860b;"></i> Call us: 0800 123 4567</p>
-                    <p><i class="fas fa-envelope" style="color: #b8860b;"></i> Email: sales@stonecraft.co.uk</p>
-                    <div class="social-icons" style="margin-top: 20px;">
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+                    <p><i class="fas fa-phone"></i> 0800 123 4567</p>
+                    <p><i class="fas fa-envelope"></i> <a href="mailto:sales@stonecraft.co.uk" style="color:#ccc; text-decoration: none;">sales@stonecraft.co.uk</a></p>
+                    <p style="margin-top: 15px;">Follow Us:</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f" aria-label="Facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram" aria-label="Instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter" aria-label="Twitter"></i></a>
+                        <a href="#"><i class="fab fa-pinterest-p" aria-label="Pinterest"></i></a>
                     </div>
                 </div>
             </div>
+
             <div class="copyright">
-                &copy; 2025 StoneCraft UK Ltd. All rights reserved.
+                &copy; 2025 StoneCraft UK. All rights reserved. Registered in England & Wales.
             </div>
         </div>
     </footer>
 
     <script>
-        // --- 1. Smart Header Logic ---
+        // --- Smart Header Hide on Scroll ---
         let lastScrollTop = 0;
         const header = document.getElementById('mainHeader');
-        // Calculate the height of the entire fixed header (including the new trust bar)
-        const headerHeight = header.offsetHeight; 
-
-        window.addEventListener('scroll', () => {
-            let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-
-            if (currentScroll > lastScrollTop && currentScroll > headerHeight) {
+        
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 200) {
+                // Downscroll - add the class to hide the header
                 header.classList.add('header-hidden');
             } else {
+                // Upscroll or at the very top - remove the class to show the header
                 header.classList.remove('header-hidden');
             }
-            
-            lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; 
-        }, false);
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or when at the top
+        });
 
+        // --- Mega Menu Toggle (Click/Tap for Mobile/Accessibility) ---
+        const menuItems = document.querySelectorAll('.use-item');
 
-        // --- 2. Smart Dropdown Alignment Logic (Fix for Left, Right, and Center) ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const useItems = document.querySelectorAll('.use-item');
-            
-            // Expected width of the mega menu (from CSS min-width)
-            const dropdownMenuWidth = 900; 
-            const safetyMargin = 30; 
-            
-            const alignDropdown = (item) => {
-                const viewportWidth = window.innerWidth;
+        menuItems.forEach(item => {
+            const link = item.querySelector('.use-link');
+            const dropdown = item.querySelector('.dropdown-menu');
 
-                // Reset alignment classes first
-                item.classList.remove('align-left', 'align-right');
-
-                // Only apply smart alignment on desktop screens (wider than 992px)
-                if (viewportWidth > 992) { 
-                    const itemRect = item.getBoundingClientRect();
+            link.addEventListener('click', (e) => {
+                // Only toggle on click if screen is smaller than 992px (responsive breakpoint)
+                if (window.innerWidth < 992) {
+                    e.preventDefault(); 
                     
-                    // Center point of the parent item relative to the viewport
-                    const itemCenter = itemRect.left + (itemRect.width / 2);
-                    
-                    // 1. Left Edge Check
-                    const menuLeftEdge = itemCenter - (dropdownMenuWidth / 2);
+                    // Close other menus
+                    menuItems.forEach(i => {
+                        if (i !== item) {
+                            i.classList.remove('active');
+                            i.querySelector('.dropdown-menu').style.display = 'none';
+                        }
+                    });
 
-                    if (menuLeftEdge < safetyMargin) {
-                        item.classList.add('align-left');
-                        return;
-                    }
-
-                    // 2. Right Edge Check
-                    const menuRightEdge = itemCenter + (dropdownMenuWidth / 2);
-                    
-                    if (menuRightEdge > (viewportWidth - safetyMargin)) {
-                        item.classList.add('align-right');
-                        return;
+                    // Toggle current menu
+                    if (item.classList.contains('active')) {
+                        item.classList.remove('active');
+                        dropdown.style.display = 'none';
+                    } else {
+                        item.classList.add('active');
+                        dropdown.style.display = 'block';
                     }
                 }
-            };
-
-            // Add event listeners for mouse actions
-            useItems.forEach(item => {
-                item.addEventListener('mouseenter', () => alignDropdown(item));
-                
-                item.addEventListener('mouseleave', () => {
-                    item.classList.remove('align-left', 'align-right');
-                });
             });
 
-            // Re-check alignment if the window is resized
+            // Revert to hover behavior on wider screens
             window.addEventListener('resize', () => {
-                useItems.forEach(item => alignDropdown(item));
+                if (window.innerWidth >= 992) {
+                    item.classList.remove('active');
+                    dropdown.style.display = ''; // Revert to CSS display behavior
+                }
             });
         });
     </script>
