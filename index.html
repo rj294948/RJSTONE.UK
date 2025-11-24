@@ -291,116 +291,73 @@
             transition: transform 0.3s ease;
         }
         
-        .mobile-nav-container.active {
-            transform: translateX(0);
-        }
-        
-        .mobile-nav-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: #333;
-            color: white;
-        }
-        
-        .mobile-nav-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        
-        .mobile-nav-menu {
-            padding: 15px 0;
-        }
-        
-        .mobile-nav-item {
-            border-bottom: 1px solid #eee;
-        }
-        
-        .mobile-nav-link {
-            display: block;
-            padding: 15px;
-            color: #333;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.3s;
-            position: relative;
-        }
-        
-        .mobile-nav-link:hover {
-            background: #f5f5f5;
-        }
-        
-        .mobile-nav-link.active {
-            background: #b8860b;
-            color: white;
-        }
-        
-        .mobile-nav-link.has-submenu:after {
-            content: '\f107';
-            font-family: 'Font Awesome 5 Free';
-            font-weight: 900;
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            transition: transform 0.3s;
-        }
-        
-        .mobile-nav-link.has-submenu.active:after {
-            transform: translateY(-50%) rotate(180deg);
-        }
-        
-        .mobile-submenu {
-            display: none;
-            background: #f9f9f9;
-            padding: 10px 0;
-        }
-        
-        .mobile-submenu.active {
-            display: block;
-        }
-        
-        .mobile-submenu-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            padding: 0 15px;
-        }
-        
-        .mobile-submenu-item {
-            text-align: center;
-        }
-        
-        .mobile-submenu-link {
-            display: block;
-            color: #666;
-            text-decoration: none;
-            font-size: 13px;
-            transition: color 0.3s;
-        }
-        
-        .mobile-submenu-image {
-            width: 100%;
-            height: 120px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            transition: transform 0.3s;
-        }
-        
-        .mobile-submenu-link:hover .mobile-submenu-image {
-            transform: scale(1.05);
-        }
-        
-        .mobile-submenu-link:hover {
-            color: #b8860b;
-        }
-        
+       /* ======================================================= */
+/* 📱 MOBILE VIEW FIXES (Max Width 768px) */
+/* ======================================================= */
+@media (max-width: 768px) {
+    
+    /* 1. uses-top-bar को सामान्य करें */
+    .uses-top-bar {
+        padding: 0;
+    }
+    
+    /* 2. uses-container: सभी आइटम को एक के नीचे एक दिखाएं */
+    .uses-container {
+        flex-direction: column; /* आइटम्स को एक के नीचे एक रखें */
+    }
+    
+    /* 3. use-item: पूरी चौड़ाई लें */
+    .use-item {
+        width: 100%;
+        min-width: auto;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* आइटम्स के बीच हल्की लाइन */
+        position: relative; /* अब mega-menu के लिए parent होगा */
+    }
+    
+    /* 4. use-link: टेक्स्ट को बाएं-संरेखित करें (Left-align) */
+    .use-link {
+        text-align: left;
+        padding: 12px 15px; /* पैडिंग बढ़ाएँ */
+        border-bottom: none;
+    }
+
+    .use-link:hover, .use-link.active {
+        background: #b8860b;
+        border-bottom: none;
+    }
+    
+    /* 5. Mega Menu को सामान्य flow में लाएं (सबसे महत्वपूर्ण फिक्स) */
+    .mega-menu {
+        /* डेस्कटॉप के absolute/hidden नियमों को override करें */
+        position: relative; /* normal flow में लाएं */
+        top: auto;
+        left: auto;
+        opacity: 1; /* हमेशा दृश्यमान */
+        visibility: visible;
+        transform: none;
+        box-shadow: none; /* शैडो हटा दें */
+        padding: 10px 0;
+        background: #f8f8f8; /* मेनू के अंदर के कंटेंट को हल्का बैकग्राउंड दें */
+    }
+    
+    /* 6. Image Grid को 6 कॉलम से 2 कॉलम में करें */
+    .patterns-grid {
+        grid-template-columns: repeat(2, 1fr); /* एक पंक्ति में 2 पैटर्न */
+        gap: 10px;
+        padding: 0 15px; /* कंटेनर के अनुरूप पैडिंग */
+    }
+
+    /* 7. Pattern Image Aspect Ratio फिक्स करें */
+    .pattern-image {
+        height: 0; /* निश्चित height हटाएँ */
+        padding-bottom: 100%; /* 1:1 Aspect Ratio (स्क्वायर) */
+        margin-bottom: 5px;
+    }
+
+    .pattern-name {
+        font-size: 12px;
+    }
+}
         /* Trending Stone Banner */
         .trending-banner {
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80');
