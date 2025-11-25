@@ -1,16 +1,9 @@
-// auth.js - Complete Authentication System
+// auth.js - Updated with proper UI management
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 import {
   getFirestore,
   collection,
   addDoc,
-  getDocs,
-  query,
-  orderBy,
-  doc,
-  deleteDoc,
-  updateDoc,
-  where,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 import {
@@ -24,7 +17,7 @@ import {
   updateProfile
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
-// ===== Firebase Config =====
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDxNMhU09mINvq_aDLtylBg3FucCK-MzYE",
   authDomain: "sandstonebijoliya-293d2.firebaseapp.com",
@@ -35,20 +28,19 @@ const firebaseConfig = {
   measurementId: "G-H7JMX9VNYF"
 };
 
-// ===== Initialize Firebase =====
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-// ===== Authentication Functions =====
+// Authentication Manager Class
 class AuthManager {
   constructor() {
     this.currentUser = null;
     this.initAuthListener();
   }
 
-  // Auth State Listener
   initAuthListener() {
     onAuthStateChanged(auth, (user) => {
       this.currentUser = user;
@@ -56,17 +48,14 @@ class AuthManager {
     });
   }
 
-  // Sign Up with Email & Password
   async signUp(email, password, displayName) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
-      // Update profile with display name
       await updateProfile(userCredential.user, {
         displayName: displayName
       });
 
-      // Create user document in Firestore
       await this.createUserDocument(userCredential.user, displayName);
       
       return { success: true, user: userCredential.user };
@@ -75,7 +64,6 @@ class AuthManager {
     }
   }
 
-  // Sign In with Email & Password
   async signIn(email, password) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -85,21 +73,16 @@ class AuthManager {
     }
   }
 
-  // Google Sign In
   async signInWithGoogle() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      
-      // Create user document if first time
       await this.createUserDocument(result.user, result.user.displayName);
-      
       return { success: true, user: result.user };
     } catch (error) {
       return { success: false, error: this.getErrorMessage(error) };
     }
   }
 
-  // Sign Out
   async logout() {
     try {
       await signOut(auth);
@@ -109,7 +92,6 @@ class AuthManager {
     }
   }
 
-  // Create User Document in Firestore
   async createUserDocument(user, displayName) {
     try {
       const userDoc = {
@@ -127,38 +109,59 @@ class AuthManager {
     }
   }
 
-  // Update UI based on auth state
+  // ✅ IMPROVED: Better UI update method
   updateUI(user) {
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const userInfo = document.getElementById('userInfo');
-    const userDisplayName = document.getElementById('userDisplayName');
+    const loginBtn = document.getElementById('loginButton');
+    const userProfile = document.getElementById('userProfile');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileName = document.getElementById('profileName');
+    const dropdownUserName = document.getElementById('dropdownUserName');
+    const dropdownUserEmail = document.getElementById('dropdownUserEmail');
 
     if (user) {
-      // User is signed in
-      if (loginBtn) loginBtn.style.display = 'none';
-      if (logoutBtn) logoutBtn.style.display = 'block';
-      if (userInfo) userInfo.style.display = 'block';
-      if (userDisplayName) userDisplayName.textContent = user.displayName || user.email;
+      // User is signed in - show profile, hide login
+      if (userProfile) {
+        userProfile.style.display = 'block';
+      }
+      if (loginBtn) {
+        loginBtn.style.display = 'none';
+      }
+      
+      // Update user information
+      const displayName = user.displayName || 'User';
+      const email = user.email || '';
+      
+      if (profileAvatar) {
+        profileAvatar.textContent = displayName.charAt(0).toUpperCase();
+      }
+      if (profileName) {
+        profileName.textContent = displayName;
+      }
+      if (dropdownUserName) {
+        dropdownUserName.textContent = displayName;
+      }
+      if (dropdownUserEmail) {
+        dropdownUserEmail.textContent = email;
+      }
     } else {
-      // User is signed out
-      if (loginBtn) loginBtn.style.display = 'block';
-      if (logoutBtn) logoutBtn.style.display = 'none';
-      if (userInfo) userInfo.style.display = 'none';
+      // User is signed out - show login, hide profile
+      if (userProfile) {
+        userProfile.style.display = 'none';
+      }
+      if (loginBtn) {
+        loginBtn.style.display = 'flex';
+      }
     }
   }
 
-  // Get current user
   getCurrentUser() {
     return this.currentUser;
   }
 
-  // Check if user is authenticated
   isAuthenticated() {
     return this.currentUser !== null;
   }
 
-  // Get user-friendly error messages
   getErrorMessage(error) {
     switch (error.code) {
       case 'auth/invalid-email':
