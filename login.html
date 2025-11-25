@@ -712,6 +712,7 @@
     <script type="module">
         import { authManager } from './auth.js';
 
+        // ✅ FIXED: Variables declared only once
         const loginForm = document.getElementById('loginForm');
         const googleLogin = document.getElementById('googleLogin');
         const facebookLogin = document.getElementById('facebookLogin');
@@ -833,14 +834,14 @@
 
         // Form validation
         const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
+        const passwordField = document.getElementById('password'); // ✅ Changed variable name
 
         emailInput.addEventListener('input', validateForm);
-        passwordInput.addEventListener('input', validateForm);
+        passwordField.addEventListener('input', validateForm); // ✅ Using different variable name
 
         function validateForm() {
             const email = emailInput.value;
-            const password = passwordInput.value;
+            const password = passwordField.value; // ✅ Using different variable name
             const isValid = email && password && password.length >= 6;
             
             submitBtn.disabled = !isValid;
