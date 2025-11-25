@@ -120,6 +120,110 @@
         .user-action:hover {
             color: #b8860b;
         }
+
+        /* User Profile Dropdown */
+        .user-profile {
+            position: relative;
+        }
+
+        .profile-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .profile-toggle:hover {
+            background: #f5f5f5;
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #b8860b;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .profile-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            min-width: 200px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .profile-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dropdown-header .user-email {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .dropdown-menu {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background: #f8f9fa;
+            color: #b8860b;
+        }
+
+        .dropdown-item i {
+            width: 16px;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #eee;
+            margin: 8px 0;
+        }
         
         /* Search Bar */
         .search-container {
@@ -618,6 +722,21 @@
     font-weight: 500;
 }
 
+/* Dynamic Categories Styles */
+.loading-categories {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    grid-column: 1 / -1;
+}
+
+.product-count {
+    font-size: 12px;
+    color: #b8860b;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
 /* ======================================================= */
 /* 📱 MOBILE VIEW FIXES (768px से नीचे की स्क्रीन के लिए) */
 /* ======================================================= */
@@ -1113,6 +1232,15 @@
                 text-align: center;
                 padding: 5px;
             }
+
+            /* Mobile profile adjustments */
+            .profile-name {
+                display: none;
+            }
+
+            .user-profile {
+                margin-left: auto;
+            }
         }
         
         @media (max-width: 480px) {
@@ -1369,10 +1497,37 @@
                         <i class="fas fa-map-marker-alt"></i>
                         <span>Location</span>
                     </a>
-                    <a href="login.html" class="user-action">
+                    
+                    <!-- Dynamic User Profile/Login -->
+                    <div class="user-profile" id="userProfile" style="display: none;">
+                        <button class="profile-toggle" id="profileToggle">
+                            <div class="profile-avatar" id="profileAvatar">U</div>
+                            <span class="profile-name" id="profileName">User</span>
+                            <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <div class="profile-name" id="dropdownUserName">User Name</div>
+                                <div class="user-email" id="dropdownUserEmail">user@example.com</div>
+                            </div>
+                            <ul class="dropdown-menu">
+                                <li><a href="dashboard.html" class="dropdown-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                                <li><a href="edit-profile.html" class="dropdown-item"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+                                <li><a href="wishlist.html" class="dropdown-item"><i class="fas fa-heart"></i> My Wishlist</a></li>
+                                <li><a href="billing.html" class="dropdown-item"><i class="fas fa-address-card"></i> Billing/Shipping</a></li>
+                                <li><a href="orders.html" class="dropdown-item"><i class="fas fa-history"></i> Order History</a></li>
+                                <li class="dropdown-divider"></li>
+                                <li><a href="#" class="dropdown-item" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Login Button (shown when not logged in) -->
+                    <a href="login.html" class="user-action" id="loginButton">
                         <i class="fas fa-user"></i>
                         <span>Sign In</span>
                     </a>
+                    
                     <a href="#" class="user-action">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Cart (0)</span>
@@ -1394,37 +1549,32 @@
                 <div class="use-item">
                     <div class="use-link">Flooring</div>
                     <div class="mega-menu">
-                        <div class="patterns-grid">
-                            <a href="/flooring/herringbone" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Herringbone</div>
-                            </a>
-                            <a href="/flooring/checkerboard" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Checkerboard</div>
-                            </a>
-                            <a href="/flooring/random-layout" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Random Layout</div>
-                            </a>
-                            <a href="/flooring/brick-pattern" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Brick Pattern</div>
-                            </a>
-                            <a href="/flooring/diagonal" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Diagonal</div>
-                            </a>
-                            <a href="/flooring/hexagon" class="pattern-item">
-                                <div class="pattern-image" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div class="pattern-name">Hexagon</div>
-                            </a>
+                        <div class="patterns-grid" id="flooringPatterns">
+                            <!-- Dynamic content will be loaded here -->
+                            <div class="loading-categories">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading patterns...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Other desktop navigation items remain the same -->
-                <!-- ... -->
+                <div class="use-item">
+                    <div class="use-link">Wall Decoration</div>
+                </div>
+                <div class="use-item">
+                    <div class="use-link">Bathroom</div>
+                </div>
+                <div class="use-item">
+                    <div class="use-link">Outdoor</div>
+                </div>
+                <div class="use-item">
+                    <div class="use-link">Kitchen</div>
+                </div>
+                <div class="use-item">
+                    <div class="use-link">Commercial</div>
+                </div>
             </div>
         </div>
         
@@ -1448,49 +1598,22 @@
             <div class="mobile-nav-item">
                 <a href="#" class="mobile-nav-link has-submenu">Flooring</a>
                 <div class="mobile-submenu">
-                    <div class="mobile-submenu-grid">
-                        <div class="mobile-submenu-item">
-                            <a href="/flooring/herringbone" class="mobile-submenu-link">
-                                <div class="mobile-submenu-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div>Herringbone</div>
-                            </a>
-                        </div>
-                        <div class="mobile-submenu-item">
-                            <a href="/flooring/checkerboard" class="mobile-submenu-link">
-                                <div class="mobile-submenu-image" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div>Checkerboard</div>
-                            </a>
-                        </div>
-                        <div class="mobile-submenu-item">
-                            <a href="/flooring/random-layout" class="mobile-submenu-link">
-                                <div class="mobile-submenu-image" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div>Random Layout</div>
-                            </a>
-                        </div>
-                        <div class="mobile-submenu-item">
-                            <a href="/flooring/brick-pattern" class="mobile-submenu-link">
-                                <div class="mobile-submenu-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div>Brick Pattern</div>
-                            </a>
-                        </div>
-                        <div class="mobile-submenu-item">
-                            <a href="/flooring/diagonal" class="mobile-submenu-link">
-                                <div class="mobile-submenu-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div>Diagonal</div>
-                            </a>
-                        </div>
-                        <div class="mobile-submenu-item">
-                            <a href="/flooring/hexagon" class="mobile-submenu-link">
-                                <div class="mobile-submenu-image" style="background-image: url('https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80')"></div>
-                                <div>Hexagon</div>
-                            </a>
-                        </div>
+                    <div class="mobile-submenu-grid" id="mobileFlooringPatterns">
+                        <!-- Dynamic content will be loaded here -->
                     </div>
                 </div>
             </div>
             
             <!-- Other mobile navigation items remain the same -->
-            <!-- ... -->
+            <div class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link">Wall Decoration</a>
+            </div>
+            <div class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link">Bathroom</a>
+            </div>
+            <div class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link">Outdoor</a>
+            </div>
         </div>
     </div>
 
@@ -1506,72 +1629,120 @@
         </section>
 
         <!-- Products Banner -->
-        <!-- Products Banner -->
-<section class="products-banner">
-    <div class="container">
-        <div class="products-banner-content">
-            <h2>Sandstone & Kota Stone Products</h2>
-            <p>Premium quality natural stones perfect for all your construction and decoration needs</p>
-        </div>
-        <div class="products-grid-banner">
-            <div class="product-banner-item">
-                <div class="product-banner-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80')"></div>
-                <div class="product-banner-text">
-                    <h3>Premium Sandstone</h3>
-                    <p>Durable and elegant sandstone for flooring and wall cladding with natural texture and color variations</p>
-                    <a href="#" class="btn">View Collection</a>
+        <section class="products-banner">
+            <div class="container">
+                <div class="products-banner-content">
+                    <h2>Sandstone & Kota Stone Products</h2>
+                    <p>Premium quality natural stones perfect for all your construction and decoration needs</p>
+                </div>
+                <div class="products-grid-banner">
+                    <div class="product-banner-item">
+                        <div class="product-banner-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80')"></div>
+                        <div class="product-banner-text">
+                            <h3>Premium Sandstone</h3>
+                            <p>Durable and elegant sandstone for flooring and wall cladding with natural texture and color variations</p>
+                            <a href="#" class="btn">View Collection</a>
+                        </div>
+                    </div>
+                    <div class="product-banner-item">
+                        <div class="product-banner-image" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80')"></div>
+                        <div class="product-banner-text">
+                            <h3>Kota Blue Stone</h3>
+                            <p>Natural kota stone known for its exceptional strength, durability and beautiful blue-grey hue</p>
+                            <a href="#" class="btn">View Collection</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="product-banner-item">
-                <div class="product-banner-image" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80')"></div>
-                <div class="product-banner-text">
-                    <h3>Kota Blue Stone</h3>
-                    <p>Natural kota stone known for its exceptional strength, durability and beautiful blue-grey hue</p>
-                    <a href="#" class="btn">View Collection</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+        </section>
 
         <!-- Uses Categories Section -->
         <section class="uses-categories">
             <div class="container">
                 <h2 class="section-title">Stone Applications</h2>
-                <div class="uses-categories-grid">
-                    <div class="use-category-item">
-                        <a href="/flooring" class="use-category-link">
-                            <div class="use-category-image" style="background-image: url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80')"></div>
-                            <div class="use-category-name">Flooring</div>
-                        </a>
-                    </div>
-                    <div class="use-category-item">
-                        <a href="/wall-decoration" class="use-category-link">
-                            <div class="use-category-image" style="background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80')"></div>
-                            <div class="use-category-name">Wall Decoration</div>
-                        </a>
-                    </div>
-                    <div class="use-category-item">
-                        <a href="/bathroom" class="use-category-link">
-                            <div class="use-category-image" style="background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80')"></div>
-                            <div class="use-category-name">Bathroom</div>
-                        </a>
-                    </div>
-                    <div class="use-category-item">
-                        <a href="/outdoor" class="use-category-link">
-                            <div class="use-category-image" style="background-image: url('https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80')"></div>
-                            <div class="use-category-name">Outdoor</div>
-                        </a>
+                <div class="uses-categories-grid" id="dynamicCategories">
+                    <!-- Dynamic content will be loaded here -->
+                    <div class="loading-categories">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading categories...</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Rest of the content remains the same -->
-        <!-- ... -->
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <div class="feature">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h3>Free UK Delivery</h3>
+                    <p>Free delivery on all orders across the United Kingdom with no minimum spend required.</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-award"></i>
+                    <h3>Quality Guaranteed</h3>
+                    <p>All our stones are sourced from trusted quarries and come with quality certification.</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-headset"></i>
+                    <h3>Expert Support</h3>
+                    <p>Get expert advice from our stone specialists for your project requirements.</p>
+                </div>
+            </div>
+        </section>
     </div>
 
-    <script>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>StoneCraft</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Our Story</a></li>
+                        <li><a href="#">Sustainability</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Products</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Sandstone</a></li>
+                        <li><a href="#">Marble</a></li>
+                        <li><a href="#">Limestone</a></li>
+                        <li><a href="#">Kota Stone</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Delivery Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Legal</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                        <li><a href="#">Disclaimer</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2024 StoneCraft UK. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { authManager } from './auth.js';
+
         // Header hide on scroll
         let lastScrollTop = 0;
         const header = document.getElementById('mainHeader');
@@ -1590,28 +1761,309 @@
             lastScrollTop = scrollTop;
         });
 
+        // User Profile Management
+        class UserProfileManager {
+            constructor() {
+                this.profileToggle = document.getElementById('profileToggle');
+                this.profileDropdown = document.getElementById('profileDropdown');
+                this.userProfile = document.getElementById('userProfile');
+                this.loginButton = document.getElementById('loginButton');
+                this.logoutBtn = document.getElementById('logoutBtn');
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.updateUserInterface();
+            }
+
+            setupEventListeners() {
+                // Profile dropdown toggle
+                this.profileToggle?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.profileDropdown.classList.toggle('active');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    this.profileDropdown?.classList.remove('active');
+                });
+
+                // Logout functionality
+                this.logoutBtn?.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    await this.handleLogout();
+                });
+            }
+
+            updateUserInterface() {
+                const user = authManager.getCurrentUser();
+                
+                if (user) {
+                    // User is logged in - show profile
+                    this.showUserProfile(user);
+                    this.hideLoginButton();
+                } else {
+                    // User is not logged in - show login button
+                    this.hideUserProfile();
+                    this.showLoginButton();
+                }
+            }
+
+            showUserProfile(user) {
+                if (!this.userProfile) return;
+                
+                this.userProfile.style.display = 'block';
+                
+                // Update user information
+                const profileAvatar = document.getElementById('profileAvatar');
+                const profileName = document.getElementById('profileName');
+                const dropdownUserName = document.getElementById('dropdownUserName');
+                const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+                
+                const displayName = user.displayName || 'User';
+                const email = user.email || '';
+                
+                // Set avatar with first letter of display name
+                profileAvatar.textContent = displayName.charAt(0).toUpperCase();
+                profileName.textContent = displayName;
+                dropdownUserName.textContent = displayName;
+                dropdownUserEmail.textContent = email;
+            }
+
+            hideUserProfile() {
+                if (this.userProfile) {
+                    this.userProfile.style.display = 'none';
+                }
+            }
+
+            showLoginButton() {
+                if (this.loginButton) {
+                    this.loginButton.style.display = 'flex';
+                }
+            }
+
+            hideLoginButton() {
+                if (this.loginButton) {
+                    this.loginButton.style.display = 'none';
+                }
+            }
+
+            async handleLogout() {
+                const result = await authManager.logout();
+                if (result.success) {
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+
+        // Dynamic Categories System
+        class DynamicCategories {
+            constructor() {
+                this.categories = [];
+                this.products = [];
+                this.init();
+            }
+
+            async init() {
+                await this.loadMockData();
+                this.renderCategories();
+                this.setupEventListeners();
+            }
+
+            async loadMockData() {
+                // Mock data - replace with actual Firestore data
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                this.categories = [
+                    {
+                        id: '1',
+                        name: 'Flooring',
+                        type: 'flooring',
+                        image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+                        description: 'Stone flooring solutions'
+                    },
+                    {
+                        id: '2', 
+                        name: 'Wall Decoration',
+                        type: 'wall',
+                        image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+                        description: 'Wall cladding and decoration'
+                    },
+                    {
+                        id: '3',
+                        name: 'Bathroom',
+                        type: 'bathroom', 
+                        image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+                        description: 'Bathroom stone solutions'
+                    },
+                    {
+                        id: '4',
+                        name: 'Outdoor',
+                        type: 'outdoor',
+                        image: 'https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+                        description: 'Outdoor stone applications'
+                    }
+                ];
+
+                this.products = [
+                    {
+                        id: 'p1',
+                        name: 'Kota Blue Stone',
+                        type: 'Kota Stone',
+                        category: 'flooring',
+                        imageUrl: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                        description: 'Premium quality kota stone for flooring'
+                    },
+                    {
+                        id: 'p2',
+                        name: 'Sandstone Pavers', 
+                        type: 'Sandstone',
+                        category: 'outdoor',
+                        imageUrl: 'https://images.unsplash.com/photo-1600585154340-2e5db6e509e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                        description: 'Natural sandstone for outdoor paving'
+                    },
+                    {
+                        id: 'p3',
+                        name: 'Marble Tiles',
+                        type: 'Marble',
+                        category: 'bathroom',
+                        imageUrl: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                        description: 'Luxury marble tiles for bathrooms'
+                    },
+                    {
+                        id: 'p4',
+                        name: 'Limestone Flooring',
+                        type: 'Limestone',
+                        category: 'flooring',
+                        imageUrl: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                        description: 'Elegant limestone for modern flooring'
+                    }
+                ];
+            }
+
+            renderCategories() {
+                this.renderMainCategories();
+                this.renderMegaMenuCategories();
+            }
+
+            renderMainCategories() {
+                const categoriesGrid = document.getElementById('dynamicCategories');
+                if (!categoriesGrid) return;
+
+                // Clear loading state
+                categoriesGrid.innerHTML = '';
+
+                this.categories.forEach(category => {
+                    const categoryProducts = this.products.filter(product => 
+                        product.category === category.type
+                    );
+                    
+                    const categoryElement = this.createCategoryElement(category, categoryProducts);
+                    categoriesGrid.appendChild(categoryElement);
+                });
+            }
+
+            renderMegaMenuCategories() {
+                const flooringMegaMenu = document.getElementById('flooringPatterns');
+                if (!flooringMegaMenu) return;
+
+                // Clear loading state
+                flooringMegaMenu.innerHTML = '';
+
+                const flooringProducts = this.products.filter(product => 
+                    product.category === 'flooring'
+                );
+
+                if (flooringProducts.length > 0) {
+                    flooringProducts.forEach(product => {
+                        const patternElement = this.createMegaMenuItem(product);
+                        flooringMegaMenu.appendChild(patternElement);
+                    });
+                } else {
+                    this.addDefaultMegaMenuItems(flooringMegaMenu);
+                }
+            }
+
+            createCategoryElement(category, products) {
+                const categoryItem = document.createElement('div');
+                categoryItem.className = 'use-category-item';
+                
+                categoryItem.innerHTML = `
+                    <a href="/${category.type}" class="use-category-link">
+                        <div class="use-category-image" style="background-image: url('${category.image}')"></div>
+                        <div class="use-category-name">${category.name}</div>
+                        ${products.length > 0 ? 
+                            `<div class="product-count">${products.length} products</div>` : 
+                            ''
+                        }
+                    </a>
+                `;
+
+                return categoryItem;
+            }
+
+            createMegaMenuItem(product) {
+                const patternItem = document.createElement('a');
+                patternItem.href = `/product/${product.id}`;
+                patternItem.className = 'pattern-item';
+                
+                patternItem.innerHTML = `
+                    <div class="pattern-image" style="background-image: url('${product.imageUrl}')"></div>
+                    <div class="pattern-name">${product.name}</div>
+                `;
+
+                return patternItem;
+            }
+
+            addDefaultMegaMenuItems(container) {
+                const defaultItems = [
+                    { name: 'Herringbone', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80' },
+                    { name: 'Checkerboard', image: 'https://images.unsplash.com/photo-1628745277897-d8e04e11c0af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80' },
+                    { name: 'Random Layout', image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80' }
+                ];
+
+                defaultItems.forEach(item => {
+                    const patternItem = document.createElement('a');
+                    patternItem.href = `/flooring/${item.name.toLowerCase()}`;
+                    patternItem.className = 'pattern-item';
+                    
+                    patternItem.innerHTML = `
+                        <div class="pattern-image" style="background-image: url('${item.image}')"></div>
+                        <div class="pattern-name">${item.name}</div>
+                    `;
+
+                    container.appendChild(patternItem);
+                });
+            }
+
+            setupEventListeners() {
+                // Add any additional event listeners here
+            }
+        }
+
         // Enhanced hover/click functionality for mega menus
-        document.addEventListener('DOMContentLoaded', function() {
+        function setupMegaMenus() {
             const useItems = document.querySelectorAll('.use-item');
             let activeMenu = null;
             
-            // Function to close all menus
             function closeAllMenus() {
                 useItems.forEach(item => {
                     const menu = item.querySelector('.mega-menu');
                     const link = item.querySelector('.use-link');
-                    menu.classList.remove('active');
-                    link.classList.remove('active');
+                    menu?.classList.remove('active');
+                    link?.classList.remove('active');
                 });
                 activeMenu = null;
             }
             
-            // Set up event listeners for each use-item
             useItems.forEach(item => {
                 const menu = item.querySelector('.mega-menu');
                 const link = item.querySelector('.use-link');
                 
-                // Mouse enter - open menu
+                if (!menu || !link) return;
+                
                 item.addEventListener('mouseenter', function() {
                     closeAllMenus();
                     menu.classList.add('active');
@@ -1619,9 +2071,7 @@
                     activeMenu = item;
                 });
                 
-                // Mouse leave - close menu after delay
                 item.addEventListener('mouseleave', function(e) {
-                    // Check if we're moving to a submenu
                     const relatedTarget = e.relatedTarget;
                     if (relatedTarget && !item.contains(relatedTarget) && !menu.contains(relatedTarget)) {
                         setTimeout(() => {
@@ -1632,16 +2082,13 @@
                     }
                 });
                 
-                // Click - toggle menu (for mobile/touch devices)
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     
                     if (menu.classList.contains('active')) {
-                        // Menu is open, close it
                         closeAllMenus();
                     } else {
-                        // Menu is closed, open it and close others
                         closeAllMenus();
                         menu.classList.add('active');
                         link.classList.add('active');
@@ -1650,89 +2097,88 @@
                 });
             });
             
-            // Close menus when clicking outside
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.use-item') && !e.target.closest('.mega-menu')) {
                     closeAllMenus();
                 }
             });
             
-            // Close menus when pressing Escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     closeAllMenus();
                 }
             });
-            
-            // Mobile Navigation Functionality
+        }
+
+        // Mobile Navigation Functionality
+        function setupMobileNavigation() {
             const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
             const mobileNavClose = document.querySelector('.mobile-nav-close');
             const mobileNavOverlay = document.querySelector('.mobile-nav-overlay');
             const mobileNavContainer = document.querySelector('.mobile-nav-container');
             const mobileNavLinks = document.querySelectorAll('.mobile-nav-link.has-submenu');
             
-            // Function to open mobile navigation
             function openMobileNav() {
                 mobileNavOverlay.classList.add('active');
                 mobileNavContainer.classList.add('active');
                 document.body.style.overflow = 'hidden';
             }
             
-            // Function to close mobile navigation
             function closeMobileNav() {
                 mobileNavOverlay.classList.remove('active');
                 mobileNavContainer.classList.remove('active');
                 document.body.style.overflow = '';
                 
-                // Close all submenus when closing navigation
                 document.querySelectorAll('.mobile-submenu').forEach(submenu => {
                     submenu.classList.remove('active');
                 });
                 
-                // Remove active class from all links
                 document.querySelectorAll('.mobile-nav-link').forEach(link => {
                     link.classList.remove('active');
                 });
             }
             
-            // Toggle mobile navigation
-            mobileNavToggle.addEventListener('click', openMobileNav);
-            mobileNavClose.addEventListener('click', closeMobileNav);
-            mobileNavOverlay.addEventListener('click', closeMobileNav);
+            mobileNavToggle?.addEventListener('click', openMobileNav);
+            mobileNavClose?.addEventListener('click', closeMobileNav);
+            mobileNavOverlay?.addEventListener('click', closeMobileNav);
             
-            // Toggle submenus on mobile
             mobileNavLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     const submenu = this.nextElementSibling;
                     
-                    // Close all other submenus
                     document.querySelectorAll('.mobile-submenu').forEach(otherSubmenu => {
                         if (otherSubmenu !== submenu) {
                             otherSubmenu.classList.remove('active');
                         }
                     });
                     
-                    // Remove active class from all other links
                     document.querySelectorAll('.mobile-nav-link').forEach(otherLink => {
                         if (otherLink !== this) {
                             otherLink.classList.remove('active');
                         }
                     });
                     
-                    // Toggle current submenu
                     submenu.classList.toggle('active');
                     this.classList.toggle('active');
                 });
             });
             
-            // Close mobile navigation when clicking on a submenu link
             document.querySelectorAll('.mobile-submenu-link').forEach(link => {
                 link.addEventListener('click', function() {
                     closeMobileNav();
                 });
             });
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new UserProfileManager();
+            new DynamicCategories();
+            setupMegaMenus();
+            setupMobileNavigation();
         });
+
     </script>
 </body>
 </html>
