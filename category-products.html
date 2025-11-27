@@ -1263,16 +1263,8 @@
         </div>
     </footer>
 
-    <!-- Firebase Script -->
-      <!-- Firebase Script - CORRECTED VERSION -->
-    <script type="module">
-        // ✅ CORRECT FIREBASE IMPORT - Aapke firebase-config.js se import karo
-        import { 
-            db, auth, 
-            collection, getDocs, onSnapshot,
-            onAuthStateChanged, signOut
-        } from './firebase-config.js';
-
+    <script>
+        // Application State
         const appState = {
             products: [],
             filteredProducts: [],
@@ -1427,11 +1419,9 @@
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', function(event) {
                     event.preventDefault();
-                    signOut(auth).then(() => {
-                        console.log('User signed out');
-                    }).catch((error) => {
-                        console.error('Sign out error:', error);
-                    });
+                    // Simulate logout
+                    appState.user = null;
+                    updateUserInterface();
                 });
             }
         }
@@ -1507,7 +1497,7 @@
         async function initializePage() {
             try {
                 console.log('🔄 Starting page initialization...');
-                await loadProductsFromFirestore();
+                await loadProducts();
                 updatePageTitle();
                 generateQuickFilters();
                 applyAutoFilter();
@@ -1520,44 +1510,20 @@
             }
         }
 
-        async function loadProductsFromFirestore() {
+        async function loadProducts() {
             try {
-                console.log('🔥 Loading products from Firestore...');
-                const querySnapshot = await getDocs(collection(db, "products"));
-                appState.products = [];
-                
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    appState.products.push({
-                        id: doc.id,
-                        ...data
-                    });
-                });
+                console.log('🔥 Loading products...');
+                // In a real app, this would fetch from Firebase
+                // For demo, we'll use sample data
+                appState.products = getSampleProducts();
                 
                 console.log('✅ Products loaded successfully:', appState.products.length);
                 console.log('📦 Sample product data:', appState.products[0]);
                 
-                // Real-time listener
-                onSnapshot(collection(db, "products"), (snapshot) => {
-                    const updatedProducts = [];
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        updatedProducts.push({
-                            id: doc.id,
-                            ...data
-                        });
-                    });
-                    appState.products = updatedProducts;
-                    console.log('🔄 Products updated in real-time:', updatedProducts.length);
-                    generateQuickFilters();
-                    applyAutoFilter();
-                    generateUsesNavigation();
-                });
-                
             } catch (error) {
-                console.error('❌ Error loading products from Firestore:', error);
+                console.error('❌ Error loading products:', error);
                 console.log('🔄 Using sample data as fallback...');
-                // Fallback to sample data if Firebase fails
+                // Fallback to sample data
                 appState.products = getSampleProducts();
             }
         }
@@ -1907,7 +1873,7 @@
                             <div><strong>Size:</strong> ${product.size || 'N/A'}</div>
                             <div><strong>Usage:</strong> ${product.uses || 'General'}</div>
                         </div>
-                        <div class="product-price">${product.price ? '₹' + product.price + ' / ' + (product.price_unit || 'sqft') : 'Price on request'}</div>
+                        <div class="product-price">${product.price ? '£' + product.price + ' / ' + (product.price_unit || 'sqft') : 'Price on request'}</div>
                         <div class="product-actions">
                             <a href="product-details.html?id=${product.id}" class="btn">View Details</a>
                             <button class="btn btn-outline add-to-cart" data-product-id="${product.id}">
@@ -2105,19 +2071,13 @@
 
         // ✅ AUTHENTICATION FUNCTIONS
         function initializeAuth() {
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    appState.user = {
-                        uid: user.uid,
-                        email: user.email,
-                        name: user.displayName || user.email.split('@')[0]
-                    };
-                    updateUserInterface();
-                } else {
-                    appState.user = null;
-                    updateUserInterface();
-                }
-            });
+            // Simulate checking if user is logged in
+            // In a real app, this would check Firebase auth state
+            const userData = localStorage.getItem('stonecraft_user');
+            if (userData) {
+                appState.user = JSON.parse(userData);
+            }
+            updateUserInterface();
         }
 
         function updateUserInterface() {
@@ -2176,6 +2136,42 @@
                     size: "Small Tiles",
                     uses: "flooring",
                     price: 550,
+                    price_unit: "sqft",
+                    images: ["https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"]
+                },
+                {
+                    id: 4,
+                    stone_name: "Italian Marble",
+                    category: "Marble",
+                    type: "Natural",
+                    color: "White",
+                    size: "Large Slabs",
+                    uses: "wall",
+                    price: 1350,
+                    price_unit: "sqft",
+                    images: ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"]
+                },
+                {
+                    id: 5,
+                    stone_name: "Kashmir Gold",
+                    category: "Granite",
+                    type: "Natural",
+                    color: "Gold",
+                    size: "Medium Slabs",
+                    uses: "wall",
+                    price: 950,
+                    price_unit: "sqft",
+                    images: ["https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"]
+                },
+                {
+                    id: 6,
+                    stone_name: "Kota Blue",
+                    category: "Limestone",
+                    type: "Natural",
+                    color: "Blue",
+                    size: "Small Tiles",
+                    uses: "bathroom",
+                    price: 650,
                     price_unit: "sqft",
                     images: ["https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"]
                 }
