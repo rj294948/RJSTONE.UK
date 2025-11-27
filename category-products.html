@@ -375,9 +375,95 @@
             font-weight: 500;
         }
         
+        /* Uses Top Bar with Mega Menu - HOME PAGE JAISE */
+        .uses-top-bar {
+            position: relative; 
+            background: #333;
+            padding: 0;
+        }
+        
+        .uses-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .use-item {
+            flex: 1;
+            min-width: 120px;
+            position: relative; 
+        }
+        
+        .use-link {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 10px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .use-link:hover {
+            background: #b8860b;
+        }
+        
+        /* Mega Menu Styles */
+        .mega-menu {
+            position: absolute;
+            top: 100%;
+            left: 0; 
+            width: 100%; 
+            background: white;
+            z-index: 1000;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            display: none; 
+            padding: 30px 0;
+        }
+        
+        .use-item:hover .mega-menu {
+            display: block;
+        }
+        
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 20px;
+            padding: 0 20px;
+        }
+        
+        .pattern-item {
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .pattern-image {
+            width: 100%;
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .pattern-item:hover .pattern-image {
+            transform: scale(1.05);
+        }
+        
+        .pattern-name {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
         /* ===== CATEGORY PRODUCTS SPECIFIC STYLES ===== */
         .main-content {
-            margin-top: 140px;
+            margin-top: 180px;
             padding: 40px 0;
         }
         
@@ -427,7 +513,7 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             height: fit-content;
             position: sticky;
-            top: 160px;
+            top: 200px;
         }
         
         .filter-section {
@@ -568,7 +654,7 @@
         
         .product-image {
             width: 100%;
-            height: 200px;
+            height: 220px;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -859,11 +945,15 @@
             .footer-content {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            .patterns-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
             .main-content {
-                margin-top: 180px;
+                margin-top: 220px;
             }
             
             .header-content {
@@ -889,8 +979,16 @@
                 padding: 60px 0;
             }
             
+            .uses-top-bar {
+                display: none;
+            }
+            
             .profile-name {
                 display: none;
+            }
+            
+            .patterns-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .products-header {
@@ -905,6 +1003,10 @@
             }
             
             .footer-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .patterns-grid {
                 grid-template-columns: 1fr;
             }
             
@@ -1006,6 +1108,17 @@
         <div class="banner-text">
             <div class="container">
                 Premium Natural Stone Collections - Sandstone, Marble & Limestone for UK Homes & Commercial Projects
+            </div>
+        </div>
+
+        <!-- Desktop Uses Top Bar with Mega Menu - HOME PAGE JAISE -->
+        <div class="uses-top-bar">
+            <div class="container uses-container" id="dynamicUsesContainer">
+                <!-- Dynamic uses will be loaded here -->
+                <div class="loading-categories">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading navigation...</p>
+                </div>
             </div>
         </div>
     </header>
@@ -1247,6 +1360,7 @@
         function initializeUI() {
             initializeSearch();
             initializeUserProfile();
+            initializeMegaMenu();
         }
 
         // Initialize search functionality
@@ -1370,6 +1484,72 @@
             }
         }
 
+        // Initialize mega menu functionality
+        function initializeMegaMenu() {
+            const usesTopBar = document.querySelector('.uses-top-bar');
+            const useItems = document.querySelectorAll('.use-item');
+            const container = document.querySelector('.uses-top-bar .container');
+            
+            if (!container || !usesTopBar) return;
+            
+            const containerRect = container.getBoundingClientRect();
+            
+            useItems.forEach((item, index) => {
+                const megaMenu = item.querySelector('.mega-menu');
+                
+                if (megaMenu) {
+                    // Set mega menu width and position
+                    megaMenu.style.width = containerRect.width + 'px';
+                    megaMenu.style.left = '0px';
+                    
+                    // Mouse events for mega menu
+                    item.addEventListener('mouseenter', () => {
+                        // Hide all other mega menus
+                        document.querySelectorAll('.mega-menu').forEach(menu => {
+                            if (menu !== megaMenu) {
+                                menu.style.display = 'none';
+                            }
+                        });
+                        // Show current mega menu
+                        megaMenu.style.display = 'block';
+                    });
+                    
+                    item.addEventListener('mouseleave', (e) => {
+                        const relatedTarget = e.relatedTarget;
+                        if (!megaMenu.contains(relatedTarget)) {
+                            setTimeout(() => {
+                                if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
+                                    megaMenu.style.display = 'none';
+                                }
+                            }, 100);
+                        }
+                    });
+                    
+                    // Also handle mega menu mouse events
+                    megaMenu.addEventListener('mouseenter', () => {
+                        megaMenu.style.display = 'block';
+                    });
+                    
+                    megaMenu.addEventListener('mouseleave', () => {
+                        setTimeout(() => {
+                            if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
+                                megaMenu.style.display = 'none';
+                            }
+                        }, 100);
+                    });
+                }
+            });
+            
+            // Close all mega menus when clicking outside
+            document.addEventListener('click', (event) => {
+                if (!usesTopBar.contains(event.target)) {
+                    document.querySelectorAll('.mega-menu').forEach(menu => {
+                        menu.style.display = 'none';
+                    });
+                }
+            });
+        }
+
         // ===== CATEGORY PRODUCTS SPECIFIC FUNCTIONS =====
 
         async function initializePage() {
@@ -1380,6 +1560,7 @@
                 generateQuickFilters();
                 applyAutoFilter();
                 initializeSorting();
+                generateUsesNavigation();
                 initializeFilters();
                 console.log('✅ Page initialization completed successfully!');
             } catch (error) {
@@ -1418,6 +1599,7 @@
                     console.log('🔄 Products updated in real-time:', updatedProducts.length);
                     generateQuickFilters();
                     applyAutoFilter();
+                    generateUsesNavigation();
                 });
                 
             } catch (error) {
@@ -2009,6 +2191,44 @@
         function addToCart(productId) {
             console.log('Adding product to cart:', productId);
             alert('Product added to cart!');
+        }
+
+        // ✅ USES NAVIGATION FUNCTION
+        function generateUsesNavigation() {
+            const usesContainer = document.getElementById('dynamicUsesContainer');
+            if (!usesContainer) return;
+            
+            usesContainer.innerHTML = '';
+            
+            // Get unique uses from products
+            const uniqueUses = [...new Set(appState.products
+                .filter(product => product.uses && product.uses.trim() !== '')
+                .map(product => product.uses.trim())
+            )].sort();
+            
+            console.log('Unique uses for navigation:', uniqueUses);
+            
+            if (uniqueUses.length === 0) {
+                usesContainer.innerHTML = `
+                    <div class="loading-categories">
+                        <i class="fas fa-info-circle"></i>
+                        <p>No uses found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            uniqueUses.forEach(usage => {
+                const usageKey = usage.toLowerCase().replace(/\s+/g, '-');
+                const useItem = document.createElement('div');
+                useItem.className = 'use-item';
+                
+                useItem.innerHTML = `
+                    <a href="category-products.html?usage=${usageKey}" class="use-link">${usage}</a>
+                `;
+                
+                usesContainer.appendChild(useItem);
+            });
         }
 
         // ✅ AUTHENTICATION FUNCTIONS
