@@ -1263,17 +1263,85 @@
         </div>
     </footer>
 
-    <!-- Firebase Script -->
-    <script type="module">
-        // Import from your firebase-config.js
-        import { 
-            db, auth, 
-            collection, getDocs, onSnapshot,
-            onAuthStateChanged, signOut
-        } from './firebase-config.js';
+    <script>
+        // Sample data - Replace with your Firebase data
+        const sampleProducts = [
+            {
+                id: 1,
+                stone_name: "Italian Marble",
+                category: "Marble",
+                type: "Natural",
+                color: "White",
+                size: "Large Slabs",
+                uses: "flooring",
+                price: 1250,
+                price_unit: "sqft",
+                images: ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"]
+            },
+            {
+                id: 2,
+                stone_name: "Kashmir Gold",
+                category: "Granite",
+                type: "Natural",
+                color: "Gold",
+                size: "Medium Slabs",
+                uses: "flooring",
+                price: 850,
+                price_unit: "sqft",
+                images: ["https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"]
+            },
+            {
+                id: 3,
+                stone_name: "Kota Blue",
+                category: "Limestone",
+                type: "Natural",
+                color: "Blue",
+                size: "Small Tiles",
+                uses: "flooring",
+                price: 550,
+                price_unit: "sqft",
+                images: ["https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"]
+            },
+            {
+                id: 4,
+                stone_name: "Slate Tiles",
+                category: "Slate",
+                type: "Natural",
+                color: "Grey",
+                size: "Medium Tiles",
+                uses: "wall",
+                price: 680,
+                price_unit: "sqft",
+                images: ["https://images.unsplash.com/photo-1621550178455-8b8e8c2a2b0f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"]
+            },
+            {
+                id: 5,
+                stone_name: "Quartzite Panels",
+                category: "Quartzite",
+                type: "Natural",
+                color: "Beige",
+                size: "Large Panels",
+                uses: "wall",
+                price: 1150,
+                price_unit: "sqft",
+                images: ["https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"]
+            },
+            {
+                id: 6,
+                stone_name: "Carrara Marble",
+                category: "Marble",
+                type: "Natural",
+                color: "White",
+                size: "Medium Slabs",
+                uses: "bathroom",
+                price: 1450,
+                price_unit: "sqft",
+                images: ["https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"]
+            }
+        ];
 
         const appState = {
-            products: [],
+            products: sampleProducts,
             filteredProducts: [],
             currentUsage: null,
             currentStoneName: null,
@@ -1289,7 +1357,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Initializing Category Products Page...');
             
-            // Get URL parameters - FIXED: 'stone' parameter ko 'stone_name' mein convert karo
+            // Get URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             appState.currentUsage = urlParams.get('usage');
             appState.currentStoneName = urlParams.get('stone') || urlParams.get('stone_name');
@@ -1301,7 +1369,6 @@
             
             // Initialize the page
             initializePage();
-            initializeAuth();
             initializeUI();
         });
 
@@ -1426,11 +1493,8 @@
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', function(event) {
                     event.preventDefault();
-                    signOut(auth).then(() => {
-                        console.log('User signed out');
-                    }).catch((error) => {
-                        console.error('Sign out error:', error);
-                    });
+                    // Simulate logout
+                    console.log('User signed out');
                 });
             }
         }
@@ -1503,55 +1567,13 @@
 
         // ===== CATEGORY PRODUCTS SPECIFIC FUNCTIONS =====
 
-        async function initializePage() {
-            try {
-                await loadProductsFromFirestore();
-                updatePageTitle();
-                generateQuickFilters();
-                applyAutoFilter();
-                initializeSorting();
-                generateUsesNavigation();
-                initializeFilters(); // ✅ YEH ADD KIYA
-            } catch (error) {
-                console.error('Error initializing page:', error);
-            }
-        }
-
-        async function loadProductsFromFirestore() {
-            try {
-                const querySnapshot = await getDocs(collection(db, "products"));
-                appState.products = [];
-                
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    appState.products.push({
-                        id: doc.id,
-                        ...data
-                    });
-                });
-                
-                console.log('Products loaded:', appState.products.length);
-                
-                // Real-time listener
-                onSnapshot(collection(db, "products"), (snapshot) => {
-                    const updatedProducts = [];
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        updatedProducts.push({
-                            id: doc.id,
-                            ...data
-                        });
-                    });
-                    appState.products = updatedProducts;
-                    console.log('Products updated in real-time:', updatedProducts.length);
-                    generateQuickFilters();
-                    applyAutoFilter();
-                    generateUsesNavigation();
-                });
-                
-            } catch (error) {
-                console.error('Error loading products:', error);
-            }
+        function initializePage() {
+            updatePageTitle();
+            generateQuickFilters();
+            applyAutoFilter();
+            initializeSorting();
+            generateUsesNavigation();
+            initializeFilters();
         }
 
         // ✅ PAGE TITLE UPDATE FUNCTION
@@ -2096,43 +2118,6 @@
                 
                 usesContainer.appendChild(useItem);
             });
-        }
-
-        // ✅ AUTHENTICATION FUNCTIONS
-        function initializeAuth() {
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    appState.user = {
-                        uid: user.uid,
-                        email: user.email,
-                        name: user.displayName || user.email.split('@')[0]
-                    };
-                    updateUserInterface();
-                } else {
-                    appState.user = null;
-                    updateUserInterface();
-                }
-            });
-        }
-
-        function updateUserInterface() {
-            if (appState.user) {
-                // User is logged in
-                document.getElementById('userProfile').style.display = 'block';
-                document.getElementById('loginButton').style.display = 'none';
-                document.getElementById('addProductButton').style.display = 'flex';
-                
-                // Update user info
-                document.getElementById('profileName').textContent = appState.user.name;
-                document.getElementById('profileAvatar').textContent = appState.user.name.charAt(0).toUpperCase();
-                document.getElementById('dropdownUserName').textContent = appState.user.name;
-                document.getElementById('dropdownUserEmail').textContent = appState.user.email;
-            } else {
-                // User is not logged in
-                document.getElementById('userProfile').style.display = 'none';
-                document.getElementById('loginButton').style.display = 'flex';
-                document.getElementById('addProductButton').style.display = 'none';
-            }
         }
 
         // Make clearAllFilters available globally
