@@ -1624,9 +1624,23 @@
                 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
+                    console.log('📄 Firestore Document Data:', data);
+                    
+                    // ✅ FIX: Handle additional_fields array properly
+                    let processedData = { ...data };
+                    
+                    // If additional_fields exists and is an array, extract the properties
+                    if (data.additional_fields && Array.isArray(data.additional_fields)) {
+                        data.additional_fields.forEach(field => {
+                            if (field && typeof field === 'object') {
+                                processedData = { ...processedData, ...field };
+                            }
+                        });
+                    }
+                    
                     appState.products.push({
                         id: doc.id,
-                        ...data
+                        ...processedData
                     });
                 });
                 
@@ -1638,9 +1652,20 @@
                     const updatedProducts = [];
                     snapshot.forEach((doc) => {
                         const data = doc.data();
+                        let processedData = { ...data };
+                        
+                        // ✅ FIX: Handle additional_fields array properly
+                        if (data.additional_fields && Array.isArray(data.additional_fields)) {
+                            data.additional_fields.forEach(field => {
+                                if (field && typeof field === 'object') {
+                                    processedData = { ...processedData, ...field };
+                                }
+                            });
+                        }
+                        
                         updatedProducts.push({
                             id: doc.id,
-                            ...data
+                            ...processedData
                         });
                     });
                     appState.products = updatedProducts;
@@ -2444,15 +2469,15 @@
                     uses: "Flooring",
                     price: 100,
                     price_unit: "sqft",
-                    description: "osm",
-                    density: "osm",
-                    finish: "cool",
-                    water_absorption: "best",
-                    rate_description: "osm",
+                    description: "Premium red sandstone with excellent durability and natural beauty",
+                    density: "2.4 g/cm³",
+                    finish: "Natural",
+                    water_absorption: "Low",
+                    rate_description: "Competitive pricing with bulk discounts available",
                     factory_name: "ravi jain",
                     contact_number: "+91 7737740207",
                     email: "ravijain236129@gmail.com",
-                    compressive_strength: "osm",
+                    compressive_strength: "High",
                     images: ["https://i.ibb.co/HLpBc94R/51b7aaab131a.jpg"]
                 }
             ];
