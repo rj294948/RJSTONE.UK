@@ -605,13 +605,43 @@
             font-weight: 500;
         }
         
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
+        /* ✅ STEP 2 — Styling (very important) */
+        .product-card {
+            width: 100%;
+            max-width: 280px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 10px;
+            background: #fff;
+            margin: 10px;
+            display: inline-block;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .product-details {
+            padding-top: 10px;
+        }
+
+        .product-description {
+            font-size: 15px;
+            color: #333;
+        }
+
+        .product-rate {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            margin-top: 6px;
         }
         
-        .product-card {
+        /* Original product card styles (keeping for reference) */
+        .product-card-original {
             background: white;
             border-radius: 12px;
             overflow: hidden;
@@ -620,7 +650,7 @@
             border: 1px solid #f0f0f0;
         }
         
-        .product-card:hover {
+        .product-card-original:hover {
             transform: translateY(-8px);
             box-shadow: 0 12px 30px rgba(0,0,0,0.15);
         }
@@ -641,7 +671,7 @@
             transition: transform 0.3s ease;
         }
         
-        .product-card:hover .product-image {
+        .product-card-original:hover .product-image {
             transform: scale(1.05);
         }
         
@@ -664,7 +694,7 @@
             font-weight: 500;
         }
         
-        .product-description {
+        .product-description-fixed {
             font-size: 14px;
             color: #666;
             margin-bottom: 12px;
@@ -1276,12 +1306,8 @@
                         </div>
                     </div>
                     
-                    <div class="products-grid" id="productsGrid">
-                        <div class="loading-products">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            <p>Loading products...</p>
-                        </div>
-                    </div>
+                    <!-- ✅ STEP 3 — Products container add karo -->
+                    <div id="products-list" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
                 </div>
             </div>
 
@@ -2065,61 +2091,35 @@
             // Already handled in initializeFilters
         }
 
-        // ✅ DISPLAY PRODUCTS FUNCTION
-        // ✅ DISPLAY PRODUCTS FUNCTION (सुधार के बाद)
-// ✅ DISPLAY PRODUCTS FUNCTION (रेट और डिस्क्रिप्शन को इमेज के नीचे दिखाने के लिए अपडेट)
-function displayProducts() {
-    const productsGrid = document.getElementById('productsGrid');
-    if (!productsGrid) return;
-    
-    if (appState.filteredProducts.length === 0) {
-        // ... (No products code)
-        // ...
-        return;
-    }
-    
-    productsGrid.innerHTML = appState.filteredProducts.map(product => `
-        <div class="product-card">
-            <a href="product-details.html?id=${product.id}" class="product-image-container">
-                <div class="product-image" style="background-image: url('${product.images?.[0] || getDefaultImage(product.category)}')"></div>
-                
-                <div class="product-price-overlay">
-                    ${product.price ? 
-                        `<strong>£${product.price}</strong> / ${product.price_unit || 'Unit'}` : 
-                        'Price on request'
-                    }
-                </div>
-            </a>
-            
-            <div class="product-info">
-                <h3 class="product-name">${product.stone_name || 'Stone Product'}</h3>
-                <div class="product-category">${product.category || 'Natural Stone'}</div>
-                
-                <div class="product-description-fixed">
-                    ${product.description && product.description !== 'osm' 
-                        ? product.description.substring(0, 80) + (product.description.length > 80 ? '...' : '') 
-                        : 'Premium quality natural stone available.'}
-                </div>
-                
-                <div class="product-specs">
-                    ${product.density && product.density !== 'osm' ? `<div class="spec-item"><i class="fas fa-weight"></i> Density: ${product.density}</div>` : ''}
-                    ${product.finish && product.finish !== 'osm' ? `<div class="spec-item"><i class="fas fa-gem"></i> Finish: ${product.finish}</div>` : ''}
-                </div>
+        // ✅ STEP 1 — Firestore se products fetch ho rahe ho to ye function replace karo:
+        function displayProducts() {
+            const productsContainer = document.getElementById("products-list");
+            productsContainer.innerHTML = "";
 
-                <a href="product-details.html?id=${product.id}" class="btn-details">View Details</a>
-            </div>
-        </div>
-    `).join('');
-}
-            
-            // Add event listeners to add-to-cart buttons
-            document.querySelectorAll('.add-to-cart').forEach(button => {
-                button.addEventListener('click', function() {
-                    const productId = this.getAttribute('data-product-id');
-                    addToCart(productId);
-                });
+            if (!appState.filteredProducts.length) {
+                productsContainer.innerHTML = "<p>No products found.</p>";
+                return;
+            }
+
+            appState.filteredProducts.forEach(product => {
+                const imageUrl = product.image || product.images?.[0] || "default.jpg";
+                const description = product.description || "No description available";
+                const rate = product.rate || product.price || "N/A";
+
+                const card = `
+                    <div class="product-card">
+                        <img src="${imageUrl}" class="product-img" alt="Product Image">
+
+                        <div class="product-details">
+                            <p class="product-description">${description}</p>
+                            <p class="product-rate">₹ ${rate}</p>
+                        </div>
+                    </div>
+                `;
+
+                productsContainer.innerHTML += card;
             });
-
+        }
 
         // ✅ DEFAULT IMAGE GETTER
         function getDefaultImage(category) {
