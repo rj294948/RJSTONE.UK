@@ -1038,22 +1038,22 @@
                     }
                 ];
 
-                // ✅ FIXED: Process Firestore data with additional_fields
+                // ✅ FIXED: Process Firestore data with additional_fields - NO CONSTANT REASSIGNMENT
                 appState.products = firestoreData.map(doc => {
-                    const data = { ...doc };
+                    let processedData = { ...doc };
                     
                     // Handle additional_fields array properly
-                    if (data.additional_fields && Array.isArray(data.additional_fields)) {
-                        data.additional_fields.forEach(field => {
+                    if (processedData.additional_fields && Array.isArray(processedData.additional_fields)) {
+                        processedData.additional_fields.forEach(field => {
                             if (field && typeof field === 'object') {
-                                data = { ...data, ...field };
+                                processedData = { ...processedData, ...field };
                             }
                         });
                     }
                     
                     return {
                         id: doc.id,
-                        ...data
+                        ...processedData
                     };
                 });
                 
