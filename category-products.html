@@ -1,416 +1,783 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rajasthan SandStone Hub - Products</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f5f5f5;
-    margin: 0;
-    padding: 0;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stone Products - StoneCraft UK</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== ULTRA COMPACT STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+            padding-top: 100px; /* Drastically reduced */
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Header - Ultra Compact */
+        header {
+            background-color: #fff;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        
+        header.hidden {
+            transform: translateY(-100%);
+        }
+        
+        header.visible {
+            transform: translateY(0);
+        }
+        
+        .main-header {
+            padding: 5px 0; /* Minimal padding */
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo h1 {
+            font-size: 20px; /* Smaller logo */
+            color: #333;
+            font-weight: 700;
+        }
+        
+        .logo span {
+            color: #b8860b;
+        }
+        
+        .trust-info {
+            flex: 1;
+            text-align: center;
+            padding: 0 8px;
+        }
+        
+        .trust-info-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px; /* Very small gap */
+            font-size: 11px; /* Very small text */
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 4px 8px; /* Minimal padding */
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+            padding: 2px 5px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 3px;
+        }
+        
+        .trust-item i {
+            color: #b8860b;
+            font-size: 10px; /* Very small icons */
+        }
 
-  /* ✅ FIXED HEADER & REDUCED TOP PADDING */
-  h1 {
-    text-align: center;
-    background-color: #c45e00;
-    color: white;
-    padding: 10px; /* Reduced padding */
-    margin: 0;
-    font-size: 24px;
-    position: fixed; /* Header remains fixed on top */
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
+        /* User Profile - Compact */
+        .user-profile {
+            position: relative;
+        }
 
-  /* Main Layout: Filters (Sidebar) and Products (Grid) */
-  #main-content {
-    display: flex;
-    padding-top: 60px; /* Space for fixed h1 header */
-    min-height: calc(100vh - 60px);
-  }
+        .profile-toggle {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 3px 6px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
 
-  /* Filter Panel Styles (Smart Filter Sidebar) */
-  #filter-panel {
-    width: 280px;
-    padding: 20px 15px;
-    background-color: #fff;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-    flex-shrink: 0;
-    /* Sticky filter panel for better scrolling */
-    position: sticky;
-    top: 60px; 
-    height: calc(100vh - 60px); 
-    overflow-y: auto;
-  }
-  
-  #filter-panel h2 {
-    color: #c45e00;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 10px;
-    margin-top: 0;
-  }
-  
-  .filter-group {
-    margin-bottom: 20px;
-  }
-  
-  .filter-group label {
-    display: block;
-    margin: 5px 0;
-    cursor: pointer;
-    font-size: 14px;
-    color: #333;
-  }
+        .profile-avatar {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #b8860b;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 9px;
+        }
 
-  /* Products Grid Styles */
-  #products-container {
-      flex-grow: 1;
-  }
+        .profile-name {
+            font-size: 9px;
+            font-weight: 500;
+            color: #333;
+        }
 
-  #products {
-    display: grid;
-    /* ✅ FIX: 4 products per row */
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 20px;
-    padding: 20px;
-  }
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-  /* Product Card Styles */
-  .product-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-    overflow: hidden;
-    text-align: left; /* Changed from center */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
+        .user-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #555;
+            font-size: 8px;
+            transition: color 0.3s;
+        }
 
-  .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-  }
+        .user-action i {
+            font-size: 14px;
+            margin-bottom: 0;
+        }
 
-  .product-img {
-    width: 100%;
-    height: 250px; /* ✅ FIX: Increased height for bigger images */
-    object-fit: cover;
-  }
+        /* Search - Compact */
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 350px;
+            margin: 0 8px;
+        }
 
-  .product-info {
-      padding: 10px 15px;
-  }
+        .search-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
 
-  .product-card h3 {
-    margin: 5px 0 0;
-    color: #333;
-    font-size: 18px;
-    line-height: 1.2;
-  }
+        .search-input {
+            width: 100%;
+            padding: 6px 30px 6px 10px;
+            border: 1px solid #e1e5e9;
+            border-radius: 15px;
+            font-size: 11px;
+            background-color: #f8f9fa;
+        }
 
-  /* ✅ PRICE/RATE STYLE */
-  .price {
-    color: #007bff; 
-    font-weight: bold;
-    margin: 5px 0;
-    font-size: 16px;
-  }
-  
-  /* ✅ DESCRIPTION STYLE */
-  .description-short {
-    margin: 5px 0 10px;
-    font-size: 14px;
-    color: #555;
-    min-height: 40px; 
-  }
-  
-  .contact-info {
-    font-size: 13px;
-    color: #777;
-    margin: 5px 0;
-  }
+        .search-button {
+            position: absolute;
+            right: 4px;
+            background: #b8860b;
+            color: white;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+        }
+        
+        /* Banner Text - Ultra Small */
+        .banner-text {
+            background: linear-gradient(135deg, #b8860b, #a3780a);
+            color: white;
+            padding: 2px 0; /* Minimal padding */
+            text-align: center;
+            font-size: 11px; /* Very small font */
+            font-weight: 500;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        /* Uses Top Bar - NO SPACE with banner */
+        .uses-top-bar {
+            position: sticky;
+            top: 0;
+            background: #333;
+            padding: 0;
+            z-index: 999;
+            margin: 0;
+            border-top: 0;
+        }
+        
+        .uses-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .use-item {
+            flex: 1;
+            min-width: 90px;
+            position: relative; 
+        }
+        
+        .use-link {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 8px 4px; /* Minimal padding */
+            font-size: 11px; /* Small font */
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .use-link:hover {
+            background: #b8860b;
+        }
 
-  footer {
-    text-align: center;
-    padding: 15px;
-    background-color: #333;
-    color: white;
-  }
-</style>
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-top: 10px; /* Minimal margin */
+            padding: 15px 0;
+        }
+        
+        /* Page Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 6px;
+        }
+        
+        .page-header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .page-header .breadcrumb {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .page-header .breadcrumb a {
+            color: #b8860b;
+            text-decoration: none;
+        }
+        
+        /* Main Layout - NO FILTERS */
+        .main-layout {
+            display: block;
+        }
+        
+        /* Products Section */
+        .products-section {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .products-count {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        /* ✅ PRODUCT CARDS */
+        #products-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .product-card {
+            padding: 2px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .product-img-box {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-img:hover {
+            transform: scale(1.05);
+        }
+
+        .product-description {
+            margin-top: 6px;
+            font-size: 11px;
+            color: #333;
+            line-height: 1.2;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-rate {
+            margin-top: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #b8860b;
+        }
+
+        .details-btn {
+            display: inline-block;
+            margin-top: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            background: #b8860b;
+            color: white;
+            border-radius: 3px;
+            text-decoration: none;
+            transition: background 0.3s ease;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Features Section */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 40px 0;
+            padding: 40px 0;
+            background-color: #f9f9f9;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 20px 12px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .feature i {
+            font-size: 30px;
+            color: #b8860b;
+            margin-bottom: 12px;
+        }
+        
+        .feature h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .feature p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #222;
+            color: #ddd;
+            padding: 30px 0 8px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-column h3 {
+            color: white;
+            margin-bottom: 12px;
+            font-size: 14px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #b8860b;
+            display: inline-block;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 6px;
+        }
+        
+        .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            font-size: 12px;
+            transition: color 0.3s;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .social-links a {
+            color: white;
+            background: #444;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+            font-size: 12px;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 15px;
+            border-top: 1px solid #444;
+            font-size: 11px;
+            color: #999;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 120px;
+            }
+            
+            .header-content {
+                flex-wrap: wrap;
+            }
+            
+            .trust-info {
+                order: 3;
+                flex-basis: 100%;
+                margin-top: 5px;
+                padding: 0;
+            }
+            
+            .search-container {
+                order: 4;
+                flex-basis: 100%;
+                margin: 5px 0 0;
+                max-width: 100%;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+                padding: 25px 0;
+                margin: 25px 0;
+            }
+            
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            #products-list {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            #products-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<h1>🪨 Rajasthan SandStone Hub</h1>
-
-<div id="main-content">
-    
-    <div id="filter-panel">
-        <h2><i class="fas fa-filter"></i> Filters</h2>
-        
-        <button onclick="applyFilters()" style="padding: 10px; background-color: #c45e00; color: white; border: none; width: 100%; border-radius: 5px; cursor: pointer; margin-bottom: 20px;">Apply Filters</button>
-        
-        <div class="filter-group">
-            <h3>Stone Type (SUB CATAGORY)</h3>
-            <div id="stone-type-filters">
-                <p>Loading types...</p>
+    <!-- ===== HEADER ===== -->
+    <header id="mainHeader">
+        <div class="trust-info">
+            <div class="trust-info-content">
+                <div class="trust-item">
+                    <i class="fas fa-truck"></i>
+                    <span>Free UK Delivery</span>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-star"></i>
+                    <span>Rated 4.8/5</span>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-award"></i>
+                    <span>BSF Member</span>
+                </div>
             </div>
         </div>
 
-        <div class="filter-group">
-            <h3>Category (CATAGORY)</h3>
-            <div id="category-filters">
-                <p>Loading categories...</p>
+        <!-- Main Header -->
+        <div class="main-header">
+            <div class="container header-content">
+                <div class="logo">
+                    <a href="index.html" style="text-decoration: none; color: inherit;">
+                        <h1>Stone<span>Craft</span></h1>
+                    </a>
+                </div>
+                
+                <!-- Search -->
+                <div class="search-container">
+                    <div class="search-input-container">
+                        <input type="text" class="search-input" placeholder="Search stones...">
+                        <button class="search-button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="user-actions">
+                    <div class="user-profile" id="userProfile" style="display: none;">
+                        <button class="profile-toggle">
+                            <div class="profile-avatar">U</div>
+                            <span class="profile-name">User</span>
+                        </button>
+                    </div>
+                    
+                    <a href="login.html" class="user-action" id="loginButton">
+                        <i class="fas fa-user"></i>
+                        <span>Sign In</span>
+                    </a>
+                    
+                    <a href="#" class="user-action">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Cart (0)</span>
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div class="filter-group">
-            <h3>Color</h3>
-            <div id="color-filters">
-                <p>Loading colors...</p>
+        <!-- Banner Text - Ultra Small -->
+        <div class="banner-text">
+            <div class="container">
+                Premium Natural Stone - Sandstone, Marble & Limestone
             </div>
         </div>
-        
-        <button onclick="clearFilters()" style="padding: 10px; background-color: #f4f4f4; color: #333; border: 1px solid #ddd; width: 100%; border-radius: 5px; cursor: pointer; margin-top: 10px;">Clear Filters</button>
+    </header>
 
+    <!-- Uses Top Bar - NO SPACE with banner -->
+    <div class="uses-top-bar">
+        <div class="container uses-container">
+            <div class="use-item">
+                <a href="category-products.html?usage=flooring" class="use-link">Flooring</a>
+            </div>
+            <div class="use-item">
+                <a href="category-products.html?usage=wall" class="use-link">Wall</a>
+            </div>
+            <div class="use-item">
+                <a href="category-products.html?usage=bathroom" class="use-link">Bathroom</a>
+            </div>
+            <div class="use-item">
+                <a href="category-products.html?usage=outdoor" class="use-link">Outdoor</a>
+            </div>
+            <div class="use-item">
+                <a href="category-products.html?usage=kitchen" class="use-link">Kitchen</a>
+            </div>
+        </div>
     </div>
 
-    <div id="products-container">
-        <p id="product-count" style="padding: 10px 20px; color: #555;">Showing 0 products.</p>
-        <div id="products">Loading products...</div>
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Stone Products</h1>
+                <div class="breadcrumb">
+                    <a href="index.html">Home</a>
+                    <span>></span>
+                    <span>Products</span>
+                </div>
+            </div>
+            
+            <!-- Products Section - NO FILTERS -->
+            <div class="main-layout">
+                <div class="products-section">
+                    <div class="products-header">
+                        <div class="products-count">Showing 12 products</div>
+                    </div>
+                    
+                    <!-- Product Cards -->
+                    <div id="products-list">
+                        <!-- Products will be loaded here -->
+                        <div class="product-card">
+                            <a href="#">
+                                <div class="product-img-box">
+                                    <img src="https://i.ibb.co/HLpBc94R/51b7aaab131a.jpg" alt="Product" class="product-img">
+                                </div>
+                            </a>
+                            <p class="product-description">Premium red sandstone with excellent durability</p>
+                            <p class="product-rate">£ 100</p>
+                            <a href="#" class="details-btn">View Details</a>
+                        </div>
+                        
+                        <div class="product-card">
+                            <a href="#">
+                                <div class="product-img-box">
+                                    <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80" alt="Product" class="product-img">
+                                </div>
+                            </a>
+                            <p class="product-description">Luxury marble with elegant veining</p>
+                            <p class="product-rate">£ 250</p>
+                            <a href="#" class="details-btn">View Details</a>
+                        </div>
+                        
+                        <div class="product-card">
+                            <a href="#">
+                                <div class="product-img-box">
+                                    <img src="https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80" alt="Product" class="product-img">
+                                </div>
+                            </a>
+                            <p class="product-description">Durable granite with natural texture</p>
+                            <p class="product-rate">£ 180</p>
+                            <a href="#" class="details-btn">View Details</a>
+                        </div>
+                        
+                        <div class="product-card">
+                            <a href="#">
+                                <div class="product-img-box">
+                                    <img src="https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80" alt="Product" class="product-img">
+                                </div>
+                            </a>
+                            <p class="product-description">Classic limestone with soft tones</p>
+                            <p class="product-rate">£ 120</p>
+                            <a href="#" class="details-btn">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <section class="features">
+                <div class="container">
+                    <div class="feature">
+                        <i class="fas fa-shipping-fast"></i>
+                        <h3>Free UK Delivery</h3>
+                        <p>Free delivery on all orders across the United Kingdom with no minimum spend required.</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-award"></i>
+                        <h3>Quality Guaranteed</h3>
+                        <p>All our stones are sourced from trusted quarries and come with quality certification.</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-headset"></i>
+                        <h3>Expert Support</h3>
+                        <p>Get expert advice from our stone specialists for your project requirements.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
-</div>
 
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>StoneCraft</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="add.html">Add Product</a></li>
+                        <li><a href="#">About Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Products</h3>
+                    <ul class="footer-links">
+                        <li><a href="category-products.html?usage=flooring">Flooring Stones</a></li>
+                        <li><a href="category-products.html?usage=wall">Wall Stones</a></li>
+                        <li><a href="category-products.html?usage=bathroom">Bathroom Stones</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Delivery Info</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Legal</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2024 StoneCraft UK. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
-<footer>© 2025 Rajasthan SandStone Hub | All Rights Reserved</footer>
-
-<script>
-// === CONFIG ===
-const SHEET_ID = "1ob32T2NWQVZnxC07hBHT9neCEFFBP3neq0S30zV9-1A";
-const SHEET_NAME = "Form Responses 1";
-const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
-// offline fallback image (base64 transparent)
-const fallbackImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUAAAPAAAADwCAMAAAC7GKtPAAAAGFBMVEXMzMyWlpazs7PFxcW+vr6xsbG3t7fW1tawWyO7AAABYUlEQVR4nO3aMQ6DMAxFUaz//5tXxJAMxO3rZJbQ82YJH+UwDRRZIkSZIkSZIkSZIkSZIkSZIkSZLkJg/tj6yRzj/N7sgQh8Dk+MKx7h8ZvvVuqbBzDwPkVbcKfZ8OQ+irWjqYMXIXtcvY2EvNHauTmxvEba/cI5mxpL7HY8hc+PwS+2/tW6myXPc1/XeH7te38MnUXtd9r1pxNuv5xXcW7Wc1frvIyf3eLnd9lU7PtP3/E7O7QeeL8/1yze74d6xOeF5Q/HIkmSJEmSJEmSJEmSJEmSJEmSJEmS9E/wCUXSRgBksp/oAAAAASUVORK5CYII=";
-
-// Global state management for filters
-const allProducts = [];
-const filterState = {
-    stoneTypes: [],
-    categories: [],
-    colors: []
-};
-
-
-async function loadProducts() {
-  const container = document.getElementById("products");
-  container.innerHTML = "⏳ Loading...";
-
-  try {
-    const response = await fetch(API_URL);
-    let data = await response.json();
-    
-    // Normalize column names by trimming spaces (Crucial for consistency)
-    if (Array.isArray(data) && data.length > 0) {
-        data = data.map(item => {
-            const newItem = {};
-            for (const key in item) {
-                // Remove trailing/leading spaces from column names (keys)
-                const newKey = key.trim(); 
-                newItem[newKey] = item[key];
+    <!-- Smart Scroll Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.getElementById('mainHeader');
+            let lastScrollY = window.scrollY;
+            
+            function updateHeader() {
+                const currentScrollY = window.scrollY;
+                
+                if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                    header.classList.add('hidden');
+                    header.classList.remove('visible');
+                } else {
+                    header.classList.remove('hidden');
+                    header.classList.add('visible');
+                }
+                
+                lastScrollY = currentScrollY;
             }
-            return newItem;
+            
+            window.addEventListener('scroll', updateHeader, { passive: true });
+            header.classList.add('visible');
         });
-    }
-
-    if (!Array.isArray(data) || data.length === 0) {
-      container.innerHTML = "<p>⚠️ No data found in the sheet.</p>";
-      return;
-    }
-
-    // Store all data globally
-    allProducts.splice(0, allProducts.length, ...data);
-    
-    // Generate Filters dynamically
-    generateFilters(allProducts); 
-    
-    // Display all products initially
-    displayProducts(allProducts);
-
-  } catch (error) {
-    console.error("Error loading data:", error);
-    container.innerHTML = "<p>❌ Error loading products. Please check API URL or Sheet ID.</p>";
-  }
-}
-
-// Function to convert Google Drive link
-function getImgLink(item) {
-    // Column name used is "UPLOAD SAMPLE IMAGE"
-    let imgLink = item["UPLOAD SAMPLE IMAGE"] || ""; 
-    if (imgLink.includes("drive.google.com")) {
-        const match = imgLink.match(/[-\w]{25,}/);
-        if (match) imgLink = `https://drive.google.com/uc?export=view&id=${match[0]}`;
-    }
-    return imgLink;
-}
-
-
-// Function to display products
-function displayProducts(productsToDisplay) {
-    const container = document.getElementById("products");
-    const countElement = document.getElementById("product-count");
-    
-    if (productsToDisplay.length === 0) {
-        container.innerHTML = `<p style="grid-column: 1 / -1; text-align: center;">No products match the selected filters.</p>`;
-        countElement.textContent = 'Showing 0 products.';
-        return;
-    }
-    
-    let html = "";
-    productsToDisplay.forEach(item => {
-        const imgLink = getImgLink(item); 
-
-        // Extract description, limiting to 100 characters for card view
-        // Column name used is "DESCRIPTION"
-        const rawDescription = item["DESCRIPTION"] || "Natural stone product."; 
-        const shortDescription = rawDescription.substring(0, 100) + (rawDescription.length > 100 ? '...' : '');
-
-        html += `
-            <div class="product-card">
-              <img src="${imgLink}" 
-              class="product-img" onerror="this.src='${fallbackImage}'"/>
-              
-              <div class="product-info">
-                  <p class="price">₹ ${item["PRICE"] || "Price on Request"}</p>
-                  
-                  <h3>${item["STONE CATAGORY"] || "Unknown Stone"}</h3>
-                  
-                  <p class="description-short">${shortDescription}</p>
-                  
-                  <p>Type: ${item["STONE SUB CATAGORY"] || "N/A"}</p>
-                  
-                  <div class="contact-info">
-                    <p><b>📍 ${item["ADDRESS"] || "Not Given"}</b></p>
-                    <p>📞 ${item["CONTACT"] || ""}</p>
-                  </div>
-              </div>
-            </div>
-        `;
-    });
-    
-    container.innerHTML = html;
-    countElement.textContent = `Showing ${productsToDisplay.length} products.`;
-}
-
-
-// ===== SMART FILTERING LOGIC =====
-
-// Step 1: Generate filter options dynamically
-function generateFilters(products) {
-    // Collect unique values.
-    const stoneTypes = [...new Set(products.map(p => p["STONE SUB CATAGORY"] ? p["STONE SUB CATAGORY"].trim() : null).filter(Boolean))].sort();
-    const categories = [...new Set(products.map(p => p["STONE CATAGORY"] ? p["STONE CATAGORY"].trim() : null).filter(Boolean))].sort();
-    // NOTE: Assuming you have a 'COLOR' column in your sheet
-    const colors = [...new Set(products.map(p => p["COLOR"] ? p["COLOR"].trim() : null).filter(Boolean))].sort(); 
-
-    // Helper to generate checkbox HTML
-    const generateCheckboxes = (id, options, key) => {
-        const container = document.getElementById(id);
-        if (!container) return;
-        
-        if (options.length === 0) {
-            container.innerHTML = `<p style="font-size: 12px; color: #aaa;">No options available.</p>`;
-            return;
-        }
-
-        container.innerHTML = options.map(option => `
-            <label>
-                <input type="checkbox" data-filter-key="${key}" value="${option}" onchange="updateFilterState(this)">
-                ${option}
-            </label>
-        `).join('');
-    };
-
-    // NOTE: The filter keys must match the (trimmed) column names from your sheet
-    generateCheckboxes('stone-type-filters', stoneTypes, 'STONE SUB CATAGORY');
-    generateCheckboxes('category-filters', categories, 'STONE CATAGORY');
-    generateCheckboxes('color-filters', colors, 'COLOR');
-}
-
-// Step 2: Update the filter state when a checkbox is clicked
-window.updateFilterState = function(checkbox) {
-    const key = checkbox.getAttribute('data-filter-key');
-    const value = checkbox.value;
-
-    // Map sheet column names to internal state names
-    const stateMap = {
-        "STONE SUB CATAGORY": "stoneTypes",
-        "STONE CATAGORY": "categories",
-        "COLOR": "colors"
-    };
-    const stateKey = stateMap[key];
-
-    if (checkbox.checked) {
-        if (!filterState[stateKey].includes(value)) {
-            filterState[stateKey].push(value);
-        }
-    } else {
-        filterState[stateKey] = filterState[stateKey].filter(v => v !== value);
-    }
-}
-
-// Step 3: Apply filters and update display
-window.applyFilters = function() {
-    let filteredList = [...allProducts];
-
-    // Filter by Stone Type (STONE SUB CATAGORY)
-    if (filterState.stoneTypes.length > 0) {
-        filteredList = filteredList.filter(product => 
-            product["STONE SUB CATAGORY"] && filterState.stoneTypes.includes(product["STONE SUB CATAGORY"].trim())
-        );
-    }
-    
-    // Filter by Category (STONE CATAGORY)
-    if (filterState.categories.length > 0) {
-        filteredList = filteredList.filter(product => 
-            product["STONE CATAGORY"] && filterState.categories.includes(product["STONE CATAGORY"].trim())
-        );
-    }
-
-    // Filter by Color (COLOR)
-    if (filterState.colors.length > 0) {
-        filteredList = filteredList.filter(product => 
-            product["COLOR"] && filterState.colors.includes(product["COLOR"].trim())
-        );
-    }
-
-    displayProducts(filteredList);
-}
-
-// Step 4: Clear all filters and show all products
-window.clearFilters = function() {
-    // Reset internal state
-    filterState.stoneTypes = [];
-    filterState.categories = [];
-    filterState.colors = [];
-    
-    // Uncheck all checkboxes
-    const checkboxes = document.querySelectorAll('#filter-panel input[type="checkbox"]');
-    checkboxes.forEach(cb => {
-        cb.checked = false;
-    });
-
-    // Display all products
-    displayProducts(allProducts);
-}
-
-
-loadProducts();
-</script>
-
+    </script>
 </body>
 </html>
