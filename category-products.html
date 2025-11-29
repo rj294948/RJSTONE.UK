@@ -1083,24 +1083,23 @@
         </div>
     </footer>
 
-    <!-- Smart Scroll Behavior Script -->
+    <!-- Smart Scroll Behavior Script - HEADER ALWAYS HIDDEN EXCEPT AT TOP -->
     <script>
-        // Smart Scroll Behavior for Header - Hide on scroll down, show on scroll up
+        // Smart Scroll Behavior for Header - Always hidden except at top
         document.addEventListener('DOMContentLoaded', function() {
             const header = document.getElementById('mainHeader');
-            const usesTopBar = document.querySelector('.uses-top-bar');
             let lastScrollY = window.scrollY;
             let ticking = false;
             
             function updateHeader() {
                 const currentScrollY = window.scrollY;
                 
-                if (currentScrollY > lastScrollY && currentScrollY > 100) {
-                    // Scrolling down - hide header
+                // Always hide header when scrolled down from top
+                if (currentScrollY > 50) {
                     header.classList.add('hidden');
                     header.classList.remove('visible');
                 } else {
-                    // Scrolling up - show header
+                    // Only show when at the very top
                     header.classList.remove('hidden');
                     header.classList.add('visible');
                 }
@@ -1118,7 +1117,7 @@
             
             window.addEventListener('scroll', onScroll, { passive: true });
             
-            // Initialize header as visible
+            // Initialize header as visible (at top)
             header.classList.add('visible');
         });
     </script>
