@@ -1342,7 +1342,7 @@
     </footer>
 
     <!-- Smart Scroll Behavior Script - HEADER ALWAYS HIDDEN EXCEPT AT TOP -->
-   <script type="module">
+  <script type="module">
     // ✅ CORRECT FIREBASE IMPORT FROM YOUR CONFIG
     import { 
         db, auth, 
@@ -1462,7 +1462,7 @@
                     <div class="search-result-price">${product.price ? '£' + product.price : 'Price on request'}</div>
                 `;
                 
-                // ✅ UPDATED: Link to product-details.html with product ID
+                // Link to product-details.html with product ID for individual products
                 resultItem.addEventListener('click', function() {
                     window.location.href = `product-details.html?id=${product.id}`;
                 });
@@ -2060,7 +2060,7 @@
         applyFilters();
     }
 
-    // ✅ PERFECT 1:1 RATIO PRODUCT CARDS - UPDATED FOR PRODUCT DETAILS
+    // ✅ PERFECT 1:1 RATIO PRODUCT CARDS
     function displayProducts() {
         const productsContainer = document.getElementById("products-list");
         productsContainer.innerHTML = "";
@@ -2139,7 +2139,7 @@
         productsCount.textContent = countText;
     }
 
-    // ✅ USES NAVIGATION FUNCTION
+    // ✅ USES NAVIGATION FUNCTION - ALWAYS LINKS TO CATEGORY-PRODUCTS.HTML
     function generateUsesNavigation() {
         const usesContainer = document.getElementById('dynamicUsesContainer');
         if (!usesContainer) return;
@@ -2196,22 +2196,13 @@
                                 );
                                 const imageUrl = stoneProduct?.images?.[0] || getDefaultImage(stoneProduct?.category);
                                 
-                                // ✅ UPDATED: If we have the product ID, link to product details, otherwise to category
-                                if (stoneProduct && stoneProduct.id) {
-                                    return `
-                                        <a href="product-details.html?id=${stoneProduct.id}" class="pattern-item" data-usage="${usage}" data-stone="${stoneName}">
-                                            <div class="pattern-image" style="background-image: url('${imageUrl}')"></div>
-                                            <div class="pattern-name">${stoneName}</div>
-                                        </a>
-                                    `;
-                                } else {
-                                    return `
-                                        <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="pattern-item" data-usage="${usage}" data-stone="${stoneName}">
-                                            <div class="pattern-image" style="background-image: url('${imageUrl}')"></div>
-                                            <div class="pattern-name">${stoneName}</div>
-                                        </a>
-                                    `;
-                                }
+                                // ✅ ALWAYS LINK TO CATEGORY-PRODUCTS.HTML
+                                return `
+                                    <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="pattern-item" data-usage="${usage}" data-stone="${stoneName}">
+                                        <div class="pattern-image" style="background-image: url('${imageUrl}')"></div>
+                                        <div class="pattern-name">${stoneName}</div>
+                                    </a>
+                                `;
                             }).join('')}
                         </div>
                     </div>
@@ -2269,7 +2260,7 @@
         }
     }
 
-    // ✅ SAMPLE DATA FALLBACK - UPDATED IDs
+    // ✅ SAMPLE DATA FALLBACK
     function getSampleProducts() {
         return [
             {
