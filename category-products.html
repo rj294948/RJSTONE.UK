@@ -500,10 +500,10 @@
         .page-header {
             text-align: center;
             margin-bottom: 0px; /* GREATLY REDUCED from 30px */
-            padding: 0px 5px; /* REDUCED from 30px */
+            padding: 22px 5px; /* REDUCED from 30px */
             background: url('https://plus.unsplash.com/premium_photo-1673567871911-c8a8c63d1c2b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8c3RvbmV8ZW58MHx8MHx8fDA%3D') center/cover;
             border-radius: 8px; /* Slightly smaller radius */
-            min-height: 40px; /* Reduced height to show more products */
+            min-height: 60px; /* Reduced height to show more products */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -1342,6 +1342,43 @@
     </footer>
 
     <!-- Smart Scroll Behavior Script - HEADER ALWAYS HIDDEN EXCEPT AT TOP -->
+    <script>
+        // Smart Scroll Behavior for Header - Always hidden except at top
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.getElementById('mainHeader');
+            let lastScrollY = window.scrollY;
+            let ticking = false;
+            
+            function updateHeader() {
+                const currentScrollY = window.scrollY;
+                
+                // Always hide header when scrolled down from top
+                if (currentScrollY > 50) {
+                    header.classList.add('hidden');
+                    header.classList.remove('visible');
+                } else {
+                    // Only show when at the very top
+                    header.classList.remove('hidden');
+                    header.classList.add('visible');
+                }
+                
+                lastScrollY = currentScrollY;
+                ticking = false;
+            }
+            
+            function onScroll() {
+                if (!ticking) {
+                    requestAnimationFrame(updateHeader);
+                    ticking = true;
+                }
+            }
+            
+            window.addEventListener('scroll', onScroll, { passive: true });
+            
+            // Initialize header as visible (at top)
+            header.classList.add('visible');
+        });
+    </script>
   <script type="module">
     // ✅ CORRECT FIREBASE IMPORT FROM YOUR CONFIG
     import { 
