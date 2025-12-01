@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Marble Stone - StoneCraft UK</title>
+    <title>Product Details - StoneCraft UK</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* ===== GLOBAL STYLES ===== */
@@ -18,6 +18,7 @@
             background-color: #f8f9fa;
             color: #333;
             line-height: 1.6;
+            padding-top: 100px;
         }
         
         .container {
@@ -76,6 +77,116 @@
             color: white;
         }
         
+        /* ===== HEADER STYLES (CATEGORY PAGE JAISE) ===== */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: transform 0.4s ease;
+        }
+        
+        .trust-info {
+            flex: 1;
+            text-align: center;
+            padding: 0 10px;
+            margin-top: 0;
+            padding-top: 5px;
+        }
+        
+        .trust-info-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 13px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+        }
+        
+        .trust-item i {
+            color: #b8860b;
+            font-size: 14px;
+        }
+
+        .main-header {
+            padding: 5px 0;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            color: #333;
+            font-weight: 700;
+        }
+        
+        .logo span {
+            color: #b8860b;
+        }
+
+        .banner-text {
+            background: linear-gradient(135deg, #b8860b, #a3780a);
+            color: white;
+            padding: 2px 0;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #555;
+            font-size: 11px;
+            transition: color 0.3s;
+        }
+
+        .user-action:hover {
+            color: #b8860b;
+        }
+
+        .user-action i {
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+
         /* ===== PRODUCT PAGE LAYOUT ===== */
         .product-page {
             padding: 40px 0 80px;
@@ -113,20 +224,23 @@
             transition: transform 0.3s ease;
         }
         
-        /* Lens Zoom Effect */
+        /* ✅ FIXED: Lens Zoom Effect */
         .zoom-lens {
             position: absolute;
-            border: 1px solid #b8860b;
-            background: rgba(184, 134, 11, 0.1);
+            border: 2px solid #b8860b;
+            background: rgba(184, 134, 11, 0.2);
             cursor: none;
             display: none;
             z-index: 10;
+            pointer-events: none;
+            width: 150px;
+            height: 150px;
         }
         
         .zoom-result {
             position: absolute;
             top: 0;
-            right: -105%;
+            right: -120%;
             width: 100%;
             height: 100%;
             background: #fff;
@@ -135,6 +249,7 @@
             display: none;
             box-shadow: 0 5px 20px rgba(0,0,0,0.2);
             z-index: 20;
+            border: 1px solid #ddd;
         }
         
         .zoom-result-img {
@@ -151,7 +266,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -182,8 +297,8 @@
         
         .lightbox-close {
             position: absolute;
-            top: -40px;
-            right: -10px;
+            top: -50px;
+            right: 0;
             background: none;
             border: none;
             color: white;
@@ -492,6 +607,7 @@
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             transition: transform 0.3s ease;
+            cursor: pointer;
         }
         
         .related-product-card:hover {
@@ -558,7 +674,40 @@
             background: white;
             color: #b8860b;
         }
-        
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 50px 0;
+            color: #666;
+        }
+
+        .loading i {
+            font-size: 40px;
+            color: #b8860b;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .loading p {
+            font-size: 18px;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 50px 20px;
+            color: #d32f2f;
+            background: #ffebee;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .error-message i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
         /* ===== RESPONSIVE DESIGN ===== */
         @media (max-width: 992px) {
             .product-container {
@@ -577,9 +726,18 @@
             .action-buttons {
                 flex-direction: column;
             }
+
+            .zoom-result {
+                right: -110%;
+                width: 90%;
+            }
         }
         
         @media (max-width: 768px) {
+            body {
+                padding-top: 80px;
+            }
+
             .product-page {
                 padding: 20px 0 50px;
             }
@@ -608,6 +766,10 @@
                 width: 40px;
                 height: 40px;
                 font-size: 16px;
+            }
+
+            .zoom-result {
+                display: none !important;
             }
         }
         
@@ -702,27 +864,88 @@
         .mb-40 {
             margin-bottom: 40px;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <!-- ===== HEADER (CATEGORY PAGE JAISE) ===== -->
+    <header id="mainHeader">
+        <div class="trust-info">
+            <div class="trust-info-content">
+                <div class="trust-item">
+                    <i class="fas fa-truck"></i>
+                    <span>Free UK Delivery</span>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-star"></i>
+                    <span>Rated 4.8/5</span>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-award"></i>
+                    <span>BSF Member</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-header">
+            <div class="container header-content">
+                <div class="logo">
+                    <a href="index.html" style="text-decoration: none; color: inherit;">
+                        <h1>Stone<span>Craft</span></h1>
+                    </a>
+                </div>
+                
+                <div class="user-actions">
+                    <a href="login.html" class="user-action">
+                        <i class="fas fa-user"></i>
+                        <span>Sign In</span>
+                    </a>
+                    
+                    <a href="#" class="user-action">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Cart (0)</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="banner-text">
+            <div class="container">
+                Premium Natural Stone Collections - Sandstone, Marble & Limestone for UK Homes & Commercial Projects
+            </div>
+        </div>
+    </header>
+
     <!-- ===== PRODUCT PAGE ===== -->
     <div class="product-page">
         <div class="container">
-            <!-- Product Main Layout -->
-            <div class="product-container">
+            <!-- Loading State -->
+            <div class="loading" id="loadingState">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading product details...</p>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-message hidden" id="errorState">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Product Not Found</h3>
+                <p>We couldn't load the product details. Please try again.</p>
+                <a href="category-products.html" class="btn mt-20">Browse Products</a>
+            </div>
+
+            <!-- Product Main Layout (Hidden by default) -->
+            <div class="product-container hidden" id="productContent">
                 <!-- Left: Product Images -->
                 <div class="product-image-section">
                     <!-- Main Image with Zoom -->
                     <div class="main-image-container" id="mainImageContainer">
-                        <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
-                             alt="Premium Marble Stone" 
-                             id="mainProductImage">
+                        <img src="" alt="Product Image" id="mainProductImage">
                         <div class="zoom-lens" id="zoomLens"></div>
                         <div class="zoom-result" id="zoomResult">
-                            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80" 
-                                 alt="Zoomed View" 
-                                 class="zoom-result-img" 
-                                 id="zoomResultImg">
+                            <img src="" alt="Zoomed View" class="zoom-result-img" id="zoomResultImg">
                         </div>
                     </div>
                     
@@ -734,55 +957,26 @@
                 
                 <!-- Right: Product Details -->
                 <div class="product-details-section">
-                    <h1 class="product-title">Premium White Marble Stone</h1>
+                    <h1 class="product-title" id="productTitle">Loading...</h1>
                     
-                    <div class="product-price">
-                        £125.50 <span>per sq. ft.</span>
+                    <div class="product-price" id="productPrice">
+                        £0.00 <span id="priceUnit">per unit</span>
                     </div>
                     
                     <div class="product-rating">
-                        <div class="stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
+                        <div class="stars" id="productRating">
+                            <!-- Stars will be dynamically added -->
                         </div>
-                        <div class="rating-count">(4.5/5 from 128 reviews)</div>
+                        <div class="rating-count" id="ratingCount">(0 reviews)</div>
                     </div>
                     
-                    <p class="product-description">
-                        This premium white marble features elegant gray veining that adds sophistication to any space. 
-                        Sourced from the finest quarries, it offers exceptional durability and a luxurious finish. 
-                        Perfect for flooring, countertops, wall cladding, and decorative features in both residential 
-                        and commercial projects.
+                    <p class="product-description" id="productDescription">
+                        Loading description...
                     </p>
                     
                     <!-- Product Options -->
-                    <div class="product-options">
-                        <!-- Size Options -->
-                        <div class="option-group">
-                            <div class="option-title">Size</div>
-                            <div class="option-list" id="sizeOptions">
-                                <!-- Options will be dynamically added -->
-                            </div>
-                        </div>
-                        
-                        <!-- Color Options -->
-                        <div class="option-group">
-                            <div class="option-title">Color Variation</div>
-                            <div class="option-list" id="colorOptions">
-                                <!-- Options will be dynamically added -->
-                            </div>
-                        </div>
-                        
-                        <!-- Finish Options -->
-                        <div class="option-group">
-                            <div class="option-title">Finish</div>
-                            <div class="option-list" id="finishOptions">
-                                <!-- Options will be dynamically added -->
-                            </div>
-                        </div>
+                    <div class="product-options" id="productOptions">
+                        <!-- Options will be dynamically added -->
                     </div>
                     
                     <!-- Quantity Selector -->
@@ -794,7 +988,7 @@
                             <button class="quantity-btn" id="quantityIncrease">+</button>
                         </div>
                         <div style="margin-left: auto; font-weight: 600;">
-                            Total: £<span id="totalPrice">125.50</span>
+                            Total: £<span id="totalPrice">0.00</span>
                         </div>
                     </div>
                     
@@ -821,7 +1015,7 @@
             </div>
             
             <!-- Related Products Section -->
-            <div class="related-products-section">
+            <div class="related-products-section hidden" id="relatedProductsSection">
                 <h2 class="section-title text-center">Related Products</h2>
                 <div class="related-products-container">
                     <div class="related-products-slider" id="relatedProductsSlider">
@@ -856,198 +1050,265 @@
         </div>
     </div>
 
-    <script>
-        // ===== PRODUCT DATA =====
-        const productData = {
-            id: 1,
-            name: "Premium White Marble Stone",
-            price: 125.50,
-            currency: "£",
-            unit: "per sq. ft.",
-            description: "This premium white marble features elegant gray veining that adds sophistication to any space. Sourced from the finest quarries, it offers exceptional durability and a luxurious finish.",
-            rating: 4.5,
-            reviewCount: 128,
-            images: [
-                {
-                    thumb: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80",
-                    main: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-                    zoom: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80"
-                },
-                {
-                    thumb: "https://images.unsplash.com/photo-1559661184-5b7a5200d1f4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80",
-                    main: "https://images.unsplash.com/photo-1559661184-5b7a5200d1f4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-                    zoom: "https://images.unsplash.com/photo-1559661184-5b7a5200d1f4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80"
-                },
-                {
-                    thumb: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=60&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D",
-                    main: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=60&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D",
-                    zoom: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=60&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D"
-                },
-                {
-                    thumb: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80",
-                    main: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-                    zoom: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80"
-                },
-                {
-                    thumb: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=60",
-                    main: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=60",
-                    zoom: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=60"
-                }
-            ],
-            sizes: [
-                { id: 1, name: "12x12 inches", value: "12x12" },
-                { id: 2, name: "12x24 inches", value: "12x24" },
-                { id: 3, name: "24x24 inches", value: "24x24" },
-                { id: 4, name: "Custom Size", value: "custom" }
-            ],
-            colors: [
-                { id: 1, name: "Pure White", value: "#FFFFFF", hex: "#FFFFFF" },
-                { id: 2, name: "Gray Veined", value: "#F5F5F5", hex: "#F5F5F5" },
-                { id: 3, name: "Carrara White", value: "#F0F0F0", hex: "#F0F0F0" },
-                { id: 4, name: "Calacatta Gold", value: "#FFF8E1", hex: "#FFF8E1" }
-            ],
-            finishes: [
-                { id: 1, name: "Polished", value: "polished" },
-                { id: 2, name: "Honed", value: "honed" },
-                { id: 3, name: "Brushed", value: "brushed" },
-                { id: 4, name: "Leathered", value: "leathered" }
-            ],
-            specifications: [
-                { key: "Material", value: "Natural Marble" },
-                { key: "Thickness", value: "20mm (3/4\")" },
-                { key: "Water Absorption", value: "< 0.5%" },
-                { key: "Compressive Strength", value: "115 MPa" },
-                { key: "Density", value: "2.7 g/cm³" },
-                { key: "Hardness", value: "3-4 Mohs Scale" },
-                { key: "Finish", value: "Polished, Honed, Brushed" },
-                { key: "Origin", value: "Italy" },
-                { key: "Usage", value: "Flooring, Countertops, Wall Cladding" }
-            ],
-            relatedProducts: [
-                {
-                    id: 2,
-                    name: "Black Galaxy Granite",
-                    price: 89.99,
-                    image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-                    link: "#"
-                },
-                {
-                    id: 3,
-                    name: "Travertine Beige Stone",
-                    price: 75.50,
-                    image: "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w-400&q=80",
-                    link: "#"
-                },
-                {
-                    id: 4,
-                    name: "Sandstone Pavers",
-                    price: 45.25,
-                    image: "https://images.unsplash.com/photo-1541140532154-b024d705b90a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-                    link: "#"
-                },
-                {
-                    id: 5,
-                    name: "Quartzite Countertop",
-                    price: 135.00,
-                    image: "https://images.unsplash.com/photo-1592925300427-f58aa8f5b5ae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-                    link: "#"
-                },
-                {
-                    id: 6,
-                    name: "Slate Floor Tiles",
-                    price: 68.75,
-                    image: "https://images.unsplash.com/photo-1618219908414-83a8d8d7b0c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-                    link: "#"
-                },
-                {
-                    id: 7,
-                    name: "Limestone Wall Cladding",
-                    price: 55.40,
-                    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-                    link: "#"
-                },
-                {
-                    id: 8,
-                    name: "Onyx Backlit Panel",
-                    price: 225.00,
-                    image: "https://images.unsplash.com/photo-1583845112205-8fda7c6f7c70?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-                    link: "#"
-                }
-            ]
-        };
+    <!-- ===== FIREBASE CONFIGURATION ===== -->
+    <script type="module">
+        // Import Firebase functions
+        import { 
+            db, 
+            doc, 
+            getDoc,
+            collection,
+            query,
+            where,
+            getDocs,
+            limit
+        } from './firebase-config.js';
 
         // ===== GLOBAL VARIABLES =====
+        let currentProduct = null;
         let currentImageIndex = 0;
         let selectedSize = null;
         let selectedColor = null;
         let selectedFinish = null;
         let quantity = 1;
+        let relatedProducts = [];
 
         // ===== DOM ELEMENTS =====
+        const loadingState = document.getElementById('loadingState');
+        const errorState = document.getElementById('errorState');
+        const productContent = document.getElementById('productContent');
+        const relatedProductsSection = document.getElementById('relatedProductsSection');
+        
         const mainProductImage = document.getElementById('mainProductImage');
         const mainImageContainer = document.getElementById('mainImageContainer');
         const zoomLens = document.getElementById('zoomLens');
         const zoomResult = document.getElementById('zoomResult');
         const zoomResultImg = document.getElementById('zoomResultImg');
         const thumbnailStrip = document.getElementById('thumbnailStrip');
-        const lightbox = document.getElementById('lightbox');
-        const lightboxImg = document.getElementById('lightboxImg');
-        const lightboxClose = document.getElementById('lightboxClose');
-        const lightboxPrev = document.getElementById('lightboxPrev');
-        const lightboxNext = document.getElementById('lightboxNext');
-        const sizeOptions = document.getElementById('sizeOptions');
-        const colorOptions = document.getElementById('colorOptions');
-        const finishOptions = document.getElementById('finishOptions');
+        
+        const productTitle = document.getElementById('productTitle');
+        const productPrice = document.getElementById('productPrice');
+        const priceUnit = document.getElementById('priceUnit');
+        const productRating = document.getElementById('productRating');
+        const ratingCount = document.getElementById('ratingCount');
+        const productDescription = document.getElementById('productDescription');
+        const productOptions = document.getElementById('productOptions');
         const specificationsTable = document.getElementById('specificationsTable');
+        
         const quantityInput = document.getElementById('quantityInput');
         const quantityDecrease = document.getElementById('quantityDecrease');
         const quantityIncrease = document.getElementById('quantityIncrease');
         const totalPrice = document.getElementById('totalPrice');
         const addToCartBtn = document.getElementById('addToCartBtn');
         const buyNowBtn = document.getElementById('buyNowBtn');
+        
         const relatedProductsSlider = document.getElementById('relatedProductsSlider');
         const sliderPrevBtn = document.getElementById('sliderPrevBtn');
         const sliderNextBtn = document.getElementById('sliderNextBtn');
+        
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxClose = document.getElementById('lightboxClose');
+        const lightboxPrev = document.getElementById('lightboxPrev');
+        const lightboxNext = document.getElementById('lightboxNext');
 
         // ===== INITIALIZATION =====
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Initializing Product Page...');
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Initializing Product Details Page...');
             
-            initializeProductPage();
-            initializeImageZoom();
-            initializeLightbox();
-            initializeProductOptions();
-            initializeQuantityControls();
-            initializeRelatedProducts();
+            // Get product ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id') || localStorage.getItem('selectedProductId');
             
-            console.log('✅ Product Page initialized successfully!');
+            if (!productId) {
+                showError("No product ID found in URL");
+                return;
+            }
+            
+            console.log('📋 Product ID:', productId);
+            
+            try {
+                // Load product from Firebase
+                await loadProductFromFirestore(productId);
+                
+                // Initialize UI after product is loaded
+                initializeProductPage();
+                initializeImageZoom();
+                initializeLightbox();
+                initializeQuantityControls();
+                initializeActionButtons();
+                initializeRelatedProductsSlider();
+                
+                console.log('✅ Product Page initialized successfully!');
+            } catch (error) {
+                console.error('❌ Error loading product:', error);
+                showError("Failed to load product details");
+            }
         });
 
-        // ===== PRODUCT PAGE INITIALIZATION =====
+        // ===== FIREBASE FUNCTIONS =====
+        async function loadProductFromFirestore(productId) {
+            try {
+                console.log('🔥 Loading product from Firestore...');
+                
+                // Get product document
+                const docRef = doc(db, "products", productId);
+                const docSnap = await getDoc(docRef);
+                
+                if (!docSnap.exists()) {
+                    throw new Error("Product not found");
+                }
+                
+                // Get product data
+                let productData = docSnap.data();
+                
+                // ✅ FIX: Handle additional_fields array properly
+                if (productData.additional_fields && Array.isArray(productData.additional_fields)) {
+                    productData.additional_fields.forEach(field => {
+                        if (field && typeof field === 'object') {
+                            productData = { ...productData, ...field };
+                        }
+                    });
+                }
+                
+                // Set current product
+                currentProduct = {
+                    id: docSnap.id,
+                    ...productData
+                };
+                
+                console.log('✅ Product loaded:', currentProduct);
+                
+                // Hide loading, show content
+                loadingState.style.display = 'none';
+                productContent.classList.remove('hidden');
+                
+                // Load related products
+                await loadRelatedProducts();
+                
+            } catch (error) {
+                console.error('❌ Error loading product from Firestore:', error);
+                throw error;
+            }
+        }
+
+        async function loadRelatedProducts() {
+            try {
+                if (!currentProduct) return;
+                
+                console.log('🔄 Loading related products...');
+                
+                // Get products from same category or uses
+                const q = query(
+                    collection(db, "products"),
+                    where("id", "!=", currentProduct.id),
+                    limit(6)
+                );
+                
+                const querySnapshot = await getDocs(q);
+                relatedProducts = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    let processedData = { ...data };
+                    
+                    // Handle additional_fields
+                    if (data.additional_fields && Array.isArray(data.additional_fields)) {
+                        data.additional_fields.forEach(field => {
+                            if (field && typeof field === 'object') {
+                                processedData = { ...processedData, ...field };
+                            }
+                        });
+                    }
+                    
+                    relatedProducts.push({
+                        id: doc.id,
+                        ...processedData
+                    });
+                });
+                
+                console.log('✅ Related products loaded:', relatedProducts.length);
+                
+                // If no related products found, use sample data as fallback
+                if (relatedProducts.length === 0) {
+                    relatedProducts = getSampleRelatedProducts();
+                }
+                
+                // Show related products section
+                relatedProductsSection.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('❌ Error loading related products:', error);
+                // Use sample data as fallback
+                relatedProducts = getSampleRelatedProducts();
+                relatedProductsSection.classList.remove('hidden');
+            }
+        }
+
+        // ===== PRODUCT PAGE FUNCTIONS =====
         function initializeProductPage() {
-            // Set initial product image
-            updateMainImage(0);
+            if (!currentProduct) {
+                showError("No product data available");
+                return;
+            }
+            
+            // Set product title
+            productTitle.textContent = currentProduct.stone_name || "Stone Product";
+            
+            // Set product price
+            const price = parseFloat(currentProduct.price) || 0;
+            const unit = currentProduct.price_unit || "per unit";
+            productPrice.innerHTML = `£${price.toFixed(2)} <span id="priceUnit">${unit}</span>`;
+            
+            // Set product description
+            productDescription.textContent = currentProduct.description || "No description available";
+            
+            // Set rating (use sample rating if not available)
+            const rating = currentProduct.rating || 4.5;
+            const reviewCount = currentProduct.review_count || 128;
+            updateRatingStars(rating);
+            ratingCount.textContent = `(${rating}/5 from ${reviewCount} reviews)`;
             
             // Create thumbnail strip
             createThumbnailStrip();
             
             // Create product options
-            createSizeOptions();
-            createColorOptions();
-            createFinishOptions();
+            createProductOptions();
             
             // Create specifications table
             createSpecificationsTable();
             
             // Update total price
             updateTotalPrice();
+            
+            // Update page title
+            document.title = `${currentProduct.stone_name || 'Product'} - StoneCraft UK`;
         }
 
-        // ===== IMAGE THUMBNAIL FUNCTIONS =====
         function createThumbnailStrip() {
             thumbnailStrip.innerHTML = '';
             
-            productData.images.forEach((image, index) => {
+            // Get images from product
+            const images = getProductImages();
+            
+            if (images.length === 0) {
+                // Use default image if no images available
+                const defaultImage = getDefaultImage(currentProduct.category);
+                images.push({
+                    thumb: defaultImage,
+                    main: defaultImage,
+                    zoom: defaultImage
+                });
+            }
+            
+            // Set main image
+            if (images[0]) {
+                mainProductImage.src = images[0].main;
+                zoomResultImg.src = images[0].zoom;
+            }
+            
+            // Create thumbnails
+            images.forEach((image, index) => {
                 const thumbnailItem = document.createElement('div');
                 thumbnailItem.className = 'thumbnail-item';
                 if (index === 0) thumbnailItem.classList.add('active');
@@ -1063,22 +1324,66 @@
                 
                 thumbnailItem.addEventListener('mouseenter', () => {
                     if (index !== currentImageIndex) {
-                        mainProductImage.src = productData.images[index].main;
+                        mainProductImage.src = images[index].main;
                     }
                 });
                 
                 thumbnailItem.addEventListener('mouseleave', () => {
-                    mainProductImage.src = productData.images[currentImageIndex].main;
+                    mainProductImage.src = images[currentImageIndex].main;
                 });
                 
                 thumbnailStrip.appendChild(thumbnailItem);
             });
         }
 
+        function getProductImages() {
+            const images = [];
+            
+            // Check for images array
+            if (currentProduct.images && Array.isArray(currentProduct.images)) {
+                currentProduct.images.forEach((img, index) => {
+                    if (typeof img === 'string') {
+                        images.push({
+                            thumb: img,
+                            main: img,
+                            zoom: img
+                        });
+                    }
+                });
+            }
+            
+            // Check for single image field
+            if (currentProduct.image && images.length === 0) {
+                images.push({
+                    thumb: currentProduct.image,
+                    main: currentProduct.image,
+                    zoom: currentProduct.image
+                });
+            }
+            
+            return images;
+        }
+
+        function getDefaultImage(category) {
+            const defaultImages = {
+                'marble': 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                'granite': 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                'limestone': 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                'sandstone': 'https://images.unsplash.com/photo-1541140532154-b024d705b90a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                'red sand stone': 'https://i.ibb.co/HLpBc94R/51b7aaab131a.jpg'
+            };
+            
+            const cat = (category || 'marble').toLowerCase();
+            return defaultImages[cat] || defaultImages.marble;
+        }
+
         function updateMainImage(index) {
+            const images = getProductImages();
+            if (!images[index]) return;
+            
             currentImageIndex = index;
-            mainProductImage.src = productData.images[index].main;
-            zoomResultImg.src = productData.images[index].zoom;
+            mainProductImage.src = images[index].main;
+            zoomResultImg.src = images[index].zoom;
             
             // Add fade-in animation
             mainProductImage.classList.add('fade-in');
@@ -1098,38 +1403,190 @@
             });
         }
 
-        // ===== IMAGE ZOOM FUNCTIONALITY =====
+        function updateRatingStars(rating) {
+            productRating.innerHTML = '';
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            
+            // Add full stars
+            for (let i = 0; i < fullStars; i++) {
+                productRating.innerHTML += '<i class="fas fa-star"></i>';
+            }
+            
+            // Add half star
+            if (hasHalfStar) {
+                productRating.innerHTML += '<i class="fas fa-star-half-alt"></i>';
+            }
+            
+            // Add empty stars
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                productRating.innerHTML += '<i class="far fa-star"></i>';
+            }
+        }
+
+        function createProductOptions() {
+            productOptions.innerHTML = '';
+            
+            // Create size options if available
+            if (currentProduct.size || currentProduct.thickness) {
+                const sizeGroup = document.createElement('div');
+                sizeGroup.className = 'option-group';
+                sizeGroup.innerHTML = `
+                    <div class="option-title">Size / Thickness</div>
+                    <div class="option-list" id="sizeOptions">
+                        <div class="option-item selected" data-size="default">
+                            ${currentProduct.size || 'Standard'} - ${currentProduct.thickness || 'Standard'}
+                        </div>
+                    </div>
+                `;
+                productOptions.appendChild(sizeGroup);
+                
+                selectedSize = 'default';
+            }
+            
+            // Create color options if available
+            if (currentProduct.color) {
+                const colorGroup = document.createElement('div');
+                colorGroup.className = 'option-group';
+                colorGroup.innerHTML = `
+                    <div class="option-title">Color</div>
+                    <div class="option-list" id="colorOptions">
+                        <div class="option-item color-option selected" 
+                             data-color="${currentProduct.color}" 
+                             style="background-color: ${getColorHex(currentProduct.color)}"
+                             title="${currentProduct.color}">
+                        </div>
+                    </div>
+                `;
+                productOptions.appendChild(colorGroup);
+                
+                selectedColor = currentProduct.color;
+            }
+            
+            // Create finish options if available
+            if (currentProduct.finish) {
+                const finishGroup = document.createElement('div');
+                finishGroup.className = 'option-group';
+                finishGroup.innerHTML = `
+                    <div class="option-title">Finish</div>
+                    <div class="option-list" id="finishOptions">
+                        <div class="option-item selected" data-finish="${currentProduct.finish}">
+                            ${currentProduct.finish}
+                        </div>
+                    </div>
+                `;
+                productOptions.appendChild(finishGroup);
+                
+                selectedFinish = currentProduct.finish;
+            }
+        }
+
+        function getColorHex(colorName) {
+            const colorMap = {
+                'red': '#ff0000',
+                'white': '#ffffff',
+                'black': '#000000',
+                'gray': '#808080',
+                'grey': '#808080',
+                'blue': '#0000ff',
+                'green': '#008000',
+                'yellow': '#ffff00',
+                'brown': '#a52a2a',
+                'beige': '#f5f5dc',
+                'tan': '#d2b48c'
+            };
+            
+            const normalizedColor = (colorName || '').toLowerCase();
+            return colorMap[normalizedColor] || '#cccccc';
+        }
+
+        function createSpecificationsTable() {
+            specificationsTable.innerHTML = '';
+            
+            // Add specifications from product data
+            const specFields = [
+                { key: 'Category', value: currentProduct.category },
+                { key: 'Type', value: currentProduct.type },
+                { key: 'Color', value: currentProduct.color },
+                { key: 'Size', value: currentProduct.size },
+                { key: 'Thickness', value: currentProduct.thickness },
+                { key: 'Length', value: currentProduct.length },
+                { key: 'Width', value: currentProduct.width },
+                { key: 'Uses', value: currentProduct.uses },
+                { key: 'Density', value: currentProduct.density },
+                { key: 'Finish', value: currentProduct.finish },
+                { key: 'Water Absorption', value: currentProduct.water_absorption },
+                { key: 'Compressive Strength', value: currentProduct.compressive_strength },
+                { key: 'Factory Name', value: currentProduct.factory_name },
+                { key: 'Contact', value: currentProduct.contact_number }
+            ];
+            
+            specFields.forEach(spec => {
+                if (spec.value) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${spec.key}</td>
+                        <td>${spec.value}</td>
+                    `;
+                    specificationsTable.appendChild(row);
+                }
+            });
+            
+            // If no specifications found, show message
+            if (specificationsTable.children.length === 0) {
+                specificationsTable.innerHTML = `
+                    <tr>
+                        <td colspan="2" style="text-align: center; padding: 30px; color: #666;">
+                            No specifications available for this product.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // ✅ FIXED: IMAGE ZOOM FUNCTIONALITY
         function initializeImageZoom() {
             if (!mainImageContainer || !zoomLens || !zoomResult) return;
             
-            const zoomFactor = 2; // How much to zoom (2x)
+            const zoomFactor = 2;
+            let isZooming = false;
             
-            mainImageContainer.addEventListener('mousemove', moveLens);
+            // Initialize lens size
+            updateLensSize();
+            
+            // Mouse events
             mainImageContainer.addEventListener('mouseenter', () => {
+                isZooming = true;
                 zoomLens.style.display = 'block';
                 zoomResult.style.display = 'block';
+                updateZoomPosition();
             });
             
             mainImageContainer.addEventListener('mouseleave', () => {
+                isZooming = false;
                 zoomLens.style.display = 'none';
                 zoomResult.style.display = 'none';
             });
             
-            // Touch support for mobile
-            let isZooming = false;
+            mainImageContainer.addEventListener('mousemove', (e) => {
+                if (!isZooming) return;
+                updateZoomPosition(e);
+            });
+            
+            // Touch events for mobile
             mainImageContainer.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 isZooming = true;
                 zoomLens.style.display = 'block';
                 zoomResult.style.display = 'block';
-                moveLensTouch(e);
+                updateZoomPositionTouch(e);
             });
             
             mainImageContainer.addEventListener('touchmove', (e) => {
-                if (isZooming) {
-                    e.preventDefault();
-                    moveLensTouch(e);
-                }
+                if (!isZooming) return;
+                e.preventDefault();
+                updateZoomPositionTouch(e);
             });
             
             mainImageContainer.addEventListener('touchend', () => {
@@ -1138,8 +1595,27 @@
                 zoomResult.style.display = 'none';
             });
             
-            function moveLens(e) {
-                e.preventDefault();
+            // Open lightbox on image click
+            mainImageContainer.addEventListener('click', () => {
+                openLightbox(currentImageIndex);
+            });
+            
+            // Adjust on window resize
+            window.addEventListener('resize', updateLensSize);
+            
+            function updateLensSize() {
+                const containerWidth = mainImageContainer.offsetWidth;
+                const lensSize = Math.min(150, containerWidth / 3);
+                
+                zoomLens.style.width = lensSize + 'px';
+                zoomLens.style.height = lensSize + 'px';
+                
+                zoomResult.style.width = lensSize + 'px';
+                zoomResult.style.height = lensSize + 'px';
+            }
+            
+            function updateZoomPosition(e = null) {
+                if (!e) return;
                 
                 const containerRect = mainImageContainer.getBoundingClientRect();
                 const imgRect = mainProductImage.getBoundingClientRect();
@@ -1148,81 +1624,43 @@
                 let x = e.clientX - imgRect.left;
                 let y = e.clientY - imgRect.top;
                 
-                // Prevent lens from going outside image
+                // Get lens dimensions
                 const lensWidth = zoomLens.offsetWidth;
                 const lensHeight = zoomLens.offsetHeight;
                 
-                x = Math.max(lensWidth / 2, Math.min(x, imgRect.width - lensWidth / 2));
-                y = Math.max(lensHeight / 2, Math.min(y, imgRect.height - lensHeight / 2));
+                // Calculate bounds
+                const minX = lensWidth / 2;
+                const maxX = imgRect.width - lensWidth / 2;
+                const minY = lensHeight / 2;
+                const maxY = imgRect.height - lensHeight / 2;
+                
+                // Clamp position within image bounds
+                x = Math.max(minX, Math.min(x, maxX));
+                y = Math.max(minY, Math.min(y, maxY));
                 
                 // Position the lens
                 zoomLens.style.left = (x - lensWidth / 2) + 'px';
                 zoomLens.style.top = (y - lensHeight / 2) + 'px';
                 
-                // Calculate the zoomed image position
-                const resultWidth = zoomResult.offsetWidth;
-                const resultHeight = zoomResult.offsetHeight;
-                
-                const zoomX = (x / imgRect.width) * 100;
-                const zoomY = (y / imgRect.height) * 100;
+                // Calculate zoomed image position
+                const zoomX = ((x - minX) / (maxX - minX)) * 100;
+                const zoomY = ((y - minY) / (maxY - minY)) * 100;
                 
                 // Position the zoomed image
                 zoomResultImg.style.objectPosition = `${zoomX}% ${zoomY}%`;
             }
             
-            function moveLensTouch(e) {
-                e.preventDefault();
+            function updateZoomPositionTouch(e) {
+                if (!e.touches || e.touches.length === 0) return;
                 
-                const containerRect = mainImageContainer.getBoundingClientRect();
-                const imgRect = mainProductImage.getBoundingClientRect();
-                
-                // Get touch position
                 const touch = e.touches[0];
-                let x = touch.clientX - imgRect.left;
-                let y = touch.clientY - imgRect.top;
+                const fakeEvent = {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                };
                 
-                // Prevent lens from going outside image
-                const lensWidth = zoomLens.offsetWidth;
-                const lensHeight = zoomLens.offsetHeight;
-                
-                x = Math.max(lensWidth / 2, Math.min(x, imgRect.width - lensWidth / 2));
-                y = Math.max(lensHeight / 2, Math.min(y, imgRect.height - lensHeight / 2));
-                
-                // Position the lens
-                zoomLens.style.left = (x - lensWidth / 2) + 'px';
-                zoomLens.style.top = (y - lensHeight / 2) + 'px';
-                
-                // Calculate the zoomed image position
-                const zoomX = (x / imgRect.width) * 100;
-                const zoomY = (y / imgRect.height) * 100;
-                
-                // Position the zoomed image
-                zoomResultImg.style.objectPosition = `${zoomX}% ${zoomY}%`;
+                updateZoomPosition(fakeEvent);
             }
-            
-            // Adjust lens size based on container size
-            function adjustLensSize() {
-                const containerWidth = mainImageContainer.offsetWidth;
-                const lensSize = containerWidth / 4; // Lens is 1/4 of container width
-                
-                zoomLens.style.width = lensSize + 'px';
-                zoomLens.style.height = lensSize + 'px';
-                
-                // Also adjust zoom result container
-                zoomResult.style.width = lensSize * 1.5 + 'px';
-                zoomResult.style.height = lensSize * 1.5 + 'px';
-            }
-            
-            // Initial adjustment
-            adjustLensSize();
-            
-            // Adjust on window resize
-            window.addEventListener('resize', adjustLensSize);
-            
-            // Open lightbox on image click
-            mainImageContainer.addEventListener('click', () => {
-                openLightbox(currentImageIndex);
-            });
         }
 
         // ===== LIGHTBOX FUNCTIONALITY =====
@@ -1268,171 +1706,39 @@
         }
 
         function openLightbox(index) {
+            const images = getProductImages();
+            if (!images[index]) return;
+            
             currentImageIndex = index;
-            lightboxImg.src = productData.images[index].main;
+            lightboxImg.src = images[index].main;
             lightbox.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            document.body.style.overflow = 'hidden';
         }
 
         function closeLightbox() {
             lightbox.classList.remove('active');
-            document.body.style.overflow = ''; // Re-enable scrolling
+            document.body.style.overflow = '';
         }
 
         function navigateLightbox(direction) {
+            const images = getProductImages();
             let newIndex = currentImageIndex + direction;
             
             // Wrap around
             if (newIndex < 0) {
-                newIndex = productData.images.length - 1;
-            } else if (newIndex >= productData.images.length) {
+                newIndex = images.length - 1;
+            } else if (newIndex >= images.length) {
                 newIndex = 0;
             }
             
             currentImageIndex = newIndex;
-            lightboxImg.src = productData.images[newIndex].main;
+            lightboxImg.src = images[newIndex].main;
             
             // Add fade-in animation
             lightboxImg.classList.add('fade-in');
             setTimeout(() => {
                 lightboxImg.classList.remove('fade-in');
             }, 300);
-        }
-
-        // ===== PRODUCT OPTIONS FUNCTIONS =====
-        function initializeProductOptions() {
-            // Select first options by default
-            if (productData.sizes.length > 0) {
-                selectSize(productData.sizes[0].id);
-            }
-            
-            if (productData.colors.length > 0) {
-                selectColor(productData.colors[0].id);
-            }
-            
-            if (productData.finishes.length > 0) {
-                selectFinish(productData.finishes[0].id);
-            }
-        }
-
-        function createSizeOptions() {
-            sizeOptions.innerHTML = '';
-            
-            productData.sizes.forEach(size => {
-                const option = document.createElement('div');
-                option.className = 'option-item';
-                option.dataset.id = size.id;
-                option.textContent = size.name;
-                
-                if (size.id === 1) option.classList.add('selected');
-                
-                option.addEventListener('click', () => {
-                    selectSize(size.id);
-                });
-                
-                sizeOptions.appendChild(option);
-            });
-        }
-
-        function createColorOptions() {
-            colorOptions.innerHTML = '';
-            
-            productData.colors.forEach(color => {
-                const option = document.createElement('div');
-                option.className = 'option-item color-option';
-                option.dataset.id = color.id;
-                option.style.backgroundColor = color.hex;
-                option.title = color.name;
-                
-                if (color.id === 1) option.classList.add('selected');
-                
-                option.addEventListener('click', () => {
-                    selectColor(color.id);
-                });
-                
-                colorOptions.appendChild(option);
-            });
-        }
-
-        function createFinishOptions() {
-            finishOptions.innerHTML = '';
-            
-            productData.finishes.forEach(finish => {
-                const option = document.createElement('div');
-                option.className = 'option-item';
-                option.dataset.id = finish.id;
-                option.textContent = finish.name;
-                
-                if (finish.id === 1) option.classList.add('selected');
-                
-                option.addEventListener('click', () => {
-                    selectFinish(finish.id);
-                });
-                
-                finishOptions.appendChild(option);
-            });
-        }
-
-        function selectSize(sizeId) {
-            selectedSize = sizeId;
-            
-            // Update UI
-            const sizeOptionsElements = document.querySelectorAll('#sizeOptions .option-item');
-            sizeOptionsElements.forEach(option => {
-                if (parseInt(option.dataset.id) === sizeId) {
-                    option.classList.add('selected');
-                } else {
-                    option.classList.remove('selected');
-                }
-            });
-            
-            console.log('Selected size:', sizeId);
-        }
-
-        function selectColor(colorId) {
-            selectedColor = colorId;
-            
-            // Update UI
-            const colorOptionsElements = document.querySelectorAll('#colorOptions .option-item');
-            colorOptionsElements.forEach(option => {
-                if (parseInt(option.dataset.id) === colorId) {
-                    option.classList.add('selected');
-                } else {
-                    option.classList.remove('selected');
-                }
-            });
-            
-            console.log('Selected color:', colorId);
-        }
-
-        function selectFinish(finishId) {
-            selectedFinish = finishId;
-            
-            // Update UI
-            const finishOptionsElements = document.querySelectorAll('#finishOptions .option-item');
-            finishOptionsElements.forEach(option => {
-                if (parseInt(option.dataset.id) === finishId) {
-                    option.classList.add('selected');
-                } else {
-                    option.classList.remove('selected');
-                }
-            });
-            
-            console.log('Selected finish:', finishId);
-        }
-
-        // ===== SPECIFICATIONS TABLE =====
-        function createSpecificationsTable() {
-            specificationsTable.innerHTML = '';
-            
-            productData.specifications.forEach(spec => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${spec.key}</td>
-                    <td>${spec.value}</td>
-                `;
-                specificationsTable.appendChild(row);
-            });
         }
 
         // ===== QUANTITY CONTROLS =====
@@ -1476,7 +1782,10 @@
         }
 
         function updateTotalPrice() {
-            const total = (productData.price * quantity).toFixed(2);
+            if (!currentProduct) return;
+            
+            const price = parseFloat(currentProduct.price) || 0;
+            const total = (price * quantity).toFixed(2);
             totalPrice.textContent = total;
         }
 
@@ -1494,15 +1803,17 @@
         }
 
         function addToCart() {
+            if (!currentProduct) return;
+            
             const product = {
-                id: productData.id,
-                name: productData.name,
-                price: productData.price,
+                id: currentProduct.id,
+                name: currentProduct.stone_name,
+                price: parseFloat(currentProduct.price) || 0,
                 size: selectedSize,
                 color: selectedColor,
                 finish: selectedFinish,
                 quantity: quantity,
-                image: productData.images[0].thumb
+                image: getProductImages()[0]?.thumb || getDefaultImage(currentProduct.category)
             };
             
             console.log('Added to cart:', product);
@@ -1517,7 +1828,7 @@
                 addToCartBtn.style.background = '';
             }, 2000);
             
-            // In a real app, you would save to localStorage or send to server
+            // Save to cart
             saveToCart(product);
         }
 
@@ -1525,11 +1836,9 @@
             // First add to cart
             addToCart();
             
-            // Then redirect to checkout (simulated)
+            // Then redirect to checkout
             console.log('Proceeding to checkout...');
-            
-            // In a real app, you would redirect to checkout page
-            // window.location.href = '/checkout';
+            // window.location.href = '/checkout.html';
         }
 
         function saveToCart(product) {
@@ -1555,20 +1864,21 @@
             // Save to localStorage
             localStorage.setItem('stonecraft_cart', JSON.stringify(cart));
             
-            // Update cart count in header if it exists
+            // Update cart count in header
             updateCartCount(cart.length);
         }
 
         function updateCartCount(count) {
-            // If there's a cart count element in the header, update it
-            const cartCountElements = document.querySelectorAll('.cart-count');
+            const cartCountElements = document.querySelectorAll('.user-action span');
             cartCountElements.forEach(element => {
-                element.textContent = count;
+                if (element.textContent.includes('Cart')) {
+                    element.textContent = `Cart (${count})`;
+                }
             });
         }
 
         // ===== RELATED PRODUCTS SLIDER =====
-        function initializeRelatedProducts() {
+        function initializeRelatedProductsSlider() {
             createRelatedProductsSlider();
             initializeSliderControls();
         }
@@ -1576,21 +1886,47 @@
         function createRelatedProductsSlider() {
             relatedProductsSlider.innerHTML = '';
             
-            productData.relatedProducts.forEach(product => {
+            if (relatedProducts.length === 0) return;
+            
+            relatedProducts.forEach(product => {
                 const productCard = document.createElement('div');
                 productCard.className = 'related-product-card';
+                productCard.dataset.productId = product.id;
+                
+                const imageUrl = product.image || product.images?.[0] || getDefaultImage(product.category);
+                const productName = product.stone_name || 'Stone Product';
+                const productPrice = parseFloat(product.price) || 0;
+                
                 productCard.innerHTML = `
-                    <a href="${product.link}" class="related-product-link">
-                        <img src="${product.image}" alt="${product.name}" class="related-product-img">
-                        <div class="related-product-info">
-                            <h3 class="related-product-title">${product.name}</h3>
-                            <div class="related-product-price">${productData.currency}${product.price}</div>
-                        </div>
-                    </a>
+                    <div class="related-product-img-container">
+                        <img src="${imageUrl}" alt="${productName}" class="related-product-img">
+                    </div>
+                    <div class="related-product-info">
+                        <h3 class="related-product-title">${productName}</h3>
+                        <div class="related-product-price">£${productPrice.toFixed(2)}</div>
+                    </div>
                 `;
+                
+                // Add click event to redirect to product details
+                productCard.addEventListener('click', () => {
+                    redirectToProductDetails(product.id, productName);
+                });
                 
                 relatedProductsSlider.appendChild(productCard);
             });
+        }
+
+        function redirectToProductDetails(productId, productName) {
+            // Save product ID to localStorage
+            localStorage.setItem('selectedProductId', productId);
+            
+            // Create SEO-friendly URL
+            const slug = (productName || 'product').toLowerCase()
+                .replace(/[^\w\s]/gi, '')
+                .replace(/\s+/g, '-');
+            
+            // Redirect to product details page
+            window.location.href = `product-details.html?id=${productId}&name=${slug}`;
         }
 
         function initializeSliderControls() {
@@ -1623,10 +1959,50 @@
             sliderNextBtn.disabled = scrollLeft + clientWidth >= scrollWidth - 10;
         }
 
-        // Initialize action buttons
-        initializeActionButtons();
-        
-        console.log('✅ All product page functionality loaded!');
+        // ===== UTILITY FUNCTIONS =====
+        function showError(message) {
+            loadingState.style.display = 'none';
+            errorState.classList.remove('hidden');
+            
+            if (message) {
+                errorState.querySelector('h3').textContent = message;
+            }
+        }
+
+        function getSampleRelatedProducts() {
+            return [
+                {
+                    id: "2",
+                    stone_name: "Black Galaxy Granite",
+                    category: "Granite",
+                    price: 89.99,
+                    image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+                },
+                {
+                    id: "3",
+                    stone_name: "Travertine Beige Stone",
+                    category: "Limestone",
+                    price: 75.50,
+                    image: "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+                },
+                {
+                    id: "4",
+                    stone_name: "Sandstone Pavers",
+                    category: "Sandstone",
+                    price: 45.25,
+                    image: "https://images.unsplash.com/photo-1541140532154-b024d705b90a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+                },
+                {
+                    id: "5",
+                    stone_name: "Quartzite Countertop",
+                    category: "Quartzite",
+                    price: 135.00,
+                    image: "https://images.unsplash.com/photo-1592925300427-f58aa8f5b5ae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+                }
+            ];
+        }
+
+        console.log('✅ All functions defined successfully!');
     </script>
 </body>
 </html>
