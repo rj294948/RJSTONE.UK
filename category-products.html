@@ -527,12 +527,158 @@
             color: #999;
         }
         
-        /* Main Layout - Filters removed */
+        /* Main Layout - WITH FILTERS */
         .main-layout {
-            display: block;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 25px;
         }
         
-        /* Products Section - Full width now */
+        /* Filters Section */
+        .filters-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+        
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .filters-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .clear-filters {
+            color: #b8860b;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: underline;
+        }
+        
+        .filter-group {
+            margin-bottom: 25px;
+        }
+        
+        .filter-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .filter-toggle {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .filter-options {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .filter-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        
+        .filter-checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            accent-color: #b8860b;
+            cursor: pointer;
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            color: #555;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        .filter-count {
+            font-size: 12px;
+            color: #999;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        
+        .price-range {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .price-inputs {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .price-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .price-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .color-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+        
+        .color-option.selected {
+            border-color: #b8860b;
+            box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.3);
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Products Section */
         .products-section {
             background: white;
             padding: 20px; /* Reduced padding */
@@ -556,6 +702,26 @@
             font-weight: 500;
         }
         
+        .sort-options {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sort-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .sort-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+        
         /* ✅ PERFECT 1:1 RATIO E-COMMERCE PRODUCT CARDS - 4 PER ROW */
         #products-list {
             display: grid;
@@ -570,6 +736,14 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
         /* PERFECT 1:1 RATIO IMAGE BOX */
@@ -776,6 +950,10 @@
                 grid-template-columns: repeat(3, 1fr); /* 3 products per row on tablets */
             }
             
+            .main-layout {
+                grid-template-columns: 250px 1fr;
+            }
+            
             .features {
                 grid-template-columns: repeat(3, 1fr); /* Keep 3 in a row */
             }
@@ -814,6 +992,20 @@
                 flex-basis: 100%;
                 margin: 8px 0 0; /* Reduced margin */
                 max-width: 100%;
+            }
+            
+            .main-layout {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .filters-section {
+                position: static;
+                order: 2;
+            }
+            
+            .products-section {
+                order: 1;
             }
             
             .features {
@@ -997,13 +1189,102 @@
                 </div>
             </div>
             
-            <!-- Main Layout with Products Only -->
+            <!-- Main Layout with Filters and Products -->
             <div class="main-layout">
-                <!-- Products Section - Full width now -->
+                <!-- Filters Section -->
+                <div class="filters-section">
+                    <div class="filters-header">
+                        <div class="filters-title">Filters</div>
+                        <button class="clear-filters" id="clearFilters">Clear All</button>
+                    </div>
+                    
+                    <!-- Category Filter -->
+                    <div class="filter-group">
+                        <div class="filter-title">
+                            Category
+                            <button class="filter-toggle" data-target="categoryOptions">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="filter-options" id="categoryOptions">
+                            <!-- Category options will be dynamically loaded here -->
+                            <div class="loading-filters">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span>Loading categories...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Color Filter -->
+                    <div class="filter-group">
+                        <div class="filter-title">
+                            Color
+                            <button class="filter-toggle" data-target="colorOptions">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="filter-options" id="colorOptions">
+                            <!-- Color options will be dynamically loaded here -->
+                            <div class="loading-filters">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span>Loading colors...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Price Filter -->
+                    <div class="filter-group">
+                        <div class="filter-title">
+                            Price Range
+                            <button class="filter-toggle" data-target="priceRange">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="price-range" id="priceRange">
+                            <div class="price-inputs">
+                                <input type="number" class="price-input" id="minPrice" placeholder="Min" min="0">
+                                <input type="number" class="price-input" id="maxPrice" placeholder="Max" min="0">
+                            </div>
+                            <input type="range" class="price-slider" id="priceSlider" min="0" max="1000" step="10">
+                            <div class="price-display">
+                                Price: £<span id="minPriceDisplay">0</span> - £<span id="maxPriceDisplay">1000</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rate Filter -->
+                    <div class="filter-group">
+                        <div class="filter-title">
+                            Rating
+                            <button class="filter-toggle" data-target="rateOptions">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="filter-options" id="rateOptions">
+                            <!-- Rating options will be dynamically loaded here -->
+                            <div class="loading-filters">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span>Loading ratings...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Products Section -->
                 <div class="products-section">
                     <div class="products-header">
                         <div class="products-count" id="productsCount">
                             Loading products...
+                        </div>
+                        <div class="sort-options">
+                            <span class="sort-label">Sort by:</span>
+                            <select class="sort-select" id="sortSelect">
+                                <option value="default">Default</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="name">Name: A to Z</option>
+                                <option value="rating">Highest Rated</option>
+                            </select>
                         </div>
                     </div>
                     
@@ -1139,11 +1420,19 @@
             filteredProducts: [],
             currentUsage: null,
             currentStoneName: null,
-            user: null
+            user: null,
+            filters: {
+                categories: [],
+                colors: [],
+                minPrice: 0,
+                maxPrice: 1000,
+                ratings: []
+            },
+            sortOption: 'default'
         };
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Initializing Category Products Page...');
+            console.log('🚀 Initializing Category Products Page with Filters...');
             
             // Get URL parameters
             const urlParams = new URLSearchParams(window.location.search);
@@ -1168,6 +1457,8 @@
             initializeSearch();
             initializeUserProfile();
             initializeMegaMenu();
+            initializeFilters();
+            initializeSorting();
         }
 
         // Initialize search functionality
@@ -1357,6 +1648,427 @@
             });
         }
 
+        // ===== FILTER SYSTEM FUNCTIONS =====
+
+        // Initialize filters
+        function initializeFilters() {
+            // Initialize filter toggles
+            const filterToggles = document.querySelectorAll('.filter-toggle');
+            filterToggles.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const target = document.getElementById(targetId);
+                    if (target) {
+                        target.style.display = target.style.display === 'none' ? 'block' : 'none';
+                        this.querySelector('i').classList.toggle('fa-chevron-down');
+                        this.querySelector('i').classList.toggle('fa-chevron-up');
+                    }
+                });
+            });
+
+            // Initialize price slider
+            const priceSlider = document.getElementById('priceSlider');
+            const minPriceInput = document.getElementById('minPrice');
+            const maxPriceInput = document.getElementById('maxPrice');
+            const minPriceDisplay = document.getElementById('minPriceDisplay');
+            const maxPriceDisplay = document.getElementById('maxPriceDisplay');
+
+            if (priceSlider && minPriceInput && maxPriceInput) {
+                // Set initial values
+                priceSlider.value = appState.filters.maxPrice;
+                minPriceInput.value = appState.filters.minPrice;
+                maxPriceInput.value = appState.filters.maxPrice;
+                minPriceDisplay.textContent = appState.filters.minPrice;
+                maxPriceDisplay.textContent = appState.filters.maxPrice;
+
+                // Update price display when slider changes
+                priceSlider.addEventListener('input', function() {
+                    appState.filters.maxPrice = parseInt(this.value);
+                    maxPriceInput.value = appState.filters.maxPrice;
+                    maxPriceDisplay.textContent = appState.filters.maxPrice;
+                    applyFilters();
+                });
+
+                // Update filters when price inputs change
+                minPriceInput.addEventListener('change', function() {
+                    appState.filters.minPrice = parseInt(this.value) || 0;
+                    minPriceDisplay.textContent = appState.filters.minPrice;
+                    applyFilters();
+                });
+
+                maxPriceInput.addEventListener('change', function() {
+                    appState.filters.maxPrice = parseInt(this.value) || 1000;
+                    priceSlider.value = appState.filters.maxPrice;
+                    maxPriceDisplay.textContent = appState.filters.maxPrice;
+                    applyFilters();
+                });
+            }
+
+            // Clear filters button
+            const clearFiltersBtn = document.getElementById('clearFilters');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', function() {
+                    clearAllFilters();
+                });
+            }
+        }
+
+        // Initialize sorting
+        function initializeSorting() {
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function() {
+                    appState.sortOption = this.value;
+                    applyFilters();
+                });
+            }
+        }
+
+        // Generate filter options from products
+        function generateFilterOptions() {
+            console.log('🔄 Generating filter options...');
+            
+            // Generate category options
+            const categories = [...new Set(appState.products
+                .filter(product => product.category && product.category.trim() !== '')
+                .map(product => product.category.trim())
+            )].sort();
+            
+            const categoryOptions = document.getElementById('categoryOptions');
+            if (categoryOptions) {
+                categoryOptions.innerHTML = '';
+                
+                categories.forEach(category => {
+                    const count = appState.products.filter(p => p.category === category).length;
+                    const option = document.createElement('div');
+                    option.className = 'filter-option';
+                    option.innerHTML = `
+                        <input type="checkbox" class="filter-checkbox" id="cat-${category}" data-category="${category}">
+                        <label for="cat-${category}" class="filter-label">
+                            ${category}
+                            <span class="filter-count">${count}</span>
+                        </label>
+                    `;
+                    
+                    option.querySelector('input').addEventListener('change', function() {
+                        if (this.checked) {
+                            appState.filters.categories.push(category);
+                        } else {
+                            appState.filters.categories = appState.filters.categories.filter(c => c !== category);
+                        }
+                        applyFilters();
+                    });
+                    
+                    categoryOptions.appendChild(option);
+                });
+            }
+            
+            // Generate color options
+            const colors = [...new Set(appState.products
+                .filter(product => product.color && product.color.trim() !== '')
+                .map(product => product.color.trim())
+            )].sort();
+            
+            const colorOptions = document.getElementById('colorOptions');
+            if (colorOptions) {
+                colorOptions.innerHTML = '';
+                
+                colors.forEach(color => {
+                    const count = appState.products.filter(p => p.color === color).length;
+                    const option = document.createElement('div');
+                    option.className = 'filter-option';
+                    option.innerHTML = `
+                        <input type="checkbox" class="filter-checkbox" id="color-${color}" data-color="${color}">
+                        <label for="color-${color}" class="filter-label">
+                            ${color}
+                            <span class="filter-count">${count}</span>
+                        </label>
+                    `;
+                    
+                    option.querySelector('input').addEventListener('change', function() {
+                        if (this.checked) {
+                            appState.filters.colors.push(color);
+                        } else {
+                            appState.filters.colors = appState.filters.colors.filter(c => c !== color);
+                        }
+                        applyFilters();
+                    });
+                    
+                    colorOptions.appendChild(option);
+                });
+            }
+            
+            // Generate rating options
+            const rateOptions = document.getElementById('rateOptions');
+            if (rateOptions) {
+                rateOptions.innerHTML = '';
+                
+                // Create rating options (1-5 stars)
+                for (let i = 5; i >= 1; i--) {
+                    const count = appState.products.filter(p => p.rating >= i).length;
+                    const option = document.createElement('div');
+                    option.className = 'filter-option';
+                    option.innerHTML = `
+                        <input type="checkbox" class="filter-checkbox" id="rating-${i}" data-rating="${i}">
+                        <label for="rating-${i}" class="filter-label">
+                            ${'★'.repeat(i)}${'☆'.repeat(5-i)}
+                            <span class="filter-count">${count}</span>
+                        </label>
+                    `;
+                    
+                    option.querySelector('input').addEventListener('change', function() {
+                        if (this.checked) {
+                            appState.filters.ratings.push(i);
+                        } else {
+                            appState.filters.ratings = appState.filters.ratings.filter(r => r !== i);
+                        }
+                        applyFilters();
+                    });
+                    
+                    rateOptions.appendChild(option);
+                }
+            }
+        }
+
+        // Apply all filters
+        function applyFilters() {
+            console.log('🔄 Applying filters...', appState.filters);
+            
+            let filteredProducts = [...appState.products];
+            
+            // Apply URL filters first
+            if (appState.currentUsage) {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.uses && 
+                    product.uses.toLowerCase().replace(/\s+/g, '-') === appState.currentUsage.toLowerCase()
+                );
+            }
+            
+            if (appState.currentStoneName) {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.stone_name && 
+                    product.stone_name.toLowerCase().replace(/\s+/g, '-') === appState.currentStoneName.toLowerCase()
+                );
+            }
+            
+            // Apply category filters
+            if (appState.filters.categories.length > 0) {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.category && appState.filters.categories.includes(product.category)
+                );
+            }
+            
+            // Apply color filters
+            if (appState.filters.colors.length > 0) {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.color && appState.filters.colors.includes(product.color)
+                );
+            }
+            
+            // Apply price filters
+            filteredProducts = filteredProducts.filter(product => {
+                const price = parseFloat(product.price) || 0;
+                return price >= appState.filters.minPrice && price <= appState.filters.maxPrice;
+            });
+            
+            // Apply rating filters
+            if (appState.filters.ratings.length > 0) {
+                filteredProducts = filteredProducts.filter(product => {
+                    const rating = parseFloat(product.rating) || 0;
+                    return appState.filters.ratings.some(minRating => rating >= minRating);
+                });
+            }
+            
+            // Apply sorting
+            filteredProducts = sortProducts(filteredProducts, appState.sortOption);
+            
+            appState.filteredProducts = filteredProducts;
+            displayProducts();
+            updateProductsCount();
+            updateFilterCounts();
+        }
+
+        // Sort products based on selected option
+        function sortProducts(products, sortOption) {
+            const sortedProducts = [...products];
+            
+            switch(sortOption) {
+                case 'price-low':
+                    return sortedProducts.sort((a, b) => {
+                        const priceA = parseFloat(a.price) || 0;
+                        const priceB = parseFloat(b.price) || 0;
+                        return priceA - priceB;
+                    });
+                    
+                case 'price-high':
+                    return sortedProducts.sort((a, b) => {
+                        const priceA = parseFloat(a.price) || 0;
+                        const priceB = parseFloat(b.price) || 0;
+                        return priceB - priceA;
+                    });
+                    
+                case 'name':
+                    return sortedProducts.sort((a, b) => {
+                        const nameA = (a.stone_name || '').toLowerCase();
+                        const nameB = (b.stone_name || '').toLowerCase();
+                        return nameA.localeCompare(nameB);
+                    });
+                    
+                case 'rating':
+                    return sortedProducts.sort((a, b) => {
+                        const ratingA = parseFloat(a.rating) || 0;
+                        const ratingB = parseFloat(b.rating) || 0;
+                        return ratingB - ratingA;
+                    });
+                    
+                default:
+                    return sortedProducts;
+            }
+        }
+
+        // Clear all filters
+        function clearAllFilters() {
+            console.log('🔄 Clearing all filters...');
+            
+            // Reset filter state
+            appState.filters = {
+                categories: [],
+                colors: [],
+                minPrice: 0,
+                maxPrice: 1000,
+                ratings: []
+            };
+            
+            // Reset UI elements
+            const checkboxes = document.querySelectorAll('.filter-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            const priceSlider = document.getElementById('priceSlider');
+            const minPriceInput = document.getElementById('minPrice');
+            const maxPriceInput = document.getElementById('maxPrice');
+            const minPriceDisplay = document.getElementById('minPriceDisplay');
+            const maxPriceDisplay = document.getElementById('maxPriceDisplay');
+            
+            if (priceSlider && minPriceInput && maxPriceInput) {
+                priceSlider.value = 1000;
+                minPriceInput.value = 0;
+                maxPriceInput.value = 1000;
+                minPriceDisplay.textContent = '0';
+                maxPriceDisplay.textContent = '1000';
+            }
+            
+            // Reset sort option
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.value = 'default';
+                appState.sortOption = 'default';
+            }
+            
+            // Reapply filters (which will now be empty)
+            applyFilters();
+        }
+
+        // Update filter counts based on current filtered products
+        function updateFilterCounts() {
+            // Update category counts
+            const categoryOptions = document.querySelectorAll('#categoryOptions .filter-option');
+            categoryOptions.forEach(option => {
+                const checkbox = option.querySelector('input');
+                const category = checkbox.getAttribute('data-category');
+                const countSpan = option.querySelector('.filter-count');
+                
+                if (category && countSpan) {
+                    const count = appState.products.filter(p => 
+                        p.category === category && 
+                        isProductInCurrentFilter(p, { categories: [category] })
+                    ).length;
+                    
+                    countSpan.textContent = count;
+                }
+            });
+            
+            // Update color counts
+            const colorOptions = document.querySelectorAll('#colorOptions .filter-option');
+            colorOptions.forEach(option => {
+                const checkbox = option.querySelector('input');
+                const color = checkbox.getAttribute('data-color');
+                const countSpan = option.querySelector('.filter-count');
+                
+                if (color && countSpan) {
+                    const count = appState.products.filter(p => 
+                        p.color === color && 
+                        isProductInCurrentFilter(p, { colors: [color] })
+                    ).length;
+                    
+                    countSpan.textContent = count;
+                }
+            });
+            
+            // Update rating counts
+            const ratingOptions = document.querySelectorAll('#rateOptions .filter-option');
+            ratingOptions.forEach(option => {
+                const checkbox = option.querySelector('input');
+                const rating = parseInt(checkbox.getAttribute('data-rating'));
+                const countSpan = option.querySelector('.filter-count');
+                
+                if (rating && countSpan) {
+                    const count = appState.products.filter(p => {
+                        const productRating = parseFloat(p.rating) || 0;
+                        return productRating >= rating && 
+                               isProductInCurrentFilter(p, { ratings: [rating] });
+                    }).length;
+                    
+                    countSpan.textContent = count;
+                }
+            });
+        }
+
+        // Helper function to check if a product would be in current filter
+        function isProductInCurrentFilter(product, additionalFilter = {}) {
+            const combinedFilters = { ...appState.filters, ...additionalFilter };
+            
+            // Check category
+            if (combinedFilters.categories.length > 0 && 
+                (!product.category || !combinedFilters.categories.includes(product.category))) {
+                return false;
+            }
+            
+            // Check color
+            if (combinedFilters.colors.length > 0 && 
+                (!product.color || !combinedFilters.colors.includes(product.color))) {
+                return false;
+            }
+            
+            // Check price
+            const price = parseFloat(product.price) || 0;
+            if (price < combinedFilters.minPrice || price > combinedFilters.maxPrice) {
+                return false;
+            }
+            
+            // Check rating
+            if (combinedFilters.ratings.length > 0) {
+                const rating = parseFloat(product.rating) || 0;
+                if (!combinedFilters.ratings.some(minRating => rating >= minRating)) {
+                    return false;
+                }
+            }
+            
+            // Check URL filters
+            if (appState.currentUsage && 
+                (!product.uses || product.uses.toLowerCase().replace(/\s+/g, '-') !== appState.currentUsage.toLowerCase())) {
+                return false;
+            }
+            
+            if (appState.currentStoneName && 
+                (!product.stone_name || product.stone_name.toLowerCase().replace(/\s+/g, '-') !== appState.currentStoneName.toLowerCase())) {
+                return false;
+            }
+            
+            return true;
+        }
+
         // ===== CATEGORY PRODUCTS SPECIFIC FUNCTIONS =====
 
         async function initializePage() {
@@ -1366,6 +2078,7 @@
                 updatePageTitle();
                 applyAutoFilter();
                 generateUsesNavigation();
+                generateFilterOptions();
                 console.log('✅ Page initialization completed successfully!');
             } catch (error) {
                 console.error('❌ Error initializing page:', error);
@@ -1428,6 +2141,7 @@
                     console.log('🔄 Products updated in real-time:', updatedProducts.length);
                     applyAutoFilter();
                     generateUsesNavigation();
+                    generateFilterOptions();
                 });
                 
             } catch (error) {
@@ -1473,30 +2187,7 @@
         // ✅ AUTO FILTER FUNCTION
         function applyAutoFilter() {
             console.log('🔄 Applying auto filter from URL...');
-            
-            let filteredProducts = [...appState.products];
-            
-            // 1. Pehle usage filter lagao
-            if (appState.currentUsage) {
-                filteredProducts = filteredProducts.filter(product => 
-                    product.uses && 
-                    product.uses.toLowerCase().replace(/\s+/g, '-') === appState.currentUsage.toLowerCase()
-                );
-                console.log(`✅ After usage filter (${appState.currentUsage}):`, filteredProducts.length);
-            }
-            
-            // 2. Fir stone_name filter lagao (MAIN FILTER)
-            if (appState.currentStoneName) {
-                filteredProducts = filteredProducts.filter(product => 
-                    product.stone_name && 
-                    product.stone_name.toLowerCase().replace(/\s+/g, '-') === appState.currentStoneName.toLowerCase()
-                );
-                console.log(`✅ After stone name filter (${appState.currentStoneName}):`, filteredProducts.length);
-            }
-            
-            appState.filteredProducts = filteredProducts;
-            displayProducts();
-            updateProductsCount();
+            applyFilters();
         }
 
         // ✅ PERFECT 1:1 RATIO PRODUCT CARDS
@@ -1565,6 +2256,10 @@
             
             if (appState.currentUsage || appState.currentStoneName) {
                 countText += ` for ${appState.currentStoneName || appState.currentUsage || 'all categories'}`;
+            }
+            
+            if (filteredCount < baseCount) {
+                countText += ` (filtered from ${baseCount})`;
             }
             
             productsCount.textContent = countText;
@@ -1698,7 +2393,7 @@
                     stone_name: "RED SAND STONE",
                     category: "Red Sand Stone",
                     type: "Natural",
-                    color: "green",
+                    color: "Red",
                     size: "10",
                     length: "5",
                     width: "2",
@@ -1716,7 +2411,86 @@
                     email: "ravijain236129@gmail.com",
                     compressive_strength: "High",
                     images: ["https://i.ibb.co/HLpBc94R/51b7aaab131a.jpg"],
-                    pageUrl: "product-details.html?id=1"
+                    pageUrl: "product-details.html?id=1",
+                    rating: 4.5
+                },
+                {
+                    id: 2,
+                    stone_name: "WHITE MARBLE",
+                    category: "Marble",
+                    type: "Natural",
+                    color: "White",
+                    size: "12",
+                    length: "6",
+                    width: "3",
+                    thickness: "25-35 mm",
+                    uses: "Flooring",
+                    price: 150,
+                    price_unit: "sqft",
+                    description: "Elegant white marble with fine veining for luxurious interiors",
+                    density: "2.7 g/cm³",
+                    finish: "Polished",
+                    water_absorption: "Medium",
+                    rate_description: "Premium quality marble at competitive prices",
+                    factory_name: "marble works",
+                    contact_number: "+91 9876543210",
+                    email: "info@marbleworks.com",
+                    compressive_strength: "Medium",
+                    images: ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"],
+                    pageUrl: "product-details.html?id=2",
+                    rating: 4.8
+                },
+                {
+                    id: 3,
+                    stone_name: "BLACK GRANITE",
+                    category: "Granite",
+                    type: "Natural",
+                    color: "Black",
+                    size: "15",
+                    length: "7",
+                    width: "4",
+                    thickness: "30-40 mm",
+                    uses: "Countertop",
+                    price: 200,
+                    price_unit: "sqft",
+                    description: "Durable black granite perfect for kitchen countertops",
+                    density: "2.8 g/cm³",
+                    finish: "Polished",
+                    water_absorption: "Very Low",
+                    rate_description: "High-end granite with excellent durability",
+                    factory_name: "granite experts",
+                    contact_number: "+91 8765432109",
+                    email: "sales@graniteexperts.com",
+                    compressive_strength: "Very High",
+                    images: ["https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"],
+                    pageUrl: "product-details.html?id=3",
+                    rating: 4.7
+                },
+                {
+                    id: 4,
+                    stone_name: "BEIGE LIMESTONE",
+                    category: "Limestone",
+                    type: "Natural",
+                    color: "Beige",
+                    size: "11",
+                    length: "5.5",
+                    width: "2.5",
+                    thickness: "22-32 mm",
+                    uses: "Wall Cladding",
+                    price: 80,
+                    price_unit: "sqft",
+                    description: "Warm beige limestone ideal for exterior and interior walls",
+                    density: "2.5 g/cm³",
+                    finish: "Honed",
+                    water_absorption: "Medium",
+                    rate_description: "Affordable limestone with natural appeal",
+                    factory_name: "limestone quarry",
+                    contact_number: "+91 7654321098",
+                    email: "contact@limestonequarry.com",
+                    compressive_strength: "Medium",
+                    images: ["https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"],
+                    pageUrl: "product-details.html?id=4",
+                    rating: 4.3
                 }
             ];
         }
