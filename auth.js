@@ -31,7 +31,7 @@ import {
 // ===========================
 const firebaseConfig = {
   apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-  authDomain: "rj294948.github.io",
+  authDomain: "iryastone-uk.firebaseapp.com",
   projectId: "iryastone-uk",
   storageBucket: "iryastone-uk.firebasestorage.app",
   messagingSenderId: "110940910896",
