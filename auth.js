@@ -1,4 +1,4 @@
-// auth.js - Updated for IRYA STONE UK + Firebase 12.5.0
+// auth.js - FINAL FIXED VERSION for Firebase 12.5.0 (GitHub Pages Safe)
 
 // ===========================
 // Firebase Core
@@ -13,6 +13,8 @@ import {
   getFirestore,
   collection,
   addDoc,
+  setDoc,
+  doc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
@@ -25,13 +27,14 @@ import {
   signInWithEmailAndPassword,
   signOut,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
 // ===========================
-// 🔥 NEW IRYA STONE UK FIREBASE CONFIG
+// FIREBASE CONFIG
 // ===========================
 const firebaseConfig = {
   apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
@@ -43,22 +46,38 @@ const firebaseConfig = {
   measurementId: "G-6YM1FLYN48"
 };
 
-// ===========================
 // Initialize Firebase
-// ===========================
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// Google Provider
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: "select_account"
+});
 
 // ==============================================================
-//                  AUTH MANAGER
+//                    AUTH MANAGER
 // ==============================================================
 class AuthManager {
   constructor() {
     this.currentUser = null;
     this.initAuthListener();
+    this.handleGoogleRedirect();
+  }
+
+  // Handle Redirect Login Completion
+  async handleGoogleRedirect() {
+    try {
+      const result = await getRedirectResult(auth);
+      if (result && result.user) {
+        await this.createUserDocument(result.user, result.user.displayName);
+      }
+    } catch (error) {
+      console.error("Redirect error:", error);
+    }
   }
 
   initAuthListener() {
@@ -72,9 +91,7 @@ class AuthManager {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-      await updateProfile(userCredential.user, {
-        displayName: displayName
-      });
+      await updateProfile(userCredential.user, { displayName });
 
       await this.createUserDocument(userCredential.user, displayName);
 
@@ -95,14 +112,10 @@ class AuthManager {
     }
   }
 
+  // FIXED Google Login — Redirect method (GitHub safe)
   async signInWithGoogle() {
     try {
-      const result = await signInWithPopup(auth, googleprovider);
-
-      await this.createUserDocument(result.user, result.user.displayName);
-
-      return { success: true, user: result.user };
-
+      await signInWithRedirect(auth, googleProvider);
     } catch (error) {
       return { success: false, error: this.getErrorMessage(error) };
     }
@@ -112,12 +125,12 @@ class AuthManager {
     try {
       await signOut(auth);
       return { success: true };
-
     } catch (error) {
       return { success: false, error: this.getErrorMessage(error) };
     }
   }
 
+  // FIXED — No duplicate user creation
   async createUserDocument(user, displayName) {
     try {
       const userDoc = {
@@ -128,8 +141,9 @@ class AuthManager {
         lastLogin: serverTimestamp()
       };
 
-      await addDoc(collection(db, "users"), userDoc);
-      console.log("User document created");
+      await setDoc(doc(db, "users", user.uid), userDoc, { merge: true });
+
+      console.log("User document created/updated");
 
     } catch (error) {
       console.error("Error creating user document:", error);
