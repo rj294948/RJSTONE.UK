@@ -419,144 +419,140 @@
             line-height: 1.2;
         }
         
-        /* Desktop Uses Top Bar with Mega Menu - FIXED POSITION */
+        /* Desktop Uses Top Bar with Mega Menu - STICKY POSITION */
         .uses-top-bar {
             position: sticky;
-            top: 120px;
+            top: 0;
             background: #333;
             padding: 0;
-            z-index: 998;
+            z-index: 999;
             transition: top 0.3s ease;
-            height: 44px;
-            display: flex;
-            align-items: center;
         }
         
         .uses-container {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            width: 100%;
-            position: relative;
         }
         
         .use-item {
-            flex: 1;
-            min-width: 110px;
-            position: relative;
-            height: 44px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .use-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-decoration: none;
-            padding: 0 15px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            height: 100%;
-            width: 100%;
-            position: relative;
-            z-index: 999;
-        }
+    flex: 1;
+    min-width: 110px;
+    position: relative;
+    overflow: visible;
+}
+
+.use-link {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 12px 8px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: relative;
+    z-index: 2;
+}
         
         .use-link:hover {
             background: #b8860b;
         }
         
-        /* Mega Menu Styles - FIXED POSITIONING */
-        .mega-menu {
-            position: absolute;
-            top: 44px !important; /* Uses bar ke neeche */
-            left: 0;
-            width: 100vw;
-            background: white;
-            z-index: 997;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            display: none;
-            padding: 25px 0;
-            margin-left: 50%;
-            transform: translateX(-50%);
-            overflow: hidden;
-        }
+        /* Mega Menu Styles - UPDATED FOR FULL WIDTH */
+      .mega-menu {
+        position: fixed;
+        top: 120px;
+        left: 0;
+        width: 100%;
+        height: auto;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        margin-left: 0;
+        transform: none;
+    }
+}
+
         
         .use-item:hover .mega-menu {
             display: block;
-            top: 44px !important;
         }
         
-        .patterns-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 15px;
-            padding: 0 15px;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
+       .patterns-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 15px;
+    padding: 0 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    overflow: visible;
+}
         
         .pattern-item {
-            text-align: center;
-            cursor: pointer;
-            text-decoration: none;
-            color: #333;
-            display: block;
-            width: 100%;
-        }
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: #333;
+    display: block;
+    width: 100%;
+    overflow: hidden;
+}
 
-        .pattern-image {
-            width: 100%;
-            height: 160px;
-            background-size: contain !important;
-            background-position: center !important;
-            background-repeat: no-repeat !important;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            transition: transform 0.3s ease;
-            background-color: #ffffff !important;
-            border: 1px solid #eaeaea;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
+.pattern-image {
+    width: 100%;
+    height: 160px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: transform 0.3s ease;
+    box-sizing: border-box;
+   
+}
 
-        .pattern-item:hover .pattern-image {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+.pattern-item:hover .pattern-image {
+    transform: scale(1.05);
+}
+.patterns-grid .pattern-image {
+    background-color: #ffffff !important;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    min-height: 160px;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
 
-        .pattern-name {
-            font-size: 13px;
-            color: #333;
-            font-weight: 500;
-            padding: 0 5px;
-            text-align: center;
-            word-wrap: break-word;
-            white-space: normal;
-        }
-        
-        /* White layer overlay on hover */
-        .pattern-item:hover .pattern-image::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            pointer-events: none;
-        }
-        
+.pattern-name {
+    font-size: 13px;
+    color: #333;
+    font-weight: 500;
+    padding: 0 5px;
+    text-align: center;
+    word-wrap: break-word;
+    white-space: normal;
+}
+/* White layer overlay on hover */
+.pattern-item:hover .pattern-image::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    pointer-events: none;
+}     
         /* ===== MOBILE SIDEBAR MENU ===== */
         .mobile-uses-menu {
             position: fixed;
             top: 0;
-            left: -320px;
+            left: -320px; /* Hide off-screen */
             width: 300px;
             height: 100vh;
             background: white;
@@ -643,7 +639,6 @@
             display: block;
         }
         
-        /* MOBILE: 2 images per row */
         .mobile-pattern-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -658,18 +653,17 @@
         
         .mobile-pattern-image {
             width: 100%;
-            height: 100px;
-            background-size: contain;
+            height: 80px;
+            background-size: contain; /* Full image show */
             background-position: center;
             background-repeat: no-repeat;
             border-radius: 5px;
             margin-bottom: 5px;
-            background-color: #ffffff;
-            border: 1px solid #eaeaea;
+            background-color: #f0f0f0;
         }
         
         .mobile-pattern-name {
-            font-size: 11px;
+            font-size: 12px;
             text-align: center;
             color: #333;
             font-weight: 500;
@@ -826,7 +820,7 @@
             line-height: 1.5;
         }
         
-        /* Uses Categories Section */
+        /* Uses Categories Section - UPDATED FOR 100% IMAGES */
         .uses-categories {
             padding: 50px 0;
             background: white;
@@ -876,13 +870,13 @@
         .use-category-image {
             width: 100%;
             height: 200px;
-            background-size: contain;
+            background-size: contain; /* Full image show without cropping */
             background-position: center;
             background-repeat: no-repeat;
             border-radius: 10px;
             margin-bottom: 15px;
             transition: transform 0.3s;
-            background-color: #f8f9fa;
+            background-color: #f8f9fa; /* Background color for better visibility */
         }
 
         .use-category-link:hover .use-category-image {
@@ -1042,10 +1036,10 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            .patterns-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
+            patterns-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
 
         @media (max-width: 768px) {
             body {
@@ -1105,11 +1099,18 @@
             }
             
             .patterns-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .use-category-image {
                 height: 180px;
+            }
+            
+            /* Mega menu full width on mobile */
+            .mega-menu {
+                width: 100vw;
+                left: 50%;
+                transform: translateX(-50%);
             }
         }
 
@@ -1127,24 +1128,19 @@
             }
             
             .patterns-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr;
             }
             
             .section-title {
                 font-size: 24px;
             }
             
+            .mobile-pattern-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .mobile-uses-menu {
                 width: 280px;
-            }
-            
-            /* Mobile pattern grid - 2 images per row */
-            .mobile-pattern-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .mobile-pattern-image {
-                height: 80px;
             }
         }
     </style>
@@ -1587,11 +1583,11 @@
                                                     p.stone_name === stoneName
                                                 );
                                                 const imageUrl = stoneProduct?.images?.[0] || 
-                                                    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                                                    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80';
                                                 
                                                 return `
                                                     <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="pattern-item" data-usage="${usage}" data-stone="${stoneName}">
-                                                        <div class="pattern-image" style="background-image: url('${imageUrl}'); background-color: #ffffff;"></div>
+                                                        <div class="pattern-image" style="background-image: url('${imageUrl}')"></div>
                                                         <div class="pattern-name">${stoneName}</div>
                                                     </a>
                                                 `;
@@ -1644,7 +1640,7 @@
                                 p.uses && p.uses.toLowerCase() === usage.toLowerCase()
                             );
                             const imageUrl = usageProduct?.images?.[0] || 
-                                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80';
                             
                             const usageSlug = usage.toLowerCase().replace(/\s+/g, '-');
                             
@@ -1660,89 +1656,95 @@
                         });
                     }
                     
-                    // Initialize mega menu functionality - FIXED VERSION
-                    function initializeMegaMenu() {
-                        console.log('🔄 Initializing Mega Menu...');
-                        
-                        const usesTopBar = document.querySelector('.uses-top-bar');
-                        const useItems = document.querySelectorAll('.use-item');
-                        
-                        if (!usesTopBar) {
-                            console.log('❌ Mega Menu container not found');
-                            return;
-                        }
-                        
-                        useItems.forEach((item) => {
-                            const megaMenu = item.querySelector('.mega-menu');
-                            const useLink = item.querySelector('.use-link');
-                            
-                            if (megaMenu && useLink) {
-                                // Mouse enter - show menu
-                                item.addEventListener('mouseenter', () => {
-                                    // Hide all other mega menus
-                                    document.querySelectorAll('.mega-menu').forEach(menu => {
-                                        if (menu !== megaMenu) {
-                                            menu.style.display = 'none';
-                                        }
-                                    });
-                                    
-                                    // Position correctly
-                                    megaMenu.style.width = '100vw';
-                                    megaMenu.style.left = '0';
-                                    megaMenu.style.marginLeft = '50%';
-                                    megaMenu.style.transform = 'translateX(-50%)';
-                                    megaMenu.style.top = '44px';
-                                    megaMenu.style.display = 'block';
-                                    megaMenu.style.zIndex = '997';
-                                    
-                                    // Highlight the link
-                                    useLink.style.backgroundColor = '#b8860b';
-                                });
-                                
-                                // Mouse leave - hide menu after delay
-                                item.addEventListener('mouseleave', (e) => {
-                                    const relatedTarget = e.relatedTarget;
-                                    if (!megaMenu.contains(relatedTarget)) {
-                                        setTimeout(() => {
-                                            if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
-                                                megaMenu.style.display = 'none';
-                                                useLink.style.backgroundColor = '';
-                                            }
-                                        }, 150);
-                                    }
-                                });
-                                
-                                // Mega menu mouse events
-                                megaMenu.addEventListener('mouseenter', () => {
-                                    megaMenu.style.display = 'block';
-                                    useLink.style.backgroundColor = '#b8860b';
-                                });
-                                
-                                megaMenu.addEventListener('mouseleave', () => {
-                                    setTimeout(() => {
-                                        if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
-                                            megaMenu.style.display = 'none';
-                                            useLink.style.backgroundColor = '';
-                                        }
-                                    }, 150);
-                                });
-                            }
-                        });
-                        
-                        // Close all mega menus when clicking outside
-                        document.addEventListener('click', (event) => {
-                            if (!usesTopBar.contains(event.target)) {
-                                document.querySelectorAll('.mega-menu').forEach(menu => {
-                                    menu.style.display = 'none';
-                                });
-                                document.querySelectorAll('.use-link').forEach(link => {
-                                    link.style.backgroundColor = '';
-                                });
-                            }
-                        });
-                        
-                        console.log('✅ Mega Menu initialization complete');
+                    // Initialize mega menu functionality - UPDATED FOR FULL WIDTH
+                   // Initialize mega menu functionality - FIXED FOR FULL WIDTH
+function initializeMegaMenu() {
+    console.log('🔄 Initializing Mega Menu...');
+    
+    const usesTopBar = document.querySelector('.uses-top-bar');
+    const useItems = document.querySelectorAll('.use-item');
+    
+    if (!usesTopBar) {
+        console.log('❌ Mega Menu container not found');
+        return;
+    }
+    
+    useItems.forEach((item) => {
+        const megaMenu = item.querySelector('.mega-menu');
+        
+        if (megaMenu) {
+            // Calculate correct position
+            function positionMegaMenu() {
+                const rect = item.getBoundingClientRect();
+                const containerWidth = usesTopBar.offsetWidth;
+                
+                // Center the mega menu relative to the use item
+                megaMenu.style.width = '100vw';
+                megaMenu.style.left = '0';
+                megaMenu.style.marginLeft = '50%';
+                megaMenu.style.transform = 'translateX(-50%)';
+            }
+            
+            // Mouse enter - show menu
+            item.addEventListener('mouseenter', () => {
+                // Position correctly first
+                positionMegaMenu();
+                
+                // Hide all other mega menus
+                document.querySelectorAll('.mega-menu').forEach(menu => {
+                    if (menu !== megaMenu) {
+                        menu.style.display = 'none';
                     }
+                });
+                // Show current mega menu
+                megaMenu.style.display = 'block';
+            });
+            
+            // Mouse leave - hide menu after delay
+            item.addEventListener('mouseleave', (e) => {
+                const relatedTarget = e.relatedTarget;
+                if (!megaMenu.contains(relatedTarget)) {
+                    setTimeout(() => {
+                        if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
+                            megaMenu.style.display = 'none';
+                        }
+                    }, 150);
+                }
+            });
+            
+            // Mega menu mouse events
+            megaMenu.addEventListener('mouseenter', () => {
+                megaMenu.style.display = 'block';
+            });
+            
+            megaMenu.addEventListener('mouseleave', () => {
+                setTimeout(() => {
+                    if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
+                        megaMenu.style.display = 'none';
+                    }
+                }, 150);
+            });
+        }
+    });
+    
+    // Recalculate on window resize
+    window.addEventListener('resize', function() {
+        document.querySelectorAll('.mega-menu').forEach(menu => {
+            menu.style.display = 'none';
+        });
+    });
+    
+    // Close all mega menus when clicking outside
+    document.addEventListener('click', (event) => {
+        if (!usesTopBar.contains(event.target)) {
+            document.querySelectorAll('.mega-menu').forEach(menu => {
+                menu.style.display = 'none';
+            });
+        }
+    });
+    
+    console.log('✅ Mega Menu initialization complete');
+}
                     
                     // Function to generate mobile uses menu (sidebar)
                     function generateMobileUsesMenu() {
@@ -1792,11 +1794,11 @@
                                                     p.stone_name === stoneName
                                                 );
                                                 const imageUrl = stoneProduct?.images?.[0] || 
-                                                    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                                                    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80';
                                                 
                                                 return `
                                                     <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="mobile-pattern-item">
-                                                        <div class="mobile-pattern-image" style="background-image: url('${imageUrl}'); background-size: contain; background-color: #ffffff;"></div>
+                                                        <div class="mobile-pattern-image" style="background-image: url('${imageUrl}'); background-size: contain;"></div>
                                                         <div class="mobile-pattern-name">${stoneName}</div>
                                                     </a>
                                                 `;
@@ -2085,4 +2087,4 @@
         }
     </script>
 </body>
-</html>
+</html> 
