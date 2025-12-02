@@ -80,6 +80,13 @@ class AuthManager {
   }
 
   // ===========================
+  // Check if user logged in (ADDED FIX)
+  // ===========================
+  isAuthenticated() {
+    return this.currentUser !== null;
+  }
+
+  // ===========================
   // Email Password Signup
   // ===========================
   async signUp(email, password, displayName) {
@@ -118,7 +125,7 @@ class AuthManager {
   }
 
   // ===========================
-  // GOOGLE POPUP LOGIN (FIXED)
+  // GOOGLE POPUP LOGIN (100% FIXED)
   // ===========================
   async signInWithGoogle() {
     try {
