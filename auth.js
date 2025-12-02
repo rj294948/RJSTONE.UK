@@ -97,7 +97,7 @@ class AuthManager {
 
   async signInWithGoogle() {
     try {
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, googleprovider);
 
       await this.createUserDocument(result.user, result.user.displayName);
 
