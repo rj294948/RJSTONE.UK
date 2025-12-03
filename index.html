@@ -432,7 +432,7 @@
             justify-content: center;
         }
         
-        /* Desktop Uses Top Bar with Mega Menu - FIXED FOR PROPER ROW LAYOUT */
+        /* Desktop Uses Top Bar with Mega Menu - NO SLIDING, AUTO ADJUST */
         .uses-top-bar {
             position: fixed;
             top: 125px; /* Default: Header ke niche */
@@ -445,8 +445,6 @@
             display: flex;
             align-items: center;
             transition: top 0.4s ease; /* Smooth transition */
-            overflow-x: auto; /* Horizontal scroll agar links zyada ho */
-            white-space: nowrap; /* Links ek line mein rahen */
         }
         
         /* When header is hidden, uses bar moves to top */
@@ -456,28 +454,26 @@
         
         .uses-container {
             display: flex;
-            justify-content: flex-start; /* Links left align */
-            flex-wrap: nowrap; /* No wrapping - single row */
+            justify-content: space-between;
             width: 100%;
-            min-width: max-content; /* Container width based on content */
         }
         
         .use-item {
-            flex-shrink: 0; /* Prevent items from shrinking */
+            flex: 1;
             position: relative;
             height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 120px; /* Minimum width for each item */
+            text-align: center;
         }
 
         .use-link {
             display: block;
             color: white;
             text-decoration: none;
-            padding: 12px 15px;
-            font-size: 13px;
+            padding: 12px 5px;
+            font-size: 12px;
             font-weight: 500;
             text-align: center;
             cursor: pointer;
@@ -489,9 +485,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            white-space: nowrap; /* Text ek line mein */
-            overflow: hidden; /* Overflow hide */
-            text-overflow: ellipsis; /* ... agar text lamba ho */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .use-link:hover {
@@ -1325,13 +1321,10 @@
                 grid-template-columns: repeat(3, 1fr);
             }
             
-            /* Uses bar for tablet */
-            .uses-top-bar {
-                overflow-x: auto;
-            }
-            
-            .use-item {
-                min-width: 110px;
+            /* Uses bar for tablet - font size adjust */
+            .use-link {
+                font-size: 11px;
+                padding: 12px 3px;
             }
         }
 
@@ -1366,6 +1359,20 @@
             .user-actions {
                 order: 3;
                 flex: none;
+            }
+            
+            /* Dynamic font size for uses bar based on number of items */
+            .use-link {
+                font-size: calc(13px - (var(--item-count) * 0.5px));
+                padding: 12px calc(5px + (var(--item-count) * 0.2px));
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 360px) {
+            .use-link {
+                font-size: 10px;
+                padding: 12px 2px;
             }
         }
     </style>
@@ -1673,7 +1680,7 @@
                     // Initialize authentication
                     initializeAuth();
                     
-                    // Initialize scroll behavior - FIXED VERSION
+                    // Initialize scroll behavior - FIXED: Scroll up par header show nahi hoga
                     initializeScrollBehavior();
                     
                     // Initialize mobile menu
@@ -1762,7 +1769,7 @@
                         return uniqueUses;
                     }
                     
-                    // Function to generate desktop uses navigation - FIXED FOR SINGLE ROW
+                    // Function to generate desktop uses navigation - FIXED: No sliding, auto adjust
                     function generateUsesNavigation() {
                         const usesContainer = document.getElementById('dynamicUsesContainer');
                         if (!usesContainer) return;
@@ -1781,6 +1788,9 @@
                             `;
                             return;
                         }
+                        
+                        // Set CSS variable for item count to adjust font size dynamically
+                        usesContainer.style.setProperty('--item-count', uniqueUses.length);
                         
                         uniqueUses.forEach(usage => {
                             const usageKey = usage.toLowerCase().replace(/\s+/g, '-');
@@ -1831,8 +1841,43 @@
                             usesContainer.appendChild(useItem);
                         });
                         
+                        // Calculate and adjust font sizes dynamically based on number of items
+                        adjustUsesBarFontSize(uniqueUses.length);
+                        
                         // Initialize mega menu functionality
                         initializeMegaMenu();
+                    }
+                    
+                    // Function to adjust font size based on number of items
+                    function adjustUsesBarFontSize(itemCount) {
+                        const useLinks = document.querySelectorAll('.use-link');
+                        const containerWidth = document.querySelector('.uses-container').offsetWidth;
+                        const availableWidth = containerWidth / itemCount;
+                        
+                        // Calculate optimal font size
+                        let fontSize = 12;
+                        let padding = 5;
+                        
+                        if (itemCount > 10) {
+                            fontSize = 11;
+                            padding = 3;
+                        }
+                        
+                        if (itemCount > 15) {
+                            fontSize = 10;
+                            padding = 2;
+                        }
+                        
+                        if (availableWidth < 100) {
+                            fontSize = Math.max(10, fontSize - 1);
+                            padding = Math.max(2, padding - 1);
+                        }
+                        
+                        // Apply to all links
+                        useLinks.forEach(link => {
+                            link.style.fontSize = fontSize + 'px';
+                            link.style.padding = '12px ' + padding + 'px';
+                        });
                     }
                     
                     // Function to update categories section with 100% images
@@ -2090,33 +2135,31 @@
                         }, 100);
                     }
                     
-                    // Initialize scroll behavior - COMPLETELY REWRITTEN FOR PROPER HEADER SHOW/HIDE
+                    // Initialize scroll behavior - FIXED: Scroll up par header show nahi hoga
                     function initializeScrollBehavior() {
                         const header = document.getElementById('mainHeader');
                         let lastScrollY = window.scrollY;
                         let ticking = false;
-                        let isHeaderHidden = false;
                         
                         function updateHeader() {
                             const currentScrollY = window.scrollY;
                             
-                            // Jab page top par ho (0-50px), to header hamesha show rahe
-                            if (currentScrollY <= 50) {
-                                header.classList.remove('hidden');
-                                header.classList.add('visible');
-                                isHeaderHidden = false;
-                            } 
-                            // Jab scroll down ho raha ho aur header already hidden nahi hai
-                            else if (currentScrollY > lastScrollY && !isHeaderHidden) {
+                            // Only hide on scroll down (not on scroll up)
+                            if (currentScrollY > lastScrollY && currentScrollY > 50) {
+                                // Scrolling down - hide header
                                 header.classList.add('hidden');
                                 header.classList.remove('visible');
-                                isHeaderHidden = true;
-                            } 
-                            // Jab scroll up ho raha ho aur header hidden hai
-                            else if (currentScrollY < lastScrollY && isHeaderHidden) {
+                                
+                                // Hide all mega menus when scrolling
+                                document.querySelectorAll('.mega-menu').forEach(menu => {
+                                    menu.style.display = 'none';
+                                });
+                            }
+                            // DO NOT show on scroll up - only show when at top
+                            else if (currentScrollY <= 50) {
+                                // At top of page - show header
                                 header.classList.remove('hidden');
                                 header.classList.add('visible');
-                                isHeaderHidden = false;
                             }
                             
                             lastScrollY = currentScrollY;
