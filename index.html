@@ -461,37 +461,30 @@
         }
         
         /* Mega Menu Styles - UPDATED FOR FULL WIDTH */
-     .mega-menu {
+   .mega-menu {
     position: absolute;
     top: 100%;
-    /* 'left' और 'width' को हटा दें या बदल दें ताकि यह कंटेनर के अंदर रहे */
-    /* यदि आप इसे पूरे '.uses-top-bar' की चौड़ाई का रखना चाहते हैं, तो: */
-    left: 0;
-    width: 100%; /* यह पेरेंट (.use-item) के 100% चौड़ा होगा */
+    left: 50%; /* Center relative to the parent item, not the whole screen */
+    width: 100%; /* Default width is 100% of the parent .use-item (before JS intervention) */
     
-    /* ... बाकी स्टाइल्स */
-    background: white;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    padding: 25px 0;
-    z-index: 997;
-    display: none;
-    border-top: 3px solid #b8860b;
+    /* The JavaScript will override these, but setting them initially helps. */
+    /* ... other styles ... */
+    
+    /* Crucial: Ensure the items inside the grid don't exceed the main content area */
+    max-width: 1200px; /* Or whatever your site's maximum width is */
 }
 }
-
-        
-        .use-item:hover .mega-menu {
+    .use-item:hover .mega-menu {
             display: block;
         }
         
-      .patterns-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 15px;
-    max-width: 1200px; /* आपके मुख्य कंटेनर की चौड़ाई */
-    width: 95%; /* अधिकतम चौड़ाई का प्रतिशत */
-    margin: 0 auto; /* ग्रिड को सेंटर में लाने के लिए */
+     /* Also check your patterns-grid */
+.patterns-grid {
+    /* Use max-width and margin: 0 auto; to center the content inside the mega-menu */
+    max-width: 1200px; 
+    margin: 0 auto; 
     padding: 0 15px;
+    /* ... other grid styles ... */
 }
         
         .pattern-item {
@@ -1663,7 +1656,7 @@
                     // Initialize mega menu functionality - UPDATED FOR FULL WIDTH
                    // Initialize mega menu functionality - FIXED FOR FULL WIDTH
 function initializeMegaMenu() {
-    console.log('🔄 Initializing Mega Menu (Adjusted for Container Fit)...');
+    console.log('🔄 Initializing Mega Menu (Final Container Fit Adjustment)...');
     
     const usesTopBar = document.querySelector('.uses-top-bar');
     const useItems = document.querySelectorAll('.use-item');
@@ -1673,42 +1666,49 @@ function initializeMegaMenu() {
         return;
     }
     
-    // 💡 Step 1: Find the main content container for alignment
-    const mainContainer = usesTopBar.querySelector('.container'); // Assuming your main content container has the class 'container'
-    if (!mainContainer) {
-        console.error('❌ Main content container (.container) not found inside .uses-top-bar. Mega menu positioning may be incorrect.');
-        return; // Exit if the container cannot be found for proper alignment
-    }
-
+    // Find the main content container for alignment
+    const mainContainer = usesTopBar.querySelector('.container');
+    
     useItems.forEach((item) => {
         const megaMenu = item.querySelector('.mega-menu');
         
         if (megaMenu) {
-            // 💡 Step 2: Update the positioning function
+            // Calculate correct position
             function positionMegaMenu() {
-                // Get the bounding rectangles of the key elements
-                const mainContainerRect = mainContainer.getBoundingClientRect();
-                const usesTopBarRect = usesTopBar.getBoundingClientRect();
                 
-                // Set the Mega Menu's width to match the main container's width
-                megaMenu.style.width = `${mainContainerRect.width}px`;
-                
-                // Calculate the 'left' position: 
-                // Position relative to the usesTopBar's left edge
-                // = (mainContainer's distance from viewport left) - (usesTopBar's distance from viewport left)
-                const newLeft = mainContainerRect.left - usesTopBarRect.left;
-                
-                megaMenu.style.left = `${newLeft}px`;
-                
-                // Crucial: Remove the old centering styles that caused overflow
-                megaMenu.style.marginLeft = '0';
-                megaMenu.style.transform = 'none';
+                // --- CORE FIX LOGIC ---
+                if (mainContainer) {
+                    const mainContainerRect = mainContainer.getBoundingClientRect();
+                    const usesTopBarRect = usesTopBar.getBoundingClientRect();
+                    
+                    // 1. Set the Mega Menu's width to match the main container's width
+                    megaMenu.style.width = `${mainContainerRect.width}px`;
+                    
+                    // 2. Calculate the 'left' position relative to usesTopBar
+                    // This aligns the mega menu's left edge with the mainContainer's left edge
+                    const newLeft = mainContainerRect.left - usesTopBarRect.left;
+                    
+                    megaMenu.style.left = `${newLeft}px`;
+                    
+                    // 3. Remove any old centering/shifting styles
+                    megaMenu.style.marginLeft = '0';
+                    megaMenu.style.transform = 'none';
+                    
+                } else {
+                    // Fallback if .container is not found (avoids 100vw)
+                    console.warn('⚠️ .container not found. Mega Menu may not align perfectly.');
+                    megaMenu.style.width = '100%'; // Maximize within the parent .use-item
+                    megaMenu.style.left = '0';
+                    megaMenu.style.marginLeft = '0';
+                    megaMenu.style.transform = 'none';
+                }
+                // --- END CORE FIX LOGIC ---
             }
             
             // Mouse enter - show menu
             item.addEventListener('mouseenter', () => {
-                // Position correctly first
                 positionMegaMenu();
+                // ... (rest of the logic remains the same)
                 
                 // Hide all other mega menus
                 document.querySelectorAll('.mega-menu').forEach(menu => {
@@ -1716,11 +1716,10 @@ function initializeMegaMenu() {
                         menu.style.display = 'none';
                     }
                 });
-                // Show current mega menu
                 megaMenu.style.display = 'block';
             });
             
-            // Mouse leave - hide menu after delay
+            // ... (Mouse leave and other event listeners remain the same)
             item.addEventListener('mouseleave', (e) => {
                 const relatedTarget = e.relatedTarget;
                 if (!megaMenu.contains(relatedTarget)) {
@@ -1732,7 +1731,6 @@ function initializeMegaMenu() {
                 }
             });
             
-            // Mega menu mouse events
             megaMenu.addEventListener('mouseenter', () => {
                 megaMenu.style.display = 'block';
             });
@@ -1747,13 +1745,11 @@ function initializeMegaMenu() {
         }
     });
     
-    // Recalculate on window resize - IMPORTANT
+    // Recalculate on window resize (Important to ensure proper positioning on resize)
     window.addEventListener('resize', function() {
-        // Hide all menus initially when resizing
         document.querySelectorAll('.mega-menu').forEach(menu => {
             menu.style.display = 'none';
         });
-        // You should re-call positionMegaMenu() on 'mouseenter' to get the new sizes
     });
     
     // Close all mega menus when clicking outside
