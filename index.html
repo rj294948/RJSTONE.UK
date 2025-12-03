@@ -47,9 +47,14 @@
             left: 0;
             width: 100%;
             z-index: 1000;
-            transition: transform 0.4s ease;
+            transition: transform 0.4s ease, height 0.3s ease;
             margin-top: 0;
             padding-top: 0;
+            height: 120px;
+        }
+        
+        header.scrolled {
+            height: 60px;
         }
         
         header.hidden {
@@ -62,6 +67,11 @@
         
         .main-header {
             padding: 5px 0;
+            transition: padding 0.3s ease;
+        }
+        
+        header.scrolled .main-header {
+            padding: 0;
         }
         
         .header-content {
@@ -79,6 +89,11 @@
             font-size: 24px;
             color: #333;
             font-weight: 700;
+            transition: font-size 0.3s ease;
+        }
+        
+        header.scrolled .logo h1 {
+            font-size: 20px;
         }
         
         .logo span {
@@ -91,6 +106,11 @@
             padding: 0 10px;
             margin-top: 0;
             padding-top: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        header.scrolled .trust-info {
+            display: none;
         }
         
         .trust-info-content {
@@ -417,137 +437,171 @@
             font-weight: 500;
             margin: 0;
             line-height: 1.2;
+            transition: all 0.3s ease;
         }
         
-        /* Desktop Uses Top Bar with Mega Menu - STICKY POSITION */
+        header.scrolled .banner-text {
+            display: none;
+        }
+        
+        /* ===== DESKTOP USES TOP BAR WITH MEGA MENU - FIXED ===== */
         .uses-top-bar {
             position: sticky;
-            top: 0;
+            top: 120px;
             background: #333;
             padding: 0;
-            z-index: 999;
+            z-index: 998;
             transition: top 0.3s ease;
+            border-top: 1px solid #444;
+        }
+        
+        body.header-scrolled .uses-top-bar {
+            top: 60px;
         }
         
         .uses-container {
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            overflow: visible;
         }
         
         .use-item {
-    flex: 1;
-    min-width: 110px;
-    position: relative;
-    overflow: visible;
-}
+            flex: 1;
+            min-width: 110px;
+            position: relative;
+            overflow: visible;
+        }
 
-.use-link {
-    display: block;
-    color: white;
-    text-decoration: none;
-    padding: 12px 8px;
-    font-size: 13px;
-    font-weight: 500;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    position: relative;
-    z-index: 2;
-}
+        .use-link {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 8px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+            z-index: 999;
+            white-space: nowrap;
+        }
         
         .use-link:hover {
             background: #b8860b;
         }
         
-        /* Mega Menu Styles - UPDATED FOR FULL WIDTH */
-      .mega-menu {
-        position: fixed;
-        top: 120px;
-        left: 0;
-        width: 100%;
-        height: auto;
-        max-height: calc(100vh - 120px);
-        overflow-y: auto;
-        margin-left: 0;
-        transform: none;
-    }
-}
+        /* Mega Menu Styles - UPDATED FOR PROPER POSITIONING */
+        .mega-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 0 0 10px 10px;
+            padding: 25px 0;
+            z-index: 997;
+            display: none;
+            border-top: 3px solid #b8860b;
+            animation: fadeInDown 0.3s ease;
+        }
 
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
         
         .use-item:hover .mega-menu {
             display: block;
         }
         
-       .patterns-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 15px;
-    padding: 0 15px;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-    overflow: visible;
-}
+        /* Full width mega menu background */
+        .mega-menu-background {
+            position: fixed;
+            top: 120px;
+            left: 0;
+            width: 100vw;
+            background: white;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 996;
+            padding: 25px 0;
+            border-top: 3px solid #b8860b;
+        }
+        
+        body.header-scrolled .mega-menu-background {
+            top: 60px;
+        }
+        
+        .use-item:hover .mega-menu-background {
+            display: block;
+        }
+        
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            position: relative;
+            z-index: 997;
+        }
         
         .pattern-item {
-    text-align: center;
-    cursor: pointer;
-    text-decoration: none;
-    color: #333;
-    display: block;
-    width: 100%;
-    overflow: hidden;
-}
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+            display: block;
+            width: 100%;
+            overflow: hidden;
+        }
 
-.pattern-image {
-    width: 100%;
-    height: 160px;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    border-radius: 6px;
-    margin-bottom: 8px;
-    transition: transform 0.3s ease;
-    box-sizing: border-box;
-   
-}
+        .pattern-image {
+            width: 100%;
+            height: 160px;
+            background-size: contain !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: transform 0.3s ease;
+            background-color: #ffffff !important;
+            border: 1px solid #e9ecef;
+        }
 
-.pattern-item:hover .pattern-image {
-    transform: scale(1.05);
-}
-.patterns-grid .pattern-image {
-    background-color: #ffffff !important;
-    background-size: contain !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    min-height: 160px;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-.pattern-name {
-    font-size: 13px;
-    color: #333;
-    font-weight: 500;
-    padding: 0 5px;
-    text-align: center;
-    word-wrap: break-word;
-    white-space: normal;
-}
-/* White layer overlay on hover */
-.pattern-item:hover .pattern-image::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    pointer-events: none;
-}     
+        .pattern-item:hover .pattern-image {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pattern-name {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+            padding: 0 5px;
+            text-align: center;
+            word-wrap: break-word;
+            white-space: normal;
+            transition: color 0.3s;
+        }
+        
+        .pattern-item:hover .pattern-name {
+            color: #b8860b;
+        }
+        
         /* ===== MOBILE SIDEBAR MENU ===== */
         .mobile-uses-menu {
             position: fixed;
@@ -654,7 +708,7 @@
         .mobile-pattern-image {
             width: 100%;
             height: 80px;
-            background-size: contain; /* Full image show */
+            background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
             border-radius: 5px;
@@ -870,13 +924,13 @@
         .use-category-image {
             width: 100%;
             height: 200px;
-            background-size: contain; /* Full image show without cropping */
+            background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
             border-radius: 10px;
             margin-bottom: 15px;
             transition: transform 0.3s;
-            background-color: #f8f9fa; /* Background color for better visibility */
+            background-color: #f8f9fa;
         }
 
         .use-category-link:hover .use-category-image {
@@ -1015,6 +1069,17 @@
         }
 
         /* Responsive Design */
+        @media (max-width: 1200px) {
+            .patterns-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .uses-container {
+                max-width: 100%;
+                padding: 0 15px;
+            }
+        }
+
         @media (max-width: 1024px) {
             .hero h1 {
                 font-size: 32px;
@@ -1036,10 +1101,20 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            patterns-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
+            .patterns-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .patterns-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .use-category-image {
+                height: 180px;
+            }
+        }
 
         @media (max-width: 768px) {
             body {
@@ -1102,15 +1177,8 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            .use-category-image {
-                height: 180px;
-            }
-            
-            /* Mega menu full width on mobile */
-            .mega-menu {
-                width: 100vw;
-                left: 50%;
-                transform: translateX(-50%);
+            .mega-menu-background {
+                display: none !important;
             }
         }
 
@@ -1141,6 +1209,10 @@
             
             .mobile-uses-menu {
                 width: 280px;
+            }
+            
+            .use-category-image {
+                height: 150px;
             }
         }
     </style>
@@ -1259,7 +1331,7 @@
         </div>
     </header>
 
-    <!-- Desktop Uses Top Bar with Mega Menu - BELOW HEADER -->
+    <!-- Desktop Uses Top Bar with Mega Menu - FIXED VERSION -->
     <div class="uses-top-bar" id="desktopUsesBar">
         <div class="container uses-container" id="dynamicUsesContainer">
             <!-- Dynamic uses will be loaded here -->
@@ -1269,6 +1341,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Mega Menu Full Width Background -->
+    <div class="mega-menu-background" id="megaMenuBackground"></div>
 
     <!-- ===== MAIN CONTENT ===== -->
     <div class="main-content">
@@ -1535,7 +1610,7 @@
                         return uniqueUses;
                     }
                     
-                    // Function to generate desktop uses navigation
+                    // Function to generate desktop uses navigation - UPDATED
                     function generateUsesNavigation() {
                         const usesContainer = document.getElementById('dynamicUsesContainer');
                         if (!usesContainer) return;
@@ -1656,95 +1731,115 @@
                         });
                     }
                     
-                    // Initialize mega menu functionality - UPDATED FOR FULL WIDTH
-                   // Initialize mega menu functionality - FIXED FOR FULL WIDTH
-function initializeMegaMenu() {
-    console.log('🔄 Initializing Mega Menu...');
-    
-    const usesTopBar = document.querySelector('.uses-top-bar');
-    const useItems = document.querySelectorAll('.use-item');
-    
-    if (!usesTopBar) {
-        console.log('❌ Mega Menu container not found');
-        return;
-    }
-    
-    useItems.forEach((item) => {
-        const megaMenu = item.querySelector('.mega-menu');
-        
-        if (megaMenu) {
-            // Calculate correct position
-            function positionMegaMenu() {
-                const rect = item.getBoundingClientRect();
-                const containerWidth = usesTopBar.offsetWidth;
-                
-                // Center the mega menu relative to the use item
-                megaMenu.style.width = '100vw';
-                megaMenu.style.left = '0';
-                megaMenu.style.marginLeft = '50%';
-                megaMenu.style.transform = 'translateX(-50%)';
-            }
-            
-            // Mouse enter - show menu
-            item.addEventListener('mouseenter', () => {
-                // Position correctly first
-                positionMegaMenu();
-                
-                // Hide all other mega menus
-                document.querySelectorAll('.mega-menu').forEach(menu => {
-                    if (menu !== megaMenu) {
-                        menu.style.display = 'none';
-                    }
-                });
-                // Show current mega menu
-                megaMenu.style.display = 'block';
-            });
-            
-            // Mouse leave - hide menu after delay
-            item.addEventListener('mouseleave', (e) => {
-                const relatedTarget = e.relatedTarget;
-                if (!megaMenu.contains(relatedTarget)) {
-                    setTimeout(() => {
-                        if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
-                            megaMenu.style.display = 'none';
+                    // Initialize mega menu functionality - FIXED VERSION
+                    function initializeMegaMenu() {
+                        console.log('🔄 Initializing Mega Menu...');
+                        
+                        const megaMenuBackground = document.getElementById('megaMenuBackground');
+                        const useItems = document.querySelectorAll('.use-item');
+                        
+                        if (useItems.length === 0) {
+                            console.log('❌ No use items found');
+                            return;
                         }
-                    }, 150);
-                }
-            });
-            
-            // Mega menu mouse events
-            megaMenu.addEventListener('mouseenter', () => {
-                megaMenu.style.display = 'block';
-            });
-            
-            megaMenu.addEventListener('mouseleave', () => {
-                setTimeout(() => {
-                    if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
-                        megaMenu.style.display = 'none';
+                        
+                        let currentOpenMenu = null;
+                        
+                        useItems.forEach((item) => {
+                            const megaMenu = item.querySelector('.mega-menu');
+                            
+                            if (megaMenu) {
+                                // Mouse enter - show menu
+                                item.addEventListener('mouseenter', () => {
+                                    // Close any currently open menu
+                                    if (currentOpenMenu && currentOpenMenu !== megaMenu) {
+                                        currentOpenMenu.style.display = 'none';
+                                    }
+                                    
+                                    // Show background and current menu
+                                    megaMenuBackground.style.display = 'block';
+                                    megaMenu.style.display = 'block';
+                                    currentOpenMenu = megaMenu;
+                                    
+                                    // Update background content
+                                    const patternsGrid = megaMenu.querySelector('.patterns-grid');
+                                    if (patternsGrid) {
+                                        megaMenuBackground.innerHTML = patternsGrid.outerHTML;
+                                    }
+                                });
+                                
+                                // Mouse leave - hide menu with delay
+                                item.addEventListener('mouseleave', (e) => {
+                                    setTimeout(() => {
+                                        // Check if mouse is still over item or mega menu
+                                        if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
+                                            megaMenu.style.display = 'none';
+                                            megaMenuBackground.style.display = 'none';
+                                            currentOpenMenu = null;
+                                        }
+                                    }, 150);
+                                });
+                                
+                                // Mega menu mouse events
+                                megaMenu.addEventListener('mouseenter', () => {
+                                    megaMenu.style.display = 'block';
+                                    megaMenuBackground.style.display = 'block';
+                                    currentOpenMenu = megaMenu;
+                                });
+                                
+                                megaMenu.addEventListener('mouseleave', () => {
+                                    setTimeout(() => {
+                                        if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
+                                            megaMenu.style.display = 'none';
+                                            megaMenuBackground.style.display = 'none';
+                                            currentOpenMenu = null;
+                                        }
+                                    }, 150);
+                                });
+                            }
+                        });
+                        
+                        // Mega menu background mouse events
+                        megaMenuBackground.addEventListener('mouseenter', () => {
+                            if (currentOpenMenu) {
+                                currentOpenMenu.style.display = 'block';
+                                megaMenuBackground.style.display = 'block';
+                            }
+                        });
+                        
+                        megaMenuBackground.addEventListener('mouseleave', () => {
+                            setTimeout(() => {
+                                megaMenuBackground.style.display = 'none';
+                                if (currentOpenMenu) {
+                                    currentOpenMenu.style.display = 'none';
+                                    currentOpenMenu = null;
+                                }
+                            }, 150);
+                        });
+                        
+                        // Close all menus when clicking outside
+                        document.addEventListener('click', (event) => {
+                            const usesBar = document.getElementById('desktopUsesBar');
+                            if (!usesBar.contains(event.target) && !megaMenuBackground.contains(event.target)) {
+                                megaMenuBackground.style.display = 'none';
+                                document.querySelectorAll('.mega-menu').forEach(menu => {
+                                    menu.style.display = 'none';
+                                });
+                                currentOpenMenu = null;
+                            }
+                        });
+                        
+                        // Hide on window resize
+                        window.addEventListener('resize', function() {
+                            megaMenuBackground.style.display = 'none';
+                            document.querySelectorAll('.mega-menu').forEach(menu => {
+                                menu.style.display = 'none';
+                            });
+                            currentOpenMenu = null;
+                        });
+                        
+                        console.log('✅ Mega Menu initialization complete');
                     }
-                }, 150);
-            });
-        }
-    });
-    
-    // Recalculate on window resize
-    window.addEventListener('resize', function() {
-        document.querySelectorAll('.mega-menu').forEach(menu => {
-            menu.style.display = 'none';
-        });
-    });
-    
-    // Close all mega menus when clicking outside
-    document.addEventListener('click', (event) => {
-        if (!usesTopBar.contains(event.target)) {
-            document.querySelectorAll('.mega-menu').forEach(menu => {
-                menu.style.display = 'none';
-            });
-        }
-    });
-    
-    console.log('✅ Mega Menu initialization complete');
-}
                     
                     // Function to generate mobile uses menu (sidebar)
                     function generateMobileUsesMenu() {
@@ -1850,9 +1945,10 @@ function initializeMegaMenu() {
                         }, 100);
                     }
                     
-                    // Initialize scroll behavior
+                    // Initialize scroll behavior - UPDATED
                     function initializeScrollBehavior() {
                         const header = document.getElementById('mainHeader');
+                        const body = document.body;
                         let lastScrollY = window.scrollY;
                         let ticking = false;
                         
@@ -1860,6 +1956,15 @@ function initializeMegaMenu() {
                             const currentScrollY = window.scrollY;
                             
                             if (currentScrollY > 50) {
+                                header.classList.add('scrolled');
+                                body.classList.add('header-scrolled');
+                            } else {
+                                header.classList.remove('scrolled');
+                                body.classList.remove('header-scrolled');
+                            }
+                            
+                            // Hide/show header on scroll
+                            if (currentScrollY > lastScrollY && currentScrollY > 100) {
                                 header.classList.add('hidden');
                                 header.classList.remove('visible');
                             } else {
@@ -2087,4 +2192,4 @@ function initializeMegaMenu() {
         }
     </script>
 </body>
-</html> 
+</html>
