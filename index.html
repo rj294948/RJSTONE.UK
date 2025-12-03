@@ -419,9 +419,9 @@
             line-height: 1.2;
         }
         
-        /* Desktop Uses Top Bar with PUSH-DOWN Mega Menu */
+        /* ===== DESKTOP MEGA MENU - FULL-WIDTH AUTO-FIT ===== */
         .uses-top-bar {
-            position: sticky;
+            position: relative; /* Reference point for absolute positioning */
             top: 0;
             background: #333;
             padding: 0;
@@ -438,10 +438,10 @@
         .use-item {
             flex: 1;
             min-width: 110px;
-            position: relative;
+            position: relative; /* Parent for absolute positioning */
             overflow: visible;
         }
-
+        
         .use-link {
             display: block;
             color: white;
@@ -460,36 +460,19 @@
             background: #b8860b;
         }
         
-        /* PUSH-DOWN Mega Menu Container */
-        .mega-menu-container {
+        /* Mega Menu Panel - Hidden by default */
+        .mega-menu {
             position: absolute;
-            left: 0;
-            width: 100%;
+            top: 100%;
             background: white;
-            overflow: hidden;
-            max-height: 0;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 997;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            padding: 25px 0;
+            z-index: 997;
+            display: none; /* Hidden initially */
             border-top: 3px solid #b8860b;
         }
         
-        .mega-menu-container.active {
-            max-height: 500px;
-        }
-        
-        .mega-menu-content {
-            padding: 25px 15px;
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
-        }
-        
-        .mega-menu-container.active .mega-menu-content {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
+        /* Grid inside mega menu */
         .patterns-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -508,7 +491,7 @@
             width: 100%;
             overflow: hidden;
         }
-
+        
         .pattern-image {
             width: 100%;
             height: 160px;
@@ -520,7 +503,7 @@
             transition: transform 0.3s ease;
             box-sizing: border-box;
         }
-
+        
         .pattern-item:hover .pattern-image {
             transform: scale(1.05);
         }
@@ -535,7 +518,7 @@
             visibility: visible !important;
             opacity: 1 !important;
         }
-
+        
         .pattern-name {
             font-size: 13px;
             color: #333;
@@ -544,18 +527,6 @@
             text-align: center;
             word-wrap: break-word;
             white-space: normal;
-        }
-        
-        /* Main Content Adjustment for Push-Down Effect */
-        .main-content {
-            margin-top: 8px;
-            padding: 2px 0px;
-            transition: margin-top 0.3s ease;
-        }
-        
-        /* Temporary push effect when mega menu is active */
-        .mega-menu-container.active ~ .main-content {
-            margin-top: 20px;
         }
         
         /* White layer overlay on hover */
@@ -569,7 +540,7 @@
             background-color: rgba(255, 255, 255, 0.2);
             border-radius: 6px;
             pointer-events: none;
-        }     
+        }
         
         /* ===== MOBILE SIDEBAR MENU ===== */
         .mobile-uses-menu {
@@ -710,6 +681,10 @@
         }
         
         /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-top: 8px;
+            padding: 2px 0px;
+        }
         
         /* Hero Section */
         .hero {
@@ -1271,7 +1246,7 @@
         </div>
     </header>
 
-    <!-- Desktop Uses Top Bar with PUSH-DOWN Mega Menu -->
+    <!-- Desktop Uses Top Bar with Full-Width Auto-Fit Mega Menu -->
     <div class="uses-top-bar" id="desktopUsesBar">
         <div class="container uses-container" id="dynamicUsesContainer">
             <!-- Dynamic uses will be loaded here -->
@@ -1280,8 +1255,6 @@
                 <p>Loading navigation...</p>
             </div>
         </div>
-        <!-- PUSH-DOWN Mega Menu Container -->
-        <div class="mega-menu-container" id="megaMenuContainer"></div>
     </div>
 
     <!-- ===== MAIN CONTENT ===== -->
@@ -1451,9 +1424,6 @@
                     const menuOverlay = document.getElementById('menuOverlay');
                     const mobileUsesList = document.getElementById('mobileUsesList');
                     
-                    // Mega menu elements
-                    const megaMenuContainer = document.getElementById('megaMenuContainer');
-                    
                     // Initialize the application
                     initializeApp();
                     
@@ -1552,7 +1522,32 @@
                         return uniqueUses;
                     }
                     
-                    // Function to generate desktop uses navigation with PUSH-DOWN mega menu
+                    // Core function to position mega menu
+                    function positionMegaMenu(megaMenu) {
+                        // Get reference points
+                        const mainContainer = document.querySelector('.container');
+                        const usesTopBar = document.querySelector('.uses-top-bar');
+                        
+                        if (!mainContainer || !usesTopBar) {
+                            console.error('❌ Required elements not found');
+                            return;
+                        }
+                        
+                        const mainContainerRect = mainContainer.getBoundingClientRect();
+                        const usesTopBarRect = usesTopBar.getBoundingClientRect();
+                        
+                        // Calculate width and position
+                        const newLeft = mainContainerRect.left - usesTopBarRect.left;
+                        megaMenu.style.width = mainContainerRect.width + 'px';
+                        megaMenu.style.left = newLeft + 'px';
+                        
+                        // Clean up any conflicting styles
+                        megaMenu.style.marginLeft = '0';
+                        megaMenu.style.transform = 'none';
+                        megaMenu.style.right = 'auto';
+                    }
+                    
+                    // Function to generate desktop uses navigation
                     function generateUsesNavigation() {
                         const usesContainer = document.getElementById('dynamicUsesContainer');
                         if (!usesContainer) return;
@@ -1588,128 +1583,123 @@
                             
                             console.log(`📁 ${usage} - Products: ${usageProducts.length}, Stone Names: ${uniqueStoneNames.length}`);
                             
-                            useItem.innerHTML = `
-                                <div class="use-link" data-usage="${usageKey}">
-                                    ${usage} (${usageProducts.length})
-                                </div>
-                            `;
+                            if (uniqueStoneNames.length > 0) {
+                                useItem.innerHTML = `
+                                    <div class="use-link">${usage} (${usageProducts.length})</div>
+                                    <div class="mega-menu">
+                                        <div class="patterns-grid">
+                                            ${uniqueStoneNames.map(stoneName => {
+                                                const stoneSlug = stoneName.toLowerCase().replace(/\s+/g, '-');
+                                                const stoneProduct = appState.products.find(p => 
+                                                    p.uses && p.uses.toLowerCase() === usage.toLowerCase() && 
+                                                    p.stone_name === stoneName
+                                                );
+                                                const imageUrl = stoneProduct?.images?.[0] || 
+                                                    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80';
+                                                
+                                                return `
+                                                    <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="pattern-item" data-usage="${usage}" data-stone="${stoneName}">
+                                                        <div class="pattern-image" style="background-image: url('${imageUrl}')"></div>
+                                                        <div class="pattern-name">${stoneName}</div>
+                                                    </a>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                useItem.innerHTML = `
+                                    <a href="category-products.html?usage=${usageKey}" class="use-link">${usage} (${usageProducts.length})</a>
+                                `;
+                            }
                             
                             usesContainer.appendChild(useItem);
                         });
                         
-                        // Initialize PUSH-DOWN mega menu functionality
-                        initializePushDownMenu();
+                        // Initialize mega menu functionality
+                        initializeMegaMenu();
                     }
                     
-                    // Initialize PUSH-DOWN mega menu
-                    function initializePushDownMenu() {
-                        console.log('🔄 Initializing Push-Down Mega Menu...');
+                    // Initialize mega menu functionality
+                    function initializeMegaMenu() {
+                        console.log('🔄 Initializing Mega Menu (Full-Width Auto-Fit)...');
                         
-                        const useLinks = document.querySelectorAll('.use-link');
-                        const megaMenuContainer = document.getElementById('megaMenuContainer');
+                        const usesTopBar = document.querySelector('.uses-top-bar');
+                        const useItems = document.querySelectorAll('.use-item');
                         
-                        if (!megaMenuContainer) {
-                            console.log('❌ Mega menu container not found');
+                        if (!usesTopBar) {
+                            console.log('❌ Mega Menu container (.uses-top-bar) not found');
                             return;
                         }
                         
-                        useLinks.forEach((link) => {
-                            // Mouse enter: Show mega menu
-                            link.addEventListener('mouseenter', function() {
-                                const usageKey = this.getAttribute('data-usage');
-                                const usage = this.textContent.split(' (')[0];
-                                showMegaMenu(usage, usageKey);
-                            });
+                        useItems.forEach((item) => {
+                            const megaMenu = item.querySelector('.mega-menu');
                             
-                            // Mouse leave: Hide mega menu with delay
-                            link.parentElement.addEventListener('mouseleave', function(e) {
-                                setTimeout(() => {
-                                    if (!megaMenuContainer.matches(':hover')) {
-                                        hideMegaMenu();
+                            if (megaMenu) {
+                                // Mouse enter: Show and position mega menu
+                                item.addEventListener('mouseenter', function() {
+                                    // Position the menu
+                                    positionMegaMenu(megaMenu);
+                                    
+                                    // Hide all other mega menus
+                                    document.querySelectorAll('.mega-menu').forEach(menu => {
+                                        if (menu !== megaMenu) {
+                                            menu.style.display = 'none';
+                                        }
+                                    });
+                                    
+                                    // Show current mega menu
+                                    megaMenu.style.display = 'block';
+                                });
+                                
+                                // Mouse leave: Hide mega menu with delay
+                                item.addEventListener('mouseleave', function(e) {
+                                    const relatedTarget = e.relatedTarget;
+                                    
+                                    // Check if mouse moved to mega menu
+                                    if (!megaMenu.contains(relatedTarget)) {
+                                        setTimeout(() => {
+                                            // Double-check that mouse is not on item or mega menu
+                                            if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
+                                                megaMenu.style.display = 'none';
+                                            }
+                                        }, 150);
                                     }
-                                }, 150);
+                                });
+                                
+                                // Mega menu mouse enter: Keep visible
+                                megaMenu.addEventListener('mouseenter', function() {
+                                    this.style.display = 'block';
+                                });
+                                
+                                // Mega menu mouse leave: Hide with delay
+                                megaMenu.addEventListener('mouseleave', function() {
+                                    setTimeout(() => {
+                                        if (!item.matches(':hover') && !this.matches(':hover')) {
+                                            this.style.display = 'none';
+                                        }
+                                    }, 150);
+                                });
+                            }
+                        });
+                        
+                        // On window resize: Hide all mega menus and recalculate on next hover
+                        window.addEventListener('resize', function() {
+                            document.querySelectorAll('.mega-menu').forEach(menu => {
+                                menu.style.display = 'none';
                             });
                         });
                         
-                        // Mega menu mouse leave
-                        megaMenuContainer.addEventListener('mouseleave', function() {
-                            hideMegaMenu();
-                        });
-                        
-                        // Function to show mega menu
-                        function showMegaMenu(usage, usageKey) {
-                            const usageProducts = appState.products.filter(product => 
-                                product.uses && product.uses.toLowerCase() === usage.toLowerCase()
-                            );
-                            
-                            const uniqueStoneNames = [...new Set(usageProducts
-                                .filter(product => product.stone_name)
-                                .map(product => product.stone_name)
-                            )];
-                            
-                            if (uniqueStoneNames.length === 0) {
-                                hideMegaMenu();
-                                return;
-                            }
-                            
-                            // Build mega menu content
-                            const megaMenuHTML = `
-                                <div class="mega-menu-content">
-                                    <div class="patterns-grid">
-                                        ${uniqueStoneNames.map(stoneName => {
-                                            const stoneSlug = stoneName.toLowerCase().replace(/\s+/g, '-');
-                                            const stoneProduct = appState.products.find(p => 
-                                                p.uses && p.uses.toLowerCase() === usage.toLowerCase() && 
-                                                p.stone_name === stoneName
-                                            );
-                                            const imageUrl = stoneProduct?.images?.[0] || 
-                                                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80';
-                                            
-                                            return `
-                                                <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="pattern-item" data-usage="${usage}" data-stone="${stoneName}">
-                                                    <div class="pattern-image" style="background-image: url('${imageUrl}')"></div>
-                                                    <div class="pattern-name">${stoneName}</div>
-                                                </a>
-                                            `;
-                                        }).join('')}
-                                    </div>
-                                </div>
-                            `;
-                            
-                            // Set mega menu content
-                            megaMenuContainer.innerHTML = megaMenuHTML;
-                            
-                            // Activate mega menu
-                            megaMenuContainer.classList.add('active');
-                            
-                            // Calculate exact height for smooth animation
-                            setTimeout(() => {
-                                const contentHeight = megaMenuContainer.scrollHeight;
-                                megaMenuContainer.style.maxHeight = `${contentHeight}px`;
-                            }, 10);
-                        }
-                        
-                        // Function to hide mega menu
-                        function hideMegaMenu() {
-                            megaMenuContainer.classList.remove('active');
-                            megaMenuContainer.style.maxHeight = '0';
-                            
-                            // Clear content after animation
-                            setTimeout(() => {
-                                if (!megaMenuContainer.classList.contains('active')) {
-                                    megaMenuContainer.innerHTML = '';
-                                }
-                            }, 400);
-                        }
-                        
-                        // Close mega menu when clicking outside
+                        // Close all mega menus when clicking outside
                         document.addEventListener('click', function(event) {
-                            if (!event.target.closest('.uses-top-bar')) {
-                                hideMegaMenu();
+                            if (!event.target.closest('.use-item') && !event.target.closest('.mega-menu')) {
+                                document.querySelectorAll('.mega-menu').forEach(menu => {
+                                    menu.style.display = 'none';
+                                });
                             }
                         });
                         
-                        console.log('✅ Push-Down Mega Menu initialized');
+                        console.log('✅ Mega Menu initialization complete');
                     }
                     
                     // Function to update categories section with 100% images
