@@ -37,7 +37,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            z-index: 1000;
+            z-index: 1001; /* Increased for proper stacking */
             transition: transform 0.4s ease;
             margin-top: 0;
             padding-top: 0;
@@ -96,6 +96,22 @@
             border-radius: 8px;
             border: 1px solid #e0e0e0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Mobile Menu Toggle in Trust Info Section - LEFT CORNER */
+        .trust-mobile-toggle {
+            display: none;
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #333;
+            cursor: pointer;
+            z-index: 10;
+            padding: 8px;
         }
         
         .trust-item {
@@ -297,7 +313,7 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
             max-height: 350px; /* Slightly smaller */
             overflow-y: auto;
-            z-index: 1001;
+            z-index: 1003;
             display: none;
             margin-top: 5px;
         }
@@ -396,71 +412,100 @@
             font-weight: 500;
             margin: 0;
             line-height: 1.2; /* Reduced line height */
-            background: linear-gradient(135deg, rgba(184, 134, 11, 0.9), rgba(163, 120, 10, 0.9)), 
-                url('your-image-url.jpg') center/cover !important;
-    /* existing styles remain same */
         }
         
-        /* Uses Top Bar with Mega Menu - HOME PAGE JAISE */
+        /* Desktop Uses Top Bar with Mega Menu - HOME PAGE JAISE - FIXED POSITION */
         .uses-top-bar {
-            position: sticky;
-            top: 0;
+            position: fixed;
+            top: 120px; /* Header ke niche */
+            left: 0;
+            width: 100%;
             background: #333;
             padding: 0;
-            z-index: 999; /* Below main header but above content */
-            transition: top 0.3s ease;
+            z-index: 1000; /* Below main header but above content */
+            height: 45px;
+            display: flex;
+            align-items: center;
+            transition: top 0.4s ease; /* Smooth transition */
+        }
+        
+        /* When header is hidden, uses bar moves to top */
+        header.hidden + .uses-top-bar {
+            top: 0; /* Header hide hone par top position par */
         }
         
         .uses-container {
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
+            width: 100%;
         }
         
         .use-item {
             flex: 1;
-            min-width: 110px; /* Slightly smaller */
-            position: relative; 
+            position: relative;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
         
         .use-link {
             display: block;
             color: white;
             text-decoration: none;
-            padding: 12px 8px; /* Reduced padding */
-            font-size: 13px; /* Smaller text */
+            padding: 12px 5px;
+            font-size: 12px;
             font-weight: 500;
             text-align: center;
             cursor: pointer;
             transition: background-color 0.3s;
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .use-link:hover {
             background: #b8860b;
         }
         
-        /* Mega Menu Styles */
+        /* Mega Menu Styles - DYNAMIC TOP */
         .mega-menu {
-            position: absolute;
-            top: 100%;
-            left: 0; 
-            width: 100%; 
+            position: fixed;
+            top: 165px; /* Header (120px) + Uses Bar (45px) = 165px */
+            left: 0;
+            width: 100%;
             background: white;
-            z-index: 1000;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            display: none; 
-            padding: 25px 0; /* Reduced padding */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 999;
+            display: none;
+            padding: 20px 0;
+            border-top: 1px solid #e0e0e0;
+            max-height: calc(100vh - 165px);
+            overflow-y: auto;
+            transition: top 0.4s ease; /* Smooth transition */
         }
         
-        .use-item:hover .mega-menu {
-            display: block;
+        /* When header is hidden, mega menu also moves up */
+        header.hidden + .uses-top-bar .mega-menu {
+            top: 45px; /* Uses bar ke niche (45px uses bar height) */
         }
         
         .patterns-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 15px; /* Reduced gap */
-            padding: 0 15px; /* Reduced padding */
+            gap: 15px;
+            padding: 0 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
         }
         
         .pattern-item {
@@ -468,28 +513,201 @@
             cursor: pointer;
             text-decoration: none;
             color: #333;
+            display: block;
+            width: 100%;
+            overflow: hidden;
         }
-        
+
         .pattern-image {
             width: 100%;
-            height: 160px; /* Smaller images */
+            height: 160px;
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             border-radius: 6px;
-            margin-bottom: 8px; /* Reduced margin */
+            margin-bottom: 8px;
             transition: transform 0.3s ease;
+            box-sizing: border-box;
         }
-        
+
         .pattern-item:hover .pattern-image {
             transform: scale(1.05);
         }
         
-        .pattern-name {
-            font-size: 13px; /* Smaller text */
-            color: #333;
-            font-weight: 500;
+        .patterns-grid .pattern-image {
+            background-color: #ffffff !important;
+            background-size: contain !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            min-height: 160px;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
+        .pattern-name {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+            padding: 0 5px;
+            text-align: center;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+
+        /* White layer overlay on hover */
+        .pattern-item:hover .pattern-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            pointer-events: none;
+        }     
+        
+        /* ===== MOBILE SIDEBAR MENU ===== */
+        .mobile-uses-menu {
+            position: fixed;
+            top: 0;
+            left: -320px; /* Hide off-screen */
+            width: 300px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.15);
+            z-index: 1100;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .mobile-uses-menu.active {
+            left: 0;
+        }
+        
+        .mobile-menu-header {
+            padding: 20px;
+            background: #333;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+        
+        .mobile-menu-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .close-menu {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .mobile-uses-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            max-height: calc(100vh - 70px);
+        }
+        
+        .mobile-use-item {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .mobile-use-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 10px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+        
+        .mobile-use-link:hover {
+            background: #f8f9fa;
+        }
+        
+        .mobile-use-link i {
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+        
+        .mobile-mega-content {
+            padding: 10px;
+            display: none;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin: 8px 0;
+        }
+        
+        .mobile-mega-content.active {
+            display: block;
+        }
+        
+        .mobile-pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .mobile-pattern-item {
+            text-decoration: none;
+            color: #333;
+            display: block;
+        }
+        
+        .mobile-pattern-image {
+            width: 100%;
+            height: 80px;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            background-color: #f0f0f0;
+        }
+        
+        .mobile-pattern-name {
+            font-size: 12px;
+            text-align: center;
+            color: #333;
+            font-weight: 500;
+            line-height: 1.3;
+            padding: 0 5px;
+        }
+        
+        /* Overlay for mobile menu */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1099;
+            display: none;
+        }
+        
+        .menu-overlay.active {
+            display: block;
+        }
+        
         /* ===== CATEGORY PRODUCTS SPECIFIC STYLES ===== */
         .main-content {
             margin-top: 8px; /* GREATLY REDUCED from 20px */
@@ -501,7 +719,7 @@
             text-align: center;
             margin-bottom: 0px; /* GREATLY REDUCED from 30px */
             padding: 22px 5px; /* REDUCED from 30px */
-            background: url('https://plus.unsplash.com/premium_photo-1673567871911-c8a8c63d1c2b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8c3RvbmV8ZW58MHx8MHx8fDA%3D') center/cover;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://plus.unsplash.com/premium_photo-1673567871911-c8a8c63d1c2b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8c3RvbmV8ZW58MHx8MHx8fDA%3D') center/cover;
             border-radius: 8px; /* Slightly smaller radius */
             min-height: 60px; /* Reduced height to show more products */
             display: flex;
@@ -521,7 +739,7 @@
         }
         
         .page-header .breadcrumb {
-            color: #666;
+            color: #ddd;
             font-size: 14px; /* Smaller text */
         }
         
@@ -533,7 +751,7 @@
         
         .page-header .breadcrumb span {
             margin: 0 8px; /* Reduced margin */
-            color: #999;
+            color: #ccc;
         }
         
         /* Main Layout - WITH FILTERS */
@@ -541,6 +759,22 @@
             display: grid;
             grid-template-columns: 250px 1fr;
             gap: 25px;
+        }
+        
+        /* Mobile Filter Toggle Button */
+        .filter-toggle-btn {
+            display: none;
+            background: #b8860b;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            align-items: center;
+            gap: 8px;
         }
         
         /* Filters Section */
@@ -551,7 +785,8 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             height: fit-content;
             position: sticky;
-            top: 120px;
+            top: 165px;
+            transition: all 0.3s ease;
         }
         
         .filters-header {
@@ -640,28 +875,29 @@
         }
         
         .price-range {
-    width: 100%; /* Color filter jitni width */
-}
+            width: 100%; /* Color filter jitni width */
+        }
 
-.price-inputs {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-}
+        .price-inputs {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
 
-.price-input {
-    flex: 1; /* Dono inputs equal width mein */
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 14px;
-}
+        .price-input {
+            flex: 1; /* Dono inputs equal width mein */
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
 
-.price-slider {
-    width: 100%; /* Slider ko bhi full width do */
-    margin: 10px 0;
-}
+        .price-slider {
+            width: 100%; /* Slider ko bhi full width do */
+            margin: 10px 0;
+        }
+        
         .color-options {
             display: flex;
             flex-wrap: wrap;
@@ -730,12 +966,12 @@
             cursor: pointer;
         }
         
-        /* ✅ PERFECT 1:1 RATIO E-COMMERCE PRODUCT CARDS - 4 PER ROW */
+        /* ✅ PERFECT 1:1 RATIO E-COMMERCE PRODUCT CARDS - 3 PER ROW (INCREASED) */
         #products-list {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 products per row */
-            gap: 15px; /* Reduced gap */
-            padding: 8px;
+            grid-template-columns: repeat(3, 1fr); /* 3 products per row */
+            gap: 20px; /* Increased gap */
+            padding: 10px;
         }
 
         .product-card {
@@ -747,6 +983,7 @@
             border-radius: 8px;
             overflow: hidden;
             transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
         }
 
         .product-card:hover {
@@ -754,7 +991,7 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
-        /* PERFECT 1:1 RATIO IMAGE BOX */
+        /* PERFECT 1:1 RATIO IMAGE BOX - HEIGHT INCREASED */
         .product-img-box {
             width: 100%;
             aspect-ratio: 1 / 1; /* This creates the 1:1 ratio */
@@ -768,11 +1005,50 @@
             width: 100%;
             height: 100%;
             object-fit: cover; /* Ensures image fills container without distortion */
-            transition: transform 0.3s ease;
+            transition: opacity 0.5s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
-        .product-img:hover {
-            transform: scale(1.05);
+        .product-img.active {
+            opacity: 1;
+            z-index: 2;
+        }
+
+        .product-img.inactive {
+            opacity: 0;
+            z-index: 1;
+        }
+
+        /* Image navigation dots */
+        .image-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            z-index: 3;
+        }
+
+        .image-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .image-dot.active {
+            background: #b8860b;
+            transform: scale(1.2);
+        }
+
+        .image-dot:hover {
+            background: rgba(255, 255, 255, 0.8);
         }
 
         .product-description {
@@ -782,7 +1058,7 @@
             line-height: 1.4;
             flex-grow: 1;
             display: -webkit-box;
-            -webkit-line-amp: 2;
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -845,20 +1121,27 @@
         
         /* Features Section - Home Page jaise - SINGLE ROW */
         .features {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 features in a row */
-            gap: 25px; /* Reduced gap */
-            margin: 40px 0; /* Reduced margin */
-            padding: 40px 0; /* Reduced padding */
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 25px;
+            margin: 40px 0;
+            padding: 40px 0;
             background-color: #f9f9f9;
+            border-radius: 8px;
         }
         
         .feature {
+            flex: 1;
             text-align: center;
-            padding: 25px 15px; /* Reduced padding */
+            padding: 25px 15px;
             background: white;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 280px;
         }
         
         .feature i {
@@ -877,6 +1160,7 @@
             font-size: 14px; /* Smaller text */
             color: #666;
             line-height: 1.5;
+            flex-grow: 1;
         }
         
         /* Footer - Home Page jaise */
@@ -963,7 +1247,12 @@
             }
             
             .features {
-                grid-template-columns: repeat(3, 1fr); /* Keep 3 in a row */
+                flex-wrap: wrap;
+            }
+            
+            .feature {
+                min-width: calc(50% - 25px);
+                flex: 1 0 calc(50% - 25px);
             }
             
             .footer-content {
@@ -988,28 +1277,113 @@
                 flex-wrap: wrap;
             }
             
+            /* Trust Info Section - Mobile View */
             .trust-info {
+                position: relative;
+                padding: 0 40px; /* Left side ke liye space for hamburger */
+                height: 35px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 order: 3;
                 flex-basis: 100%;
                 margin-top: 8px; /* Reduced margin */
                 padding: 0;
             }
             
-            .search-container {
-                order: 4;
-                flex-basis: 100%;
-                margin: 8px 0 0; /* Reduced margin */
-                max-width: 100%;
+            /* Mobile Menu Toggle in Trust Info - LEFT CORNER */
+            .trust-mobile-toggle {
+                display: block;
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                font-size: 20px;
+                color: #333;
+                cursor: pointer;
+                z-index: 10;
+                padding: 8px;
             }
             
+            .trust-info-content {
+                padding: 4px 8px;
+                gap: 10px;
+                font-size: 11px;
+            }
+            
+            .trust-item {
+                padding: 4px 8px;
+            }
+            
+            /* Main Header Mobile Layout */
+            .header-content {
+                flex-wrap: nowrap;
+                justify-content: space-between;
+                padding: 8px 0;
+            }
+            
+            /* Logo - LEFT SIDE */
+            .logo {
+                order: 1;
+                flex: 1;
+                justify-content: flex-start;
+            }
+            
+            .logo h1 {
+                font-size: 20px;
+            }
+            
+            /* Search Container - CENTER (Logo aur User Actions ke beech) */
+            .search-container {
+                order: 2;
+                flex: 2;
+                margin: 0 10px;
+                max-width: none;
+            }
+            
+            /* User Actions - RIGHT SIDE */
+            .user-actions {
+                order: 3;
+                flex: 1;
+                justify-content: flex-end;
+                gap: 10px;
+            }
+            
+            .user-action {
+                font-size: 10px;
+            }
+            
+            .user-action i {
+                font-size: 16px;
+            }
+            
+            /* Mobile Filter Toggle Button */
+            .filter-toggle-btn {
+                display: flex;
+            }
+            
+            /* Mobile Layout with Toggleable Filters */
             .main-layout {
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
             
             .filters-section {
-                position: static;
-                order: 2;
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 300px;
+                height: 100vh;
+                z-index: 1100;
+                overflow-y: auto;
+                transition: left 0.3s ease;
+                box-shadow: 2px 0 15px rgba(0,0,0,0.15);
+            }
+            
+            .filters-section.active {
+                left: 0;
             }
             
             .products-section {
@@ -1017,17 +1391,25 @@
             }
             
             .features {
-                grid-template-columns: 1fr; /* Stack on mobile */
+                flex-direction: column;
                 padding: 30px 0; /* Reduced padding */
                 margin: 30px 0; /* Reduced margin */
+                gap: 15px;
             }
             
+            .feature {
+                min-height: auto;
+                width: 100%;
+            }
+            
+            /* Hide desktop uses bar on mobile */
             .uses-top-bar {
-                display: block; /* Always show on mobile */
+                display: none;
             }
             
-            .profile-name {
-                display: none;
+            /* Hide mega menu on mobile */
+            .mega-menu {
+                display: none !important;
             }
             
             .patterns-grid {
@@ -1050,7 +1432,7 @@
 
         @media (max-width: 480px) {
             body {
-                padding-top: 190px; /* Further adjustment for very small screens */
+                padding-top: 100px; /* Further adjustment for very small screens */
             }
             
             #products-list {
@@ -1074,13 +1456,51 @@
             .page-header h1 {
                 font-size: 22px; /* Even smaller on very small screens */
             }
+            
+            .mobile-pattern-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            .mobile-pattern-image {
+                height: 70px;
+            }
+            
+            .mobile-pattern-name {
+                font-size: 11px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Mobile Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    
+    <!-- Mobile Slide-out Menu (SIDEBAR) -->
+    <div class="mobile-uses-menu" id="mobileUsesMenu">
+        <div class="mobile-menu-header">
+            <h3>Stone Categories</h3>
+            <button class="close-menu" id="closeMenu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-uses-list" id="mobileUsesList">
+            <!-- Dynamic mobile menu will be loaded here -->
+            <div class="loading-categories">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading categories...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== HEADER - HOME PAGE JAISE ===== -->
     <header id="mainHeader">
         <div class="trust-info">
+            <!-- Mobile Menu Toggle Button in Trust Info Section - LEFT CORNER -->
+            <button class="trust-mobile-toggle" id="trustMobileToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
             <div class="trust-info-content">
                 <div class="trust-item">
                     <i class="fas fa-truck"></i>
@@ -1174,8 +1594,7 @@
     </header>
 
     <!-- Desktop Uses Top Bar with Mega Menu - HOME PAGE JAISE -->
-    <!-- This is outside the main header so it stays visible -->
-    <div class="uses-top-bar">
+    <div class="uses-top-bar" id="desktopUsesBar">
         <div class="container uses-container" id="dynamicUsesContainer">
             <!-- Dynamic uses will be loaded here -->
             <div class="loading-categories">
@@ -1198,10 +1617,16 @@
                 </div>
             </div>
             
+            <!-- Mobile Filter Toggle Button -->
+            <button class="filter-toggle-btn" id="mobileFilterToggle">
+                <i class="fas fa-filter"></i>
+                Filters
+            </button>
+            
             <!-- Main Layout with Filters and Products -->
             <div class="main-layout">
                 <!-- Filters Section -->
-                <div class="filters-section">
+                <div class="filters-section" id="filtersSection">
                     <div class="filters-header">
                         <div class="filters-title">Filters</div>
                         <button class="clear-filters" id="clearFilters">Clear All</button>
@@ -1262,7 +1687,7 @@
                         </div>
                     </div>
                     
-                    <!-- ✅ PERFECT 1:1 RATIO PRODUCT CARDS - 4 PER ROW -->
+                    <!-- ✅ PERFECT 1:1 RATIO PRODUCT CARDS - 3 PER ROW -->
                     <div id="products-list"></div>
                 </div>
             </div>
@@ -1379,1032 +1804,1366 @@
             header.classList.add('visible');
         });
     </script>
-  <script type="module">
-    // ✅ CORRECT FIREBASE IMPORT FROM YOUR CONFIG
-    import { 
-        db, auth, 
-        collection, getDocs, onSnapshot,
-        onAuthStateChanged, signOut
-    } from './firebase-config.js';
+    <script type="module">
+        // ✅ CORRECT FIREBASE IMPORT FROM YOUR CONFIG
+        import { 
+            db, auth, 
+            collection, getDocs, onSnapshot,
+            onAuthStateChanged, signOut
+        } from './firebase-config.js';
 
-    const appState = {
-        products: [],
-        filteredProducts: [],
-        currentUsage: null,
-        currentStoneName: null,
-        user: null,
-        filters: {
-            colors: [],
-            minPrice: 0,
-            maxPrice: 1000
-        },
-        sortOption: 'default'
-    };
-
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 Initializing Category Products Page with Filters...');
-        
-        // Get URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        appState.currentUsage = urlParams.get('usage');
-        appState.currentStoneName = urlParams.get('stone') || urlParams.get('stone_name');
-        
-        console.log('📋 URL Parameters:', {
-            usage: appState.currentUsage,
-            stone_name: appState.currentStoneName
-        });
-        
-        // Initialize the page
-        initializePage();
-        initializeAuth();
-        initializeUI();
-        initializeScrollBehavior();
-    });
-
-    // ===== HOME PAGE JAISE FUNCTIONS =====
-    
-    // Initialize UI components
-    function initializeUI() {
-        initializeSearch();
-        initializeUserProfile();
-        initializeMegaMenu();
-        initializeFilters();
-        initializeSorting();
-    }
-
-    // Initialize search functionality
-    function initializeSearch() {
-        const searchInput = document.getElementById('searchInput');
-        const searchButton = document.getElementById('searchButton');
-        const searchResults = document.getElementById('searchResults');
-        
-        if (!searchInput || !searchButton || !searchResults) return;
-        
-        searchButton.addEventListener('click', performSearch);
-        searchInput.addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                performSearch();
-            }
-        });
-        
-        searchInput.addEventListener('input', function() {
-            if (searchInput.value.length > 2) {
-                performSearch();
-            } else {
-                searchResults.classList.remove('active');
-            }
-        });
-        
-        function performSearch() {
-            const query = searchInput.value.trim().toLowerCase();
-            
-            if (query.length < 2) {
-                searchResults.classList.remove('active');
-                return;
-            }
-            
-            // Show loading state
-            searchResults.innerHTML = '<div class="search-loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
-            searchResults.classList.add('active');
-            
-            // Simulate API delay
-            setTimeout(() => {
-                const results = appState.products.filter(product => 
-                    (product.stone_name && product.stone_name.toLowerCase().includes(query)) ||
-                    (product.uses && product.uses.toLowerCase().includes(query)) ||
-                    (product.type && product.type.toLowerCase().includes(query)) ||
-                    (product.category && product.category.toLowerCase().includes(query))
-                );
-                
-                displaySearchResults(results, query);
-            }, 300);
-        }
-        
-        function displaySearchResults(results, query) {
-            searchResults.innerHTML = '';
-            
-            if (results.length === 0) {
-                searchResults.innerHTML = '<div class="no-results">No products found for "' + query + '"</div>';
-                return;
-            }
-            
-            results.forEach(product => {
-                const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-item';
-                resultItem.innerHTML = `
-                    <div class="search-result-image" style="background-image: url('${product.images?.[0] || getDefaultImage(product.category)}')"></div>
-                    <div class="search-result-content">
-                        <div class="search-result-name">${product.stone_name || 'Stone Product'}</div>
-                        <div class="search-result-category">${product.uses || 'General'} • ${product.category || 'Natural Stone'}</div>
-                    </div>
-                    <div class="search-result-price">${product.price ? '£' + product.price : 'Price on request'}</div>
-                `;
-                
-                // Link to product-details.html with product ID for individual products
-                resultItem.addEventListener('click', function() {
-                    window.location.href = `product-details.html?id=${product.id}`;
-                });
-                
-                searchResults.appendChild(resultItem);
-            });
-            
-            // Add "View all results" link
-            const viewAll = document.createElement('div');
-            viewAll.className = 'view-all-results';
-            viewAll.innerHTML = `<a href="search-results.html?q=${encodeURIComponent(query)}">View all ${results.length} results</a>`;
-            searchResults.appendChild(viewAll);
-        }
-        
-        // Close search results when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!searchResults.contains(event.target) && event.target !== searchInput && event.target !== searchButton) {
-                searchResults.classList.remove('active');
-            }
-        });
-    }
-
-    // Initialize user profile dropdown
-    function initializeUserProfile() {
-        const profileToggle = document.getElementById('profileToggle');
-        const profileDropdown = document.getElementById('profileDropdown');
-        const logoutBtn = document.getElementById('logoutBtn');
-        
-        if (!profileToggle || !profileDropdown) return;
-        
-        profileToggle.addEventListener('click', function(event) {
-            event.stopPropagation();
-            profileDropdown.classList.toggle('active');
-        });
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function() {
-            profileDropdown.classList.remove('active');
-        });
-        
-        // Logout functionality
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function(event) {
-                event.preventDefault();
-                signOut(auth).then(() => {
-                    console.log('User signed out');
-                }).catch((error) => {
-                    console.error('Sign out error:', error);
-                });
-            });
-        }
-    }
-
-    // Initialize mega menu functionality
-    function initializeMegaMenu() {
-        const usesTopBar = document.querySelector('.uses-top-bar');
-        const useItems = document.querySelectorAll('.use-item');
-        const container = document.querySelector('.uses-top-bar .container');
-        
-        if (!container || !usesTopBar) return;
-        
-        const containerRect = container.getBoundingClientRect();
-        
-        useItems.forEach((item, index) => {
-            const megaMenu = item.querySelector('.mega-menu');
-            
-            if (megaMenu) {
-                // Set mega menu width and position
-                megaMenu.style.width = containerRect.width + 'px';
-                megaMenu.style.left = '0px';
-                
-                // Mouse events for mega menu
-                item.addEventListener('mouseenter', () => {
-                    // Hide all other mega menus
-                    document.querySelectorAll('.mega-menu').forEach(menu => {
-                        if (menu !== megaMenu) {
-                            menu.style.display = 'none';
-                        }
-                    });
-                    // Show current mega menu
-                    megaMenu.style.display = 'block';
-                });
-                
-                item.addEventListener('mouseleave', (e) => {
-                    const relatedTarget = e.relatedTarget;
-                    if (!megaMenu.contains(relatedTarget)) {
-                        setTimeout(() => {
-                            if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
-                                megaMenu.style.display = 'none';
-                            }
-                        }, 100);
-                    }
-                });
-                
-                // Also handle mega menu mouse events
-                megaMenu.addEventListener('mouseenter', () => {
-                    megaMenu.style.display = 'block';
-                });
-                
-                megaMenu.addEventListener('mouseleave', () => {
-                    setTimeout(() => {
-                        if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
-                            megaMenu.style.display = 'none';
-                        }
-                    }, 100);
-                });
-            }
-        });
-        
-        // Close all mega menus when clicking outside
-        document.addEventListener('click', (event) => {
-            if (!usesTopBar.contains(event.target)) {
-                document.querySelectorAll('.mega-menu').forEach(menu => {
-                    menu.style.display = 'none';
-                });
-            }
-        });
-    }
-
-    // ===== FILTER SYSTEM FUNCTIONS =====
-
-    // Initialize filters
-    function initializeFilters() {
-        // Initialize filter toggles
-        const filterToggles = document.querySelectorAll('.filter-toggle');
-        filterToggles.forEach(toggle => {
-            toggle.addEventListener('click', function() {
-                const targetId = this.getAttribute('data-target');
-                const target = document.getElementById(targetId);
-                if (target) {
-                    target.style.display = target.style.display === 'none' ? 'block' : 'none';
-                    this.querySelector('i').classList.toggle('fa-chevron-down');
-                    this.querySelector('i').classList.toggle('fa-chevron-up');
-                }
-            });
-        });
-
-        // Initialize price slider
-        const priceSlider = document.getElementById('priceSlider');
-        const minPriceInput = document.getElementById('minPrice');
-        const maxPriceInput = document.getElementById('maxPrice');
-        const minPriceDisplay = document.getElementById('minPriceDisplay');
-        const maxPriceDisplay = document.getElementById('maxPriceDisplay');
-
-        if (priceSlider && minPriceInput && maxPriceInput) {
-            // Set initial values
-            priceSlider.value = appState.filters.maxPrice;
-            minPriceInput.value = appState.filters.minPrice;
-            maxPriceInput.value = appState.filters.maxPrice;
-            minPriceDisplay.textContent = appState.filters.minPrice;
-            maxPriceDisplay.textContent = appState.filters.maxPrice;
-
-            // Update price display when slider changes
-            priceSlider.addEventListener('input', function() {
-                appState.filters.maxPrice = parseInt(this.value);
-                maxPriceInput.value = appState.filters.maxPrice;
-                maxPriceDisplay.textContent = appState.filters.maxPrice;
-                applyFilters();
-            });
-
-            // Update filters when price inputs change
-            minPriceInput.addEventListener('change', function() {
-                appState.filters.minPrice = parseInt(this.value) || 0;
-                minPriceDisplay.textContent = appState.filters.minPrice;
-                applyFilters();
-            });
-
-            maxPriceInput.addEventListener('change', function() {
-                appState.filters.maxPrice = parseInt(this.value) || 1000;
-                priceSlider.value = appState.filters.maxPrice;
-                maxPriceDisplay.textContent = appState.filters.maxPrice;
-                applyFilters();
-            });
-        }
-
-        // Clear filters button
-        const clearFiltersBtn = document.getElementById('clearFilters');
-        if (clearFiltersBtn) {
-            clearFiltersBtn.addEventListener('click', function() {
-                clearAllFilters();
-            });
-        }
-    }
-
-    // Initialize sorting
-    function initializeSorting() {
-        const sortSelect = document.getElementById('sortSelect');
-        if (sortSelect) {
-            sortSelect.addEventListener('change', function() {
-                appState.sortOption = this.value;
-                applyFilters();
-            });
-        }
-    }
-
-    // Generate filter options from products
-    function generateFilterOptions() {
-        console.log('🔄 Generating filter options...');
-        
-        // Generate color options with grouping similar colors
-        const colorOptions = document.getElementById('colorOptions');
-        if (colorOptions) {
-            colorOptions.innerHTML = '';
-            
-            const groupedColors = groupSimilarColors(appState.products);
-            
-            Object.keys(groupedColors).forEach(colorGroup => {
-                const count = groupedColors[colorGroup].count;
-                const option = document.createElement('div');
-                option.className = 'filter-option';
-                option.innerHTML = `
-                    <input type="checkbox" class="filter-checkbox" id="color-${colorGroup}" data-color="${colorGroup}">
-                    <label for="color-${colorGroup}" class="filter-label">
-                        ${colorGroup}
-                        <span class="filter-count">${count}</span>
-                    </label>
-                `;
-                
-                option.querySelector('input').addEventListener('change', function() {
-                    if (this.checked) {
-                        appState.filters.colors.push(colorGroup);
-                    } else {
-                        appState.filters.colors = appState.filters.colors.filter(c => c !== colorGroup);
-                    }
-                    applyFilters();
-                });
-                
-                colorOptions.appendChild(option);
-            });
-        }
-    }
-
-    // Group similar colors together
-    function groupSimilarColors(products) {
-        const colorGroups = {};
-        
-        products.forEach(product => {
-            if (product.color && product.color.trim() !== '') {
-                const originalColor = product.color.trim();
-                const normalizedColor = normalizeColor(originalColor);
-                
-                if (!colorGroups[normalizedColor]) {
-                    colorGroups[normalizedColor] = {
-                        count: 0,
-                        originalColors: new Set()
-                    };
-                }
-                
-                colorGroups[normalizedColor].count++;
-                colorGroups[normalizedColor].originalColors.add(originalColor);
-            }
-        });
-        
-        // Convert to simple count object for display
-        const result = {};
-        Object.keys(colorGroups).forEach(group => {
-            result[group] = colorGroups[group].count;
-        });
-        
-        console.log('Grouped colors:', result);
-        return result;
-    }
-
-    // Normalize color names (group similar colors)
-    function normalizeColor(color) {
-        const colorLower = color.toLowerCase();
-        
-        // Red variations
-        if (colorLower.includes('red') || colorLower.includes('crimson') || colorLower.includes('scarlet')) {
-            return 'Red';
-        }
-        // Blue variations
-        if (colorLower.includes('blue') || colorLower.includes('navy') || colorLower.includes('azure')) {
-            return 'Blue';
-        }
-        // Black variations
-        if (colorLower.includes('black') || colorLower.includes('onyx') || colorLower.includes('ebony') || colorLower.includes('dark')) {
-            return 'Black';
-        }
-        // White variations
-        if (colorLower.includes('white') || colorLower.includes('ivory') || colorLower.includes('pearl')) {
-            return 'White';
-        }
-        // Green variations
-        if (colorLower.includes('green') || colorLower.includes('emerald') || colorLower.includes('olive')) {
-            return 'Green';
-        }
-        // Yellow variations
-        if (colorLower.includes('yellow') || colorLower.includes('gold') || colorLower.includes('amber')) {
-            return 'Yellow';
-        }
-        // Brown variations
-        if (colorLower.includes('brown') || colorLower.includes('tan') || colorLower.includes('beige')) {
-            return 'Brown';
-        }
-        // Gray variations
-        if (colorLower.includes('gray') || colorLower.includes('grey') || colorLower.includes('silver')) {
-            return 'Gray';
-        }
-        
-        // Capitalize first letter for other colors
-        return color.charAt(0).toUpperCase() + color.slice(1).toLowerCase();
-    }
-
-    // Apply all filters
-    function applyFilters() {
-        console.log('🔄 Applying filters...', appState.filters);
-        
-        let filteredProducts = [...appState.products];
-        
-        // Apply URL filters first
-        if (appState.currentUsage) {
-            filteredProducts = filteredProducts.filter(product => 
-                product.uses && 
-                product.uses.toLowerCase().replace(/\s+/g, '-') === appState.currentUsage.toLowerCase()
-            );
-        }
-        
-        if (appState.currentStoneName) {
-            filteredProducts = filteredProducts.filter(product => 
-                product.stone_name && 
-                product.stone_name.toLowerCase().replace(/\s+/g, '-') === appState.currentStoneName.toLowerCase()
-            );
-        }
-        
-        // Apply color filters
-        if (appState.filters.colors.length > 0) {
-            filteredProducts = filteredProducts.filter(product => {
-                if (!product.color) return false;
-                const normalizedColor = normalizeColor(product.color);
-                return appState.filters.colors.includes(normalizedColor);
-            });
-        }
-        
-        // Apply price filters
-        filteredProducts = filteredProducts.filter(product => {
-            const price = parseFloat(product.price) || 0;
-            return price >= appState.filters.minPrice && price <= appState.filters.maxPrice;
-        });
-        
-        // Apply sorting
-        filteredProducts = sortProducts(filteredProducts, appState.sortOption);
-        
-        appState.filteredProducts = filteredProducts;
-        displayProducts();
-        updateProductsCount();
-        updateFilterCounts();
-    }
-
-    // Sort products based on selected option
-    function sortProducts(products, sortOption) {
-        const sortedProducts = [...products];
-        
-        switch(sortOption) {
-            case 'price-low':
-                return sortedProducts.sort((a, b) => {
-                    const priceA = parseFloat(a.price) || 0;
-                    const priceB = parseFloat(b.price) || 0;
-                    return priceA - priceB;
-                });
-                
-            case 'price-high':
-                return sortedProducts.sort((a, b) => {
-                    const priceA = parseFloat(a.price) || 0;
-                    const priceB = parseFloat(b.price) || 0;
-                    return priceB - priceA;
-                });
-                
-            case 'name':
-                return sortedProducts.sort((a, b) => {
-                    const nameA = (a.stone_name || '').toLowerCase();
-                    const nameB = (b.stone_name || '').toLowerCase();
-                    return nameA.localeCompare(nameB);
-                });
-                
-            default:
-                return sortedProducts;
-        }
-    }
-
-    // Clear all filters
-    function clearAllFilters() {
-        console.log('🔄 Clearing all filters...');
-        
-        // Reset filter state
-        appState.filters = {
-            colors: [],
-            minPrice: 0,
-            maxPrice: 1000
+        const appState = {
+            products: [],
+            filteredProducts: [],
+            currentUsage: null,
+            currentStoneName: null,
+            user: null,
+            filters: {
+                colors: [],
+                minPrice: 0,
+                maxPrice: 1000
+            },
+            sortOption: 'default'
         };
-        
-        // Reset UI elements
-        const checkboxes = document.querySelectorAll('.filter-checkbox');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        
-        const priceSlider = document.getElementById('priceSlider');
-        const minPriceInput = document.getElementById('minPrice');
-        const maxPriceInput = document.getElementById('maxPrice');
-        const minPriceDisplay = document.getElementById('minPriceDisplay');
-        const maxPriceDisplay = document.getElementById('maxPriceDisplay');
-        
-        if (priceSlider && minPriceInput && maxPriceInput) {
-            priceSlider.value = 1000;
-            minPriceInput.value = 0;
-            maxPriceInput.value = 1000;
-            minPriceDisplay.textContent = '0';
-            maxPriceDisplay.textContent = '1000';
-        }
-        
-        // Reset sort option
-        const sortSelect = document.getElementById('sortSelect');
-        if (sortSelect) {
-            sortSelect.value = 'default';
-            appState.sortOption = 'default';
-        }
-        
-        // Reapply filters (which will now be empty)
-        applyFilters();
-    }
 
-    // Update filter counts based on current filtered products
-    function updateFilterCounts() {
-        // Update color counts
-        const colorOptions = document.querySelectorAll('#colorOptions .filter-option');
-        colorOptions.forEach(option => {
-            const checkbox = option.querySelector('input');
-            const color = checkbox.getAttribute('data-color');
-            const countSpan = option.querySelector('.filter-count');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Initializing Category Products Page with Filters...');
             
-            if (color && countSpan) {
-                const count = appState.products.filter(p => {
-                    if (!p.color) return false;
-                    const normalizedColor = normalizeColor(p.color);
-                    return normalizedColor === color && isProductInCurrentFilter(p, { colors: [color] });
-                }).length;
-                
-                countSpan.textContent = count;
-            }
-        });
-    }
-
-    // Helper function to check if a product would be in current filter
-    function isProductInCurrentFilter(product, additionalFilter = {}) {
-        const combinedFilters = { ...appState.filters, ...additionalFilter };
-        
-        // Check color
-        if (combinedFilters.colors.length > 0) {
-            if (!product.color) return false;
-            const normalizedColor = normalizeColor(product.color);
-            if (!combinedFilters.colors.includes(normalizedColor)) {
-                return false;
-            }
-        }
-        
-        // Check price
-        const price = parseFloat(product.price) || 0;
-        if (price < combinedFilters.minPrice || price > combinedFilters.maxPrice) {
-            return false;
-        }
-        
-        // Check URL filters
-        if (appState.currentUsage && 
-            (!product.uses || product.uses.toLowerCase().replace(/\s+/g, '-') !== appState.currentUsage.toLowerCase())) {
-            return false;
-        }
-        
-        if (appState.currentStoneName && 
-            (!product.stone_name || product.stone_name.toLowerCase().replace(/\s+/g, '-') !== appState.currentStoneName.toLowerCase())) {
-            return false;
-        }
-        
-        return true;
-    }
-
-    // ===== CATEGORY PRODUCTS SPECIFIC FUNCTIONS =====
-
-    async function initializePage() {
-        try {
-            console.log('🔄 Starting page initialization...');
-            await loadProductsFromFirestore();
-            updatePageTitle();
-            applyAutoFilter();
-            generateUsesNavigation();
-            generateFilterOptions();
-            console.log('✅ Page initialization completed successfully!');
-        } catch (error) {
-            console.error('❌ Error initializing page:', error);
-        }
-    }
-
-    async function loadProductsFromFirestore() {
-        try {
-            console.log('🔥 Loading products from Firestore...');
-            const querySnapshot = await getDocs(collection(db, "products"));
-            appState.products = [];
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            appState.currentUsage = urlParams.get('usage');
+            appState.currentStoneName = urlParams.get('stone') || urlParams.get('stone_name');
             
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                console.log('📄 Firestore Document Data:', data);
-                
-                // ✅ FIX: Handle additional_fields array properly
-                let processedData = { ...data };
-                
-                // If additional_fields exists and is an array, extract the properties
-                if (data.additional_fields && Array.isArray(data.additional_fields)) {
-                    data.additional_fields.forEach(field => {
-                        if (field && typeof field === 'object') {
-                            processedData = { ...processedData, ...field };
-                        }
-                    });
-                }
-                
-                appState.products.push({
-                    id: doc.id,
-                    ...processedData
-                });
+            console.log('📋 URL Parameters:', {
+                usage: appState.currentUsage,
+                stone_name: appState.currentStoneName
             });
             
-            console.log('✅ Products loaded successfully:', appState.products.length);
-            console.log('📦 Sample product data:', appState.products[0]);
+            // Mobile menu elements
+            const trustMobileToggle = document.getElementById('trustMobileToggle');
+            const mobileUsesMenu = document.getElementById('mobileUsesMenu');
+            const closeMenu = document.getElementById('closeMenu');
+            const menuOverlay = document.getElementById('menuOverlay');
             
-            // Real-time listener
-            onSnapshot(collection(db, "products"), (snapshot) => {
-                const updatedProducts = [];
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    let processedData = { ...data };
+            // Mobile filter toggle
+            const mobileFilterToggle = document.getElementById('mobileFilterToggle');
+            const filtersSection = document.getElementById('filtersSection');
+            
+            // Initialize the page
+            initializePage();
+            initializeAuth();
+            initializeUI();
+            initializeMobileMenu();
+            initializeMobileFilters();
+            
+            // ===== FUNCTIONS =====
+            
+            async function initializePage() {
+                try {
+                    console.log('🔄 Starting page initialization...');
+                    await loadProductsFromFirestore();
+                    updatePageTitle();
+                    applyAutoFilter();
+                    generateUsesNavigation();
+                    generateFilterOptions();
+                    console.log('✅ Page initialization completed successfully!');
+                } catch (error) {
+                    console.error('❌ Error initializing page:', error);
+                }
+            }
+            
+            async function loadProductsFromFirestore() {
+                try {
+                    console.log('🔥 Loading products from Firestore...');
+                    const querySnapshot = await getDocs(collection(db, "products"));
+                    appState.products = [];
                     
-                    // ✅ FIX: Handle additional_fields array properly
-                    if (data.additional_fields && Array.isArray(data.additional_fields)) {
-                        data.additional_fields.forEach(field => {
-                            if (field && typeof field === 'object') {
-                                processedData = { ...processedData, ...field };
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        console.log('📄 Firestore Document Data:', data);
+                        
+                        // ✅ FIX: Handle additional_fields array properly
+                        let processedData = { ...data };
+                        
+                        // If additional_fields exists and is an array, extract the properties
+                        if (data.additional_fields && Array.isArray(data.additional_fields)) {
+                            data.additional_fields.forEach(field => {
+                                if (field && typeof field === 'object') {
+                                    processedData = { ...processedData, ...field };
+                                }
+                            });
+                        }
+                        
+                        appState.products.push({
+                            id: doc.id,
+                            ...processedData
+                        });
+                    });
+                    
+                    console.log('✅ Products loaded successfully:', appState.products.length);
+                    console.log('📦 Sample product data:', appState.products[0]);
+                    
+                    // Real-time listener
+                    onSnapshot(collection(db, "products"), (snapshot) => {
+                        const updatedProducts = [];
+                        snapshot.forEach((doc) => {
+                            const data = doc.data();
+                            let processedData = { ...data };
+                            
+                            // ✅ FIX: Handle additional_fields array properly
+                            if (data.additional_fields && Array.isArray(data.additional_fields)) {
+                                data.additional_fields.forEach(field => {
+                                    if (field && typeof field === 'object') {
+                                        processedData = { ...processedData, ...field };
+                                    }
+                                });
+                            }
+                            
+                            updatedProducts.push({
+                                id: doc.id,
+                                ...processedData
+                            });
+                        });
+                        appState.products = updatedProducts;
+                        console.log('🔄 Products updated in real-time:', updatedProducts.length);
+                        applyAutoFilter();
+                        generateUsesNavigation();
+                        generateFilterOptions();
+                    });
+                    
+                } catch (error) {
+                    console.error('❌ Error loading products from Firestore:', error);
+                    console.log('🔄 Using sample data as fallback...');
+                    // Fallback to sample data if Firebase fails
+                    appState.products = getSampleProducts();
+                }
+            }
+            
+            // ✅ PAGE TITLE UPDATE FUNCTION
+            function updatePageTitle() {
+                const pageTitle = document.getElementById('pageTitle');
+                const breadcrumb = document.getElementById('breadcrumb');
+                
+                if (appState.currentUsage && appState.currentStoneName) {
+                    pageTitle.textContent = `${appState.currentStoneName} Stones`;
+                    breadcrumb.innerHTML = `
+                        <a href="index.html">Home</a>
+                        <span>></span>
+                        <a href="category-products.html?usage=${appState.currentUsage}">${appState.currentUsage}</a>
+                        <span>></span>
+                        <span>${appState.currentStoneName}</span>
+                    `;
+                    
+                } else if (appState.currentUsage) {
+                    pageTitle.textContent = `${appState.currentUsage} Stones`;
+                    breadcrumb.innerHTML = `
+                        <a href="index.html">Home</a>
+                        <span>></span>
+                        <span>${appState.currentUsage}</span>
+                    `;
+                } else {
+                    pageTitle.textContent = 'All Stone Products';
+                    breadcrumb.innerHTML = `
+                        <a href="index.html">Home</a>
+                        <span>></span>
+                        <span>All Products</span>
+                    `;
+                }
+            }
+            
+            // ✅ AUTO FILTER FUNCTION
+            function applyAutoFilter() {
+                console.log('🔄 Applying auto filter from URL...');
+                applyFilters();
+            }
+            
+            // ✅ PRODUCT DISPLAY WITH MULTIPLE IMAGES SLIDESHOW
+            function displayProducts() {
+                const productsContainer = document.getElementById("products-list");
+                productsContainer.innerHTML = "";
+
+                if (!appState.filteredProducts.length) {
+                    productsContainer.innerHTML = `
+                        <div class="no-products">
+                            <i class="fas fa-box-open"></i>
+                            <h3>No Products Found</h3>
+                            <p>We couldn't find any products matching your criteria.</p>
+                            <a href="index.html" class="details-btn">Back to Home</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                appState.filteredProducts.forEach(product => {
+                    // Get all images for the product
+                    const images = product.images || [];
+                    // If no images array but has single image, use that
+                    if (product.image && images.length === 0) {
+                        images.push(product.image);
+                    }
+                    // If still no images, use default
+                    if (images.length === 0) {
+                        images.push(getDefaultImage(product.category));
+                    }
+                    
+                    const description = product.description || "No description";
+                    const rate = product.price || "N/A";
+                    const detailsLink = `product-details.html?id=${product.id}`;
+
+                    // Create image HTML with multiple image support
+                    let imagesHTML = '';
+                    if (images.length > 1) {
+                        // Multiple images - create slideshow
+                        imagesHTML = `
+                            <div class="product-img-box">
+                                ${images.map((img, index) => `
+                                    <img src="${img}" 
+                                         alt="${product.stone_name || 'Stone Product'}" 
+                                         class="product-img ${index === 0 ? 'active' : 'inactive'}" 
+                                         data-index="${index}">
+                                `).join('')}
+                                <div class="image-dots">
+                                    ${images.map((img, index) => `
+                                        <div class="image-dot ${index === 0 ? 'active' : ''}" 
+                                             data-index="${index}"></div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Single image
+                        imagesHTML = `
+                            <div class="product-img-box">
+                                <img src="${images[0]}" 
+                                     alt="${product.stone_name || 'Stone Product'}" 
+                                     class="product-img active">
+                            </div>
+                        `;
+                    }
+
+                    const cardHTML = `
+                        <div class="product-card" data-product-id="${product.id}">
+                            <a href="${detailsLink}">
+                                ${imagesHTML}
+                            </a>
+                            <h3 style="margin-top: 8px; font-size: 15px; color: #333; font-weight: 600;">
+                                ${product.stone_name || 'Stone Product'}
+                            </h3>
+                            <p class="product-description">${description}</p>
+                            <p class="product-rate">£ ${rate}</p>
+                            <a href="${detailsLink}" class="details-btn">View Details</a>
+                        </div>
+                    `;
+
+                    productsContainer.innerHTML += cardHTML;
+                });
+
+                // Initialize image slideshow for products with multiple images
+                initializeProductImageSlideshow();
+            }
+            
+            // ✅ MULTIPLE IMAGES SLIDESHOW FUNCTION
+            function initializeProductImageSlideshow() {
+                const productCards = document.querySelectorAll('.product-card');
+                
+                productCards.forEach(card => {
+                    const images = card.querySelectorAll('.product-img');
+                    const dots = card.querySelectorAll('.image-dot');
+                    
+                    if (images.length > 1) {
+                        let currentImageIndex = 0;
+                        let slideshowInterval;
+                        
+                        // Function to show specific image
+                        function showImage(index) {
+                            images.forEach((img, i) => {
+                                if (i === index) {
+                                    img.classList.add('active');
+                                    img.classList.remove('inactive');
+                                } else {
+                                    img.classList.remove('active');
+                                    img.classList.add('inactive');
+                                }
+                            });
+                            
+                            dots.forEach((dot, i) => {
+                                if (i === index) {
+                                    dot.classList.add('active');
+                                } else {
+                                    dot.classList.remove('active');
+                                }
+                            });
+                            
+                            currentImageIndex = index;
+                        }
+                        
+                        // Start automatic slideshow
+                        function startSlideshow() {
+                            slideshowInterval = setInterval(() => {
+                                let nextIndex = (currentImageIndex + 1) % images.length;
+                                showImage(nextIndex);
+                            }, 3000); // Change image every 3 seconds
+                        }
+                        
+                        // Stop slideshow
+                        function stopSlideshow() {
+                            clearInterval(slideshowInterval);
+                        }
+                        
+                        // Initialize dots click event
+                        dots.forEach(dot => {
+                            dot.addEventListener('click', function() {
+                                const index = parseInt(this.getAttribute('data-index'));
+                                showImage(index);
+                                stopSlideshow();
+                                // Restart slideshow after 5 seconds
+                                setTimeout(startSlideshow, 5000);
+                            });
+                        });
+                        
+                        // Mouse events for slideshow control
+                        card.addEventListener('mouseenter', stopSlideshow);
+                        card.addEventListener('mouseleave', startSlideshow);
+                        
+                        // Start slideshow initially
+                        startSlideshow();
+                    }
+                });
+            }
+            
+            // ✅ DEFAULT IMAGE GETTER
+            function getDefaultImage(category) {
+                const defaultImages = {
+                    'marble': 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                    'granite': 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                    'limestone': 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                    'sandstone': 'https://images.unsplash.com/photo-1541140532154-b024d705b90a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+                    'red sand stone': 'https://i.ibb.co/HLpBc94R/51b7aaab131a.jpg'
+                };
+                
+                const cat = category ? category.toLowerCase() : 'marble';
+                return defaultImages[cat] || defaultImages.marble;
+            }
+            
+            // ✅ UPDATE PRODUCTS COUNT
+            function updateProductsCount() {
+                const productsCount = document.getElementById('productsCount');
+                if (!productsCount) return;
+                
+                const baseCount = appState.products.length;
+                const filteredCount = appState.filteredProducts.length;
+                
+                let countText = `Showing ${filteredCount} product${filteredCount !== 1 ? 's' : ''}`;
+                
+                if (appState.currentUsage || appState.currentStoneName) {
+                    countText += ` for ${appState.currentStoneName || appState.currentUsage || 'all categories'}`;
+                }
+                
+                if (filteredCount < baseCount) {
+                    countText += ` (filtered from ${baseCount})`;
+                }
+                
+                productsCount.textContent = countText;
+            }
+            
+            // ✅ USES NAVIGATION FUNCTION
+            function generateUsesNavigation() {
+                const usesContainer = document.getElementById('dynamicUsesContainer');
+                const mobileUsesList = document.getElementById('mobileUsesList');
+                
+                if (!usesContainer) return;
+                
+                usesContainer.innerHTML = '';
+                if (mobileUsesList) mobileUsesList.innerHTML = '';
+                
+                // Get unique uses from products
+                const uniqueUses = [...new Set(appState.products
+                    .filter(product => product.uses && product.uses.trim() !== '')
+                    .map(product => product.uses.trim())
+                )].sort();
+                
+                console.log('Unique uses for navigation:', uniqueUses);
+                
+                if (uniqueUses.length === 0) {
+                    usesContainer.innerHTML = `
+                        <div class="loading-categories">
+                            <i class="fas fa-info-circle"></i>
+                            <p>No uses found</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                uniqueUses.forEach(usage => {
+                    const usageKey = usage.toLowerCase().replace(/\s+/g, '-');
+                    
+                    // Desktop uses navigation
+                    const useItem = document.createElement('div');
+                    useItem.className = 'use-item';
+                    
+                    // Get products for this usage
+                    const usageProducts = appState.products.filter(product => 
+                        product.uses && product.uses.toLowerCase() === usage.toLowerCase()
+                    );
+                    
+                    const uniqueStoneNames = [...new Set(usageProducts
+                        .filter(product => product.stone_name)
+                        .map(product => product.stone_name)
+                    )];
+                    
+                    console.log(`📁 ${usage} - Products: ${usageProducts.length}, Stone Names: ${uniqueStoneNames.length}`);
+                    
+                    if (uniqueStoneNames.length > 0) {
+                        // Usage with stone names - create mega menu
+                        useItem.innerHTML = `
+                            <div class="use-link">${usage} (${usageProducts.length})</div>
+                            <div class="mega-menu">
+                                <div class="patterns-grid">
+                                    ${uniqueStoneNames.map(stoneName => {
+                                        const stoneSlug = stoneName.toLowerCase().replace(/\s+/g, '-');
+                                        // Find a product image for this stone or use default
+                                        const stoneProduct = appState.products.find(p => 
+                                            p.uses && p.uses.toLowerCase() === usage.toLowerCase() && 
+                                            p.stone_name === stoneName
+                                        );
+                                        const imageUrl = stoneProduct?.images?.[0] || getDefaultImage(stoneProduct?.category);
+                                        
+                                        return `
+                                            <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="pattern-item" data-usage="${usage}" data-stone="${stoneName}">
+                                                <div class="pattern-image" style="background-image: url('${imageUrl}')"></div>
+                                                <div class="pattern-name">${stoneName}</div>
+                                            </a>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Usage with products but no stone names - simple link
+                        useItem.innerHTML = `
+                            <a href="category-products.html?usage=${usageKey}" class="use-link">${usage} (${usageProducts.length})</a>
+                        `;
+                    }
+                    
+                    usesContainer.appendChild(useItem);
+                    
+                    // Mobile uses menu
+                    if (mobileUsesList) {
+                        const mobileUseItem = document.createElement('div');
+                        mobileUseItem.className = 'mobile-use-item';
+                        
+                        if (uniqueStoneNames.length > 0) {
+                            mobileUseItem.innerHTML = `
+                                <div class="mobile-use-link mobile-use-toggle" data-usage="${usageKey}">
+                                    <span>${usage} (${usageProducts.length})</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="mobile-mega-content" id="mobile-content-${usageKey}">
+                                    <div class="mobile-pattern-grid">
+                                        ${uniqueStoneNames.map(stoneName => {
+                                            const stoneSlug = stoneName.toLowerCase().replace(/\s+/g, '-');
+                                            const stoneProduct = appState.products.find(p => 
+                                                p.uses && p.uses.toLowerCase() === usage.toLowerCase() && 
+                                                p.stone_name === stoneName
+                                            );
+                                            const imageUrl = stoneProduct?.images?.[0] || getDefaultImage(stoneProduct?.category);
+                                            
+                                            return `
+                                                <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="mobile-pattern-item">
+                                                    <div class="mobile-pattern-image" style="background-image: url('${imageUrl}'); background-size: contain;"></div>
+                                                    <div class="mobile-pattern-name">${stoneName}</div>
+                                                </a>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            mobileUseItem.innerHTML = `
+                                <a href="category-products.html?usage=${usageKey}" class="mobile-use-link">
+                                    ${usage} (${usageProducts.length})
+                                </a>
+                            `;
+                        }
+                        
+                        mobileUsesList.appendChild(mobileUseItem);
+                    }
+                });
+                
+                // Reinitialize mega menu functionality
+                setTimeout(() => {
+                    initializeMegaMenu();
+                }, 100);
+                
+                // Add event listeners for mobile menu toggles
+                setTimeout(() => {
+                    const mobileToggles = document.querySelectorAll('.mobile-use-toggle');
+                    mobileToggles.forEach(toggle => {
+                        toggle.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const usageKey = this.getAttribute('data-usage');
+                            const content = document.getElementById(`mobile-content-${usageKey}`);
+                            const icon = this.querySelector('i');
+                            
+                            if (content.classList.contains('active')) {
+                                content.classList.remove('active');
+                                icon.classList.remove('fa-chevron-up');
+                                icon.classList.add('fa-chevron-down');
+                            } else {
+                                document.querySelectorAll('.mobile-mega-content.active').forEach(openContent => {
+                                    openContent.classList.remove('active');
+                                    const openIcon = openContent.previousElementSibling.querySelector('i');
+                                    if (openIcon) {
+                                        openIcon.classList.remove('fa-chevron-up');
+                                        openIcon.classList.add('fa-chevron-down');
+                                    }
+                                });
+                                
+                                content.classList.add('active');
+                                icon.classList.remove('fa-chevron-down');
+                                icon.classList.add('fa-chevron-up');
+                            }
+                        });
+                    });
+                }, 100);
+            }
+            
+            // ===== UI FUNCTIONS =====
+            
+            // Initialize UI components
+            function initializeUI() {
+                initializeSearch();
+                initializeUserProfile();
+                initializeMegaMenu();
+                initializeFilters();
+                initializeSorting();
+            }
+
+            // Initialize search functionality
+            function initializeSearch() {
+                const searchInput = document.getElementById('searchInput');
+                const searchButton = document.getElementById('searchButton');
+                const searchResults = document.getElementById('searchResults');
+                
+                if (!searchInput || !searchButton || !searchResults) return;
+                
+                searchButton.addEventListener('click', performSearch);
+                searchInput.addEventListener('keyup', function(event) {
+                    if (event.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+                
+                searchInput.addEventListener('input', function() {
+                    if (searchInput.value.length > 2) {
+                        performSearch();
+                    } else {
+                        searchResults.classList.remove('active');
+                    }
+                });
+                
+                function performSearch() {
+                    const query = searchInput.value.trim().toLowerCase();
+                    
+                    if (query.length < 2) {
+                        searchResults.classList.remove('active');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    searchResults.innerHTML = '<div class="search-loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+                    searchResults.classList.add('active');
+                    
+                    // Simulate API delay
+                    setTimeout(() => {
+                        const results = appState.products.filter(product => 
+                            (product.stone_name && product.stone_name.toLowerCase().includes(query)) ||
+                            (product.uses && product.uses.toLowerCase().includes(query)) ||
+                            (product.type && product.type.toLowerCase().includes(query)) ||
+                            (product.category && product.category.toLowerCase().includes(query))
+                        );
+                        
+                        displaySearchResults(results, query);
+                    }, 300);
+                }
+                
+                function displaySearchResults(results, query) {
+                    searchResults.innerHTML = '';
+                    
+                    if (results.length === 0) {
+                        searchResults.innerHTML = '<div class="no-results">No products found for "' + query + '"</div>';
+                        return;
+                    }
+                    
+                    results.forEach(product => {
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'search-result-item';
+                        resultItem.innerHTML = `
+                            <div class="search-result-image" style="background-image: url('${product.images?.[0] || getDefaultImage(product.category)}')"></div>
+                            <div class="search-result-content">
+                                <div class="search-result-name">${product.stone_name || 'Stone Product'}</div>
+                                <div class="search-result-category">${product.uses || 'General'} • ${product.category || 'Natural Stone'}</div>
+                            </div>
+                            <div class="search-result-price">${product.price ? '£' + product.price : 'Price on request'}</div>
+                        `;
+                        
+                        // Link to product-details.html with product ID for individual products
+                        resultItem.addEventListener('click', function() {
+                            window.location.href = `product-details.html?id=${product.id}`;
+                        });
+                        
+                        searchResults.appendChild(resultItem);
+                    });
+                    
+                    // Add "View all results" link
+                    const viewAll = document.createElement('div');
+                    viewAll.className = 'view-all-results';
+                    viewAll.innerHTML = `<a href="search-results.html?q=${encodeURIComponent(query)}">View all ${results.length} results</a>`;
+                    searchResults.appendChild(viewAll);
+                }
+                
+                // Close search results when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!searchResults.contains(event.target) && event.target !== searchInput && event.target !== searchButton) {
+                        searchResults.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Initialize user profile dropdown
+            function initializeUserProfile() {
+                const profileToggle = document.getElementById('profileToggle');
+                const profileDropdown = document.getElementById('profileDropdown');
+                const logoutBtn = document.getElementById('logoutBtn');
+                
+                if (!profileToggle || !profileDropdown) return;
+                
+                profileToggle.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    profileDropdown.classList.toggle('active');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function() {
+                    profileDropdown.classList.remove('active');
+                });
+                
+                // Logout functionality
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        signOut(auth).then(() => {
+                            console.log('User signed out');
+                        }).catch((error) => {
+                            console.error('Sign out error:', error);
+                        });
+                    });
+                }
+            }
+            
+            // Initialize mega menu functionality
+            function initializeMegaMenu() {
+                const usesTopBar = document.getElementById('desktopUsesBar');
+                const useItems = document.querySelectorAll('.use-item');
+                let activeMegaMenu = null;
+                let hideTimeout = null;
+                
+                if (!usesTopBar || useItems.length === 0) {
+                    console.log('❌ Mega Menu elements not found');
+                    return;
+                }
+                
+                // Hide all mega menus
+                function hideAllMegaMenus() {
+                    document.querySelectorAll('.mega-menu').forEach(menu => {
+                        menu.style.display = 'none';
+                    });
+                    activeMegaMenu = null;
+                }
+                
+                // Show specific mega menu
+                function showMegaMenu(menu) {
+                    hideAllMegaMenus();
+                    menu.style.display = 'block';
+                    activeMegaMenu = menu;
+                    
+                    // Clear any pending hide timeout
+                    if (hideTimeout) {
+                        clearTimeout(hideTimeout);
+                        hideTimeout = null;
+                    }
+                }
+                
+                // Initialize event listeners for each use item
+                useItems.forEach((item) => {
+                    const megaMenu = item.querySelector('.mega-menu');
+                    
+                    if (megaMenu) {
+                        // Mouse enter - show menu immediately
+                        item.addEventListener('mouseenter', () => {
+                            showMegaMenu(megaMenu);
+                        });
+                        
+                        // Mouse leave - hide after delay
+                        item.addEventListener('mouseleave', (e) => {
+                            // Check if mouse is going to mega menu
+                            const relatedTarget = e.relatedTarget;
+                            const isGoingToMegaMenu = megaMenu.contains(relatedTarget);
+                            
+                            if (!isGoingToMegaMenu) {
+                                hideTimeout = setTimeout(() => {
+                                    if (activeMegaMenu === megaMenu && !megaMenu.matches(':hover')) {
+                                        hideAllMegaMenus();
+                                    }
+                                }, 100);
+                            }
+                        });
+                        
+                        // Mega menu mouse events
+                        megaMenu.addEventListener('mouseenter', () => {
+                            // Clear any pending hide timeout
+                            if (hideTimeout) {
+                                clearTimeout(hideTimeout);
+                                hideTimeout = null;
+                            }
+                        });
+                        
+                        megaMenu.addEventListener('mouseleave', (e) => {
+                            // Check if mouse is going back to use item
+                            const relatedTarget = e.relatedTarget;
+                            const isGoingToUseItem = item.contains(relatedTarget);
+                            
+                            if (!isGoingToUseItem) {
+                                hideTimeout = setTimeout(() => {
+                                    hideAllMegaMenus();
+                                }, 100);
                             }
                         });
                     }
+                });
+                
+                // Hide mega menus when clicking outside
+                document.addEventListener('click', (event) => {
+                    const isClickInside = usesTopBar.contains(event.target) || 
+                                         (activeMegaMenu && activeMegaMenu.contains(event.target));
                     
-                    updatedProducts.push({
-                        id: doc.id,
-                        ...processedData
+                    if (!isClickInside && activeMegaMenu) {
+                        hideAllMegaMenus();
+                    }
+                });
+                
+                // Hide on scroll
+                window.addEventListener('scroll', function() {
+                    if (activeMegaMenu) {
+                        hideAllMegaMenus();
+                    }
+                });
+            }
+            
+            // ===== FILTER SYSTEM FUNCTIONS =====
+
+            // Initialize filters
+            function initializeFilters() {
+                // Initialize filter toggles
+                const filterToggles = document.querySelectorAll('.filter-toggle');
+                filterToggles.forEach(toggle => {
+                    toggle.addEventListener('click', function() {
+                        const targetId = this.getAttribute('data-target');
+                        const target = document.getElementById(targetId);
+                        if (target) {
+                            target.style.display = target.style.display === 'none' ? 'block' : 'none';
+                            this.querySelector('i').classList.toggle('fa-chevron-down');
+                            this.querySelector('i').classList.toggle('fa-chevron-up');
+                        }
                     });
                 });
-                appState.products = updatedProducts;
-                console.log('🔄 Products updated in real-time:', updatedProducts.length);
-                applyAutoFilter();
-                generateUsesNavigation();
-                generateFilterOptions();
-            });
-            
-        } catch (error) {
-            console.error('❌ Error loading products from Firestore:', error);
-            console.log('🔄 Using sample data as fallback...');
-            // Fallback to sample data if Firebase fails
-            appState.products = getSampleProducts();
-        }
-    }
 
-    // ✅ PAGE TITLE UPDATE FUNCTION
-    function updatePageTitle() {
-        const pageTitle = document.getElementById('pageTitle');
-        const breadcrumb = document.getElementById('breadcrumb');
-        
-        if (appState.currentUsage && appState.currentStoneName) {
-            pageTitle.textContent = `${appState.currentStoneName} Stones`;
-            breadcrumb.innerHTML = `
-                <a href="index.html">Home</a>
-                <span>></span>
-                <a href="category-products.html?usage=${appState.currentUsage}">${appState.currentUsage}</a>
-                <span>></span>
-                <span>${appState.currentStoneName}</span>
-            `;
-            
-        } else if (appState.currentUsage) {
-            pageTitle.textContent = `${appState.currentUsage} Stones`;
-            breadcrumb.innerHTML = `
-                <a href="index.html">Home</a>
-                <span>></span>
-                <span>${appState.currentUsage}</span>
-            `;
-        } else {
-            pageTitle.textContent = 'All Stone Products';
-            breadcrumb.innerHTML = `
-                <a href="index.html">Home</a>
-                <span>></span>
-                <span>All Products</span>
-            `;
-        }
-    }
+                // Initialize price slider
+                const priceSlider = document.getElementById('priceSlider');
+                const minPriceInput = document.getElementById('minPrice');
+                const maxPriceInput = document.getElementById('maxPrice');
+                const minPriceDisplay = document.getElementById('minPriceDisplay');
+                const maxPriceDisplay = document.getElementById('maxPriceDisplay');
 
-    // ✅ AUTO FILTER FUNCTION
-    function applyAutoFilter() {
-        console.log('🔄 Applying auto filter from URL...');
-        applyFilters();
-    }
+                if (priceSlider && minPriceInput && maxPriceInput) {
+                    // Set initial values
+                    priceSlider.value = appState.filters.maxPrice;
+                    minPriceInput.value = appState.filters.minPrice;
+                    maxPriceInput.value = appState.filters.maxPrice;
+                    minPriceDisplay.textContent = appState.filters.minPrice;
+                    maxPriceDisplay.textContent = appState.filters.maxPrice;
 
-    // ✅ PERFECT 1:1 RATIO PRODUCT CARDS
-    function displayProducts() {
-        const productsContainer = document.getElementById("products-list");
-        productsContainer.innerHTML = "";
+                    // Update price display when slider changes
+                    priceSlider.addEventListener('input', function() {
+                        appState.filters.maxPrice = parseInt(this.value);
+                        maxPriceInput.value = appState.filters.maxPrice;
+                        maxPriceDisplay.textContent = appState.filters.maxPrice;
+                        applyFilters();
+                    });
 
-        if (!appState.filteredProducts.length) {
-            productsContainer.innerHTML = `
-                <div class="no-products">
-                    <i class="fas fa-box-open"></i>
-                    <h3>No Products Found</h3>
-                    <p>We couldn't find any products matching your criteria.</p>
-                    <a href="index.html" class="details-btn">Back to Home</a>
-                </div>
-            `;
-            return;
-        }
+                    // Update filters when price inputs change
+                    minPriceInput.addEventListener('change', function() {
+                        appState.filters.minPrice = parseInt(this.value) || 0;
+                        minPriceDisplay.textContent = appState.filters.minPrice;
+                        applyFilters();
+                    });
 
-        appState.filteredProducts.forEach(product => {
-            const imageUrl = product.image || product.images?.[0] || getDefaultImage(product.category);
-            const description = product.description || "No description";
-            const rate = product.price || "N/A";
-            // ✅ UPDATED: Link to product-details.html with product ID
-            const detailsLink = `product-details.html?id=${product.id}`;
+                    maxPriceInput.addEventListener('change', function() {
+                        appState.filters.maxPrice = parseInt(this.value) || 1000;
+                        priceSlider.value = appState.filters.maxPrice;
+                        maxPriceDisplay.textContent = appState.filters.maxPrice;
+                        applyFilters();
+                    });
+                }
 
-            const cardHTML = `
-                <div class="product-card">
-                    <a href="${detailsLink}">
-                        <div class="product-img-box">
-                            <img src="${imageUrl}" alt="${product.stone_name || 'Stone Product'}" class="product-img">
-                        </div>
-                    </a>
-                    <h3 style="margin-top: 8px; font-size: 15px; color: #333; font-weight: 600;">
-                        ${product.stone_name || 'Stone Product'}
-                    </h3>
-                    <p class="product-description">${description}</p>
-                    <p class="product-rate">£ ${rate}</p>
-                    <a href="${detailsLink}" class="details-btn">View Details</a>
-                </div>
-            `;
-
-            productsContainer.innerHTML += cardHTML;
-        });
-    }
-
-    // ✅ DEFAULT IMAGE GETTER
-    function getDefaultImage(category) {
-        const defaultImages = {
-            'marble': 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
-            'granite': 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
-            'limestone': 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
-            'sandstone': 'https://images.unsplash.com/photo-1541140532154-b024d705b90a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
-            'red sand stone': 'https://i.ibb.co/HLpBc94R/51b7aaab131a.jpg'
-        };
-        
-        const cat = category ? category.toLowerCase() : 'marble';
-        return defaultImages[cat] || defaultImages.marble;
-    }
-
-    // ✅ UPDATE PRODUCTS COUNT
-    function updateProductsCount() {
-        const productsCount = document.getElementById('productsCount');
-        if (!productsCount) return;
-        
-        const baseCount = appState.products.length;
-        const filteredCount = appState.filteredProducts.length;
-        
-        let countText = `Showing ${filteredCount} product${filteredCount !== 1 ? 's' : ''}`;
-        
-        if (appState.currentUsage || appState.currentStoneName) {
-            countText += ` for ${appState.currentStoneName || appState.currentUsage || 'all categories'}`;
-        }
-        
-        if (filteredCount < baseCount) {
-            countText += ` (filtered from ${baseCount})`;
-        }
-        
-        productsCount.textContent = countText;
-    }
-
-    // ✅ USES NAVIGATION FUNCTION - ALWAYS LINKS TO CATEGORY-PRODUCTS.HTML
-    function generateUsesNavigation() {
-        const usesContainer = document.getElementById('dynamicUsesContainer');
-        if (!usesContainer) return;
-        
-        usesContainer.innerHTML = '';
-        
-        // Get unique uses from products
-        const uniqueUses = [...new Set(appState.products
-            .filter(product => product.uses && product.uses.trim() !== '')
-            .map(product => product.uses.trim())
-        )].sort();
-        
-        console.log('Unique uses for navigation:', uniqueUses);
-        
-        if (uniqueUses.length === 0) {
-            usesContainer.innerHTML = `
-                <div class="loading-categories">
-                    <i class="fas fa-info-circle"></i>
-                    <p>No uses found</p>
-                </div>
-            `;
-            return;
-        }
-        
-        uniqueUses.forEach(usage => {
-            const usageKey = usage.toLowerCase().replace(/\s+/g, '-');
-            const useItem = document.createElement('div');
-            useItem.className = 'use-item';
-            
-            // Get products for this usage
-            const usageProducts = appState.products.filter(product => 
-                product.uses && product.uses.toLowerCase() === usage.toLowerCase()
-            );
-            
-            const uniqueStoneNames = [...new Set(usageProducts
-                .filter(product => product.stone_name)
-                .map(product => product.stone_name)
-            )];
-            
-            console.log(`📁 ${usage} - Products: ${usageProducts.length}, Stone Names: ${uniqueStoneNames.length}`);
-            
-            if (uniqueStoneNames.length > 0) {
-                // Usage with stone names - create mega menu
-                useItem.innerHTML = `
-                    <div class="use-link">${usage} (${usageProducts.length})</div>
-                    <div class="mega-menu">
-                        <div class="patterns-grid">
-                            ${uniqueStoneNames.map(stoneName => {
-                                const stoneSlug = stoneName.toLowerCase().replace(/\s+/g, '-');
-                                // Find a product image for this stone or use default
-                                const stoneProduct = appState.products.find(p => 
-                                    p.uses && p.uses.toLowerCase() === usage.toLowerCase() && 
-                                    p.stone_name === stoneName
-                                );
-                                const imageUrl = stoneProduct?.images?.[0] || getDefaultImage(stoneProduct?.category);
-                                
-                                // ✅ ALWAYS LINK TO CATEGORY-PRODUCTS.HTML
-                                return `
-                                    <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="pattern-item" data-usage="${usage}" data-stone="${stoneName}">
-                                        <div class="pattern-image" style="background-image: url('${imageUrl}')"></div>
-                                        <div class="pattern-name">${stoneName}</div>
-                                    </a>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            } else {
-                // Usage with products but no stone names - simple link
-                useItem.innerHTML = `
-                    <a href="category-products.html?usage=${usageKey}" class="use-link">${usage} (${usageProducts.length})</a>
-                `;
+                // Clear filters button
+                const clearFiltersBtn = document.getElementById('clearFilters');
+                if (clearFiltersBtn) {
+                    clearFiltersBtn.addEventListener('click', function() {
+                        clearAllFilters();
+                    });
+                }
             }
-            
-            usesContainer.appendChild(useItem);
-        });
-        
-        // Reinitialize mega menu functionality
-        setTimeout(() => {
-            initializeMegaMenu();
-        }, 100);
-    }
 
-    // ✅ AUTHENTICATION FUNCTIONS
-    function initializeAuth() {
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                appState.user = {
-                    uid: user.uid,
-                    email: user.email,
-                    name: user.displayName || user.email.split('@')[0]
+            // Initialize sorting
+            function initializeSorting() {
+                const sortSelect = document.getElementById('sortSelect');
+                if (sortSelect) {
+                    sortSelect.addEventListener('change', function() {
+                        appState.sortOption = this.value;
+                        applyFilters();
+                    });
+                }
+            }
+
+            // Generate filter options from products
+            function generateFilterOptions() {
+                console.log('🔄 Generating filter options...');
+                
+                // Generate color options with grouping similar colors
+                const colorOptions = document.getElementById('colorOptions');
+                if (colorOptions) {
+                    colorOptions.innerHTML = '';
+                    
+                    const groupedColors = groupSimilarColors(appState.products);
+                    
+                    Object.keys(groupedColors).forEach(colorGroup => {
+                        const count = groupedColors[colorGroup].count;
+                        const option = document.createElement('div');
+                        option.className = 'filter-option';
+                        option.innerHTML = `
+                            <input type="checkbox" class="filter-checkbox" id="color-${colorGroup}" data-color="${colorGroup}">
+                            <label for="color-${colorGroup}" class="filter-label">
+                                ${colorGroup}
+                                <span class="filter-count">${count}</span>
+                            </label>
+                        `;
+                        
+                        option.querySelector('input').addEventListener('change', function() {
+                            if (this.checked) {
+                                appState.filters.colors.push(colorGroup);
+                            } else {
+                                appState.filters.colors = appState.filters.colors.filter(c => c !== colorGroup);
+                            }
+                            applyFilters();
+                        });
+                        
+                        colorOptions.appendChild(option);
+                    });
+                }
+            }
+
+            // Group similar colors together
+            function groupSimilarColors(products) {
+                const colorGroups = {};
+                
+                products.forEach(product => {
+                    if (product.color && product.color.trim() !== '') {
+                        const originalColor = product.color.trim();
+                        const normalizedColor = normalizeColor(originalColor);
+                        
+                        if (!colorGroups[normalizedColor]) {
+                            colorGroups[normalizedColor] = {
+                                count: 0,
+                                originalColors: new Set()
+                            };
+                        }
+                        
+                        colorGroups[normalizedColor].count++;
+                        colorGroups[normalizedColor].originalColors.add(originalColor);
+                    }
+                });
+                
+                // Convert to simple count object for display
+                const result = {};
+                Object.keys(colorGroups).forEach(group => {
+                    result[group] = colorGroups[group].count;
+                });
+                
+                console.log('Grouped colors:', result);
+                return result;
+            }
+
+            // Normalize color names (group similar colors)
+            function normalizeColor(color) {
+                const colorLower = color.toLowerCase();
+                
+                // Red variations
+                if (colorLower.includes('red') || colorLower.includes('crimson') || colorLower.includes('scarlet')) {
+                    return 'Red';
+                }
+                // Blue variations
+                if (colorLower.includes('blue') || colorLower.includes('navy') || colorLower.includes('azure')) {
+                    return 'Blue';
+                }
+                // Black variations
+                if (colorLower.includes('black') || colorLower.includes('onyx') || colorLower.includes('ebony') || colorLower.includes('dark')) {
+                    return 'Black';
+                }
+                // White variations
+                if (colorLower.includes('white') || colorLower.includes('ivory') || colorLower.includes('pearl')) {
+                    return 'White';
+                }
+                // Green variations
+                if (colorLower.includes('green') || colorLower.includes('emerald') || colorLower.includes('olive')) {
+                    return 'Green';
+                }
+                // Yellow variations
+                if (colorLower.includes('yellow') || colorLower.includes('gold') || colorLower.includes('amber')) {
+                    return 'Yellow';
+                }
+                // Brown variations
+                if (colorLower.includes('brown') || colorLower.includes('tan') || colorLower.includes('beige')) {
+                    return 'Brown';
+                }
+                // Gray variations
+                if (colorLower.includes('gray') || colorLower.includes('grey') || colorLower.includes('silver')) {
+                    return 'Gray';
+                }
+                
+                // Capitalize first letter for other colors
+                return color.charAt(0).toUpperCase() + color.slice(1).toLowerCase();
+            }
+
+            // Apply all filters
+            function applyFilters() {
+                console.log('🔄 Applying filters...', appState.filters);
+                
+                let filteredProducts = [...appState.products];
+                
+                // Apply URL filters first
+                if (appState.currentUsage) {
+                    filteredProducts = filteredProducts.filter(product => 
+                        product.uses && 
+                        product.uses.toLowerCase().replace(/\s+/g, '-') === appState.currentUsage.toLowerCase()
+                    );
+                }
+                
+                if (appState.currentStoneName) {
+                    filteredProducts = filteredProducts.filter(product => 
+                        product.stone_name && 
+                        product.stone_name.toLowerCase().replace(/\s+/g, '-') === appState.currentStoneName.toLowerCase()
+                    );
+                }
+                
+                // Apply color filters
+                if (appState.filters.colors.length > 0) {
+                    filteredProducts = filteredProducts.filter(product => {
+                        if (!product.color) return false;
+                        const normalizedColor = normalizeColor(product.color);
+                        return appState.filters.colors.includes(normalizedColor);
+                    });
+                }
+                
+                // Apply price filters
+                filteredProducts = filteredProducts.filter(product => {
+                    const price = parseFloat(product.price) || 0;
+                    return price >= appState.filters.minPrice && price <= appState.filters.maxPrice;
+                });
+                
+                // Apply sorting
+                filteredProducts = sortProducts(filteredProducts, appState.sortOption);
+                
+                appState.filteredProducts = filteredProducts;
+                displayProducts();
+                updateProductsCount();
+                updateFilterCounts();
+            }
+
+            // Sort products based on selected option
+            function sortProducts(products, sortOption) {
+                const sortedProducts = [...products];
+                
+                switch(sortOption) {
+                    case 'price-low':
+                        return sortedProducts.sort((a, b) => {
+                            const priceA = parseFloat(a.price) || 0;
+                            const priceB = parseFloat(b.price) || 0;
+                            return priceA - priceB;
+                        });
+                        
+                    case 'price-high':
+                        return sortedProducts.sort((a, b) => {
+                            const priceA = parseFloat(a.price) || 0;
+                            const priceB = parseFloat(b.price) || 0;
+                            return priceB - priceA;
+                        });
+                        
+                    case 'name':
+                        return sortedProducts.sort((a, b) => {
+                            const nameA = (a.stone_name || '').toLowerCase();
+                            const nameB = (b.stone_name || '').toLowerCase();
+                            return nameA.localeCompare(nameB);
+                        });
+                        
+                    default:
+                        return sortedProducts;
+                }
+            }
+
+            // Clear all filters
+            function clearAllFilters() {
+                console.log('🔄 Clearing all filters...');
+                
+                // Reset filter state
+                appState.filters = {
+                    colors: [],
+                    minPrice: 0,
+                    maxPrice: 1000
                 };
-                updateUserInterface();
-            } else {
-                appState.user = null;
-                updateUserInterface();
+                
+                // Reset UI elements
+                const checkboxes = document.querySelectorAll('.filter-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+                const priceSlider = document.getElementById('priceSlider');
+                const minPriceInput = document.getElementById('minPrice');
+                const maxPriceInput = document.getElementById('maxPrice');
+                const minPriceDisplay = document.getElementById('minPriceDisplay');
+                const maxPriceDisplay = document.getElementById('maxPriceDisplay');
+                
+                if (priceSlider && minPriceInput && maxPriceInput) {
+                    priceSlider.value = 1000;
+                    minPriceInput.value = 0;
+                    maxPriceInput.value = 1000;
+                    minPriceDisplay.textContent = '0';
+                    maxPriceDisplay.textContent = '1000';
+                }
+                
+                // Reset sort option
+                const sortSelect = document.getElementById('sortSelect');
+                if (sortSelect) {
+                    sortSelect.value = 'default';
+                    appState.sortOption = 'default';
+                }
+                
+                // Reapply filters (which will now be empty)
+                applyFilters();
             }
-        });
-    }
 
-    function updateUserInterface() {
-        if (appState.user) {
-            // User is logged in
-            document.getElementById('userProfile').style.display = 'block';
-            document.getElementById('loginButton').style.display = 'none';
-            document.getElementById('addProductButton').style.display = 'flex';
+            // Update filter counts based on current filtered products
+            function updateFilterCounts() {
+                // Update color counts
+                const colorOptions = document.querySelectorAll('#colorOptions .filter-option');
+                colorOptions.forEach(option => {
+                    const checkbox = option.querySelector('input');
+                    const color = checkbox.getAttribute('data-color');
+                    const countSpan = option.querySelector('.filter-count');
+                    
+                    if (color && countSpan) {
+                        const count = appState.products.filter(p => {
+                            if (!p.color) return false;
+                            const normalizedColor = normalizeColor(p.color);
+                            return normalizedColor === color && isProductInCurrentFilter(p, { colors: [color] });
+                        }).length;
+                        
+                        countSpan.textContent = count;
+                    }
+                });
+            }
+
+            // Helper function to check if a product would be in current filter
+            function isProductInCurrentFilter(product, additionalFilter = {}) {
+                const combinedFilters = { ...appState.filters, ...additionalFilter };
+                
+                // Check color
+                if (combinedFilters.colors.length > 0) {
+                    if (!product.color) return false;
+                    const normalizedColor = normalizeColor(product.color);
+                    if (!combinedFilters.colors.includes(normalizedColor)) {
+                        return false;
+                    }
+                }
+                
+                // Check price
+                const price = parseFloat(product.price) || 0;
+                if (price < combinedFilters.minPrice || price > combinedFilters.maxPrice) {
+                    return false;
+                }
+                
+                // Check URL filters
+                if (appState.currentUsage && 
+                    (!product.uses || product.uses.toLowerCase().replace(/\s+/g, '-') !== appState.currentUsage.toLowerCase())) {
+                    return false;
+                }
+                
+                if (appState.currentStoneName && 
+                    (!product.stone_name || product.stone_name.toLowerCase().replace(/\s+/g, '-') !== appState.currentStoneName.toLowerCase())) {
+                    return false;
+                }
+                
+                return true;
+            }
             
-            // Update user info
-            document.getElementById('profileName').textContent = appState.user.name;
-            document.getElementById('profileAvatar').textContent = appState.user.name.charAt(0).toUpperCase();
-            document.getElementById('dropdownUserName').textContent = appState.user.name;
-            document.getElementById('dropdownUserEmail').textContent = appState.user.email;
-        } else {
-            // User is not logged in
-            document.getElementById('userProfile').style.display = 'none';
-            document.getElementById('loginButton').style.display = 'flex';
-            document.getElementById('addProductButton').style.display = 'none';
-        }
-    }
-
-    // ✅ SAMPLE DATA FALLBACK
-    function getSampleProducts() {
-        return [
-            {
-                id: "1",
-                stone_name: "RED SAND STONE",
-                category: "Red Sand Stone",
-                type: "Natural",
-                color: "Red",
-                size: "10",
-                length: "5",
-                width: "2",
-                thickness: "20-30 mm",
-                uses: "Flooring",
-                price: 100,
-                price_unit: "sqft",
-                description: "Premium red sandstone with excellent durability and natural beauty",
-                density: "2.4 g/cm³",
-                finish: "Natural",
-                water_absorption: "Low",
-                rate_description: "Competitive pricing with bulk discounts available",
-                factory_name: "ravi jain",
-                contact_number: "+91 7737740207",
-                email: "ravijain236129@gmail.com",
-                compressive_strength: "High",
-                images: ["https://i.ibb.co/HLpBc94R/51b7aaab131a.jpg"],
-                pageUrl: "product-details.html?id=1"
-            },
-            {
-                id: "2",
-                stone_name: "WHITE MARBLE",
-                category: "Marble",
-                type: "Natural",
-                color: "White",
-                size: "12",
-                length: "6",
-                width: "3",
-                thickness: "25-35 mm",
-                uses: "Flooring",
-                price: 150,
-                price_unit: "sqft",
-                description: "Elegant white marble with fine veining for luxurious interiors",
-                density: "2.7 g/cm³",
-                finish: "Polished",
-                water_absorption: "Medium",
-                rate_description: "Premium quality marble at competitive prices",
-                factory_name: "marble works",
-                contact_number: "+91 9876543210",
-                email: "info@marbleworks.com",
-                compressive_strength: "Medium",
-                images: ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"],
-                pageUrl: "product-details.html?id=2"
-            },
-            {
-                id: "3",
-                stone_name: "BLACK GRANITE",
-                category: "Granite",
-                type: "Natural",
-                color: "Black",
-                size: "15",
-                length: "7",
-                width: "4",
-                thickness: "30-40 mm",
-                uses: "Countertop",
-                price: 200,
-                price_unit: "sqft",
-                description: "Durable black granite perfect for kitchen countertops",
-                density: "2.8 g/cm³",
-                finish: "Polished",
-                water_absorption: "Very Low",
-                rate_description: "High-end granite with excellent durability",
-                factory_name: "granite experts",
-                contact_number: "+91 8765432109",
-                email: "sales@graniteexperts.com",
-                compressive_strength: "Very High",
-                images: ["https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"],
-                pageUrl: "product-details.html?id=3"
-            },
-            {
-                id: "4",
-                stone_name: "BEIGE LIMESTONE",
-                category: "Limestone",
-                type: "Natural",
-                color: "Beige",
-                size: "11",
-                length: "5.5",
-                width: "2.5",
-                thickness: "22-32 mm",
-                uses: "Wall Cladding",
-                price: 80,
-                price_unit: "sqft",
-                description: "Warm beige limestone ideal for exterior and interior walls",
-                density: "2.5 g/cm³",
-                finish: "Honed",
-                water_absorption: "Medium",
-                rate_description: "Affordable limestone with natural appeal",
-                factory_name: "limestone quarry",
-                contact_number: "+91 7654321098",
-                email: "contact@limestonequarry.com",
-                compressive_strength: "Medium",
-                images: ["https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"],
-                pageUrl: "product-details.html?id=4"
+            // ✅ AUTHENTICATION FUNCTIONS
+            function initializeAuth() {
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        appState.user = {
+                            uid: user.uid,
+                            email: user.email,
+                            name: user.displayName || user.email.split('@')[0]
+                        };
+                        updateUserInterface();
+                    } else {
+                        appState.user = null;
+                        updateUserInterface();
+                    }
+                });
             }
-        ];
-    }
 
-    console.log('✅ All functions defined successfully!');
-</script>
+            function updateUserInterface() {
+                if (appState.user) {
+                    // User is logged in
+                    document.getElementById('userProfile').style.display = 'block';
+                    document.getElementById('loginButton').style.display = 'none';
+                    document.getElementById('addProductButton').style.display = 'flex';
+                    
+                    // Update user info
+                    document.getElementById('profileName').textContent = appState.user.name;
+                    document.getElementById('profileAvatar').textContent = appState.user.name.charAt(0).toUpperCase();
+                    document.getElementById('dropdownUserName').textContent = appState.user.name;
+                    document.getElementById('dropdownUserEmail').textContent = appState.user.email;
+                } else {
+                    // User is not logged in
+                    document.getElementById('userProfile').style.display = 'none';
+                    document.getElementById('loginButton').style.display = 'flex';
+                    document.getElementById('addProductButton').style.display = 'none';
+                }
+            }
+            
+            // ✅ SAMPLE DATA FALLBACK
+            function getSampleProducts() {
+                return [
+                    {
+                        id: "1",
+                        stone_name: "RED SAND STONE",
+                        category: "Red Sand Stone",
+                        type: "Natural",
+                        color: "Red",
+                        size: "10",
+                        length: "5",
+                        width: "2",
+                        thickness: "20-30 mm",
+                        uses: "Flooring",
+                        price: 100,
+                        price_unit: "sqft",
+                        description: "Premium red sandstone with excellent durability and natural beauty",
+                        density: "2.4 g/cm³",
+                        finish: "Natural",
+                        water_absorption: "Low",
+                        rate_description: "Competitive pricing with bulk discounts available",
+                        factory_name: "ravi jain",
+                        contact_number: "+91 7737740207",
+                        email: "ravijain236129@gmail.com",
+                        compressive_strength: "High",
+                        images: [
+                            "https://i.ibb.co/HLpBc94R/51b7aaab131a.jpg",
+                            "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
+                            "https://images.unsplash.com/photo-1541140532154-b024d705b90a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+                        ],
+                        pageUrl: "product-details.html?id=1"
+                    },
+                    {
+                        id: "2",
+                        stone_name: "WHITE MARBLE",
+                        category: "Marble",
+                        type: "Natural",
+                        color: "White",
+                        size: "12",
+                        length: "6",
+                        width: "3",
+                        thickness: "25-35 mm",
+                        uses: "Flooring",
+                        price: 150,
+                        price_unit: "sqft",
+                        description: "Elegant white marble with fine veining for luxurious interiors",
+                        density: "2.7 g/cm³",
+                        finish: "Polished",
+                        water_absorption: "Medium",
+                        rate_description: "Premium quality marble at competitive prices",
+                        factory_name: "marble works",
+                        contact_number: "+91 9876543210",
+                        email: "info@marbleworks.com",
+                        compressive_strength: "Medium",
+                        images: [
+                            "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
+                            "https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+                        ],
+                        pageUrl: "product-details.html?id=2"
+                    },
+                    {
+                        id: "3",
+                        stone_name: "BLACK GRANITE",
+                        category: "Granite",
+                        type: "Natural",
+                        color: "Black",
+                        size: "15",
+                        length: "7",
+                        width: "4",
+                        thickness: "30-40 mm",
+                        uses: "Countertop",
+                        price: 200,
+                        price_unit: "sqft",
+                        description: "Durable black granite perfect for kitchen countertops",
+                        density: "2.8 g/cm³",
+                        finish: "Polished",
+                        water_absorption: "Very Low",
+                        rate_description: "High-end granite with excellent durability",
+                        factory_name: "granite experts",
+                        contact_number: "+91 8765432109",
+                        email: "sales@graniteexperts.com",
+                        compressive_strength: "Very High",
+                        images: [
+                            "https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
+                            "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+                        ],
+                        pageUrl: "product-details.html?id=3"
+                    }
+                ];
+            }
+            
+            // Initialize mobile menu functionality
+            function initializeMobileMenu() {
+                if (!trustMobileToggle || !mobileUsesMenu || !closeMenu || !menuOverlay) {
+                    console.log('❌ Mobile menu elements not found');
+                    return;
+                }
+                
+                // Open mobile menu from trust info hamburger
+                trustMobileToggle.addEventListener('click', function() {
+                    mobileUsesMenu.classList.add('active');
+                    menuOverlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+                
+                // Close mobile menu
+                function closeMobileMenu() {
+                    mobileUsesMenu.classList.remove('active');
+                    menuOverlay.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                    
+                    document.querySelectorAll('.mobile-mega-content.active').forEach(content => {
+                        content.classList.remove('active');
+                        const icon = content.previousElementSibling.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('fa-chevron-up');
+                            icon.classList.add('fa-chevron-down');
+                        }
+                    });
+                }
+                
+                closeMenu.addEventListener('click', closeMobileMenu);
+                menuOverlay.addEventListener('click', closeMobileMenu);
+                
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && mobileUsesMenu.classList.contains('active')) {
+                        closeMobileMenu();
+                    }
+                });
+            }
+            
+            // Initialize mobile filters functionality
+            function initializeMobileFilters() {
+                if (!mobileFilterToggle || !filtersSection) return;
+                
+                // Create filter overlay
+                const filterOverlay = document.createElement('div');
+                filterOverlay.className = 'menu-overlay';
+                filterOverlay.id = 'filterOverlay';
+                document.body.appendChild(filterOverlay);
+                
+                // Toggle filters on mobile
+                mobileFilterToggle.addEventListener('click', function() {
+                    filtersSection.classList.toggle('active');
+                    filterOverlay.classList.toggle('active');
+                    document.body.style.overflow = 'hidden';
+                });
+                
+                // Close filters when clicking overlay
+                filterOverlay.addEventListener('click', function() {
+                    filtersSection.classList.remove('active');
+                    this.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                });
+                
+                // Close filters when pressing escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && filtersSection.classList.contains('active')) {
+                        filtersSection.classList.remove('active');
+                        filterOverlay.classList.remove('active');
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+                
+                // Add close button inside filters for mobile
+                const closeFiltersBtn = document.createElement('button');
+                closeFiltersBtn.className = 'close-filters';
+                closeFiltersBtn.innerHTML = '<i class="fas fa-times"></i>';
+                closeFiltersBtn.style.cssText = `
+                    display: none;
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    background: none;
+                    border: none;
+                    font-size: 20px;
+                    color: #666;
+                    cursor: pointer;
+                    z-index: 10;
+                `;
+                
+                closeFiltersBtn.addEventListener('click', function() {
+                    filtersSection.classList.remove('active');
+                    filterOverlay.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                });
+                
+                filtersSection.appendChild(closeFiltersBtn);
+                
+                // Show close button on mobile
+                if (window.innerWidth <= 768) {
+                    closeFiltersBtn.style.display = 'block';
+                }
+                
+                // Update on resize
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth <= 768) {
+                        closeFiltersBtn.style.display = 'block';
+                    } else {
+                        closeFiltersBtn.style.display = 'none';
+                        // Ensure filters are visible on desktop
+                        filtersSection.classList.remove('active');
+                        filterOverlay.classList.remove('active');
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
+            
+            console.log('✅ All functions defined successfully!');
+        });
+    </script>
 </body>
 </html>
