@@ -419,13 +419,13 @@
             line-height: 1.2;
         }
         
-        /* Desktop Uses Top Bar with Mega Menu - STICKY POSITION */
+        /* Desktop Uses Top Bar with PUSH-DOWN Mega Menu */
         .uses-top-bar {
             position: sticky;
             top: 0;
             background: #333;
             padding: 0;
-            z-index: 999;
+            z-index: 998;
             transition: top 0.3s ease;
         }
         
@@ -436,118 +436,141 @@
         }
         
         .use-item {
-    flex: 1;
-    min-width: 110px;
-    position: relative;
-    overflow: visible;
-}
+            flex: 1;
+            min-width: 110px;
+            position: relative;
+            overflow: visible;
+        }
 
-.use-link {
-    display: block;
-    color: white;
-    text-decoration: none;
-    padding: 12px 8px;
-    font-size: 13px;
-    font-weight: 500;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    position: relative;
-    z-index: 2;
-}
+        .use-link {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 8px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+            z-index: 2;
+        }
         
         .use-link:hover {
             background: #b8860b;
         }
         
-        /* Mega Menu Styles - UPDATED FOR FULL WIDTH */
-   /* Ensure these styles are clean in your CSS */
-.mega-menu {
-    position: absolute;
-    top: 100%;
-    /* left: 0; <--- JS will set this dynamically */
-    /* width: 100vw; <--- JS will set this dynamically */
-    
-    background: white;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    padding: 25px 0;
-    z-index: 997;
-    display: none;
-    border-top: 3px solid #b8860b;
-}
-}
-    .use-item:hover .mega-menu {
-            display: block;
+        /* PUSH-DOWN Mega Menu Container */
+        .mega-menu-container {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            background: white;
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 997;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-top: 3px solid #b8860b;
         }
         
-.patterns-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 15px;
-    max-width: 1200px; /* Use your site's maximum content width */
-    margin: 0 auto; /* This centers the content inside the full-width mega menu */
-    padding: 0 15px;
-    /* ... rest of the styles */
-}
+        .mega-menu-container.active {
+            max-height: 500px;
+        }
+        
+        .mega-menu-content {
+            padding: 25px 15px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+        }
+        
+        .mega-menu-container.active .mega-menu-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
         
         .pattern-item {
-    text-align: center;
-    cursor: pointer;
-    text-decoration: none;
-    color: #333;
-    display: block;
-    width: 100%;
-    overflow: hidden;
-}
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+            display: block;
+            width: 100%;
+            overflow: hidden;
+        }
 
-.pattern-image {
-    width: 100%;
-    height: 160px;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    border-radius: 6px;
-    margin-bottom: 8px;
-    transition: transform 0.3s ease;
-    box-sizing: border-box;
-   
-}
+        .pattern-image {
+            width: 100%;
+            height: 160px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: transform 0.3s ease;
+            box-sizing: border-box;
+        }
 
-.pattern-item:hover .pattern-image {
-    transform: scale(1.05);
-}
-.patterns-grid .pattern-image {
-    background-color: #ffffff !important;
-    background-size: contain !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    min-height: 160px;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
+        .pattern-item:hover .pattern-image {
+            transform: scale(1.05);
+        }
+        
+        .patterns-grid .pattern-image {
+            background-color: #ffffff !important;
+            background-size: contain !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            min-height: 160px;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
 
-.pattern-name {
-    font-size: 13px;
-    color: #333;
-    font-weight: 500;
-    padding: 0 5px;
-    text-align: center;
-    word-wrap: break-word;
-    white-space: normal;
-}
-/* White layer overlay on hover */
-.pattern-item:hover .pattern-image::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    pointer-events: none;
-}     
+        .pattern-name {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+            padding: 0 5px;
+            text-align: center;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+        
+        /* Main Content Adjustment for Push-Down Effect */
+        .main-content {
+            margin-top: 8px;
+            padding: 2px 0px;
+            transition: margin-top 0.3s ease;
+        }
+        
+        /* Temporary push effect when mega menu is active */
+        .mega-menu-container.active ~ .main-content {
+            margin-top: 20px;
+        }
+        
+        /* White layer overlay on hover */
+        .pattern-item:hover .pattern-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            pointer-events: none;
+        }     
+        
         /* ===== MOBILE SIDEBAR MENU ===== */
         .mobile-uses-menu {
             position: fixed;
@@ -687,10 +710,6 @@
         }
         
         /* ===== MAIN CONTENT ===== */
-        .main-content {
-            margin-top: 8px;
-            padding: 2px 0px;
-        }
         
         /* Hero Section */
         .hero {
@@ -1036,10 +1055,10 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            patterns-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
+            .patterns-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
 
         @media (max-width: 768px) {
             body {
@@ -1104,13 +1123,6 @@
             
             .use-category-image {
                 height: 180px;
-            }
-            
-            /* Mega menu full width on mobile */
-            .mega-menu {
-                width: 100vw;
-                left: 50%;
-                transform: translateX(-50%);
             }
         }
 
@@ -1259,7 +1271,7 @@
         </div>
     </header>
 
-    <!-- Desktop Uses Top Bar with Mega Menu - BELOW HEADER -->
+    <!-- Desktop Uses Top Bar with PUSH-DOWN Mega Menu -->
     <div class="uses-top-bar" id="desktopUsesBar">
         <div class="container uses-container" id="dynamicUsesContainer">
             <!-- Dynamic uses will be loaded here -->
@@ -1268,6 +1280,8 @@
                 <p>Loading navigation...</p>
             </div>
         </div>
+        <!-- PUSH-DOWN Mega Menu Container -->
+        <div class="mega-menu-container" id="megaMenuContainer"></div>
     </div>
 
     <!-- ===== MAIN CONTENT ===== -->
@@ -1437,6 +1451,9 @@
                     const menuOverlay = document.getElementById('menuOverlay');
                     const mobileUsesList = document.getElementById('mobileUsesList');
                     
+                    // Mega menu elements
+                    const megaMenuContainer = document.getElementById('megaMenuContainer');
+                    
                     // Initialize the application
                     initializeApp();
                     
@@ -1535,7 +1552,7 @@
                         return uniqueUses;
                     }
                     
-                    // Function to generate desktop uses navigation
+                    // Function to generate desktop uses navigation with PUSH-DOWN mega menu
                     function generateUsesNavigation() {
                         const usesContainer = document.getElementById('dynamicUsesContainer');
                         if (!usesContainer) return;
@@ -1571,41 +1588,128 @@
                             
                             console.log(`📁 ${usage} - Products: ${usageProducts.length}, Stone Names: ${uniqueStoneNames.length}`);
                             
-                            if (uniqueStoneNames.length > 0) {
-                                useItem.innerHTML = `
-                                    <div class="use-link">${usage} (${usageProducts.length})</div>
-                                    <div class="mega-menu">
-                                        <div class="patterns-grid">
-                                            ${uniqueStoneNames.map(stoneName => {
-                                                const stoneSlug = stoneName.toLowerCase().replace(/\s+/g, '-');
-                                                const stoneProduct = appState.products.find(p => 
-                                                    p.uses && p.uses.toLowerCase() === usage.toLowerCase() && 
-                                                    p.stone_name === stoneName
-                                                );
-                                                const imageUrl = stoneProduct?.images?.[0] || 
-                                                    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80';
-                                                
-                                                return `
-                                                    <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="pattern-item" data-usage="${usage}" data-stone="${stoneName}">
-                                                        <div class="pattern-image" style="background-image: url('${imageUrl}')"></div>
-                                                        <div class="pattern-name">${stoneName}</div>
-                                                    </a>
-                                                `;
-                                            }).join('')}
-                                        </div>
-                                    </div>
-                                `;
-                            } else {
-                                useItem.innerHTML = `
-                                    <a href="category-products.html?usage=${usageKey}" class="use-link">${usage} (${usageProducts.length})</a>
-                                `;
-                            }
+                            useItem.innerHTML = `
+                                <div class="use-link" data-usage="${usageKey}">
+                                    ${usage} (${usageProducts.length})
+                                </div>
+                            `;
                             
                             usesContainer.appendChild(useItem);
                         });
                         
-                        // Initialize mega menu functionality
-                        initializeMegaMenu();
+                        // Initialize PUSH-DOWN mega menu functionality
+                        initializePushDownMenu();
+                    }
+                    
+                    // Initialize PUSH-DOWN mega menu
+                    function initializePushDownMenu() {
+                        console.log('🔄 Initializing Push-Down Mega Menu...');
+                        
+                        const useLinks = document.querySelectorAll('.use-link');
+                        const megaMenuContainer = document.getElementById('megaMenuContainer');
+                        
+                        if (!megaMenuContainer) {
+                            console.log('❌ Mega menu container not found');
+                            return;
+                        }
+                        
+                        useLinks.forEach((link) => {
+                            // Mouse enter: Show mega menu
+                            link.addEventListener('mouseenter', function() {
+                                const usageKey = this.getAttribute('data-usage');
+                                const usage = this.textContent.split(' (')[0];
+                                showMegaMenu(usage, usageKey);
+                            });
+                            
+                            // Mouse leave: Hide mega menu with delay
+                            link.parentElement.addEventListener('mouseleave', function(e) {
+                                setTimeout(() => {
+                                    if (!megaMenuContainer.matches(':hover')) {
+                                        hideMegaMenu();
+                                    }
+                                }, 150);
+                            });
+                        });
+                        
+                        // Mega menu mouse leave
+                        megaMenuContainer.addEventListener('mouseleave', function() {
+                            hideMegaMenu();
+                        });
+                        
+                        // Function to show mega menu
+                        function showMegaMenu(usage, usageKey) {
+                            const usageProducts = appState.products.filter(product => 
+                                product.uses && product.uses.toLowerCase() === usage.toLowerCase()
+                            );
+                            
+                            const uniqueStoneNames = [...new Set(usageProducts
+                                .filter(product => product.stone_name)
+                                .map(product => product.stone_name)
+                            )];
+                            
+                            if (uniqueStoneNames.length === 0) {
+                                hideMegaMenu();
+                                return;
+                            }
+                            
+                            // Build mega menu content
+                            const megaMenuHTML = `
+                                <div class="mega-menu-content">
+                                    <div class="patterns-grid">
+                                        ${uniqueStoneNames.map(stoneName => {
+                                            const stoneSlug = stoneName.toLowerCase().replace(/\s+/g, '-');
+                                            const stoneProduct = appState.products.find(p => 
+                                                p.uses && p.uses.toLowerCase() === usage.toLowerCase() && 
+                                                p.stone_name === stoneName
+                                            );
+                                            const imageUrl = stoneProduct?.images?.[0] || 
+                                                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80';
+                                            
+                                            return `
+                                                <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="pattern-item" data-usage="${usage}" data-stone="${stoneName}">
+                                                    <div class="pattern-image" style="background-image: url('${imageUrl}')"></div>
+                                                    <div class="pattern-name">${stoneName}</div>
+                                                </a>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Set mega menu content
+                            megaMenuContainer.innerHTML = megaMenuHTML;
+                            
+                            // Activate mega menu
+                            megaMenuContainer.classList.add('active');
+                            
+                            // Calculate exact height for smooth animation
+                            setTimeout(() => {
+                                const contentHeight = megaMenuContainer.scrollHeight;
+                                megaMenuContainer.style.maxHeight = `${contentHeight}px`;
+                            }, 10);
+                        }
+                        
+                        // Function to hide mega menu
+                        function hideMegaMenu() {
+                            megaMenuContainer.classList.remove('active');
+                            megaMenuContainer.style.maxHeight = '0';
+                            
+                            // Clear content after animation
+                            setTimeout(() => {
+                                if (!megaMenuContainer.classList.contains('active')) {
+                                    megaMenuContainer.innerHTML = '';
+                                }
+                            }, 400);
+                        }
+                        
+                        // Close mega menu when clicking outside
+                        document.addEventListener('click', function(event) {
+                            if (!event.target.closest('.uses-top-bar')) {
+                                hideMegaMenu();
+                            }
+                        });
+                        
+                        console.log('✅ Push-Down Mega Menu initialized');
                     }
                     
                     // Function to update categories section with 100% images
@@ -1655,143 +1759,6 @@
                             categoriesGrid.appendChild(categoryItem);
                         });
                     }
-                    
-                    // Initialize mega menu functionality - UPDATED FOR FULL WIDTH
-                   // Initialize mega menu functionality - FIXED FOR FULL WIDTH
-function initializeMegaMenu() {
-    console.log('🔄 Initializing Mega Menu (Auto-Fit to Container)...');
-    
-    const usesTopBar = document.querySelector('.uses-top-bar');
-    const useItems = document.querySelectorAll('.use-item');
-    
-    if (!usesTopBar) {
-        console.log('❌ Mega Menu container (.uses-top-bar) not found');
-        return;
-    }
-    
-    // Find the main content container for alignment
-    const mainContainer = usesTopBar.querySelector('.container'); 
-    
-    useItems.forEach((item) => {
-        const megaMenu = item.querySelector('.mega-menu');
-        
-        if (megaMenu) {
-          function initializeMegaMenu() {
-    console.log('🔄 Initializing Mega Menu (Auto-Fit to Container, Refactored)...');
-    
-    const usesTopBar = document.querySelector('.uses-top-bar');
-    const useItems = document.querySelectorAll('.use-item');
-    
-    if (!usesTopBar) {
-        console.log('❌ Mega Menu container (.uses-top-bar) not found');
-        return;
-    }
-    
-    // यह एलिमेंट आपकी मुख्य सामग्री की चौड़ाई को परिभाषित करता है।
-    const mainContainer = usesTopBar.querySelector('.container'); 
-    
-    /**
-     * @function positionMegaMenu
-     * @description Calculates and sets the width and left position of the mega menu 
-     * to align perfectly under the main content container.
-     * @param {HTMLElement} megaMenu - The specific mega menu element to position.
-     */
-    function positionMegaMenu(megaMenu) {
-        // 🛑 CORE AUTO-FIT LOGIC 🛑
-        if (mainContainer) {
-            const mainContainerRect = mainContainer.getBoundingClientRect();
-            const usesTopBarRect = usesTopBar.getBoundingClientRect();
-            
-            // 1. Set Width: Match the main container's width
-            megaMenu.style.width = `${mainContainerRect.width}px`;
-            
-            // 2. Set Left Position: Align mega menu's left edge with mainContainer's left edge
-            const newLeft = mainContainerRect.left - usesTopBarRect.left;
-            
-            megaMenu.style.left = `${newLeft}px`;
-            
-            // 3. Clean up conflicting styles
-            megaMenu.style.marginLeft = '0';
-            megaMenu.style.transform = 'none';
-            
-        } else {
-            // Fallback (only takes up 100% of the small parent item)
-            megaMenu.style.width = '100%'; 
-            megaMenu.style.left = '0';
-            megaMenu.style.marginLeft = '0';
-            megaMenu.style.transform = 'none';
-            console.warn('⚠️ .container not found. Using fallback positioning.');
-        }
-    }
-
-    useItems.forEach((item) => {
-        const megaMenu = item.querySelector('.mega-menu');
-        
-        if (megaMenu) {
-            
-            // Mouse enter: Call positionMegaMenu every time
-            item.addEventListener('mouseenter', () => {
-                // Ensure only one mega menu is open at a time
-                document.querySelectorAll('.mega-menu').forEach(menu => {
-                    if (menu !== megaMenu) {
-                        menu.style.display = 'none';
-                    }
-                });
-
-                // Recalculates position before showing
-                positionMegaMenu(megaMenu); 
-                
-                // Show current mega menu
-                megaMenu.style.display = 'block';
-            });
-            
-            // Mouse leave - hide menu after delay
-            item.addEventListener('mouseleave', (e) => {
-                const relatedTarget = e.relatedTarget;
-                if (!megaMenu.contains(relatedTarget)) {
-                    setTimeout(() => {
-                        if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
-                            megaMenu.style.display = 'none';
-                        }
-                    }, 150);
-                }
-            });
-            
-            // Mega menu mouse events
-            megaMenu.addEventListener('mouseenter', () => {
-                megaMenu.style.display = 'block';
-            });
-            
-            megaMenu.addEventListener('mouseleave', () => {
-                setTimeout(() => {
-                    if (!item.matches(':hover') && !megaMenu.matches(':hover')) {
-                        megaMenu.style.display = 'none';
-                    }
-                }, 150);
-            });
-        }
-    });
-    
-    // 💡 IMPORTANT: On resize, hide all menus.
-    // Hiding on resize is the safest way to ensure positionMegaMenu is called 
-    // again correctly on the next mouseenter.
-    window.addEventListener('resize', function() {
-        document.querySelectorAll('.mega-menu').forEach(menu => {
-            menu.style.display = 'none';
-        });
-    });
-    
-    // Close all mega menus when clicking outside
-    document.addEventListener('click', (event) => {
-        if (!usesTopBar.contains(event.target)) {
-            document.querySelectorAll('.mega-menu').forEach(menu => {
-                menu.style.display = 'none';
-            });
-        }
-    });
-    
-    console.log('✅ Mega Menu initialization complete');
-}
                     
                     // Function to generate mobile uses menu (sidebar)
                     function generateMobileUsesMenu() {
@@ -2005,17 +1972,10 @@ function initializeMegaMenu() {
                     }
                     
                     // Initialize UI components
-                 // Initialize UI components
-                    function initializeUI() {
-                        // Add actual UI initialization logic here
-                    } // <--- CLOSE initializeUI()
-                    
-                }; // <--- CLOSE DOMContentLoaded listener
-                
-            
-        } catch (error) {
-            console.error('Error initializing Firebase:', error);
-        } // <--- CLOSE try/catch
+                    function initializeUI() {
+                        initializeSearch();
+                        initializeUserProfile();
+                    }
                     
                     // Initialize search functionality
                     function initializeSearch() {
@@ -2141,4 +2101,4 @@ function initializeMegaMenu() {
         }
     </script>
 </body>
-</html> 
+</html>
