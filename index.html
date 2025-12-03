@@ -461,30 +461,33 @@
         }
         
         /* Mega Menu Styles - UPDATED FOR FULL WIDTH */
-   .mega-menu {
+   /* Ensure these styles are clean in your CSS */
+.mega-menu {
     position: absolute;
     top: 100%;
-    left: 50%; /* Center relative to the parent item, not the whole screen */
-    width: 100%; /* Default width is 100% of the parent .use-item (before JS intervention) */
+    /* left: 0; <--- JS will set this dynamically */
+    /* width: 100vw; <--- JS will set this dynamically */
     
-    /* The JavaScript will override these, but setting them initially helps. */
-    /* ... other styles ... */
-    
-    /* Crucial: Ensure the items inside the grid don't exceed the main content area */
-    max-width: 1200px; /* Or whatever your site's maximum width is */
+    background: white;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    padding: 25px 0;
+    z-index: 997;
+    display: none;
+    border-top: 3px solid #b8860b;
 }
 }
     .use-item:hover .mega-menu {
             display: block;
         }
         
-     /* Also check your patterns-grid */
 .patterns-grid {
-    /* Use max-width and margin: 0 auto; to center the content inside the mega-menu */
-    max-width: 1200px; 
-    margin: 0 auto; 
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 15px;
+    max-width: 1200px; /* Use your site's maximum content width */
+    margin: 0 auto; /* This centers the content inside the full-width mega menu */
     padding: 0 15px;
-    /* ... other grid styles ... */
+    /* ... rest of the styles */
 }
         
         .pattern-item {
@@ -1656,7 +1659,7 @@
                     // Initialize mega menu functionality - UPDATED FOR FULL WIDTH
                    // Initialize mega menu functionality - FIXED FOR FULL WIDTH
 function initializeMegaMenu() {
-    console.log('🔄 Initializing Mega Menu (Final Container Fit Adjustment)...');
+    console.log('🔄 Initializing Mega Menu (Restoring Royal Stones Full Width Style)...');
     
     const usesTopBar = document.querySelector('.uses-top-bar');
     const useItems = document.querySelectorAll('.use-item');
@@ -1666,8 +1669,8 @@ function initializeMegaMenu() {
         return;
     }
     
-    // Find the main content container for alignment
-    const mainContainer = usesTopBar.querySelector('.container');
+    // We don't need mainContainer for alignment if we want 100vw, but we need
+    // the position of the usesTopBar relative to the viewport.
     
     useItems.forEach((item) => {
         const megaMenu = item.querySelector('.mega-menu');
@@ -1675,40 +1678,29 @@ function initializeMegaMenu() {
         if (megaMenu) {
             // Calculate correct position
             function positionMegaMenu() {
+                // Get the bounding rectangle of the top bar
+                const usesTopBarRect = usesTopBar.getBoundingClientRect();
                 
-                // --- CORE FIX LOGIC ---
-                if (mainContainer) {
-                    const mainContainerRect = mainContainer.getBoundingClientRect();
-                    const usesTopBarRect = usesTopBar.getBoundingClientRect();
-                    
-                    // 1. Set the Mega Menu's width to match the main container's width
-                    megaMenu.style.width = `${mainContainerRect.width}px`;
-                    
-                    // 2. Calculate the 'left' position relative to usesTopBar
-                    // This aligns the mega menu's left edge with the mainContainer's left edge
-                    const newLeft = mainContainerRect.left - usesTopBarRect.left;
-                    
-                    megaMenu.style.left = `${newLeft}px`;
-                    
-                    // 3. Remove any old centering/shifting styles
-                    megaMenu.style.marginLeft = '0';
-                    megaMenu.style.transform = 'none';
-                    
-                } else {
-                    // Fallback if .container is not found (avoids 100vw)
-                    console.warn('⚠️ .container not found. Mega Menu may not align perfectly.');
-                    megaMenu.style.width = '100%'; // Maximize within the parent .use-item
-                    megaMenu.style.left = '0';
-                    megaMenu.style.marginLeft = '0';
-                    megaMenu.style.transform = 'none';
-                }
-                // --- END CORE FIX LOGIC ---
+                // 1. Set the Mega Menu to 100% of the viewport width (100vw)
+                megaMenu.style.width = '100vw';
+                
+                // 2. Calculate 'left' position:
+                // Since the usesTopBar is sticky and spans the whole width, 
+                // we need to set the mega menu's left position to match the viewport's left edge (0).
+                // If usesTopBar is full width: left = -(distance of usesTopBar from viewport left)
+                const newLeft = -usesTopBarRect.left;
+                
+                megaMenu.style.left = `${newLeft}px`;
+                
+                // 3. Remove old centering styles, if any (although the new 'left' should handle it)
+                megaMenu.style.marginLeft = '0';
+                megaMenu.style.transform = 'none';
             }
             
             // Mouse enter - show menu
             item.addEventListener('mouseenter', () => {
+                // Position correctly first
                 positionMegaMenu();
-                // ... (rest of the logic remains the same)
                 
                 // Hide all other mega menus
                 document.querySelectorAll('.mega-menu').forEach(menu => {
@@ -1716,10 +1708,11 @@ function initializeMegaMenu() {
                         menu.style.display = 'none';
                     }
                 });
+                // Show current mega menu
                 megaMenu.style.display = 'block';
             });
             
-            // ... (Mouse leave and other event listeners remain the same)
+            // Mouse leave - hide menu after delay
             item.addEventListener('mouseleave', (e) => {
                 const relatedTarget = e.relatedTarget;
                 if (!megaMenu.contains(relatedTarget)) {
@@ -1731,6 +1724,7 @@ function initializeMegaMenu() {
                 }
             });
             
+            // Mega menu mouse events
             megaMenu.addEventListener('mouseenter', () => {
                 megaMenu.style.display = 'block';
             });
@@ -1745,7 +1739,7 @@ function initializeMegaMenu() {
         }
     });
     
-    // Recalculate on window resize (Important to ensure proper positioning on resize)
+    // Recalculate on window resize (This is crucial for 100vw to work correctly)
     window.addEventListener('resize', function() {
         document.querySelectorAll('.mega-menu').forEach(menu => {
             menu.style.display = 'none';
