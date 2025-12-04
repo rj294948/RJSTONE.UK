@@ -753,7 +753,7 @@
             color: rgba(255,255,255,0.7);
         }
         
-        /* Product Details Layout */
+        /* Product Details Layout - UPDATED FOR MOBILE */
         .product-details-layout {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -761,7 +761,7 @@
             margin: 30px 0;
         }
         
-        /* ===== SMART ZOOM FEATURE - FIXED ===== */
+        /* ===== ENHANCED SMART ZOOM FEATURE ===== */
         .product-gallery {
             background: white;
             padding: 20px;
@@ -778,7 +778,7 @@
             border-radius: 10px;
             margin-bottom: 15px;
             position: relative;
-            cursor: crosshair;
+            cursor: zoom-in;
         }
         
         .main-image {
@@ -788,39 +788,49 @@
             transition: transform 0.3s;
         }
         
+        .main-image-container:hover .main-image {
+            transform: scale(1.02);
+        }
+        
+        /* Enhanced Zoom Lens - LAYER TYPE */
         .image-zoom-lens {
             position: absolute;
-            border: 2px solid #b8860b;
-            background: rgba(184, 134, 11, 0.2);
+            border: 3px solid #b8860b;
+            background: rgba(184, 134, 11, 0.15);
             pointer-events: none;
             display: none;
             z-index: 100;
-            width: 150px;
-            height: 150px;
+            width: 180px;
+            height: 180px;
             box-sizing: border-box;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(184, 134, 11, 0.3);
         }
         
+        /* Enhanced Zoom Result - LAYER TYPE */
         .image-zoom-result {
             position: fixed;
             top: 50%;
-            right: 20px;
+            right: 30px;
             transform: translateY(-50%);
-            width: 400px;
-            height: 400px;
-            border: 2px solid #b8860b;
-            border-radius: 8px;
+            width: 450px;
+            height: 450px;
+            border: 3px solid #b8860b;
+            border-radius: 12px;
             background: white;
             overflow: hidden;
             display: none;
             z-index: 1100;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 10px;
         }
         
         .image-zoom-result img {
             position: absolute;
-            width: 1000px;
-            height: 1000px;
+            width: 1200px;
+            height: 1200px;
             object-fit: none;
+            border-radius: 8px;
         }
         
         .zoom-active .image-zoom-lens,
@@ -828,35 +838,147 @@
             display: block;
         }
         
-        /* Zoom controls */
+        /* Enhanced Zoom controls */
         .zoom-controls {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
+            bottom: 15px;
+            right: 15px;
             display: flex;
-            gap: 5px;
+            gap: 8px;
             z-index: 102;
         }
         
         .zoom-btn {
-            width: 32px;
-            height: 32px;
-            background: white;
-            border: 1px solid #ddd;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #ddd;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             color: #333;
             transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
         }
         
         .zoom-btn:hover {
             background: #b8860b;
             color: white;
             border-color: #b8860b;
+            transform: scale(1.1);
+        }
+        
+        /* Click to open full image overlay */
+        .full-image-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .full-image-overlay.active {
+            display: flex;
+        }
+        
+        .full-image-container {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+        
+        .full-image {
+            width: 100%;
+            height: auto;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        
+        .close-full-image {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: #b8860b;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .full-image-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(184, 134, 11, 0.8);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        
+        .full-image-nav:hover {
+            background: #a3780a;
+        }
+        
+        .prev-image {
+            left: -60px;
+        }
+        
+        .next-image {
+            right: -60px;
+        }
+        
+        .image-counter {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        /* Click to zoom hint */
+        .zoom-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 101;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .zoom-hint i {
+            font-size: 14px;
         }
         
         .thumbnail-gallery {
@@ -878,6 +1000,7 @@
         
         .thumbnail.active {
             border-color: #b8860b;
+            box-shadow: 0 3px 10px rgba(184, 134, 11, 0.3);
         }
         
         .thumbnail:hover {
@@ -1332,7 +1455,7 @@
             color: #999;
         }
 
-        /* Responsive Design */
+        /* Responsive Design - UPDATED FOR MOBILE */
         @media (max-width: 1024px) {
             .products-grid {
                 grid-template-columns: repeat(3, 1fr);
@@ -1344,8 +1467,9 @@
             }
             
             .image-zoom-result {
-                width: 300px;
-                height: 300px;
+                width: 350px;
+                height: 350px;
+                right: 15px;
             }
             
             .features {
@@ -1372,6 +1496,48 @@
             
             .main-content {
                 margin-top: 5px;
+            }
+            
+            /* Mobile Layout for Product Details - Stacked Layout */
+            .product-details-layout {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .product-gallery {
+                order: 1;
+                padding: 15px;
+            }
+            
+            .product-info {
+                order: 2;
+                padding: 20px;
+            }
+            
+            /* Mobile Image Container */
+            .main-image-container {
+                aspect-ratio: 1 / 1;
+                cursor: pointer;
+            }
+            
+            /* Hide zoom result on mobile */
+            .image-zoom-result {
+                display: none !important;
+            }
+            
+            .image-zoom-lens {
+                display: none !important;
+            }
+            
+            .zoom-controls {
+                display: none;
+            }
+            
+            /* Mobile click hint */
+            .zoom-hint {
+                display: flex;
+                font-size: 11px;
+                padding: 5px 10px;
             }
             
             .header-content {
@@ -1461,14 +1627,6 @@
                 font-size: 16px;
             }
             
-            .image-zoom-result {
-                display: none !important;
-            }
-            
-            .zoom-btn {
-                display: none;
-            }
-            
             .features {
                 grid-template-columns: 1fr;
                 padding: 30px 0;
@@ -1496,11 +1654,49 @@
             }
             
             .product-title {
-                font-size: 28px;
+                font-size: 26px;
             }
             
             .product-price {
-                font-size: 30px;
+                font-size: 28px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            /* Mobile Full Image Overlay */
+            .full-image-overlay {
+                padding: 10px;
+            }
+            
+            .full-image-container {
+                max-width: 100%;
+                max-height: 100%;
+            }
+            
+            .full-image-nav {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            
+            .prev-image {
+                left: 10px;
+            }
+            
+            .next-image {
+                right: 10px;
+            }
+            
+            .close-full-image {
+                top: -50px;
+                right: 50%;
+                transform: translateX(50%);
+            }
+            
+            .image-counter {
+                bottom: -50px;
             }
         }
 
@@ -1511,10 +1707,12 @@
             
             .products-grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
             
             .footer-content {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
             
             .patterns-grid {
@@ -1531,12 +1729,25 @@
                 font-size: 22px;
             }
             
-            .product-info {
-                padding: 20px;
+            .product-title {
+                font-size: 24px;
             }
             
-            .action-buttons {
-                flex-direction: column;
+            .product-price {
+                font-size: 26px;
+            }
+            
+            .product-description-full {
+                font-size: 14px;
+            }
+            
+            .specifications h3 {
+                font-size: 18px;
+            }
+            
+            .action-buttons .action-btn {
+                padding: 12px 20px;
+                font-size: 14px;
             }
             
             .trust-mobile-toggle {
@@ -1546,6 +1757,11 @@
             
             .trust-info-content {
                 padding-left: 35px;
+            }
+            
+            .thumbnail {
+                width: 70px;
+                height: 70px;
             }
         }
     </style>
@@ -1569,6 +1785,23 @@
                 <p>Loading categories...</p>
             </div>
         </div>
+    </div>
+
+    <!-- ===== FULL IMAGE VIEW OVERLAY ===== -->
+    <div class="full-image-overlay" id="fullImageOverlay">
+        <button class="close-full-image" id="closeFullImage">
+            <i class="fas fa-times"></i>
+        </button>
+        <button class="full-image-nav prev-image" id="prevImageBtn">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="full-image-container">
+            <img src="" alt="Full size image" class="full-image" id="fullImage">
+            <div class="image-counter" id="imageCounter">1 / 3</div>
+        </div>
+        <button class="full-image-nav next-image" id="nextImageBtn">
+            <i class="fas fa-chevron-right"></i>
+        </button>
     </div>
 
     <!-- ===== HEADER - UPDATED WITH MOBILE TOGGLE ===== -->
@@ -1836,7 +2069,7 @@
         });
     </script>
 
-    <!-- Firebase Script -->
+    <!-- Firebase Script with Enhanced Features -->
     <script type="module">
         import { 
             db, auth, 
@@ -1851,7 +2084,9 @@
             user: null,
             cart: [],
             quantity: 1,
-            selectedUnit: 'sqft'
+            selectedUnit: 'sqft',
+            currentImages: [],
+            currentImageIndex: 0
         };
 
         // Cart management functions
@@ -1947,13 +2182,225 @@
             initializeUI();
         });
 
-        // ===== REUSABLE FUNCTIONS =====
+        // ===== ENHANCED ZOOM AND IMAGE VIEWING FUNCTIONS =====
         
         // Initialize UI components
         function initializeUI() {
             initializeSearch();
             initializeUserProfile();
             initializeMobileMenu();
+            initializeFullImageOverlay();
+        }
+
+        // Initialize full image overlay functionality
+        function initializeFullImageOverlay() {
+            const fullImageOverlay = document.getElementById('fullImageOverlay');
+            const closeFullImage = document.getElementById('closeFullImage');
+            const prevImageBtn = document.getElementById('prevImageBtn');
+            const nextImageBtn = document.getElementById('nextImageBtn');
+            const fullImage = document.getElementById('fullImage');
+            const imageCounter = document.getElementById('imageCounter');
+            
+            if (!fullImageOverlay || !closeFullImage) return;
+            
+            // Close overlay
+            closeFullImage.addEventListener('click', function() {
+                fullImageOverlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+            
+            // Close on overlay click (outside image)
+            fullImageOverlay.addEventListener('click', function(e) {
+                if (e.target === fullImageOverlay) {
+                    fullImageOverlay.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            // Close on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && fullImageOverlay.classList.contains('active')) {
+                    fullImageOverlay.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            // Previous image
+            prevImageBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (appState.currentImages.length > 1) {
+                    appState.currentImageIndex = (appState.currentImageIndex - 1 + appState.currentImages.length) % appState.currentImages.length;
+                    updateFullImageView();
+                }
+            });
+            
+            // Next image
+            nextImageBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (appState.currentImages.length > 1) {
+                    appState.currentImageIndex = (appState.currentImageIndex + 1) % appState.currentImages.length;
+                    updateFullImageView();
+                }
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (fullImageOverlay.classList.contains('active')) {
+                    if (e.key === 'ArrowLeft') {
+                        prevImageBtn.click();
+                    } else if (e.key === 'ArrowRight') {
+                        nextImageBtn.click();
+                    }
+                }
+            });
+            
+            // Store functions globally
+            window.openFullImageView = function(imageIndex = 0) {
+                if (appState.currentImages.length === 0) return;
+                
+                appState.currentImageIndex = imageIndex;
+                updateFullImageView();
+                fullImageOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            };
+            
+            window.updateFullImageView = function() {
+                if (appState.currentImages.length === 0) return;
+                
+                fullImage.src = appState.currentImages[appState.currentImageIndex];
+                imageCounter.textContent = `${appState.currentImageIndex + 1} / ${appState.currentImages.length}`;
+                
+                // Show/hide navigation buttons
+                prevImageBtn.style.display = appState.currentImages.length > 1 ? 'flex' : 'none';
+                nextImageBtn.style.display = appState.currentImages.length > 1 ? 'flex' : 'none';
+            };
+        }
+
+        // ENHANCED SMART ZOOM FUNCTIONALITY
+        function initializeEnhancedSmartZoom() {
+            const zoomContainer = document.getElementById('zoomContainer');
+            const mainImage = document.getElementById('mainProductImage');
+            const zoomLens = document.getElementById('zoomLens');
+            const zoomResult = document.getElementById('zoomResult');
+            const zoomedImage = document.getElementById('zoomedImage');
+            const zoomInBtn = document.getElementById('zoomInBtn');
+            const zoomOutBtn = document.getElementById('zoomOutBtn');
+            const zoomResetBtn = document.getElementById('zoomResetBtn');
+            
+            if (!zoomContainer || !mainImage) return;
+            
+            let zoomLevel = 2.5; // Default zoom level
+            let isZoomActive = false;
+            let isTouchDevice = 'ontouchstart' in window;
+            
+            // If touch device, don't initialize hover zoom
+            if (isTouchDevice) {
+                console.log('📱 Touch device detected - disabling hover zoom');
+                return;
+            }
+            
+            // Enhanced Zoom in/out controls
+            if (zoomInBtn) {
+                zoomInBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    zoomLevel = Math.min(zoomLevel + 0.5, 6);
+                    updateZoom();
+                });
+            }
+            
+            if (zoomOutBtn) {
+                zoomOutBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    zoomLevel = Math.max(zoomLevel - 0.5, 1);
+                    updateZoom();
+                });
+            }
+            
+            if (zoomResetBtn) {
+                zoomResetBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    zoomLevel = 2.5;
+                    updateZoom();
+                });
+            }
+            
+            function updateZoom() {
+                if (zoomedImage) {
+                    const resultWidth = zoomResult.offsetWidth;
+                    const lensWidth = 180; // Fixed lens size
+                    const scale = zoomLevel * (resultWidth / lensWidth);
+                    
+                    zoomedImage.style.transform = `scale(${scale})`;
+                }
+            }
+            
+            // Execute when mouse moves over image
+            zoomContainer.addEventListener("mousemove", moveLens);
+            zoomContainer.addEventListener("mouseenter", function() {
+                isZoomActive = true;
+                zoomContainer.classList.add('zoom-active');
+                updateZoom();
+            });
+            zoomContainer.addEventListener("mouseleave", function() {
+                isZoomActive = false;
+                zoomContainer.classList.remove('zoom-active');
+            });
+            
+            function moveLens(e) {
+                if (!isZoomActive) return;
+                
+                e.preventDefault();
+                
+                // Get cursor position relative to the image
+                const rect = zoomContainer.getBoundingClientRect();
+                let x = e.clientX - rect.left - window.pageXOffset;
+                let y = e.clientY - rect.top - window.pageYOffset;
+                
+                // Calculate lens position (center lens on cursor)
+                x = x - 90; // Half of lens width (180px)
+                y = y - 90; // Half of lens height (180px)
+                
+                // Prevent lens from being positioned outside the image
+                const maxX = rect.width - 180;
+                const maxY = rect.height - 180;
+                
+                if (x > maxX) x = maxX;
+                if (x < 0) x = 0;
+                if (y > maxY) y = maxY;
+                if (y < 0) y = 0;
+                
+                // Set lens position
+                zoomLens.style.left = x + "px";
+                zoomLens.style.top = y + "px";
+                
+                // Calculate zoomed image position
+                const zoomedX = x * zoomLevel;
+                const zoomedY = y * zoomLevel;
+                
+                // Position zoomed image
+                if (zoomedImage) {
+                    zoomedImage.style.left = `-${zoomedX}px`;
+                    zoomedImage.style.top = `-${zoomedY}px`;
+                }
+            }
+            
+            // Click to open full image
+            zoomContainer.addEventListener('click', function(e) {
+                // Only open full image if not clicking zoom buttons
+                if (!e.target.closest('.zoom-btn')) {
+                    openFullImageView(0);
+                }
+            });
+            
+            // Initialize zoom when image loads
+            mainImage.onload = function() {
+                updateZoom();
+            };
+            
+            // If image is already loaded
+            if (mainImage.complete) {
+                updateZoom();
+            }
         }
 
         // Initialize search functionality
@@ -2250,16 +2697,23 @@
                 images.push(getDefaultImage(product.category));
             }
             
+            // Store current images for full image viewer
+            appState.currentImages = images;
+            
             // Create product details HTML
             const productHTML = `
                 <div class="product-details-layout">
-                    <!-- Product Images Gallery with SMART ZOOM - FIXED -->
+                    <!-- Product Images Gallery with ENHANCED ZOOM -->
                     <div class="product-gallery">
                         <div class="main-image-container" id="zoomContainer">
                             <img src="${images[0]}" alt="${product.stone_name}" class="main-image" id="mainProductImage">
                             <div class="image-zoom-lens" id="zoomLens"></div>
                             <div class="image-zoom-result" id="zoomResult">
                                 <img id="zoomedImage" src="${images[0]}" alt="Zoomed view">
+                            </div>
+                            <div class="zoom-hint">
+                                <i class="fas fa-search-plus"></i>
+                                <span>Click to view full image</span>
                             </div>
                             <div class="zoom-controls">
                                 <button class="zoom-btn" id="zoomInBtn" title="Zoom In">+</button>
@@ -2272,7 +2726,7 @@
                         <div class="thumbnail-gallery">
                             ${images.map((img, index) => `
                                 <img src="${img}" alt="Thumbnail ${index + 1}" class="thumbnail ${index === 0 ? 'active' : ''}" 
-                                     data-index="${index}" onclick="changeMainImage(this)">
+                                     data-index="${index}" onclick="changeMainImage(this, ${index})">
                             `).join('')}
                         </div>
                         ` : ''}
@@ -2425,9 +2879,20 @@
             // Insert into page
             document.getElementById('productDetailsContainer').innerHTML = productHTML;
             
-            // Initialize smart zoom
+            // Initialize enhanced smart zoom (for desktop)
             setTimeout(() => {
-                initializeSmartZoom();
+                initializeEnhancedSmartZoom();
+                
+                // Add click event for mobile
+                const mainImageContainer = document.getElementById('zoomContainer');
+                if (mainImageContainer) {
+                    mainImageContainer.addEventListener('click', function() {
+                        if ('ontouchstart' in window) {
+                            // Mobile device - open full image
+                            openFullImageView(0);
+                        }
+                    });
+                }
             }, 100);
             
             // Add event listeners for quantity controls
@@ -2465,119 +2930,7 @@
             });
         }
 
-        // SMART ZOOM FUNCTIONALITY - FIXED
-        function initializeSmartZoom() {
-            const zoomContainer = document.getElementById('zoomContainer');
-            const mainImage = document.getElementById('mainProductImage');
-            const zoomLens = document.getElementById('zoomLens');
-            const zoomResult = document.getElementById('zoomResult');
-            const zoomedImage = document.getElementById('zoomedImage');
-            const zoomInBtn = document.getElementById('zoomInBtn');
-            const zoomOutBtn = document.getElementById('zoomOutBtn');
-            const zoomResetBtn = document.getElementById('zoomResetBtn');
-            
-            if (!zoomContainer || !mainImage) return;
-            
-            let zoomLevel = 2; // Default zoom level
-            let isZoomActive = false;
-            
-            // Zoom in/out controls
-            if (zoomInBtn) {
-                zoomInBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    zoomLevel = Math.min(zoomLevel + 0.5, 5);
-                    updateZoom();
-                });
-            }
-            
-            if (zoomOutBtn) {
-                zoomOutBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    zoomLevel = Math.max(zoomLevel - 0.5, 1);
-                    updateZoom();
-                });
-            }
-            
-            if (zoomResetBtn) {
-                zoomResetBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    zoomLevel = 2;
-                    updateZoom();
-                });
-            }
-            
-            function updateZoom() {
-                if (zoomedImage) {
-                    const resultWidth = zoomResult.offsetWidth;
-                    const lensWidth = 150; // Fixed lens size
-                    const scale = zoomLevel * (resultWidth / lensWidth);
-                    
-                    zoomedImage.style.transform = `scale(${scale})`;
-                }
-            }
-            
-            // Execute when mouse moves over image
-            zoomContainer.addEventListener("mousemove", moveLens);
-            zoomContainer.addEventListener("mouseenter", function() {
-                isZoomActive = true;
-                zoomContainer.classList.add('zoom-active');
-                updateZoom();
-            });
-            zoomContainer.addEventListener("mouseleave", function() {
-                isZoomActive = false;
-                zoomContainer.classList.remove('zoom-active');
-            });
-            
-            function moveLens(e) {
-                if (!isZoomActive) return;
-                
-                e.preventDefault();
-                
-                // Get cursor position relative to the image
-                const rect = zoomContainer.getBoundingClientRect();
-                let x = e.clientX - rect.left - window.pageXOffset;
-                let y = e.clientY - rect.top - window.pageYOffset;
-                
-                // Calculate lens position (center lens on cursor)
-                x = x - 75; // Half of lens width (150px)
-                y = y - 75; // Half of lens height (150px)
-                
-                // Prevent lens from being positioned outside the image
-                const maxX = rect.width - 150;
-                const maxY = rect.height - 150;
-                
-                if (x > maxX) x = maxX;
-                if (x < 0) x = 0;
-                if (y > maxY) y = maxY;
-                if (y < 0) y = 0;
-                
-                // Set lens position
-                zoomLens.style.left = x + "px";
-                zoomLens.style.top = y + "px";
-                
-                // Calculate zoomed image position
-                const zoomedX = x * zoomLevel;
-                const zoomedY = y * zoomLevel;
-                
-                // Position zoomed image
-                if (zoomedImage) {
-                    zoomedImage.style.left = `-${zoomedX}px`;
-                    zoomedImage.style.top = `-${zoomedY}px`;
-                }
-            }
-            
-            // Initialize zoom when image loads
-            mainImage.onload = function() {
-                updateZoom();
-            };
-            
-            // If image is already loaded
-            if (mainImage.complete) {
-                updateZoom();
-            }
-        }
-
-        function changeMainImage(thumbnail) {
+        function changeMainImage(thumbnail, index) {
             const mainImage = document.getElementById('mainProductImage');
             const zoomResult = document.getElementById('zoomResult');
             const zoomedImage = document.getElementById('zoomedImage');
@@ -2596,10 +2949,47 @@
                 
                 // Reinitialize zoom for new image
                 setTimeout(() => {
-                    initializeSmartZoom();
+                    if (!('ontouchstart' in window)) {
+                        // Only reinitialize zoom for non-touch devices
+                        initializeEnhancedSmartZoom();
+                    }
                 }, 100);
+                
+                // Update current image index
+                appState.currentImageIndex = index;
             }
         }
+
+        // Make changeMainImage function globally available with index parameter
+        window.changeMainImage = function(thumbnail, index) {
+            const mainImage = document.getElementById('mainProductImage');
+            const zoomResult = document.getElementById('zoomResult');
+            const zoomedImage = document.getElementById('zoomedImage');
+            
+            if (mainImage && thumbnail.src) {
+                mainImage.src = thumbnail.src;
+                
+                // Update zoom image
+                if (zoomedImage) {
+                    zoomedImage.src = thumbnail.src;
+                }
+                
+                // Update active thumbnail
+                document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+                thumbnail.classList.add('active');
+                
+                // Reinitialize zoom for new image
+                setTimeout(() => {
+                    if (!('ontouchstart' in window)) {
+                        // Only reinitialize zoom for non-touch devices
+                        initializeEnhancedSmartZoom();
+                    }
+                }, 100);
+                
+                // Update current image index
+                appState.currentImageIndex = index;
+            }
+        };
 
         // Generate USES BAR navigation
         function generateUsesNavigation() {
@@ -3184,7 +3574,7 @@
             ];
         }
 
-        console.log('✅ Product Details page initialized successfully!');
+        console.log('✅ Product Details page initialized successfully with enhanced features!');
     </script>
 </body>
 </html>
