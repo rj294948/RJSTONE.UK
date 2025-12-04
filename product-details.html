@@ -22,6 +22,10 @@
             transition: padding-top 0.3s ease;
         }
         
+        body.scrolled-down {
+            padding-top: 180px;
+        }
+        
         .container {
             width: 100%;
             max-width: 1200px;
@@ -607,14 +611,20 @@
             line-height: 1.2;
         }
         
-        /* Desktop Uses Top Bar - TUP USES BAR */
+        /* ===== DESKTOP USES TOP BAR - FIXED ===== */
         .uses-top-bar {
-            position: sticky;
+            position: fixed;
             top: 120px;
+            left: 0;
+            width: 100%;
             background: #333;
             padding: 0;
             z-index: 999;
             transition: top 0.3s ease;
+        }
+        
+        body.scrolled-down .uses-top-bar {
+            top: 0;
         }
         
         .uses-container {
@@ -751,13 +761,14 @@
             margin: 30px 0;
         }
         
-        /* ===== SMART ZOOM FEATURE ===== */
+        /* ===== SMART ZOOM FEATURE - FIXED ===== */
         .product-gallery {
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             position: relative;
+            overflow: visible;
         }
         
         .main-image-container {
@@ -784,12 +795,16 @@
             pointer-events: none;
             display: none;
             z-index: 100;
+            width: 150px;
+            height: 150px;
+            box-sizing: border-box;
         }
         
         .image-zoom-result {
-            position: absolute;
-            top: 0;
-            right: -400px;
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
             width: 400px;
             height: 400px;
             border: 2px solid #b8860b;
@@ -797,14 +812,15 @@
             background: white;
             overflow: hidden;
             display: none;
-            z-index: 101;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            z-index: 1100;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
         
         .image-zoom-result img {
             position: absolute;
-            max-width: none;
-            max-height: none;
+            width: 1000px;
+            height: 1000px;
+            object-fit: none;
         }
         
         .zoom-active .image-zoom-lens,
@@ -1328,7 +1344,6 @@
             }
             
             .image-zoom-result {
-                right: -300px;
                 width: 300px;
                 height: 300px;
             }
@@ -1348,6 +1363,10 @@
 
         @media (max-width: 768px) {
             body {
+                padding-top: 100px;
+            }
+            
+            body.scrolled-down {
                 padding-top: 100px;
             }
             
@@ -1443,9 +1462,11 @@
             }
             
             .image-zoom-result {
-                right: -200px;
-                width: 200px;
-                height: 200px;
+                display: none !important;
+            }
+            
+            .zoom-btn {
+                display: none;
             }
             
             .features {
@@ -1490,14 +1511,6 @@
             
             .products-grid {
                 grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .image-zoom-result {
-                display: none !important;
-            }
-            
-            .zoom-btn {
-                display: none;
             }
             
             .footer-content {
@@ -1652,7 +1665,7 @@
         </div>
     </header>
 
-    <!-- Desktop Uses Top Bar with Mega Menu - TUP USES BAR -->
+    <!-- Desktop Uses Top Bar with Mega Menu - FIXED -->
     <div class="uses-top-bar">
         <div class="container uses-container" id="dynamicUsesContainer">
             <!-- Dynamic uses will be loaded here -->
@@ -1773,23 +1786,35 @@
 
     <!-- Smart Scroll Behavior Script -->
     <script>
-        // Smart Scroll Behavior for Header - Always hidden except at top
+        // Smart Scroll Behavior for Header and Uses Bar - FIXED
         document.addEventListener('DOMContentLoaded', function() {
             const header = document.getElementById('mainHeader');
+            const usesTopBar = document.querySelector('.uses-top-bar');
+            const body = document.body;
             let lastScrollY = window.scrollY;
             let ticking = false;
             
-            function updateHeader() {
+            function updateScroll() {
                 const currentScrollY = window.scrollY;
                 
-                // Always hide header when scrolled down from top
+                // Header behavior
                 if (currentScrollY > 50) {
                     header.classList.add('hidden');
                     header.classList.remove('visible');
+                    body.classList.add('scrolled-down');
                 } else {
-                    // Only show when at the very top
                     header.classList.remove('hidden');
                     header.classList.add('visible');
+                    body.classList.remove('scrolled-down');
+                }
+                
+                // Uses bar behavior - always visible when scrolled
+                if (usesTopBar) {
+                    if (currentScrollY > 120) {
+                        usesTopBar.style.top = '0';
+                    } else {
+                        usesTopBar.style.top = '120px';
+                    }
                 }
                 
                 lastScrollY = currentScrollY;
@@ -1798,15 +1823,16 @@
             
             function onScroll() {
                 if (!ticking) {
-                    requestAnimationFrame(updateHeader);
+                    requestAnimationFrame(updateScroll);
                     ticking = true;
                 }
             }
             
             window.addEventListener('scroll', onScroll, { passive: true });
             
-            // Initialize header as visible (at top)
+            // Initialize
             header.classList.add('visible');
+            usesTopBar.style.top = '120px';
         });
     </script>
 
@@ -2227,7 +2253,7 @@
             // Create product details HTML
             const productHTML = `
                 <div class="product-details-layout">
-                    <!-- Product Images Gallery with SMART ZOOM -->
+                    <!-- Product Images Gallery with SMART ZOOM - FIXED -->
                     <div class="product-gallery">
                         <div class="main-image-container" id="zoomContainer">
                             <img src="${images[0]}" alt="${product.stone_name}" class="main-image" id="mainProductImage">
@@ -2439,7 +2465,7 @@
             });
         }
 
-        // SMART ZOOM FUNCTIONALITY
+        // SMART ZOOM FUNCTIONALITY - FIXED
         function initializeSmartZoom() {
             const zoomContainer = document.getElementById('zoomContainer');
             const mainImage = document.getElementById('mainProductImage');
@@ -2454,23 +2480,6 @@
             
             let zoomLevel = 2; // Default zoom level
             let isZoomActive = false;
-            
-            // Wait for image to load
-            mainImage.onload = function() {
-                // Set lens size (20% of image size)
-                zoomLens.style.width = (this.width * 0.2) + "px";
-                zoomLens.style.height = (this.height * 0.2) + "px";
-                
-                // Initialize zoom
-                updateZoom();
-            };
-            
-            // If image is already loaded
-            if (mainImage.complete) {
-                zoomLens.style.width = (mainImage.width * 0.2) + "px";
-                zoomLens.style.height = (mainImage.height * 0.2) + "px";
-                updateZoom();
-            }
             
             // Zoom in/out controls
             if (zoomInBtn) {
@@ -2499,7 +2508,11 @@
             
             function updateZoom() {
                 if (zoomedImage) {
-                    zoomedImage.style.transform = `scale(${zoomLevel})`;
+                    const resultWidth = zoomResult.offsetWidth;
+                    const lensWidth = 150; // Fixed lens size
+                    const scale = zoomLevel * (resultWidth / lensWidth);
+                    
+                    zoomedImage.style.transform = `scale(${scale})`;
                 }
             }
             
@@ -2508,6 +2521,7 @@
             zoomContainer.addEventListener("mouseenter", function() {
                 isZoomActive = true;
                 zoomContainer.classList.add('zoom-active');
+                updateZoom();
             });
             zoomContainer.addEventListener("mouseleave", function() {
                 isZoomActive = false;
@@ -2519,15 +2533,22 @@
                 
                 e.preventDefault();
                 
-                // Get cursor position
-                const pos = getCursorPos(e);
-                let x = pos.x - (zoomLens.offsetWidth / 2);
-                let y = pos.y - (zoomLens.offsetHeight / 2);
+                // Get cursor position relative to the image
+                const rect = zoomContainer.getBoundingClientRect();
+                let x = e.clientX - rect.left - window.pageXOffset;
+                let y = e.clientY - rect.top - window.pageYOffset;
+                
+                // Calculate lens position (center lens on cursor)
+                x = x - 75; // Half of lens width (150px)
+                y = y - 75; // Half of lens height (150px)
                 
                 // Prevent lens from being positioned outside the image
-                if (x > mainImage.width - zoomLens.offsetWidth) x = mainImage.width - zoomLens.offsetWidth;
+                const maxX = rect.width - 150;
+                const maxY = rect.height - 150;
+                
+                if (x > maxX) x = maxX;
                 if (x < 0) x = 0;
-                if (y > mainImage.height - zoomLens.offsetHeight) y = mainImage.height - zoomLens.offsetHeight;
+                if (y > maxY) y = maxY;
                 if (y < 0) y = 0;
                 
                 // Set lens position
@@ -2535,7 +2556,6 @@
                 zoomLens.style.top = y + "px";
                 
                 // Calculate zoomed image position
-                const zoomRatio = 2; // Zoom ratio
                 const zoomedX = x * zoomLevel;
                 const zoomedY = y * zoomLevel;
                 
@@ -2546,20 +2566,15 @@
                 }
             }
             
-            function getCursorPos(e) {
-                const a = zoomContainer.getBoundingClientRect();
-                let x = e.pageX - a.left;
-                let y = e.pageY - a.top;
-                
-                // Consider page scrolling
-                x = x - window.pageXOffset;
-                y = y - window.pageYOffset;
-                
-                return {x: x, y: y};
-            }
+            // Initialize zoom when image loads
+            mainImage.onload = function() {
+                updateZoom();
+            };
             
-            // Initialize zoom
-            updateZoom();
+            // If image is already loaded
+            if (mainImage.complete) {
+                updateZoom();
+            }
         }
 
         function changeMainImage(thumbnail) {
