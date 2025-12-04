@@ -638,6 +638,8 @@
             cursor: pointer;
             border-radius: 6px;
             transition: background-color 0.3s;
+            width: 100%;
+            text-align: left;
         }
         
         .mobile-use-link:hover {
@@ -655,6 +657,18 @@
             background: #f8f9fa;
             border-radius: 6px;
             margin: 8px 0;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .mobile-mega-content.active {
@@ -671,6 +685,11 @@
             text-decoration: none;
             color: #333;
             display: block;
+            transition: transform 0.2s;
+        }
+        
+        .mobile-pattern-item:hover {
+            transform: scale(1.02);
         }
         
         .mobile-pattern-image {
@@ -2218,8 +2237,8 @@
                 console.log('Unique uses for navigation:', uniqueUses);
                 
                 if (uniqueUses.length === 0) {
-                    const fallbackUses = ['Flooring', 'Wall', 'Countertop', 'Bathroom', 'Outdoor', 'Kitchen'];
-                    
+                    // Show default categories if no uses found
+                    showMobileMenuFallback();
                     if (usesContainer) {
                         usesContainer.innerHTML = `
                             <div class="loading-categories">
@@ -2228,7 +2247,7 @@
                             </div>
                         `;
                         setTimeout(() => {
-                            generateDefaultUses(usesContainer, mobileUsesList, fallbackUses);
+                            generateDefaultDesktopUses(usesContainer);
                         }, 500);
                     }
                     return;
@@ -2332,7 +2351,7 @@
                                             const imageUrl = stoneProduct?.images?.[0] || getDefaultImage(stoneProduct?.category);
                                             
                                             return `
-                                                <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="mobile-pattern-item" onclick="closeMobileMenu()">
+                                                <a href="category-products.html?usage=${usageKey}&stone=${stoneSlug}" class="mobile-pattern-item">
                                                     <div class="mobile-pattern-image" style="background-image: url('${imageUrl}'); background-size: contain;"></div>
                                                     <div class="mobile-pattern-name">${stoneName}</div>
                                                 </a>
@@ -2344,7 +2363,7 @@
                         } else {
                             // Usage with products but no stone names - simple link
                             mobileUseItem.innerHTML = `
-                                <a href="category-products.html?usage=${usageKey}" class="mobile-use-link" onclick="closeMobileMenu()">
+                                <a href="category-products.html?usage=${usageKey}" class="mobile-use-link">
                                     ${usage} (${usageProducts.length})
                                 </a>
                             `;
@@ -2360,41 +2379,24 @@
                 }
             }
             
-            // Generate default uses when no data is available
-            function generateDefaultUses(desktopContainer, mobileContainer, usesList) {
-                // Desktop
-                if (desktopContainer) {
-                    desktopContainer.innerHTML = '';
-                    usesList.forEach(usage => {
-                        const usageKey = usage.toLowerCase().replace(/\s+/g, '-');
-                        const useItem = document.createElement('div');
-                        useItem.className = 'use-item';
-                        useItem.innerHTML = `
-                            <a href="category-products.html?usage=${usageKey}" class="use-link">${usage}</a>
-                        `;
-                        desktopContainer.appendChild(useItem);
-                    });
-                }
+            // Generate default desktop uses when no data is available
+            function generateDefaultDesktopUses(desktopContainer) {
+                const defaultUses = ['Flooring', 'Wall', 'Countertop', 'Bathroom', 'Outdoor', 'Kitchen'];
                 
-                // Mobile
-                if (mobileContainer) {
-                    mobileContainer.innerHTML = '';
-                    usesList.forEach(usage => {
-                        const usageKey = usage.toLowerCase().replace(/\s+/g, '-');
-                        const mobileUseItem = document.createElement('div');
-                        mobileUseItem.className = 'mobile-use-item';
-                        mobileUseItem.innerHTML = `
-                            <a href="category-products.html?usage=${usageKey}" class="mobile-use-link" onclick="closeMobileMenu()">
-                                ${usage}
-                            </a>
-                        `;
-                        mobileContainer.appendChild(mobileUseItem);
-                    });
-                }
+                desktopContainer.innerHTML = '';
+                defaultUses.forEach(usage => {
+                    const usageKey = usage.toLowerCase().replace(/\s+/g, '-');
+                    const useItem = document.createElement('div');
+                    useItem.className = 'use-item';
+                    useItem.innerHTML = `
+                        <a href="category-products.html?usage=${usageKey}" class="use-link">${usage}</a>
+                    `;
+                    desktopContainer.appendChild(useItem);
+                });
                 
                 // Reinitialize mega menu for desktop
                 setTimeout(() => {
-                    if (desktopContainer) initializeMegaMenu();
+                    initializeMegaMenu();
                 }, 100);
             }
             
@@ -2403,38 +2405,27 @@
                 const mobileUsesList = document.getElementById('mobileUsesList');
                 if (!mobileUsesList) return;
                 
-                mobileUsesList.innerHTML = `
-                    <div class="mobile-use-item">
-                        <a href="category-products.html?usage=flooring" class="mobile-use-link" onclick="closeMobileMenu()">
-                            Flooring Stones
+                const defaultUses = [
+                    { name: 'Flooring Stones', key: 'flooring' },
+                    { name: 'Wall Stones', key: 'wall' },
+                    { name: 'Bathroom Stones', key: 'bathroom' },
+                    { name: 'Outdoor Stones', key: 'outdoor' },
+                    { name: 'Kitchen Stones', key: 'kitchen' },
+                    { name: 'Countertop Stones', key: 'countertop' }
+                ];
+                
+                mobileUsesList.innerHTML = '';
+                
+                defaultUses.forEach(item => {
+                    const mobileUseItem = document.createElement('div');
+                    mobileUseItem.className = 'mobile-use-item';
+                    mobileUseItem.innerHTML = `
+                        <a href="category-products.html?usage=${item.key}" class="mobile-use-link">
+                            ${item.name}
                         </a>
-                    </div>
-                    <div class="mobile-use-item">
-                        <a href="category-products.html?usage=wall" class="mobile-use-link" onclick="closeMobileMenu()">
-                            Wall Stones
-                        </a>
-                    </div>
-                    <div class="mobile-use-item">
-                        <a href="category-products.html?usage=bathroom" class="mobile-use-link" onclick="closeMobileMenu()">
-                            Bathroom Stones
-                        </a>
-                    </div>
-                    <div class="mobile-use-item">
-                        <a href="category-products.html?usage=outdoor" class="mobile-use-link" onclick="closeMobileMenu()">
-                            Outdoor Stones
-                        </a>
-                    </div>
-                    <div class="mobile-use-item">
-                        <a href="category-products.html?usage=kitchen" class="mobile-use-link" onclick="closeMobileMenu()">
-                            Kitchen Stones
-                        </a>
-                    </div>
-                    <div class="mobile-use-item">
-                        <a href="category-products.html?usage=countertop" class="mobile-use-link" onclick="closeMobileMenu()">
-                            Countertop Stones
-                        </a>
-                    </div>
-                `;
+                    `;
+                    mobileUsesList.appendChild(mobileUseItem);
+                });
             }
             
             // ===== UI FUNCTIONS =====
@@ -2667,6 +2658,121 @@
                         hideAllMegaMenus();
                     }
                 });
+            }
+            
+            // ===== MOBILE MENU TOGGLE FIX =====
+            
+            // Initialize mobile menu toggles for expandable sections
+            function initializeMobileMenuToggles() {
+                const mobileToggles = document.querySelectorAll('.mobile-use-toggle');
+                
+                mobileToggles.forEach(toggle => {
+                    // Remove any existing event listeners first
+                    const newToggle = toggle.cloneNode(true);
+                    toggle.parentNode.replaceChild(newToggle, toggle);
+                    
+                    // Add new event listener
+                    newToggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const usageKey = this.getAttribute('data-usage');
+                        const content = document.getElementById(`mobile-content-${usageKey}`);
+                        const icon = this.querySelector('i');
+                        
+                        if (!content) {
+                            console.error('Content not found for:', usageKey);
+                            return;
+                        }
+                        
+                        // Toggle the current section
+                        if (content.classList.contains('active')) {
+                            // Close this section
+                            content.classList.remove('active');
+                            if (icon) {
+                                icon.classList.remove('fa-chevron-up');
+                                icon.classList.add('fa-chevron-down');
+                            }
+                        } else {
+                            // Close all other open sections first
+                            document.querySelectorAll('.mobile-mega-content.active').forEach(openContent => {
+                                openContent.classList.remove('active');
+                                const openIcon = openContent.previousElementSibling.querySelector('i');
+                                if (openIcon) {
+                                    openIcon.classList.remove('fa-chevron-up');
+                                    openIcon.classList.add('fa-chevron-down');
+                                }
+                            });
+                            
+                            // Open this section
+                            content.classList.add('active');
+                            if (icon) {
+                                icon.classList.remove('fa-chevron-down');
+                                icon.classList.add('fa-chevron-up');
+                            }
+                        }
+                    });
+                });
+                
+                // Also add click handlers for direct links (non-toggle links)
+                const directLinks = document.querySelectorAll('.mobile-uses-list a.mobile-use-link:not(.mobile-use-toggle)');
+                directLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        closeMobileMenu();
+                    });
+                });
+                
+                // Add click handlers for pattern items
+                const patternLinks = document.querySelectorAll('.mobile-pattern-item');
+                patternLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        closeMobileMenu();
+                    });
+                });
+            }
+            
+            // Initialize mobile menu functionality
+            function initializeMobileMenu() {
+                if (!trustMobileToggle || !mobileUsesMenu || !closeMenu || !menuOverlay) {
+                    console.log('❌ Mobile menu elements not found');
+                    return;
+                }
+                
+                // Open mobile menu from trust info hamburger
+                trustMobileToggle.addEventListener('click', function() {
+                    mobileUsesMenu.classList.add('active');
+                    menuOverlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+                
+                // Close mobile menu
+                function closeMobileMenu() {
+                    mobileUsesMenu.classList.remove('active');
+                    menuOverlay.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                    
+                    // Close all expanded sections
+                    document.querySelectorAll('.mobile-mega-content.active').forEach(content => {
+                        content.classList.remove('active');
+                        const icon = content.previousElementSibling.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('fa-chevron-up');
+                            icon.classList.add('fa-chevron-down');
+                        }
+                    });
+                }
+                
+                closeMenu.addEventListener('click', closeMobileMenu);
+                menuOverlay.addEventListener('click', closeMobileMenu);
+                
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && mobileUsesMenu.classList.contains('active')) {
+                        closeMobileMenu();
+                    }
+                });
+                
+                // Make closeMobileMenu function globally available for onclick handlers
+                window.closeMobileMenu = closeMobileMenu;
             }
             
             // ===== FILTER SYSTEM FUNCTIONS =====
@@ -3152,84 +3258,6 @@
                         pageUrl: "product-details.html?id=3"
                     }
                 ];
-            }
-            
-            // Initialize mobile menu functionality
-            function initializeMobileMenu() {
-                if (!trustMobileToggle || !mobileUsesMenu || !closeMenu || !menuOverlay) {
-                    console.log('❌ Mobile menu elements not found');
-                    return;
-                }
-                
-                // Open mobile menu from trust info hamburger
-                trustMobileToggle.addEventListener('click', function() {
-                    mobileUsesMenu.classList.add('active');
-                    menuOverlay.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                });
-                
-                // Close mobile menu
-                function closeMobileMenu() {
-                    mobileUsesMenu.classList.remove('active');
-                    menuOverlay.classList.remove('active');
-                    document.body.style.overflow = 'auto';
-                    
-                    // Close all expanded sections
-                    document.querySelectorAll('.mobile-mega-content.active').forEach(content => {
-                        content.classList.remove('active');
-                        const icon = content.previousElementSibling.querySelector('i');
-                        if (icon) {
-                            icon.classList.remove('fa-chevron-up');
-                            icon.classList.add('fa-chevron-down');
-                        }
-                    });
-                }
-                
-                closeMenu.addEventListener('click', closeMobileMenu);
-                menuOverlay.addEventListener('click', closeMobileMenu);
-                
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && mobileUsesMenu.classList.contains('active')) {
-                        closeMobileMenu();
-                    }
-                });
-                
-                // Make closeMobileMenu function globally available for onclick handlers
-                window.closeMobileMenu = closeMobileMenu;
-            }
-            
-            // Initialize mobile menu toggles for expandable sections
-            function initializeMobileMenuToggles() {
-                const mobileToggles = document.querySelectorAll('.mobile-use-toggle');
-                
-                mobileToggles.forEach(toggle => {
-                    toggle.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const usageKey = this.getAttribute('data-usage');
-                        const content = document.getElementById(`mobile-content-${usageKey}`);
-                        const icon = this.querySelector('i');
-                        
-                        if (content.classList.contains('active')) {
-                            content.classList.remove('active');
-                            icon.classList.remove('fa-chevron-up');
-                            icon.classList.add('fa-chevron-down');
-                        } else {
-                            // Close other open sections
-                            document.querySelectorAll('.mobile-mega-content.active').forEach(openContent => {
-                                openContent.classList.remove('active');
-                                const openIcon = openContent.previousElementSibling.querySelector('i');
-                                if (openIcon) {
-                                    openIcon.classList.remove('fa-chevron-up');
-                                    openIcon.classList.add('fa-chevron-down');
-                                }
-                            });
-                            
-                            content.classList.add('active');
-                            icon.classList.remove('fa-chevron-down');
-                            icon.classList.add('fa-chevron-up');
-                        }
-                    });
-                });
             }
             
             // Initialize mobile filters functionality
