@@ -2,11 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Irya Stone | Premium Natural Stone from India</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRYA STONE | Premium Sandstone & Kota Stone from India</title>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,12 +16,10 @@
     
     <!-- Firebase SDK -->
     <script type="module">
-        // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
         import { getFirestore, collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
         
-        // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
             authDomain: "iryastone-uk.firebaseapp.com",
@@ -35,298 +30,323 @@
             measurementId: "G-6YM1FLYN48"
         };
         
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
+        const auth = getAuth(app);
         
-        // Make Firebase available globally
-        window.firebaseApp = { app, auth, db, getDocs, collection, query, where, orderBy, limit };
+        window.firebaseApp = { 
+            db, 
+            auth, 
+            collection, 
+            getDocs, 
+            query, 
+            where, 
+            orderBy, 
+            limit 
+        };
         
         console.log("Firebase initialized successfully");
-        
-        // Auth state listener
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log("User logged in:", user.email);
-                document.querySelectorAll('.logged-out').forEach(el => el.style.display = 'none');
-                document.querySelectorAll('.logged-in').forEach(el => el.style.display = 'block');
-            } else {
-                console.log("User logged out");
-                document.querySelectorAll('.logged-in').forEach(el => el.style.display = 'none');
-                document.querySelectorAll('.logged-out').forEach(el => el.style.display = 'block');
-            }
-        });
     </script>
 </head>
 <body>
     <!-- Compact Header -->
     <header class="main-header">
-        <div class="header-top-bar">
-            <div class="container">
-                <div class="header-top-content">
-                    <div class="contact-info">
-                        <span><i class="fas fa-phone-alt"></i> +44 1234 567890</span>
-                        <span><i class="fas fa-envelope"></i> info@iryastone.co.uk</span>
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo -->
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-gem"></i>
                     </div>
-                    <div class="header-actions">
-                        <a href="login.html" class="logged-out"><i class="fas fa-user"></i> Login</a>
-                        <a href="dashboard.html" class="logged-in" style="display:none"><i class="fas fa-user-circle"></i> Account</a>
-                        <a href="wishlist.html"><i class="far fa-heart"></i> Wishlist</a>
-                        <a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart <span class="cart-count">0</span></a>
+                    <div class="logo-text">
+                        <h1>IRYA STONE</h1>
+                        <p>Premium Natural Stone from India</p>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <nav class="main-nav">
-            <div class="container">
-                <div class="nav-content">
-                    <!-- Logo -->
-                    <div class="logo">
-                        <i class="fas fa-gem"></i>
-                        <h1>IRYA STONE</h1>
-                    </div>
-                    
-                    <!-- Desktop Navigation -->
-                    <div class="nav-menu">
+                
+                <!-- Main Navigation -->
+                <nav class="main-nav">
+                    <div class="nav-links">
                         <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
-                        <div class="dropdown">
-                            <a href="#"><i class="fas fa-th-large"></i> Products <i class="fas fa-chevron-down"></i></a>
-                            <div class="dropdown-content">
-                                <a href="products.html?category=sandstone">Sandstone</a>
-                                <a href="products.html?category=kota-stone">Kota Stone</a>
-                                <a href="products.html?category=marble">Marble</a>
-                                <a href="products.html?category=granite">Granite</a>
-                            </div>
-                        </div>
-                        <a href="products.html?category=flooring"><i class="fas fa-layer-group"></i> Flooring</a>
-                        <a href="products.html?category=wall-cladding"><i class="fas fa-border-style"></i> Wall Cladding</a>
-                        <a href="products.html?category=kitchen"><i class="fas fa-utensils"></i> Kitchen</a>
-                        <a href="products.html?category=bathroom"><i class="fas fa-bath"></i> Bathroom</a>
+                        <a href="#sandstone"><i class="fas fa-sun"></i> Sandstone</a>
+                        <a href="#kota-stone"><i class="fas fa-layer-group"></i> Kota Stone</a>
+                        <a href="products.html"><i class="fas fa-th-large"></i> All Products</a>
                         <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
                         <a href="contact.html"><i class="fas fa-phone"></i> Contact</a>
+                    </div>
+                    
+                    <!-- User Actions -->
+                    <div class="user-actions">
+                        <a href="cart.html" class="cart-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-count">0</span>
+                        </a>
+                        <a href="login.html" class="user-btn">
+                            <i class="fas fa-user"></i>
+                        </a>
                     </div>
                     
                     <!-- Mobile Menu Button -->
                     <button class="mobile-menu-btn">
                         <i class="fas fa-bars"></i>
                     </button>
-                </div>
+                </nav>
             </div>
-        </nav>
+        </div>
     </header>
 
-    <!-- Hero Banner with Stone Images -->
-    <section class="hero-banner">
-        <div class="hero-slider">
-            <!-- Slide 1 - Sandstone -->
-            <div class="hero-slide active" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1543857778-c4a1a569e388?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');">
-                <div class="container">
-                    <div class="hero-content">
-                        <h2>Premium Indian Sandstone</h2>
-                        <p>Natural, durable sandstone for outdoor and indoor applications</p>
-                        <div class="hero-features">
-                            <span><i class="fas fa-check-circle"></i> Weather Resistant</span>
-                            <span><i class="fas fa-check-circle"></i> Non-Slip Surface</span>
-                            <span><i class="fas fa-check-circle"></i> Low Maintenance</span>
+    <!-- Hero Section with Stone Background -->
+    <section class="hero-section">
+        <div class="hero-overlay">
+            <div class="container">
+                <div class="hero-content">
+                    <h2 class="hero-title">Premium Indian Natural Stone</h2>
+                    <p class="hero-subtitle">Direct from Rajasthan to UK Homes</p>
+                    <div class="hero-features">
+                        <div class="feature">
+                            <i class="fas fa-truck"></i>
+                            <span>UK-Wide Delivery</span>
                         </div>
-                        <a href="products.html?category=sandstone" class="btn-hero">Explore Sandstone</a>
+                        <div class="feature">
+                            <i class="fas fa-pound-sign"></i>
+                            <span>30/70 Payment</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>VAT Included</span>
+                        </div>
                     </div>
+                    <a href="#sandstone" class="btn-hero">
+                        Explore Our Stones <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
-            
-            <!-- Slide 2 - Kota Stone -->
-            <div class="hero-slide" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');">
-                <div class="container">
-                    <div class="hero-content">
-                        <h2>Kota Stone Flooring</h2>
-                        <p>Natural limestone flooring with elegant blue and brown shades</p>
-                        <div class="hero-features">
-                            <span><i class="fas fa-check-circle"></i> Cool in Summer</span>
-                            <span><i class="fas fa-check-circle"></i> High Durability</span>
-                            <span><i class="fas fa-check-circle"></i> Natural Finish</span>
-                        </div>
-                        <a href="products.html?category=kota-stone" class="btn-hero">View Kota Stone</a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Slide 3 - Marble -->
-            <div class="hero-slide" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1481277542470-605612bd2d61?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');">
-                <div class="container">
-                    <div class="hero-content">
-                        <h2>Luxury Marble Collection</h2>
-                        <p>Premium marble for flooring, countertops, and wall cladding</p>
-                        <div class="hero-features">
-                            <span><i class="fas fa-check-circle"></i> Elegant Finish</span>
-                            <span><i class="fas fa-check-circle"></i> Heat Resistant</span>
-                            <span><i class="fas fa-check-circle"></i> Easy to Clean</span>
-                        </div>
-                        <a href="products.html?category=marble" class="btn-hero">Browse Marble</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Slider Controls -->
-        <div class="slider-controls">
-            <button class="slider-prev"><i class="fas fa-chevron-left"></i></button>
-            <div class="slider-dots">
-                <span class="dot active" data-slide="0"></span>
-                <span class="dot" data-slide="1"></span>
-                <span class="dot" data-slide="2"></span>
-            </div>
-            <button class="slider-next"><i class="fas fa-chevron-right"></i></button>
         </div>
     </section>
 
-    <!-- Trust Badges -->
-    <section class="trust-badges">
+    <!-- Stone Collections - Triangle Layout -->
+    <section class="stone-collections">
         <div class="container">
-            <div class="badges-grid">
-                <div class="badge-item">
-                    <i class="fas fa-ship"></i>
-                    <h4>Direct from India</h4>
-                    <p>Straight from Rajasthan quarries</p>
+            <!-- Sandstone Triangle Section -->
+            <div class="stone-section" id="sandstone">
+                <div class="section-header">
+                    <h2 class="section-title">Sandstone Collection</h2>
+                    <p class="section-subtitle">Natural sandstone for outdoor and indoor applications</p>
                 </div>
-                <div class="badge-item">
-                    <i class="fas fa-pound-sign"></i>
-                    <h4>30/70 Payment</h4>
-                    <p>Flexible payment options</p>
+                
+                <!-- Triangle Layout Container -->
+                <div class="triangle-layout-container">
+                    <!-- Large Center Triangle with Title -->
+                    <div class="center-triangle">
+                        <div class="triangle-content">
+                            <h3><i class="fas fa-mountain"></i> SANDSTONE</h3>
+                            <div class="triangle-links">
+                                <a href="products.html?category=sandstone&type=raj-green">Raj Green</a>
+                                <a href="products.html?category=sandstone&type=autumn-brown">Autumn Brown</a>
+                                <a href="products.html?category=sandstone&type=mint-fossil">Mint Fossil</a>
+                                <a href="products.html?category=sandstone&type=modak">Modak</a>
+                            </div>
+                            <a href="products.html?category=sandstone" class="btn-view-all">
+                                View All Sandstone <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Surrounding Triangles with Products -->
+                    <div class="triangle-grid">
+                        <!-- Triangle 1 -->
+                        <div class="triangle-item" style="--triangle-position: 1">
+                            <div class="triangle-image">
+                                <img src="https://images.unsplash.com/photo-1543857778-c4a1a569e388?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Raj Green Sandstone">
+                            </div>
+                            <div class="triangle-info">
+                                <h4>Raj Green</h4>
+                                <p>Natural green sandstone</p>
+                                <span class="price">£28.50/m²</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Triangle 2 -->
+                        <div class="triangle-item" style="--triangle-position: 2">
+                            <div class="triangle-image">
+                                <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Autumn Brown Sandstone">
+                            </div>
+                            <div class="triangle-info">
+                                <h4>Autumn Brown</h4>
+                                <p>Warm brown sandstone</p>
+                                <span class="price">£26.75/m²</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Triangle 3 -->
+                        <div class="triangle-item" style="--triangle-position: 3">
+                            <div class="triangle-image">
+                                <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Mint Fossil">
+                            </div>
+                            <div class="triangle-info">
+                                <h4>Mint Fossil</h4>
+                                <p>Fossil pattern sandstone</p>
+                                <span class="price">£31.20/m²</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Triangle 4 -->
+                        <div class="triangle-item" style="--triangle-position: 4">
+                            <div class="triangle-image">
+                                <img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Modak Sandstone">
+                            </div>
+                            <div class="triangle-info">
+                                <h4>Modak</h4>
+                                <p>Multi-color sandstone</p>
+                                <span class="price">£29.90/m²</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="badge-item">
-                    <i class="fas fa-shield-alt"></i>
-                    <h4>VAT Included</h4>
-                    <p>20% UK VAT included</p>
-                </div>
-                <div class="badge-item">
-                    <i class="fas fa-truck"></i>
-                    <h4>UK Delivery</h4>
-                    <p>Doorstep delivery across UK</p>
+                
+                <!-- Sandstone Features -->
+                <div class="stone-features">
+                    <div class="feature-card">
+                        <i class="fas fa-sun"></i>
+                        <h4>Weather Resistant</h4>
+                        <p>Perfect for outdoor use</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-shoe-prints"></i>
+                        <h4>Non-Slip Surface</h4>
+                        <p>Safe for walkways and patios</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-palette"></i>
+                        <h4>Natural Colors</h4>
+                        <p>Various shades available</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-tint-slash"></i>
+                        <h4>Low Maintenance</h4>
+                        <p>Easy to clean and maintain</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Stone Categories with Triangle Images -->
-    <section class="stone-categories">
-        <div class="container">
-            <h2 class="section-title">Our Stone Collections</h2>
-            <p class="section-subtitle">Premium natural stone from Indian quarries</p>
             
-            <div class="categories-grid">
-                <!-- Sandstone Triangle Layout -->
-                <div class="category-card triangle-layout" onclick="window.location='products.html?category=sandstone'">
-                    <div class="category-image">
-                        <div class="image-triangle">
-                            <img src="https://images.unsplash.com/photo-1543857778-c4a1a569e388?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Sandstone">
-                        </div>
-                        <div class="image-triangle triangle-2">
-                            <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Sandstone Pattern">
-                        </div>
-                        <div class="image-triangle triangle-3">
-                            <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-1.2.1&auto=format&fit=crop&w-600&q=80" alt="Sandstone Texture">
+            <!-- Kota Stone Triangle Section -->
+            <div class="stone-section kota-section" id="kota-stone">
+                <div class="section-header">
+                    <h2 class="section-title">Kota Stone Collection</h2>
+                    <p class="section-subtitle">Natural limestone flooring with elegant blue and brown shades</p>
+                </div>
+                
+                <!-- Triangle Layout Container -->
+                <div class="triangle-layout-container">
+                    <!-- Large Center Triangle with Title -->
+                    <div class="center-triangle kota-center">
+                        <div class="triangle-content">
+                            <h3><i class="fas fa-layer-group"></i> KOTA STONE</h3>
+                            <div class="triangle-links">
+                                <a href="products.html?category=kota-stone&type=blue">Kota Blue</a>
+                                <a href="products.html?category=kota-stone&type=brown">Kota Brown</a>
+                                <a href="products.html?category=kota-stone&type=natural">Natural Kota</a>
+                                <a href="products.html?category=kota-stone&type=polished">Polished Kota</a>
+                            </div>
+                            <a href="products.html?category=kota-stone" class="btn-view-all">
+                                View All Kota Stone <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
                     </div>
-                    <div class="category-content">
-                        <h3><i class="fas fa-mountain"></i> Sandstone</h3>
-                        <p>Natural sandstone for patios, driveways, and garden paving</p>
-                        <div class="category-features">
-                            <span><i class="fas fa-check"></i> Weather Resistant</span>
-                            <span><i class="fas fa-check"></i> Non-Slip</span>
-                            <span><i class="fas fa-check"></i> Various Colors</span>
+                    
+                    <!-- Surrounding Triangles with Products -->
+                    <div class="triangle-grid">
+                        <!-- Triangle 1 -->
+                        <div class="triangle-item" style="--triangle-position: 1">
+                            <div class="triangle-image">
+                                <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Kota Blue">
+                            </div>
+                            <div class="triangle-info">
+                                <h4>Kota Blue</h4>
+                                <p>Classic blue limestone</p>
+                                <span class="price">£32.50/m²</span>
+                            </div>
                         </div>
-                        <span class="price-from">From £28/m²</span>
+                        
+                        <!-- Triangle 2 -->
+                        <div class="triangle-item" style="--triangle-position: 2">
+                            <div class="triangle-image">
+                                <img src="https://images.unsplash.com/photo-1543857778-c4a1a569e388?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Kota Brown">
+                            </div>
+                            <div class="triangle-info">
+                                <h4>Kota Brown</h4>
+                                <p>Warm brown limestone</p>
+                                <span class="price">£31.75/m²</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Triangle 3 -->
+                        <div class="triangle-item" style="--triangle-position: 3">
+                            <div class="triangle-image">
+                                <img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Natural Kota">
+                            </div>
+                            <div class="triangle-info">
+                                <h4>Natural Kota</h4>
+                                <p>Unpolished natural finish</p>
+                                <span class="price">£30.20/m²</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Triangle 4 -->
+                        <div class="triangle-item" style="--triangle-position: 4">
+                            <div class="triangle-image">
+                                <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Polished Kota">
+                            </div>
+                            <div class="triangle-info">
+                                <h4>Polished Kota</h4>
+                                <p>High-gloss polished finish</p>
+                                <span class="price">£35.90/m²</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Kota Stone Triangle Layout -->
-                <div class="category-card triangle-layout" onclick="window.location='products.html?category=kota-stone'">
-                    <div class="category-image">
-                        <div class="image-triangle">
-                            <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Kota Stone">
-                        </div>
-                        <div class="image-triangle triangle-2">
-                            <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Kota Flooring">
-                        </div>
-                        <div class="image-triangle triangle-3">
-                            <img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Kota Texture">
-                        </div>
+                <!-- Kota Stone Features -->
+                <div class="stone-features">
+                    <div class="feature-card">
+                        <i class="fas fa-snowflake"></i>
+                        <h4>Cool Surface</h4>
+                        <p>Remains cool in summer</p>
                     </div>
-                    <div class="category-content">
-                        <h3><i class="fas fa-layer-group"></i> Kota Stone</h3>
-                        <p>Natural limestone flooring with elegant shades</p>
-                        <div class="category-features">
-                            <span><i class="fas fa-check"></i> Cool Surface</span>
-                            <span><i class="fas fa-check"></i> High Durability</span>
-                            <span><i class="fas fa-check"></i> Easy Maintenance</span>
-                        </div>
-                        <span class="price-from">From £32/m²</span>
+                    <div class="feature-card">
+                        <i class="fas fa-shield-alt"></i>
+                        <h4>High Durability</h4>
+                        <p>Long-lasting flooring solution</p>
                     </div>
-                </div>
-                
-                <!-- Marble Collection -->
-                <div class="category-card" onclick="window.location='products.html?category=marble'">
-                    <div class="category-image">
-                        <img src="https://images.unsplash.com/photo-1481277542470-605612bd2d61?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Marble">
+                    <div class="feature-card">
+                        <i class="fas fa-broom"></i>
+                        <h4>Easy Maintenance</h4>
+                        <p>Simple to clean and care for</p>
                     </div>
-                    <div class="category-content">
-                        <h3><i class="fas fa-gem"></i> Marble</h3>
-                        <p>Luxury marble for flooring, countertops, and walls</p>
-                        <div class="category-features">
-                            <span><i class="fas fa-check"></i> Elegant Finish</span>
-                            <span><i class="fas fa-check"></i> Heat Resistant</span>
-                            <span><i class="fas fa-check"></i> Variety of Patterns</span>
-                        </div>
-                        <span class="price-from">From £45/m²</span>
-                    </div>
-                </div>
-                
-                <!-- Granite Collection -->
-                <div class="category-card" onclick="window.location='products.html?category=granite'">
-                    <div class="category-image">
-                        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Granite">
-                    </div>
-                    <div class="category-content">
-                        <h3><i class="fas fa-mountain"></i> Granite</h3>
-                        <p>Durable granite for kitchen countertops and flooring</p>
-                        <div class="category-features">
-                            <span><i class="fas fa-check"></i> Scratch Resistant</span>
-                            <span><i class="fas fa-check"></i> Stain Resistant</span>
-                            <span><i class="fas fa-check"></i> Long Lasting</span>
-                        </div>
-                        <span class="price-from">From £42/m²</span>
+                    <div class="feature-card">
+                        <i class="fas fa-tint"></i>
+                        <h4>Water Resistant</h4>
+                        <p>Ideal for wet areas</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Featured Products -->
+    <!-- Featured Products (From Firebase) -->
     <section class="featured-products">
         <div class="container">
             <div class="section-header">
-                <div>
-                    <h2 class="section-title">Featured Products</h2>
-                    <p class="section-subtitle">Best selling stones for UK homes</p>
-                </div>
-                <a href="products.html" class="btn-view-all">View All <i class="fas fa-arrow-right"></i></a>
+                <h2 class="section-title">Featured Products</h2>
+                <p class="section-subtitle">Best selling stones for UK projects</p>
             </div>
             
             <div class="products-grid" id="featured-products">
-                <!-- Products loaded by JavaScript -->
-                <div class="product-card">
-                    <div class="product-image">
-                        <i class="fas fa-mountain"></i>
-                    </div>
-                    <h3>Raj Green Sandstone</h3>
-                    <p class="product-category">Sandstone</p>
-                    <p class="product-price">£28.50/m²</p>
-                    <button class="btn-product">View Details</button>
+                <!-- Products will load here from Firebase -->
+                <div class="loading-products">
+                    <div class="spinner"></div>
+                    <p>Loading products...</p>
                 </div>
-                
-                <!-- More product cards will be loaded dynamically -->
             </div>
         </div>
     </section>
@@ -334,132 +354,69 @@
     <!-- Payment System -->
     <section class="payment-system">
         <div class="container">
-            <h2 class="section-title">Easy 30/70 Payment Plan</h2>
-            <p class="section-subtitle">Simple payment process for UK customers</p>
+            <h2 class="section-title">Simple 30/70 Payment Plan</h2>
             
             <div class="payment-steps">
-                <div class="payment-step">
+                <div class="step">
                     <div class="step-number">1</div>
-                    <div class="step-icon">
-                        <i class="fas fa-shopping-cart"></i>
+                    <div class="step-content">
+                        <h4>Order & Pay 30%</h4>
+                        <p>Secure online deposit payment</p>
                     </div>
-                    <h4>Place Order & Pay 30%</h4>
-                    <p>Secure deposit payment online</p>
                 </div>
                 
                 <div class="step-arrow">
                     <i class="fas fa-arrow-right"></i>
                 </div>
                 
-                <div class="payment-step">
+                <div class="step">
                     <div class="step-number">2</div>
-                    <div class="step-icon">
-                        <i class="fas fa-industry"></i>
+                    <div class="step-content">
+                        <h4>Processing in India</h4>
+                        <p>Stone cutting & quality check</p>
                     </div>
-                    <h4>Processing in India</h4>
-                    <p>Stone cutting & quality check</p>
                 </div>
                 
                 <div class="step-arrow">
                     <i class="fas fa-arrow-right"></i>
                 </div>
                 
-                <div class="payment-step">
+                <div class="step">
                     <div class="step-number">3</div>
-                    <div class="step-icon">
-                        <i class="fas fa-pound-sign"></i>
+                    <div class="step-content">
+                        <h4>Pay 70% Balance</h4>
+                        <p>Before shipping from India</p>
                     </div>
-                    <h4>Pay 70% Balance</h4>
-                    <p>Payment request before shipping</p>
                 </div>
                 
                 <div class="step-arrow">
                     <i class="fas fa-arrow-right"></i>
                 </div>
                 
-                <div class="payment-step">
+                <div class="step">
                     <div class="step-number">4</div>
-                    <div class="step-icon">
-                        <i class="fas fa-truck"></i>
+                    <div class="step-content">
+                        <h4>UK Delivery</h4>
+                        <p>Direct to your location</p>
                     </div>
-                    <h4>UK Delivery</h4>
-                    <p>Direct shipping to your location</p>
-                </div>
-            </div>
-            
-            <div class="payment-example">
-                <div class="example-card">
-                    <h4><i class="fas fa-calculator"></i> Example: £1,500 Order</h4>
-                    <div class="example-details">
-                        <div class="detail-row">
-                            <span>30% Deposit</span>
-                            <span class="price">£450</span>
-                        </div>
-                        <div class="detail-row">
-                            <span>70% Balance</span>
-                            <span class="price">£1,050</span>
-                        </div>
-                        <div class="detail-row total">
-                            <span>Total Price</span>
-                            <span class="price">£1,500</span>
-                        </div>
-                    </div>
-                    <p class="vat-note">* All prices include 20% UK VAT</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Why Choose Us -->
-    <section class="why-choose">
-        <div class="container">
-            <h2 class="section-title">Why Choose Irya Stone?</h2>
-            
-            <div class="benefits-grid">
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-globe-asia"></i>
-                    </div>
-                    <h4>Direct from India</h4>
-                    <p>We source directly from Rajasthan quarries, eliminating middlemen costs</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-award"></i>
-                    </div>
-                    <h4>Quality Certified</h4>
-                    <p>Each stone piece is inspected for quality and durability</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-headset"></i>
-                    </div>
-                    <h4>UK Support</h4>
-                    <p>Local customer support team for advice and assistance</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-shipping-fast"></i>
-                    </div>
-                    <h4>Fast Delivery</h4>
-                    <p>Doorstep delivery across United Kingdom with tracking</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Call to Action -->
-    <section class="cta-section">
+    <!-- Contact CTA -->
+    <section class="contact-cta">
         <div class="container">
             <div class="cta-content">
-                <h2>Ready to Transform Your Space?</h2>
-                <p>Get a free quote for your stone project</p>
+                <h2>Need Help Choosing Stone?</h2>
+                <p>Our experts will help you select the perfect stone for your project</p>
                 <div class="cta-buttons">
-                    <a href="products.html" class="btn-cta-primary">Browse Products</a>
-                    <a href="contact.html" class="btn-cta-secondary">Contact Us</a>
+                    <a href="contact.html" class="btn-cta">
+                        <i class="fas fa-phone"></i> Contact Us
+                    </a>
+                    <a href="tel:+441234567890" class="btn-cta secondary">
+                        <i class="fas fa-phone-alt"></i> Call Now
+                    </a>
                 </div>
             </div>
         </div>
@@ -469,228 +426,45 @@
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-col">
+                <div class="footer-section">
                     <div class="footer-logo">
                         <i class="fas fa-gem"></i>
                         <h3>IRYA STONE</h3>
                     </div>
-                    <p class="footer-description">Premium natural stone from India to UK homes. Quality guaranteed.</p>
-                    <div class="footer-social">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-pinterest-p"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                    </div>
+                    <p class="footer-desc">Premium sandstone and kota stone from India to UK homes.</p>
                 </div>
                 
-                <div class="footer-col">
-                    <h4>Products</h4>
-                    <a href="products.html?category=sandstone">Sandstone</a>
-                    <a href="products.html?category=kota-stone">Kota Stone</a>
-                    <a href="products.html?category=marble">Marble</a>
-                    <a href="products.html?category=granite">Granite</a>
-                </div>
-                
-                <div class="footer-col">
+                <div class="footer-section">
                     <h4>Quick Links</h4>
-                    <a href="index.html">Home</a>
+                    <a href="#sandstone">Sandstone</a>
+                    <a href="#kota-stone">Kota Stone</a>
+                    <a href="products.html">All Products</a>
                     <a href="about.html">About Us</a>
-                    <a href="contact.html">Contact</a>
-                    <a href="shipping.html">Shipping Info</a>
                 </div>
                 
-                <div class="footer-col">
-                    <h4>Contact Info</h4>
+                <div class="footer-section">
+                    <h4>Contact</h4>
                     <p><i class="fas fa-phone"></i> +44 1234 567890</p>
                     <p><i class="fas fa-envelope"></i> info@iryastone.co.uk</p>
-                    <p><i class="fas fa-map-marker-alt"></i> London Office</p>
+                    <p><i class="fas fa-map-marker-alt"></i> UK Office</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <a href="#">Terms & Conditions</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Shipping Policy</a>
+                    <a href="#">Returns Policy</a>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2024 Irya Stone. All rights reserved. All prices include 20% UK VAT.</p>
-                <div class="payment-methods">
-                    <i class="fab fa-cc-paypal" title="PayPal"></i>
-                    <i class="fab fa-cc-visa" title="Visa"></i>
-                    <i class="fab fa-cc-mastercard" title="MasterCard"></i>
-                    <i class="fab fa-cc-amex" title="American Express"></i>
-                </div>
+                <p>&copy; 2024 IRYA STONE. All prices include 20% UK VAT.</p>
             </div>
         </div>
     </footer>
 
     <!-- Main JavaScript -->
-    <script src="app.js"></script>
-    <script>
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mobile menu toggle
-            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-            const navMenu = document.querySelector('.nav-menu');
-            
-            if (mobileMenuBtn && navMenu) {
-                mobileMenuBtn.addEventListener('click', function() {
-                    navMenu.classList.toggle('active');
-                });
-            }
-            
-            // Hero slider functionality
-            initHeroSlider();
-            
-            // Load featured products
-            loadFeaturedProducts();
-            
-            // Update cart count
-            updateCartCount();
-        });
-        
-        // Hero Slider
-        function initHeroSlider() {
-            const slides = document.querySelectorAll('.hero-slide');
-            const dots = document.querySelectorAll('.dot');
-            const prevBtn = document.querySelector('.slider-prev');
-            const nextBtn = document.querySelector('.slider-next');
-            
-            let currentSlide = 0;
-            
-            function showSlide(n) {
-                slides.forEach(slide => slide.classList.remove('active'));
-                dots.forEach(dot => dot.classList.remove('active'));
-                
-                currentSlide = (n + slides.length) % slides.length;
-                
-                slides[currentSlide].classList.add('active');
-                dots[currentSlide].classList.add('active');
-            }
-            
-            if (prevBtn) {
-                prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
-            }
-            
-            if (nextBtn) {
-                nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
-            }
-            
-            dots.forEach(dot => {
-                dot.addEventListener('click', function() {
-                    showSlide(parseInt(this.dataset.slide));
-                });
-            });
-            
-            // Auto slide every 5 seconds
-            setInterval(() => {
-                showSlide(currentSlide + 1);
-            }, 5000);
-        }
-        
-        // Load featured products
-        async function loadFeaturedProducts() {
-            const container = document.getElementById('featured-products');
-            if (!container) return;
-            
-            try {
-                // Check if Firebase is loaded
-                if (!window.firebaseApp) {
-                    console.log('Firebase not loaded yet');
-                    return;
-                }
-                
-                const { db, collection, getDocs, query, where, orderBy, limit } = window.firebaseApp;
-                
-                // Get featured products from Firestore
-                const q = query(
-                    collection(db, "products"),
-                    where("featured", "==", true),
-                    orderBy("createdAt", "desc"),
-                    limit(6)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                const products = [];
-                
-                querySnapshot.forEach((doc) => {
-                    products.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Display products
-                if (products.length > 0) {
-                    container.innerHTML = products.map(product => `
-                        <div class="product-card" onclick="viewProduct('${product.id}')">
-                            <div class="product-image">
-                                ${product.imageUrl ? 
-                                    `<img src="${product.imageUrl}" alt="${product.name}" loading="lazy">` : 
-                                    `<i class="fas fa-mountain"></i>`}
-                            </div>
-                            <h3>${product.name}</h3>
-                            <p class="product-category">${product.category}</p>
-                            <p class="product-price">£${product.priceGBP}/m²</p>
-                            <button class="btn-product" onclick="event.stopPropagation(); addToCart('${product.id}')">
-                                Add to Cart
-                            </button>
-                        </div>
-                    `).join('');
-                }
-                
-            } catch (error) {
-                console.error('Error loading products:', error);
-                // Show default products if Firebase fails
-                container.innerHTML = `
-                    <div class="product-card">
-                        <div class="product-image">
-                            <i class="fas fa-mountain"></i>
-                        </div>
-                        <h3>Raj Green Sandstone</h3>
-                        <p class="product-category">Sandstone</p>
-                        <p class="product-price">£28.50/m²</p>
-                        <button class="btn-product">View Details</button>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <i class="fas fa-layer-group"></i>
-                        </div>
-                        <h3>Kota Blue Stone</h3>
-                        <p class="product-category">Kota Stone</p>
-                        <p class="product-price">£32.75/m²</p>
-                        <button class="btn-product">View Details</button>
-                    </div>
-                `;
-            }
-        }
-        
-        // View product details
-        function viewProduct(productId) {
-            window.location.href = `product-detail.html?id=${productId}`;
-        }
-        
-        // Add to cart
-        async function addToCart(productId) {
-            const { auth } = window.firebaseApp || {};
-            
-            if (!auth || !auth.currentUser) {
-                alert('Please login to add items to cart');
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            try {
-                // Add to cart logic here
-                console.log('Adding to cart:', productId);
-                alert('Product added to cart!');
-                updateCartCount();
-            } catch (error) {
-                console.error('Error adding to cart:', error);
-                alert('Failed to add to cart');
-            }
-        }
-        
-        // Update cart count
-        function updateCartCount() {
-            const cartCountElement = document.querySelector('.cart-count');
-            if (cartCountElement) {
-                // This would come from Firebase
-                cartCountElement.textContent = '0';
-            }
-        }
-    </script>
+    <script src="js/app.js"></script>
 </body>
 </html>
