@@ -1,1294 +1,1342 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IRYA STONE | Premium Sandstone & Kota Stone</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRYA STONE | Premium Sandstone & Kota Stone UK</title>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    const firebaseConfig = {
+        apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+        authDomain: "iryastone-uk.firebaseapp.com",
+        projectId: "iryastone-uk",
+        storageBucket: "iryastone-uk.firebasestorage.app",
+        messagingSenderId: "110940910896",
+        appId: "1:110940910896:web:b25e92127118665e5c84f5",
+        measurementId: "G-6YM1FLYN48"
+    };
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
     
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-            authDomain: "iryastone-uk.firebaseapp.com",
-            projectId: "iryastone-uk",
-            storageBucket: "iryastone-uk.firebasestorage.app",
-            messagingSenderId: "110940910896",
-            appId: "1:110940910896:web:b25e92127118665e5c84f5",
-            measurementId: "G-6YM1FLYN48"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        window.firebaseDB = db;
-        window.firebase = { collection, getDocs, query, where, limit };
-        
-        console.log("Firebase initialized successfully");
-    </script>
+    window.firebaseDB = db;
+    window.firebase = { collection, getDocs, query, where, limit };
     
-    <style>
-        /* ==============================================
-           IRYA STONE - Sun Pattern Layout
-           ============================================== */
-        
-        :root {
-            --primary-gold: #b8860b;
-            --gold-light: #d4af37;
-            --gold-dark: #8b6914;
-            --sun-orange: #ff7b25;
-            --sun-yellow: #ffc107;
-            --sun-glow: rgba(255, 193, 7, 0.3);
-            --stone-dark: #2c3e50;
-            --stone-light: #f8f9fa;
-            --sand-color: #e6b87b;
-            --kota-blue: #3498db;
-            --white: #ffffff;
-            --text-dark: #333333;
-            --text-light: #666666;
-            --shadow: 0 4px 20px rgba(0,0,0,0.15);
-            --transition: all 0.4s ease;
-            --border-color: #e0e0e0;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Roboto', sans-serif;
-            color: var(--text-dark);
-            line-height: 1.6;
-            overflow-x: hidden;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding-top: 70px;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        /* ==============================================
-           SUN PATTERN HEADER
-           ============================================== */
-        
-        .sun-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-            z-index: 1000;
-            padding: 15px 0;
-            transition: var(--transition);
-        }
-        
-        .header-hidden {
-            transform: translateY(-100%);
-        }
-        
-        .header-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-        }
-        
-        .header-logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            position: relative;
-        }
-        
-        .sun-logo {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--sun-orange), var(--sun-yellow));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: 0 0 30px var(--sun-glow);
-            animation: sunGlow 3s infinite alternate;
-        }
-        
-        @keyframes sunGlow {
-            0% { box-shadow: 0 0 20px var(--sun-glow); }
-            100% { box-shadow: 0 0 40px rgba(255, 123, 37, 0.5); }
-        }
-        
-        .sun-logo::after {
-            content: '';
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            right: -5px;
-            bottom: -5px;
-            border-radius: 50%;
-            border: 2px solid var(--primary-gold);
-            opacity: 0.5;
-            animation: sunRotate 20s linear infinite;
-        }
-        
-        @keyframes sunRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .sun-logo i {
-            color: var(--white);
-            font-size: 1.5rem;
-        }
-        
-        .logo-text {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .logo-text span:first-child {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--stone-dark);
-            letter-spacing: 1px;
-        }
-        
-        .logo-text span:last-child {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            letter-spacing: 2px;
-        }
-        
-        /* Sun Rays Navigation */
-        .sun-nav {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            position: relative;
-        }
-        
-        .nav-ray {
-            position: relative;
-            padding: 12px 25px;
-            color: var(--text-dark);
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-            text-align: center;
-            border-radius: 25px;
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .nav-ray::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.1), transparent);
-            transition: left 0.6s;
-            z-index: -1;
-        }
-        
-        .nav-ray:hover::before {
-            left: 100%;
-        }
-        
-        .nav-ray:hover {
-            color: var(--sun-orange);
-            transform: translateY(-2px);
-        }
-        
-        .nav-ray.active {
-            background: linear-gradient(135deg, var(--sun-yellow), var(--sun-orange));
-            color: var(--white);
-            box-shadow: 0 5px 15px rgba(255, 123, 37, 0.3);
-        }
-        
-        .nav-ray i {
-            margin-right: 8px;
-            font-size: 1.1rem;
-        }
-        
-        /* Header Actions */
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .header-action {
-            position: relative;
-            color: var(--text-dark);
-            font-size: 1.2rem;
-            transition: var(--transition);
-        }
-        
-        .header-action:hover {
-            color: var(--sun-orange);
-            transform: scale(1.1);
-        }
-        
-        .cart-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: var(--sun-orange);
-            color: var(--white);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: 600;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--text-dark);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .mobile-menu-btn:hover {
-            color: var(--sun-orange);
-        }
-        
-        /* ==============================================
-           MAIN SUN PATTERN HERO
-           ============================================== */
-        
-        .sun-hero {
-            position: relative;
-            min-height: 90vh;
-            padding: 100px 0 50px;
-            overflow: hidden;
-            background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%);
-        }
-        
-        .sun-center {
-            position: relative;
-            width: 400px;
-            height: 400px;
-            margin: 0 auto 100px;
-            z-index: 2;
-        }
-        
-        .sun-disk {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--sun-orange), var(--sun-yellow));
-            border-radius: 50%;
-            position: relative;
-            box-shadow: 
-                0 0 60px var(--sun-orange),
-                0 0 120px rgba(255, 123, 37, 0.5),
-                inset 0 0 30px rgba(255, 255, 255, 0.3);
-            animation: sunPulse 4s ease-in-out infinite;
-        }
-        
-        @keyframes sunPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        
-        .sun-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: var(--white);
-            z-index: 3;
-            width: 80%;
-        }
-        
-        .sun-content h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 3rem;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .sun-content p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 30px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-        
-        .sun-rays {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        
-        .ray {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 2px;
-            height: 1000px;
-            background: linear-gradient(to bottom, transparent, var(--sun-yellow), transparent);
-            transform-origin: 0 0;
-            opacity: 0.3;
-        }
-        
-        /* Stone Orbit Sections */
-        .stone-orbits {
-            position: relative;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            height: 500px;
-        }
-        
-        .orbit {
-            position: absolute;
-            border-radius: 50%;
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            animation: orbitRotate linear infinite;
-        }
-        
-        @keyframes orbitRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .orbit-1 {
-            width: 800px;
-            height: 800px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation-duration: 40s;
-        }
-        
-        .orbit-2 {
-            width: 1000px;
-            height: 1000px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation-duration: 60s;
-        }
-        
-        .stone-planet {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--white);
-            cursor: pointer;
-            transition: var(--transition);
-            transform-origin: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        
-        .stone-planet:hover {
-            transform: scale(1.2);
-            z-index: 10;
-        }
-        
-        .planet-sandstone {
-            background: linear-gradient(135deg, var(--sand-color), #c19a6b);
-            top: 10%;
-            left: 10%;
-        }
-        
-        .planet-kota {
-            background: linear-gradient(135deg, var(--kota-blue), #2980b9);
-            top: 10%;
-            right: 10%;
-        }
-        
-        .planet-limestone {
-            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
-            bottom: 10%;
-            left: 10%;
-        }
-        
-        .planet-granite {
-            background: linear-gradient(135deg, #34495e, #2c3e50);
-            bottom: 10%;
-            right: 10%;
-        }
-        
-        .planet-content {
-            text-align: center;
-            padding: 15px;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .planet-content i {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.3));
-        }
-        
-        .planet-content h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-        
-        /* ==============================================
-           SUN PATTERN FEATURES
-           ============================================== */
-        
-        .sun-features {
-            padding: 100px 0;
-            background: var(--stone-light);
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
-        }
-        
-        .feature-sun {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 40px 30px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .feature-sun::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--sun-yellow), var(--sun-orange));
-        }
-        
-        .feature-sun:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-        }
-        
-        .feature-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, var(--sun-yellow), var(--sun-orange));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 25px;
-            font-size: 2rem;
-            color: var(--white);
-            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
-        }
-        
-        .feature-sun h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: var(--stone-dark);
-        }
-        
-        .feature-sun p {
-            color: var(--text-light);
-            line-height: 1.8;
-        }
-        
-        /* ==============================================
-           RADIAL PRODUCT DISPLAY
-           ============================================== */
-        
-        .radial-products {
-            padding: 100px 0;
-            background: var(--white);
-            position: relative;
-        }
-        
-        .radial-center {
-            text-align: center;
-            margin-bottom: 80px;
-        }
-        
-        .radial-center h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 3rem;
-            color: var(--stone-dark);
-            margin-bottom: 20px;
-        }
-        
-        .radial-center p {
-            color: var(--text-light);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .radial-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            position: relative;
-        }
-        
-        .radial-item {
-            background: var(--stone-light);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-            border: 2px solid transparent;
-        }
-        
-        .radial-item:hover {
-            transform: scale(1.05);
-            border-color: var(--sun-orange);
-            box-shadow: 0 15px 30px rgba(255, 123, 37, 0.15);
-        }
-        
-        .radial-icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, var(--sun-yellow), var(--sun-orange));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            color: var(--white);
-            font-size: 1.8rem;
-        }
-        
-        .radial-item h3 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: var(--stone-dark);
-        }
-        
-        .radial-item p {
-            color: var(--text-light);
-            margin-bottom: 15px;
-            font-size: 0.95rem;
-        }
-        
-        .radial-price {
-            color: var(--sun-orange);
-            font-weight: 600;
-            font-size: 1.3rem;
-        }
-        
-        /* ==============================================
-           SUN BEAM TESTIMONIALS
-           ============================================== */
-        
-        .sun-testimonials {
-            padding: 100px 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: var(--white);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .testimonial-beam {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
-            animation: beamMove 10s linear infinite;
-        }
-        
-        @keyframes beamMove {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        .testimonial-content {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .testimonial-content h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            margin-bottom: 50px;
-        }
-        
-        .testimonial-slider {
-            position: relative;
-            overflow: hidden;
-            height: 200px;
-        }
-        
-        .testimonial-slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            opacity: 0;
-            transition: opacity 1s ease;
-        }
-        
-        .testimonial-slide.active {
-            opacity: 1;
-        }
-        
-        .testimonial-text {
-            font-size: 1.2rem;
-            font-style: italic;
-            margin-bottom: 20px;
-            line-height: 1.8;
-        }
-        
-        .testimonial-author {
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        
-        /* ==============================================
-           FOOTER
-           ============================================== */
-        
-        .sun-footer {
-            background: var(--stone-dark);
-            color: var(--white);
-            padding: 60px 0 30px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .footer-sun {
-            position: absolute;
-            bottom: -100px;
-            right: -100px;
-            width: 300px;
-            height: 300px;
-            background: linear-gradient(135deg, var(--sun-orange), var(--sun-yellow));
-            border-radius: 50%;
-            opacity: 0.1;
-            filter: blur(20px);
-        }
-        
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .footer-section h3 {
-            color: var(--sun-yellow);
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-        }
-        
-        .footer-section p {
-            color: #ccc;
-            margin-bottom: 15px;
-            line-height: 1.8;
-        }
-        
-        .footer-links a {
-            display: block;
-            color: #ccc;
-            text-decoration: none;
-            margin-bottom: 10px;
-            transition: var(--transition);
-        }
-        
-        .footer-links a:hover {
-            color: var(--sun-yellow);
-            transform: translateX(5px);
-        }
-        
-        .copyright {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            color: #aaa;
-            font-size: 0.9rem;
-            position: relative;
-            z-index: 2;
-        }
-        
-        /* ==============================================
-           MOBILE RESPONSIVE
-           ============================================== */
-        
-        @media (max-width: 1024px) {
-            .sun-center {
-                width: 300px;
-                height: 300px;
-            }
-            
-            .sun-content h1 {
-                font-size: 2.5rem;
-            }
-            
-            .stone-orbits {
-                height: 400px;
-            }
-            
-            .orbit-1 {
-                width: 600px;
-                height: 600px;
-            }
-            
-            .orbit-2 {
-                width: 800px;
-                height: 800px;
-            }
-            
-            .stone-planet {
-                width: 100px;
-                height: 100px;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .sun-nav {
-                display: none;
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-            }
-            
-            .sun-hero {
-                padding: 80px 0 30px;
-            }
-            
-            .sun-center {
-                width: 250px;
-                height: 250px;
-                margin-bottom: 70px;
-            }
-            
-            .sun-content h1 {
-                font-size: 2rem;
-            }
-            
-            .sun-content p {
-                font-size: 1rem;
-            }
-            
-            .stone-orbits {
-                height: 300px;
-            }
-            
-            .orbit-1, .orbit-2 {
-                display: none;
-            }
-            
-            .stone-planet {
-                position: relative;
-                top: auto;
-                left: auto;
-                margin: 20px auto;
-                display: block;
-            }
-            
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .radial-center h2 {
-                font-size: 2.2rem;
-            }
-            
-            .testimonial-content h2 {
-                font-size: 2rem;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .header-container {
-                padding: 0 15px;
-            }
-            
-            .sun-logo {
-                width: 40px;
-                height: 40px;
-            }
-            
-            .logo-text span:first-child {
-                font-size: 1.2rem;
-            }
-            
-            .sun-center {
-                width: 200px;
-                height: 200px;
-            }
-            
-            .sun-content h1 {
-                font-size: 1.8rem;
-            }
-            
-            .radial-center h2 {
-                font-size: 1.8rem;
-            }
-            
-            .feature-sun {
-                padding: 30px 20px;
-            }
-        }
-    </style>
+    console.log("Firebase initialized successfully");
+</script>
+
+<style>
+:root {
+    --primary-gold: #c9a227;
+    --gold-light: #f0d77c;
+    --gold-dark: #9c7c1f;
+    --stone-dark: #1a1a1a;
+    --stone-light: #f4f6f4;
+    --bg-light: #f7f9fc;
+    --text-dark: #222222;
+    --text-light: #666666;
+    --white: #ffffff;
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+    --transition: all 0.3s ease;
+    --border-radius: 12px;
+    --border-radius-lg: 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    padding-bottom: 80px;
+    font-size: 14px;
+}
+
+/* Header with Hide/Show on Scroll */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    z-index: 1000;
+    gap: 10px;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.4s ease,
+                box-shadow 0.4s ease;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+header.hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+}
+
+header.scrolled {
+    box-shadow: var(--shadow-md);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    min-width: 140px;
+}
+
+.logo i {
+    color: var(--primary-gold);
+    font-size: 24px;
+}
+
+.logo span {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--stone-dark);
+    font-family: 'Roboto Slab', serif;
+}
+
+/* Search Box */
+.search-box {
+    flex: 1;
+    margin: 0 10px;
+    position: relative;
+    max-width: 500px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    border-radius: 25px;
+    border: 1px solid #e0e0e0;
+    background: var(--bg-light);
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.1);
+}
+
+.search-box i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+/* Buttons */
+.signin-btn {
+    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    color: var(--white);
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: var(--transition);
+    white-space: nowrap;
+    min-width: 80px;
+}
+
+.signin-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-light);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.action-btn:hover {
+    background: var(--primary-gold);
+    color: var(--white);
+}
+
+/* Hero Section with Stone Background */
+.hero {
+    padding-top: 90px;
+    text-align: center;
+    padding: 90px 20px 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)),
+        url('https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=1600&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    color: var(--white);
+    max-width: 800px;
+    padding: 40px 20px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    font-family: 'Roboto Slab', serif;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.hero p {
+    font-size: 18px;
+    opacity: 0.9;
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+    margin-top: 40px;
+}
+
+@media (min-width: 768px) {
+    .hero-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.stat-item {
+    text-align: center;
+    padding: 20px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: var(--transition);
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--gold-light);
+    line-height: 1;
+    margin-bottom: 8px;
+    font-family: 'Roboto Slab', serif;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Category Section */
+.category-section {
+    padding: 40px 16px;
+    background: var(--white);
+    margin-top: 20px;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    position: relative;
+    z-index: 1;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.category-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.category-title i {
+    color: var(--primary-gold);
+    font-size: 22px;
+}
+
+.view-all {
+    color: var(--primary-gold);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: var(--transition);
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(201, 162, 39, 0.1);
+}
+
+.view-all:hover {
+    gap: 10px;
+    background: rgba(201, 162, 39, 0.2);
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+@media (min-width: 768px) {
+    .category-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}
+
+.cat-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    position: relative;
+    border: 1px solid #f0f0f0;
+}
+
+.cat-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-gold);
+}
+
+.cat-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.cat-card:hover img {
+    transform: scale(1.1);
+}
+
+.cat-card .info {
+    padding: 15px;
+    font-weight: 500;
+    color: var(--text-dark);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cat-price {
+    color: var(--primary-gold);
+    font-weight: 600;
+    font-size: 14px;
+    background: rgba(201, 162, 39, 0.1);
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+/* Products Section */
+.products {
+    padding: 40px 16px;
+    background: var(--bg-light);
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 768px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .product-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.card {
+    background: var(--white);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: 1px solid #f0f0f0;
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    border-color: var(--primary-gold);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-5px);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-gold), var(--gold-light));
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+.card h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--stone-dark);
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.card p {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.price {
+    color: var(--primary-gold);
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: 20px;
+    font-family: 'Roboto Slab', serif;
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.card-btn {
+    flex: 1;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(201, 162, 39, 0.3);
+}
+
+.btn-secondary {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    border: 1px solid #e0e0e0;
+}
+
+.btn-secondary:hover {
+    background: #f0f0f0;
+    border-color: var(--primary-gold);
+}
+
+/* Product Badge */
+.product-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--primary-gold);
+    color: var(--white);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    z-index: 2;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid #eee;
+    z-index: 999;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.bottom-nav.hidden {
+    transform: translateY(100%);
+}
+
+.nav-btn {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 10px;
+    min-width: 70px;
+}
+
+.nav-btn:hover {
+    color: var(--primary-gold);
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.nav-btn.active {
+    color: var(--primary-gold);
+}
+
+.nav-btn i {
+    font-size: 18px;
+}
+
+/* Floating Action Button */
+.fab {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    z-index: 998;
+    transition: var(--transition);
+    border: none;
+    transform: translateY(0);
+}
+
+.fab:hover {
+    transform: scale(1.1) translateY(-5px);
+    box-shadow: 0 8px 25px rgba(201, 162, 39, 0.4);
+}
+
+/* Banner */
+.banner {
+    margin: 30px 16px;
+    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    border-radius: var(--border-radius);
+    padding: 25px;
+    color: var(--white);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="white" opacity="0.1"/></svg>');
+    background-size: 200px;
+    opacity: 0.2;
+}
+
+.banner h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.banner p {
+    font-size: 15px;
+    opacity: 0.9;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.banner-btn {
+    background: var(--white);
+    color: var(--primary-gold);
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    z-index: 1;
+}
+
+.banner-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Cart Badge */
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 600;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+    body {
+        font-size: 15px;
+    }
+    
+    header {
+        padding: 15px 30px;
+    }
+    
+    .hero {
+        min-height: 600px;
+        padding: 120px 30px 40px;
+    }
+    
+    .hero h1 {
+        font-size: 42px;
+    }
+    
+    .hero p {
+        font-size: 20px;
+    }
+    
+    .stat-number {
+        font-size: 36px;
+    }
+    
+    .stat-label {
+        font-size: 15px;
+    }
+    
+    .category-section, .products {
+        padding: 50px 30px;
+    }
+    
+    .category-title {
+        font-size: 24px;
+    }
+    
+    .bottom-nav {
+        padding: 15px 0;
+    }
+    
+    .nav-btn {
+        font-size: 12px;
+        min-width: 80px;
+    }
+    
+    .nav-btn i {
+        font-size: 20px;
+    }
+    
+    .fab {
+        bottom: 100px;
+    }
+}
+
+/* Animation */
+@keyframes fadeInUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.card, .cat-card, .stat-item {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+}
+
+/* Scroll Progress Bar */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-gold), var(--gold-light));
+    z-index: 1001;
+    transition: width 0.1s ease;
+}
+
+/* Loading Animation */
+.loading-spinner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(201, 162, 39, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-gold);
+    animation: spin 1s ease-in-out infinite;
+    z-index: 9999;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Back to Top Button */
+.back-to-top {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: var(--primary-gold);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: var(--transition);
+    z-index: 997;
+    box-shadow: var(--shadow-md);
+}
+
+.back-to-top.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    background: var(--gold-dark);
+    transform: translateY(-5px);
+}
+</style>
 </head>
+
 <body>
-    <!-- Sun Pattern Header -->
-    <header class="sun-header" id="mainHeader">
-        <div class="header-container">
-            <!-- Logo with Sun Icon -->
-            <div class="header-logo">
-                <div class="sun-logo">
-                    <i class="fas fa-gem"></i>
-                </div>
-                <div class="logo-text">
-                    <span>IRYA STONE</span>
-                    <span>PREMIUM NATURAL STONE</span>
-                </div>
-            </div>
-            
-            <!-- Sun Rays Navigation -->
-            <nav class="sun-nav">
-                <a href="#home" class="nav-ray active">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <a href="#products" class="nav-ray">
-                    <i class="fas fa-mountain"></i> Products
-                </a>
-                <a href="#sandstone" class="nav-ray">
-                    <i class="fas fa-sun"></i> Sandstone
-                </a>
-                <a href="#kota" class="nav-ray">
-                    <i class="fas fa-layer-group"></i> Kota Stone
-                </a>
-                <a href="#about" class="nav-ray">
-                    <i class="fas fa-info-circle"></i> About
-                </a>
-                <a href="#contact" class="nav-ray">
-                    <i class="fas fa-phone"></i> Contact
-                </a>
-            </nav>
-            
-            <!-- Header Actions -->
-            <div class="header-actions">
-                <a href="search.html" class="header-action">
-                    <i class="fas fa-search"></i>
-                </a>
-                <a href="cart.html" class="header-action">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-badge">0</span>
-                </a>
-                <a href="wishlist.html" class="header-action">
-                    <i class="far fa-heart"></i>
-                </a>
-                <a href="login.html" class="header-action">
-                    <i class="far fa-user"></i>
-                </a>
-                <button class="mobile-menu-btn">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </div>
-    </header>
 
-    <!-- Main Sun Hero Section -->
-    <main class="main-content">
-        <section class="sun-hero" id="home">
-            <!-- Sun Center -->
-            <div class="sun-center">
-                <div class="sun-disk"></div>
-                <div class="sun-content">
-                    <h1>IRYA STONE</h1>
-                    <p>Premium Natural Stone from India to UK</p>
-                    <div style="margin-top: 30px;">
-                        <button class="nav-ray active" style="background: white; color: var(--sun-orange); border: none; padding: 15px 30px; font-size: 1.1rem;">
-                            Explore Collection
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Sun Rays -->
-                <div class="sun-rays" id="sunRays"></div>
-            </div>
-            
-            <!-- Stone Orbits -->
-            <div class="stone-orbits">
-                <div class="orbit orbit-1"></div>
-                <div class="orbit orbit-2"></div>
-                
-                <!-- Stone Planets -->
-                <div class="stone-planet planet-sandstone" onclick="scrollToSection('sandstone')">
-                    <div class="planet-content">
-                        <i class="fas fa-sun"></i>
-                        <h3>Sandstone</h3>
-                    </div>
-                </div>
-                
-                <div class="stone-planet planet-kota" onclick="scrollToSection('kota')">
-                    <div class="planet-content">
-                        <i class="fas fa-layer-group"></i>
-                        <h3>Kota Stone</h3>
-                    </div>
-                </div>
-                
-                <div class="stone-planet planet-limestone">
-                    <div class="planet-content">
-                        <i class="fas fa-mountain"></i>
-                        <h3>Limestone</h3>
-                    </div>
-                </div>
-                
-                <div class="stone-planet planet-granite">
-                    <div class="planet-content">
-                        <i class="fas fa-gem"></i>
-                        <h3>Granite</h3>
-                    </div>
-                </div>
-            </div>
-        </section>
+<!-- Scroll Progress Bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
 
-        <!-- Sun Pattern Features -->
-        <section class="sun-features">
-            <div class="container">
-                <div class="radial-center">
-                    <h2>Why Choose IRYA STONE?</h2>
-                    <p>Experience the brilliance of premium natural stone with our sun-inspired collection</p>
-                </div>
-                
-                <div class="features-grid">
-                    <div class="feature-sun">
-                        <div class="feature-icon">
-                            <i class="fas fa-shipping-fast"></i>
-                        </div>
-                        <h3>Direct from India</h3>
-                        <p>30/70 payment system with free UK delivery. All prices include VAT.</p>
-                    </div>
-                    
-                    <div class="feature-sun">
-                        <div class="feature-icon">
-                            <i class="fas fa-award"></i>
-                        </div>
-                        <h3>Premium Quality</h3>
-                        <p>100% natural stone with excellent weather resistance and easy maintenance.</p>
-                    </div>
-                    
-                    <div class="feature-sun">
-                        <div class="feature-icon">
-                            <i class="fas fa-headset"></i>
-                        </div>
-                        <h3>Expert Support</h3>
-                        <p>Free consultation, project planning, and installation support available.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loadingSpinner"></div>
 
-        <!-- Radial Product Display -->
-        <section class="radial-products" id="products">
-            <div class="container">
-                <div class="radial-center">
-                    <h2>Featured Stone Collection</h2>
-                    <p>Discover our radiant collection of premium natural stones</p>
-                </div>
-                
-                <div class="radial-grid" id="featuredProducts">
-                    <!-- Products will load here from Firebase -->
-                    <div class="radial-item">
-                        <div class="radial-icon">
-                            <i class="fas fa-mountain"></i>
-                        </div>
-                        <h3>Raj Green Sandstone</h3>
-                        <p>Premium green sandstone for outdoor applications</p>
-                        <div class="radial-price">£28.50/m²</div>
-                    </div>
-                    
-                    <div class="radial-item">
-                        <div class="radial-icon">
-                            <i class="fas fa-layer-group"></i>
-                        </div>
-                        <h3>Kota Blue Stone</h3>
-                        <p>Natural limestone flooring with elegant blue shades</p>
-                        <div class="radial-price">£32.50/m²</div>
-                    </div>
-                </div>
-            </div>
-        </section>
+<!-- Header -->
+<header id="mainHeader">
+    <div class="logo">
+        <i class="fa-solid fa-gem"></i>
+        <span>IRYA STONE</span>
+    </div>
 
-        <!-- Sun Beam Testimonials -->
-        <section class="sun-testimonials">
-            <div class="testimonial-beam"></div>
-            <div class="container">
-                <div class="testimonial-content">
-                    <h2>What Our Customers Say</h2>
-                    
-                    <div class="testimonial-slider">
-                        <div class="testimonial-slide active">
-                            <div class="testimonial-text">
-                                "The quality of IRYA STONE is exceptional. The sandstone transformed our garden patio completely. The sun-inspired design is brilliant!"
-                            </div>
-                            <div class="testimonial-author">- Sarah Johnson, London</div>
-                        </div>
-                        
-                        <div class="testimonial-slide">
-                            <div class="testimonial-text">
-                                "Professional service from start to finish. The Kota stone flooring in our kitchen looks absolutely stunning. Highly recommended!"
-                            </div>
-                            <div class="testimonial-author">- Michael Brown, Manchester</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+    <!-- Search -->
+    <div class="search-box">
+        <input type="text" placeholder="Search for sandstone, kota stone...">
+        <i class="fas fa-search"></i>
+    </div>
 
-    <!-- Footer -->
-    <footer class="sun-footer">
-        <div class="footer-sun"></div>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>IRYA STONE</h3>
-                    <p>Premium natural stone from Indian quarries to UK homes and businesses.</p>
-                    <p>Bringing the warmth of the sun through our stone collection.</p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Quick Links</h3>
-                    <div class="footer-links">
-                        <a href="#home">Home</a>
-                        <a href="#products">Products</a>
-                        <a href="#sandstone">Sandstone</a>
-                        <a href="#kota">Kota Stone</a>
-                        <a href="#contact">Contact Us</a>
-                    </div>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Contact Info</h3>
-                    <p><i class="fas fa-phone"></i> +44 1234 567890</p>
-                    <p><i class="fas fa-envelope"></i> info@iryastone.co.uk</p>
-                    <p><i class="fas fa-map-marker-alt"></i> London, United Kingdom</p>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                © 2024 IRYA STONE. All rights reserved. | Premium Natural Stone Solutions
-            </div>
-        </div>
-    </footer>
+    <!-- Header Actions -->
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <button class="action-btn">
+            <i class="far fa-heart"></i>
+        </button>
+        <button class="action-btn" style="position: relative;">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge">3</span>
+        </button>
+        <button class="signin-btn">Sign In</button>
+    </div>
+</header>
 
-    <script>
-        // Auto-hide Header
-        let lastScrollTop = 0;
-        const header = document.getElementById('mainHeader');
+<!-- Hero with Stone Background -->
+<section class="hero">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+        <h1>Premium Natural Stones</h1>
+        <p>Export Quality Sandstone & Kota Stone from Indian quarries to UK homes</p>
         
-        window.addEventListener('scroll', function() {
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
-                header.classList.add('header-hidden');
+        <div class="hero-stats">
+            <div class="stat-item">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Projects</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">30/70</div>
+                <div class="stat-label">Payment Plan</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">Free</div>
+                <div class="stat-label">UK Delivery</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">VAT</div>
+                <div class="stat-label">Included</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Back to Top Button -->
+<div class="back-to-top" id="backToTop">
+    <i class="fas fa-chevron-up"></i>
+</div>
+
+<!-- Banner -->
+<div class="banner">
+    <h3>30% Advance, 70% After Delivery</h3>
+    <p>Flexible payment plan with free UK delivery & VAT included. No hidden charges!</p>
+    <button class="banner-btn">Learn More</button>
+</div>
+
+<!-- Sandstone Uses -->
+<section class="category-section">
+    <div class="section-header">
+        <div class="category-title">
+            <i class="fas fa-sun"></i> Sandstone Uses
+        </div>
+        <a href="#" class="view-all">
+            View All <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    <div class="category-grid">
+        <div class="cat-card">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800" alt="Patio Flooring">
+            <div class="info">
+                <span>Patio Flooring</span>
+                <span class="cat-price">From £26/m²</span>
+            </div>
+        </div>
+        <div class="cat-card">
+            <img src="https://images.unsplash.com/photo-1598300054893-ef06c8935c52?auto=format&fit=crop&w=800" alt="Garden Pathways">
+            <div class="info">
+                <span>Garden Pathways</span>
+                <span class="cat-price">From £24/m²</span>
+            </div>
+        </div>
+        <div class="cat-card">
+            <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800" alt="Wall Cladding">
+            <div class="info">
+                <span>Wall Cladding</span>
+                <span class="cat-price">From £28/m²</span>
+            </div>
+        </div>
+        <div class="cat-card">
+            <img src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800" alt="Driveways">
+            <div class="info">
+                <span>Driveways</span>
+                <span class="cat-price">From £30/m²</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Kota Stone Uses -->
+<section class="category-section">
+    <div class="section-header">
+        <div class="category-title">
+            <i class="fas fa-layer-group"></i> Kota Stone Uses
+        </div>
+        <a href="#" class="view-all">
+            View All <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    <div class="category-grid">
+        <div class="cat-card">
+            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800" alt="Indoor Flooring">
+            <div class="info">
+                <span>Indoor Flooring</span>
+                <span class="cat-price">From £32/m²</span>
+            </div>
+        </div>
+        <div class="cat-card">
+            <img src="https://images.unsplash.com/photo-1502005097973-6a7082348e28?auto=format&fit=crop&w=800" alt="Commercial Spaces">
+            <div class="info">
+                <span>Commercial Spaces</span>
+                <span class="cat-price">From £35/m²</span>
+            </div>
+        </div>
+        <div class="cat-card">
+            <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800" alt="Kitchen Counter">
+            <div class="info">
+                <span>Kitchen Counter</span>
+                <span class="cat-price">From £40/m²</span>
+            </div>
+        </div>
+        <div class="cat-card">
+            <img src="https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&w=800" alt="Bathroom Walls">
+            <div class="info">
+                <span>Bathroom Walls</span>
+                <span class="cat-price">From £34/m²</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Products -->
+<section class="products">
+    <div class="section-header">
+        <div class="category-title">
+            <i class="fas fa-gem"></i> Top Products
+        </div>
+        <a href="#" class="view-all">
+            View All <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    <div class="product-grid" id="productGrid">
+        <div class="card">
+            <div class="product-badge">Best Seller</div>
+            <h3>Raj Green Sandstone</h3>
+            <p>Natural outdoor paving stone with excellent weather resistance. Perfect for garden pathways and patios.</p>
+            <div class="price">£28.50/m²</div>
+            <div class="card-actions">
+                <button class="card-btn btn-primary">Add to Cart</button>
+                <button class="card-btn btn-secondary">View Details</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="product-badge">Popular</div>
+            <h3>Kota Blue Stone</h3>
+            <p>Durable limestone flooring solution for indoor spaces. Natural blue shades with elegant texture.</p>
+            <div class="price">£32.75/m²</div>
+            <div class="card-actions">
+                <button class="card-btn btn-primary">Add to Cart</button>
+                <button class="card-btn btn-secondary">View Details</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="product-badge">New</div>
+            <h3>Autumn Brown Sandstone</h3>
+            <p>Warm brown sandstone with natural variations. Ideal for driveways and outdoor landscaping.</p>
+            <div class="price">£26.90/m²</div>
+            <div class="card-actions">
+                <button class="card-btn btn-primary">Add to Cart</button>
+                <button class="card-btn btn-secondary">View Details</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Limestone Tiles</h3>
+            <p>Versatile natural stone suitable for both indoor and outdoor applications with timeless look.</p>
+            <div class="price">£29.99/m²</div>
+            <div class="card-actions">
+                <button class="card-btn btn-primary">Add to Cart</button>
+                <button class="card-btn btn-secondary">View Details</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Floating Action Button -->
+<button class="fab">
+    <i class="fas fa-comment-alt"></i>
+</button>
+
+<!-- Bottom Menu -->
+<div class="bottom-nav" id="bottomNav">
+    <div class="nav-btn active">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </div>
+    <div class="nav-btn">
+        <i class="fas fa-th-large"></i>
+        <span>Products</span>
+    </div>
+    <div class="nav-btn">
+        <i class="fas fa-search"></i>
+        <span>Search</span>
+    </div>
+    <div class="nav-btn">
+        <i class="fas fa-user"></i>
+        <span>Account</span>
+    </div>
+    <div class="nav-btn">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Cart</span>
+    </div>
+</div>
+
+<script>
+    // Header Hide/Show on Scroll
+    let lastScrollTop = 0;
+    const header = document.getElementById('mainHeader');
+    const bottomNav = document.getElementById('bottomNav');
+    const backToTop = document.getElementById('backToTop');
+    const scrollProgress = document.getElementById('scrollProgress');
+    
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Header hide/show logic
+        if (scrollTop > 100) {
+            if (scrollTop > lastScrollTop) {
+                // Scrolling down - hide header and bottom nav
+                header.classList.add('hidden');
+                bottomNav.classList.add('hidden');
             } else {
-                header.classList.remove('header-hidden');
+                // Scrolling up - show header and bottom nav
+                header.classList.remove('hidden');
+                bottomNav.classList.remove('hidden');
             }
-            
-            lastScrollTop = scrollTop;
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+            header.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+        }
+        
+        // Back to top button
+        if (scrollTop > 300) {
+            backToTop.classList.add('show');
+        } else {
+            backToTop.classList.remove('show');
+        }
+        
+        // Scroll progress bar
+        const winHeight = window.innerHeight;
+        const docHeight = document.documentElement.scrollHeight;
+        const totalScroll = (scrollTop / (docHeight - winHeight)) * 100;
+        scrollProgress.style.width = totalScroll + '%';
+        
+        lastScrollTop = scrollTop;
+    });
+    
+    // Back to top functionality
+    backToTop.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
         });
-
-        // Create Sun Rays
-        function createSunRays() {
-            const raysContainer = document.getElementById('sunRays');
-            const raysCount = 24;
+    });
+    
+    // Load products from Firebase
+    async function loadProductsFromFirebase() {
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        try {
+            loadingSpinner.style.display = 'block';
             
-            for (let i = 0; i < raysCount; i++) {
-                const ray = document.createElement('div');
-                ray.className = 'ray';
-                ray.style.transform = `translate(-50%, -50%) rotate(${i * (360 / raysCount)}deg)`;
-                raysContainer.appendChild(ray);
-            }
-        }
-
-        // Testimonial Slider
-        function initTestimonialSlider() {
-            const slides = document.querySelectorAll('.testimonial-slide');
-            let currentSlide = 0;
+            const container = document.getElementById('productGrid');
+            if (!container || !window.firebaseDB) return;
             
-            function showNextSlide() {
-                slides[currentSlide].classList.remove('active');
-                currentSlide = (currentSlide + 1) % slides.length;
-                slides[currentSlide].classList.add('active');
-            }
+            const { collection, getDocs, query, limit } = window.firebase;
+            const db = window.firebaseDB;
             
-            setInterval(showNextSlide, 5000);
-        }
-
-        // Scroll to section
-        window.scrollToSection = function(sectionId) {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.scrollIntoView({ behavior: 'smooth' });
-            }
-        };
-
-        // Load products from Firebase
-        async function loadProductsFromFirebase() {
-            try {
-                const container = document.getElementById('featuredProducts');
-                if (!container || !window.firebaseDB) return;
-                
-                const { collection, getDocs, query, limit } = window.firebase;
-                const db = window.firebaseDB;
-                
-                // Get featured products
-                const q = query(collection(db, "products"), limit(6));
-                const querySnapshot = await getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    showFallbackProducts(container);
-                    return;
+            // Get featured products
+            const q = query(collection(db, "products"), limit(6));
+            const querySnapshot = await getDocs(q);
+            
+            if (querySnapshot.empty) return;
+            
+            const products = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                products.push({
+                    id: doc.id,
+                    name: data.name || data.stone_name || 'Stone Product',
+                    category: data.category || 'Stone',
+                    price: data.price ? `£${parseFloat(data.price).toFixed(2)}/m²` : '£0.00/m²',
+                    description: data.description || 'Premium natural stone product',
+                    image: data.image || '',
+                    badge: data.badge || ''
+                });
+            });
+            
+            // Update product cards with animation
+            const productCards = container.querySelectorAll('.card');
+            products.forEach((product, index) => {
+                if (productCards[index]) {
+                    const card = productCards[index];
+                    const title = card.querySelector('h3');
+                    const price = card.querySelector('.price');
+                    const description = card.querySelector('p');
+                    const badge = card.querySelector('.product-badge');
+                    
+                    // Add animation delay
+                    card.style.animationDelay = `${index * 0.2}s`;
+                    
+                    if (title) title.textContent = product.name;
+                    if (price) price.textContent = product.price;
+                    if (description) {
+                        description.textContent = product.description.length > 80 
+                            ? product.description.substring(0, 80) + '...' 
+                            : product.description;
+                    }
+                    if (badge && product.badge) {
+                        badge.textContent = product.badge;
+                    } else if (badge && !product.badge) {
+                        badge.style.display = 'none';
+                    }
                 }
-                
-                const products = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    products.push({
-                        id: doc.id,
-                        name: data.name || data.stone_name || 'Stone Product',
-                        category: data.category || 'Stone',
-                        price: data.price || '£0.00',
-                        description: data.description || 'Premium natural stone',
-                        image: data.image || ''
-                    });
-                });
-                
-                // Display products
-                container.innerHTML = products.map(product => `
-                    <div class="radial-item" onclick="viewProduct('${product.id}')">
-                        <div class="radial-icon">
-                            ${product.category.includes('sandstone') ? 
-                                '<i class="fas fa-sun"></i>' : 
-                                '<i class="fas fa-layer-group"></i>'}
-                        </div>
-                        <h3>${product.name}</h3>
-                        <p>${product.description.substring(0, 80)}...</p>
-                        <div class="radial-price">${product.price}</div>
-                    </div>
-                `).join('');
-                
-            } catch (error) {
-                console.error('Error loading products:', error);
-                const container = document.getElementById('featuredProducts');
-                showFallbackProducts(container);
-            }
-        }
-
-        function showFallbackProducts(container) {
-            container.innerHTML = `
-                <div class="radial-item">
-                    <div class="radial-icon">
-                        <i class="fas fa-sun"></i>
-                    </div>
-                    <h3>Raj Green Sandstone</h3>
-                    <p>Premium green sandstone for outdoor applications with excellent durability</p>
-                    <div class="radial-price">£28.50/m²</div>
-                </div>
-                
-                <div class="radial-item">
-                    <div class="radial-icon">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
-                    <h3>Kota Blue Stone</h3>
-                    <p>Natural limestone flooring with elegant blue shades for modern interiors</p>
-                    <div class="radial-price">£32.50/m²</div>
-                </div>
-                
-                <div class="radial-item">
-                    <div class="radial-icon">
-                        <i class="fas fa-mountain"></i>
-                    </div>
-                    <h3>Autumn Brown</h3>
-                    <p>Warm brown sandstone perfect for garden paths and patio areas</p>
-                    <div class="radial-price">£26.75/m²</div>
-                </div>
-            `;
-        }
-
-        // View product details
-        window.viewProduct = function(productId) {
-            window.location.href = `product-detail.html?id=${productId}`;
-        };
-
-        // Initialize everything
-        document.addEventListener('DOMContentLoaded', function() {
-            createSunRays();
-            initTestimonialSlider();
-            loadProductsFromFirebase();
+            });
             
-            // Mobile menu
-            const mobileBtn = document.querySelector('.mobile-menu-btn');
-            const sunNav = document.querySelector('.sun-nav');
+        } catch (error) {
+            console.error('Error loading products:', error);
+        } finally {
+            loadingSpinner.style.display = 'none';
+        }
+    }
+    
+    // Search functionality
+    const searchInput = document.querySelector('.search-box input');
+    const searchIcon = document.querySelector('.search-box i');
+    
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchProducts(this.value);
+        }
+    });
+    
+    searchIcon.addEventListener('click', function() {
+        searchProducts(searchInput.value);
+    });
+    
+    function searchProducts(query) {
+        if (query.trim()) {
+            // Show loading
+            document.getElementById('loadingSpinner').style.display = 'block';
             
-            if (mobileBtn && sunNav) {
-                mobileBtn.addEventListener('click', function() {
-                    sunNav.style.display = sunNav.style.display === 'flex' ? 'none' : 'flex';
-                    sunNav.style.position = 'absolute';
-                    sunNav.style.top = '100%';
-                    sunNav.style.left = '0';
-                    sunNav.style.right = '0';
-                    sunNav.style.background = 'white';
-                    sunNav.style.flexDirection = 'column';
-                    sunNav.style.padding = '20px';
-                    sunNav.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
-                    sunNav.style.zIndex = '1000';
-                });
-            }
+            setTimeout(() => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                alert(`Searching for: ${query}`);
+                // Here you would implement actual search logic
+                // window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+            }, 1000);
+        }
+    }
+    
+    // Bottom navigation
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            const text = this.querySelector('span').textContent;
+            console.log(`Navigating to: ${text}`);
         });
-    </script>
+    });
+    
+    // Add to cart functionality
+    document.querySelectorAll('.btn-primary').forEach(button => {
+        button.addEventListener('click', function() {
+            const productName = this.closest('.card').querySelector('h3').textContent;
+            const productPrice = this.closest('.card').querySelector('.price').textContent;
+            
+            // Update cart badge
+            const cartBadge = document.querySelector('.cart-badge');
+            let count = parseInt(cartBadge.textContent);
+            count++;
+            cartBadge.textContent = count;
+            
+            // Show cart animation
+            cartBadge.style.transform = 'scale(1.5)';
+            setTimeout(() => {
+                cartBadge.style.transform = 'scale(1)';
+            }, 200);
+            
+            // Show confirmation
+            showNotification(`${productName} added to cart!`);
+        });
+    });
+    
+    // View details functionality
+    document.querySelectorAll('.btn-secondary').forEach(button => {
+        button.addEventListener('click', function() {
+            const productName = this.closest('.card').querySelector('h3').textContent;
+            console.log(`Viewing details for: ${productName}`);
+            // In real implementation, would redirect to product detail page
+        });
+    });
+    
+    // FAB click
+    document.querySelector('.fab').addEventListener('click', function() {
+        showNotification('Opening chat support...');
+        // In real implementation, would open chat widget
+    });
+    
+    // Banner button
+    document.querySelector('.banner-btn').addEventListener('click', function() {
+        showNotification('Learn more about our 30/70 payment plan!');
+        // In real implementation, would scroll to payment plan section
+    });
+    
+    // Sign in button
+    document.querySelector('.signin-btn').addEventListener('click', function() {
+        showNotification('Redirecting to sign in page...');
+        // In real implementation: window.location.href = 'login.html';
+    });
+    
+    // Notification function
+    function showNotification(message) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-gold);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            z-index: 9999;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 10);
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
+    }
+    
+    // Initialize with animations
+    document.addEventListener('DOMContentLoaded', function() {
+        loadProductsFromFirebase();
+        
+        // Add staggered animations
+        const cards = document.querySelectorAll('.cat-card, .stat-item');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // Hero text animation
+        const heroText = document.querySelector('.hero-content');
+        heroText.style.opacity = '0';
+        heroText.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            heroText.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+            heroText.style.opacity = '1';
+            heroText.style.transform = 'translateY(0)';
+        }, 300);
+    });
+</script>
 </body>
 </html>
