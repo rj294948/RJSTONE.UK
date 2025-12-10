@@ -1,28 +1,10 @@
 // ==============================================
-// firebase-config.js - Complete Firebase Setup
+// firebase-config.js - COMPLETE WITH AUTH & FIRESTORE
 // ==============================================
 
-// Core Firebase App
+// Firebase Core
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-
-// Analytics (optional)
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-analytics.js";
-
-// Authentication
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updateProfile,
-  updatePassword,
-  sendPasswordResetEmail,
-  GoogleAuthProvider,
-  signInWithPopup,
-  EmailAuthProvider,
-  reauthenticateWithCredential
-} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
 // Firestore Database
 import { 
@@ -49,19 +31,24 @@ import {
   increment
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-// Storage
-import { 
-  getStorage,
-  ref,
-  uploadBytes,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-  listAll
-} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-storage.js";
+// Authentication
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  updatePassword,
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup,
+  EmailAuthProvider,
+  reauthenticateWithCredential
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
 // ==============================================
-// Firebase Configuration
+// FIREBASE CONFIGURATION
 // ==============================================
 const firebaseConfig = {
   apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
@@ -74,190 +61,26 @@ const firebaseConfig = {
 };
 
 // ==============================================
-// Initialize Firebase Services
+// INITIALIZE FIREBASE
 // ==============================================
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
+const auth = getAuth(app);
 
 // Initialize Google Auth Provider
 const googleProvider = new GoogleAuthProvider();
-
-// ==============================================
-// Firestore Collection References
-// ==============================================
-const collections = {
-  users: () => collection(db, "users"),
-  products: () => collection(db, "products"),
-  categories: () => collection(db, "categories"),
-  orders: () => collection(db, "orders"),
-  cart: () => collection(db, "cart"),
-  wishlist: () => collection(db, "wishlist"),
-  addresses: () => collection(db, "addresses"),
-  payments: () => collection(db, "payments"),
-  shipping: () => collection(db, "shipping"),
-  reviews: () => collection(db, "reviews"),
-  settings: () => collection(db, "settings")
-};
-
-// ==============================================
-// Storage Paths
-// ==============================================
-const storagePaths = {
-  productImages: (productId, filename) => `products/${productId}/${filename}`,
-  userAvatars: (userId) => `users/${userId}/avatar.jpg`,
-  categoryImages: (categoryId) => `categories/${categoryId}.jpg`,
-  orderDocuments: (orderId, filename) => `orders/${orderId}/${filename}`
-};
-
-// ==============================================
-// Auth State Management
-// ==============================================
-let currentUser = null;
-let authStateListeners = [];
-
-// Watch auth state changes
-onAuthStateChanged(auth, (user) => {
-  currentUser = user;
-  
-  // Notify all listeners
-  authStateListeners.forEach(listener => {
-    listener(user);
-  });
-  
-  // Update UI if function exists
-  if (typeof updateAuthUI === 'function') {
-    updateAuthUI(user);
-  }
+googleProvider.setCustomParameters({
+  prompt: "select_account"
 });
 
-// Subscribe to auth state changes
-const subscribeToAuth = (callback) => {
-  authStateListeners.push(callback);
-  
-  // Return unsubscribe function
-  return () => {
-    const index = authStateListeners.indexOf(callback);
-    if (index > -1) {
-      authStateListeners.splice(index, 1);
-    }
-  };
-};
-
 // ==============================================
-// Database Helper Functions
-// ==============================================
-
-// Get document data by ID
-const getDocument = async (collectionName, docId) => {
-  try {
-    const docRef = doc(db, collectionName, docId);
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() };
-    } else {
-      console.log("No such document!");
-      return null;
-    }
-  } catch (error) {
-    console.error("Error getting document:", error);
-    throw error;
-  }
-};
-
-// Add document to collection
-const addDocument = async (collectionName, data) => {
-  try {
-    const docRef = await addDoc(collection(db, collectionName), {
-      ...data,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    return { id: docRef.id, ...data };
-  } catch (error) {
-    console.error("Error adding document:", error);
-    throw error;
-  }
-};
-
-// Update document
-const updateDocument = async (collectionName, docId, data) => {
-  try {
-    const docRef = doc(db, collectionName, docId);
-    await updateDoc(docRef, {
-      ...data,
-      updatedAt: serverTimestamp()
-    });
-    return { id: docId, ...data };
-  } catch (error) {
-    console.error("Error updating document:", error);
-    throw error;
-  }
-};
-
-// Delete document
-const deleteDocument = async (collectionName, docId) => {
-  try {
-    const docRef = doc(db, collectionName, docId);
-    await deleteDoc(docRef);
-    return true;
-  } catch (error) {
-    console.error("Error deleting document:", error);
-    throw error;
-  }
-};
-
-// Query documents
-const queryDocuments = async (collectionName, constraints = []) => {
-  try {
-    const q = query(collection(db, collectionName), ...constraints);
-    const querySnapshot = await getDocs(q);
-    
-    const results = [];
-    querySnapshot.forEach((doc) => {
-      results.push({ id: doc.id, ...doc.data() });
-    });
-    
-    return results;
-  } catch (error) {
-    console.error("Error querying documents:", error);
-    throw error;
-  }
-};
-
-// Listen to real-time updates
-const listenToCollection = (collectionName, constraints, callback) => {
-  try {
-    const q = query(collection(db, collectionName), ...constraints);
-    
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const results = [];
-      querySnapshot.forEach((doc) => {
-        results.push({ id: doc.id, ...doc.data() });
-      });
-      callback(results);
-    }, (error) => {
-      console.error("Error in real-time listener:", error);
-    });
-    
-    return unsubscribe;
-  } catch (error) {
-    console.error("Error setting up real-time listener:", error);
-    throw error;
-  }
-};
-
-// ==============================================
-// User Management Functions
+// AUTHENTICATION FUNCTIONS
 // ==============================================
 
 // Register new user
 const registerUser = async (email, password, userData) => {
   try {
-    // Create auth user
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
@@ -272,25 +95,31 @@ const registerUser = async (email, password, userData) => {
     const userDoc = {
       uid: user.uid,
       email: user.email,
-      displayName: userData.displayName || '',
+      displayName: userData.displayName || userData.name || '',
       phone: userData.phone || '',
       createdAt: serverTimestamp(),
       lastLogin: serverTimestamp(),
       role: 'customer',
-      shippingAddress: null,
-      billingAddress: null,
+      address: userData.address || null,
+      city: userData.city || '',
+      postcode: userData.postcode || '',
+      country: 'UK',
       preferences: {
-        newsletter: true,
-        marketing: false
+        newsletter: userData.newsletter || true,
+        marketing: userData.marketing || false
       }
     };
     
     await setDoc(doc(db, "users", user.uid), userDoc);
     
-    return user;
+    return { success: true, user: user };
   } catch (error) {
     console.error("Registration error:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message,
+      errorCode: error.code 
+    };
   }
 };
 
@@ -305,14 +134,18 @@ const loginUser = async (email, password) => {
       lastLogin: serverTimestamp()
     });
     
-    return user;
+    return { success: true, user: user };
   } catch (error) {
     console.error("Login error:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message,
+      errorCode: error.code 
+    };
   }
 };
 
-// Google sign-in
+// Google Sign-in
 const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
@@ -342,10 +175,14 @@ const signInWithGoogle = async () => {
       });
     }
     
-    return user;
+    return { success: true, user: user };
   } catch (error) {
     console.error("Google sign-in error:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message,
+      errorCode: error.code 
+    };
   }
 };
 
@@ -353,35 +190,61 @@ const signInWithGoogle = async () => {
 const logoutUser = async () => {
   try {
     await signOut(auth);
-    return true;
+    return { success: true };
   } catch (error) {
     console.error("Logout error:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message 
+    };
   }
 };
 
-// Update user profile
-const updateUserProfile = async (userId, updates) => {
+// Get current user
+const getCurrentUser = () => {
+  return auth.currentUser;
+};
+
+// Check if user is logged in
+const isUserLoggedIn = () => {
+  return auth.currentUser !== null;
+};
+
+// Password reset
+const resetPassword = async (email) => {
   try {
-    await updateDoc(doc(db, "users", userId), {
-      ...updates,
-      updatedAt: serverTimestamp()
-    });
-    return true;
+    await sendPasswordResetEmail(auth, email);
+    return { success: true };
   } catch (error) {
-    console.error("Profile update error:", error);
-    throw error;
+    console.error("Password reset error:", error);
+    return { 
+      success: false, 
+      error: error.message 
+    };
   }
 };
 
-// Get current user data
-const getCurrentUserData = async () => {
-  if (!currentUser) return null;
-  
+// ==============================================
+// USER PROFILE FUNCTIONS
+// ==============================================
+
+// Get user data
+const getUserData = async (userId = null) => {
   try {
-    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+    const uid = userId || auth.currentUser?.uid;
+    if (!uid) return null;
+    
+    const userDoc = await getDoc(doc(db, "users", uid));
+    
     if (userDoc.exists()) {
-      return { id: userDoc.id, ...userDoc.data() };
+      const data = userDoc.data();
+      return {
+        id: userDoc.id,
+        ...data,
+        // Convert timestamps if needed
+        createdAt: data.createdAt?.toDate() || null,
+        lastLogin: data.lastLogin?.toDate() || null
+      };
     }
     return null;
   } catch (error) {
@@ -390,17 +253,48 @@ const getCurrentUserData = async () => {
   }
 };
 
+// Update user profile
+const updateUserProfile = async (updates) => {
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user logged in");
+    
+    // Update in Firebase Auth
+    if (updates.displayName) {
+      await updateProfile(user, {
+        displayName: updates.displayName
+      });
+    }
+    
+    // Update in Firestore
+    const userUpdates = { ...updates };
+    delete userUpdates.email; // Can't change email directly
+    
+    await updateDoc(doc(db, "users", user.uid), {
+      ...userUpdates,
+      updatedAt: serverTimestamp()
+    });
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Profile update error:", error);
+    return { 
+      success: false, 
+      error: error.message 
+    };
+  }
+};
+
 // ==============================================
-// Product Management Functions
+// PRODUCT FUNCTIONS (Based on your data structure)
 // ==============================================
 
-// Get featured products
-const getFeaturedProducts = async (limitCount = 6) => {
+// Get all products
+const getAllProducts = async (limitCount = 50) => {
   try {
     const q = query(
-      collections.products(),
-      where("featured", "==", true),
-      orderBy("createdAt", "desc"),
+      collection(db, "products"),
+      orderBy("created_at", "desc"),
       limit(limitCount)
     );
     
@@ -408,23 +302,88 @@ const getFeaturedProducts = async (limitCount = 6) => {
     const products = [];
     
     querySnapshot.forEach((doc) => {
-      products.push({ id: doc.id, ...doc.data() });
+      const data = doc.data();
+      products.push({
+        id: doc.id,
+        name: data.name || data.stone_name || 'Stone Product',
+        stone_name: data.stone_name || data.name || '',
+        category: data.category || '',
+        type: data.type || 'Natural Stone',
+        color: data.color || '',
+        price: data.price || '£0.00',
+        price_unit: data.price_unit || 'sqft',
+        description: data.description || '',
+        image: data.image || '',
+        size: data.size || '',
+        thickness: data.thickness || '',
+        finish: data.finish || 'Natural',
+        usage: data.usage || '',
+        density: data.density || '',
+        compressive_strength: data.compressive_strength || '',
+        water_absorption: data.water_absorption || '',
+        status: data.status || 'active',
+        created_at: data.created_at?.toDate() || null
+      });
     });
     
-    return products;
+    return { success: true, products: products };
+  } catch (error) {
+    console.error("Error getting products:", error);
+    return { 
+      success: false, 
+      error: error.message,
+      products: [] 
+    };
+  }
+};
+
+// Get featured products (active status)
+const getFeaturedProducts = async (limitCount = 8) => {
+  try {
+    const q = query(
+      collection(db, "products"),
+      where("status", "==", "active"),
+      orderBy("created_at", "desc"),
+      limit(limitCount)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const products = [];
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      products.push({
+        id: doc.id,
+        name: data.name || data.stone_name || 'Stone Product',
+        stone_name: data.stone_name || '',
+        category: data.category || '',
+        price: data.price || '£0.00',
+        description: data.description || '',
+        image: data.image || '',
+        color: data.color || '',
+        size: data.size || ''
+      });
+    });
+    
+    return { success: true, products: products };
   } catch (error) {
     console.error("Error getting featured products:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message,
+      products: [] 
+    };
   }
 };
 
 // Get products by category
-const getProductsByCategory = async (category, limitCount = 12) => {
+const getProductsByCategory = async (category, limitCount = 20) => {
   try {
     const q = query(
-      collections.products(),
+      collection(db, "products"),
       where("category", "==", category),
-      orderBy("createdAt", "desc"),
+      where("status", "==", "active"),
+      orderBy("created_at", "desc"),
       limit(limitCount)
     );
     
@@ -432,13 +391,29 @@ const getProductsByCategory = async (category, limitCount = 12) => {
     const products = [];
     
     querySnapshot.forEach((doc) => {
-      products.push({ id: doc.id, ...doc.data() });
+      const data = doc.data();
+      products.push({
+        id: doc.id,
+        name: data.name || data.stone_name || 'Stone Product',
+        stone_name: data.stone_name || '',
+        category: data.category || '',
+        price: data.price || '£0.00',
+        description: data.description || '',
+        image: data.image || '',
+        color: data.color || '',
+        size: data.size || '',
+        thickness: data.thickness || ''
+      });
     });
     
-    return products;
+    return { success: true, products: products };
   } catch (error) {
     console.error("Error getting products by category:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message,
+      products: [] 
+    };
   }
 };
 
@@ -448,39 +423,143 @@ const getProductById = async (productId) => {
     const productDoc = await getDoc(doc(db, "products", productId));
     
     if (productDoc.exists()) {
-      return { id: productDoc.id, ...productDoc.data() };
+      const data = productDoc.data();
+      return {
+        success: true,
+        product: {
+          id: productDoc.id,
+          name: data.name || data.stone_name || 'Stone Product',
+          stone_name: data.stone_name || '',
+          category: data.category || '',
+          type: data.type || 'Natural Stone',
+          color: data.color || '',
+          price: data.price || '£0.00',
+          price_unit: data.price_unit || 'sqft',
+          description: data.description || '',
+          image: data.image || '',
+          size: data.size || '',
+          thickness: data.thickness || '',
+          finish: data.finish || 'Natural',
+          usage: data.usage || '',
+          density: data.density || '',
+          compressive_strength: data.compressive_strength || '',
+          water_absorption: data.water_absorption || '',
+          status: data.status || 'active',
+          created_at: data.created_at?.toDate() || null
+        }
+      };
     } else {
-      throw new Error("Product not found");
+      return { 
+        success: false, 
+        error: "Product not found" 
+      };
     }
   } catch (error) {
     console.error("Error getting product:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message 
+    };
+  }
+};
+
+// Search products
+const searchProducts = async (searchTerm, limitCount = 20) => {
+  try {
+    // Get all products first (Firebase doesn't support full-text search natively)
+    const q = query(
+      collection(db, "products"),
+      where("status", "==", "active"),
+      orderBy("name"),
+      limit(50)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const products = [];
+    const searchLower = searchTerm.toLowerCase();
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const name = data.name || data.stone_name || '';
+      const category = data.category || '';
+      const description = data.description || '';
+      const color = data.color || '';
+      
+      // Simple client-side search
+      if (name.toLowerCase().includes(searchLower) ||
+          category.toLowerCase().includes(searchLower) ||
+          description.toLowerCase().includes(searchLower) ||
+          color.toLowerCase().includes(searchLower)) {
+        
+        products.push({
+          id: doc.id,
+          name: name,
+          stone_name: data.stone_name || '',
+          category: category,
+          price: data.price || '£0.00',
+          description: description,
+          image: data.image || '',
+          color: color
+        });
+      }
+    });
+    
+    // Limit results
+    const limitedProducts = products.slice(0, limitCount);
+    
+    return { success: true, products: limitedProducts };
+  } catch (error) {
+    console.error("Error searching products:", error);
+    return { 
+      success: false, 
+      error: error.message,
+      products: [] 
+    };
   }
 };
 
 // ==============================================
-// Cart Management Functions
+// CART FUNCTIONS
 // ==============================================
 
 // Add to cart
-const addToCart = async (productId, quantity = 1) => {
-  if (!currentUser) {
-    throw new Error("User must be logged in to add to cart");
-  }
-  
+const addToCart = async (productId, quantity = 1, productData = null) => {
   try {
+    const user = auth.currentUser;
+    if (!user) {
+      // Save to localStorage if not logged in
+      const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
+      const existingIndex = cart.findIndex(item => item.productId === productId);
+      
+      if (existingIndex > -1) {
+        cart[existingIndex].quantity += quantity;
+      } else {
+        cart.push({
+          productId: productId,
+          quantity: quantity,
+          productData: productData || {},
+          addedAt: new Date().toISOString()
+        });
+      }
+      
+      localStorage.setItem('irya_cart', JSON.stringify(cart));
+      return { success: true, isLocal: true };
+    }
+    
+    // User is logged in - save to Firestore
     const cartItem = {
-      userId: currentUser.uid,
+      userId: user.uid,
       productId: productId,
       quantity: quantity,
+      productData: productData || null,
       addedAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
     
     // Check if item already exists in cart
     const q = query(
-      collections.cart(),
-      where("userId", "==", currentUser.uid),
+      collection(db, "cart"),
+      where("userId", "==", user.uid),
       where("productId", "==", productId)
     );
     
@@ -496,153 +575,246 @@ const addToCart = async (productId, quantity = 1) => {
         updatedAt: serverTimestamp()
       });
       
-      return { id: existingDoc.id, ...existingData, quantity: existingData.quantity + quantity };
+      return { 
+        success: true, 
+        cartItemId: existingDoc.id,
+        isLocal: false 
+      };
     } else {
       // Add new item
-      const docRef = await addDoc(collections.cart(), cartItem);
-      return { id: docRef.id, ...cartItem };
+      const docRef = await addDoc(collection(db, "cart"), cartItem);
+      return { 
+        success: true, 
+        cartItemId: docRef.id,
+        isLocal: false 
+      };
     }
   } catch (error) {
     console.error("Error adding to cart:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message 
+    };
   }
 };
 
-// Get user's cart items
+// Get cart items
 const getCartItems = async () => {
-  if (!currentUser) return [];
-  
   try {
+    const user = auth.currentUser;
+    
+    if (!user) {
+      // Get from localStorage
+      const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
+      return { success: true, items: cart, isLocal: true };
+    }
+    
+    // Get from Firestore
     const q = query(
-      collections.cart(),
-      where("userId", "==", currentUser.uid),
-      orderBy("addedAt", "desc")
+      collection(db, "cart"),
+      where("userId", "==", user.uid)
     );
     
     const querySnapshot = await getDocs(q);
     const cartItems = [];
     
     for (const cartDoc of querySnapshot.docs) {
-      const cartItem = { id: cartDoc.id, ...cartDoc.data() };
+      const cartItem = { 
+        id: cartDoc.id, 
+        ...cartDoc.data() 
+      };
       
-      // Get product details
-      try {
-        const productDoc = await getDoc(doc(db, "products", cartItem.productId));
-        if (productDoc.exists()) {
-          cartItem.product = { id: productDoc.id, ...productDoc.data() };
+      // Get product details if not already in productData
+      if (!cartItem.productData) {
+        try {
+          const productDoc = await getDoc(doc(db, "products", cartItem.productId));
+          if (productDoc.exists()) {
+            cartItem.productData = productDoc.data();
+          }
+        } catch (error) {
+          console.error("Error getting product details:", error);
         }
-      } catch (error) {
-        console.error("Error getting product details:", error);
       }
       
       cartItems.push(cartItem);
     }
     
-    return cartItems;
+    return { success: true, items: cartItems, isLocal: false };
   } catch (error) {
     console.error("Error getting cart items:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message,
+      items: [] 
+    };
   }
 };
 
 // Update cart item quantity
 const updateCartItemQuantity = async (cartItemId, quantity) => {
   try {
+    const user = auth.currentUser;
+    
+    if (!user) {
+      // Update in localStorage
+      const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
+      const itemIndex = cart.findIndex(item => item.id === cartItemId);
+      
+      if (itemIndex > -1) {
+        cart[itemIndex].quantity = quantity;
+        localStorage.setItem('irya_cart', JSON.stringify(cart));
+        return { success: true, isLocal: true };
+      }
+      return { success: false, error: "Item not found" };
+    }
+    
+    // Update in Firestore
     await updateDoc(doc(db, "cart", cartItemId), {
       quantity: quantity,
       updatedAt: serverTimestamp()
     });
     
-    return true;
+    return { success: true, isLocal: false };
   } catch (error) {
     console.error("Error updating cart quantity:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message 
+    };
   }
 };
 
 // Remove from cart
 const removeFromCart = async (cartItemId) => {
   try {
+    const user = auth.currentUser;
+    
+    if (!user) {
+      // Remove from localStorage
+      const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
+      const newCart = cart.filter(item => item.id !== cartItemId);
+      localStorage.setItem('irya_cart', JSON.stringify(newCart));
+      return { success: true, isLocal: true };
+    }
+    
+    // Remove from Firestore
     await deleteDoc(doc(db, "cart", cartItemId));
-    return true;
+    
+    return { success: true, isLocal: false };
   } catch (error) {
     console.error("Error removing from cart:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message 
+    };
   }
 };
 
 // Clear cart
 const clearCart = async () => {
-  if (!currentUser) return false;
-  
   try {
-    const q = query(collections.cart(), where("userId", "==", currentUser.uid));
-    const querySnapshot = await getDocs(q);
+    const user = auth.currentUser;
     
+    if (!user) {
+      // Clear localStorage
+      localStorage.setItem('irya_cart', '[]');
+      return { success: true, isLocal: true };
+    }
+    
+    // Clear from Firestore
+    const q = query(
+      collection(db, "cart"),
+      where("userId", "==", user.uid)
+    );
+    
+    const querySnapshot = await getDocs(q);
     const batch = writeBatch(db);
+    
     querySnapshot.forEach((doc) => {
       batch.delete(doc.ref);
     });
     
     await batch.commit();
-    return true;
+    
+    return { success: true, isLocal: false };
   } catch (error) {
     console.error("Error clearing cart:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message 
+    };
   }
 };
 
 // ==============================================
-// Order Management Functions
+// ORDER FUNCTIONS
 // ==============================================
 
-// Create new order
+// Create order
 const createOrder = async (orderData) => {
-  if (!currentUser) {
-    throw new Error("User must be logged in to create order");
-  }
-  
   try {
-    const orderNumber = generateOrderNumber();
+    const user = auth.currentUser;
+    if (!user) {
+      return { 
+        success: false, 
+        error: "Please login to create an order" 
+      };
+    }
+    
+    // Generate order number
+    const orderNumber = 'IRYA-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
     
     const order = {
       orderNumber: orderNumber,
-      userId: currentUser.uid,
-      items: orderData.items,
-      subtotal: orderData.subtotal,
-      vat: orderData.vat,
-      shipping: orderData.shipping,
-      total: orderData.total,
-      deposit: orderData.deposit,
-      balance: orderData.balance,
-      shippingAddress: orderData.shippingAddress,
-      billingAddress: orderData.billingAddress || orderData.shippingAddress,
-      status: 'pending_payment',
-      paymentMethod: null,
-      depositPaid: false,
-      balancePaid: false,
+      userId: user.uid,
+      customerName: orderData.customerName || user.displayName,
+      customerEmail: orderData.customerEmail || user.email,
+      customerPhone: orderData.customerPhone || '',
+      items: orderData.items || [],
+      subtotal: orderData.subtotal || 0,
+      vat: orderData.vat || 0,
+      shipping: orderData.shipping || 0,
+      total: orderData.total || 0,
+      deposit: orderData.deposit || 0,
+      balance: orderData.balance || 0,
+      shippingAddress: orderData.shippingAddress || {},
+      billingAddress: orderData.billingAddress || orderData.shippingAddress || {},
+      status: 'pending',
+      paymentStatus: 'pending',
       notes: orderData.notes || '',
-      estimatedDelivery: orderData.estimatedDelivery,
+      estimatedDelivery: orderData.estimatedDelivery || '',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
     
-    const docRef = await addDoc(collections.orders(), order);
-    return { id: docRef.id, ...order };
+    const docRef = await addDoc(collection(db, "orders"), order);
+    
+    // Clear cart after successful order
+    await clearCart();
+    
+    return { 
+      success: true, 
+      orderId: docRef.id,
+      orderNumber: orderNumber
+    };
   } catch (error) {
     console.error("Error creating order:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message 
+    };
   }
 };
 
-// Get user's orders
+// Get user orders
 const getUserOrders = async () => {
-  if (!currentUser) return [];
-  
   try {
+    const user = auth.currentUser;
+    if (!user) return { success: false, error: "Not logged in", orders: [] };
+    
     const q = query(
-      collections.orders(),
-      where("userId", "==", currentUser.uid),
+      collection(db, "orders"),
+      where("userId", "==", user.uid),
       orderBy("createdAt", "desc")
     );
     
@@ -650,146 +822,287 @@ const getUserOrders = async () => {
     const orders = [];
     
     querySnapshot.forEach((doc) => {
-      orders.push({ id: doc.id, ...doc.data() });
+      const data = doc.data();
+      orders.push({
+        id: doc.id,
+        orderNumber: data.orderNumber,
+        status: data.status,
+        total: data.total,
+        items: data.items,
+        createdAt: data.createdAt?.toDate() || null,
+        estimatedDelivery: data.estimatedDelivery || ''
+      });
     });
     
-    return orders;
+    return { success: true, orders: orders };
   } catch (error) {
     console.error("Error getting orders:", error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message,
+      orders: [] 
+    };
   }
 };
 
-// Update order status
-const updateOrderStatus = async (orderId, status, updates = {}) => {
+// ==============================================
+// WISHLIST FUNCTIONS
+// ==============================================
+
+// Add to wishlist
+const addToWishlist = async (productId) => {
   try {
-    await updateDoc(doc(db, "orders", orderId), {
-      status: status,
-      ...updates,
-      updatedAt: serverTimestamp()
+    const user = auth.currentUser;
+    if (!user) {
+      // Save to localStorage
+      const wishlist = JSON.parse(localStorage.getItem('irya_wishlist') || '[]');
+      if (!wishlist.includes(productId)) {
+        wishlist.push(productId);
+        localStorage.setItem('irya_wishlist', JSON.stringify(wishlist));
+      }
+      return { success: true, isLocal: true };
+    }
+    
+    // Save to Firestore
+    const wishlistItem = {
+      userId: user.uid,
+      productId: productId,
+      addedAt: serverTimestamp()
+    };
+    
+    // Check if already in wishlist
+    const q = query(
+      collection(db, "wishlist"),
+      where("userId", "==", user.uid),
+      where("productId", "==", productId)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      await addDoc(collection(db, "wishlist"), wishlistItem);
+    }
+    
+    return { success: true, isLocal: false };
+  } catch (error) {
+    console.error("Error adding to wishlist:", error);
+    return { 
+      success: false, 
+      error: error.message 
+    };
+  }
+};
+
+// Get wishlist
+const getWishlist = async () => {
+  try {
+    const user = auth.currentUser;
+    
+    if (!user) {
+      // Get from localStorage
+      const wishlist = JSON.parse(localStorage.getItem('irya_wishlist') || '[]');
+      return { success: true, items: wishlist, isLocal: true };
+    }
+    
+    // Get from Firestore
+    const q = query(
+      collection(db, "wishlist"),
+      where("userId", "==", user.uid)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const wishlistItems = [];
+    
+    querySnapshot.forEach((doc) => {
+      wishlistItems.push(doc.data().productId);
     });
     
-    return true;
+    return { success: true, items: wishlistItems, isLocal: false };
   } catch (error) {
-    console.error("Error updating order status:", error);
-    throw error;
+    console.error("Error getting wishlist:", error);
+    return { 
+      success: false, 
+      error: error.message,
+      items: [] 
+    };
   }
 };
 
-// ==============================================
-// Storage Functions
-// ==============================================
-
-// Upload image to storage
-const uploadImage = async (file, path) => {
+// Remove from wishlist
+const removeFromWishlist = async (productId) => {
   try {
-    const storageRef = ref(storage, path);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+    const user = auth.currentUser;
     
-    return new Promise((resolve, reject) => {
-      uploadTask.on('state_changed',
-        (snapshot) => {
-          // Progress tracking
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log('Upload is ' + progress + '% done');
-        },
-        (error) => {
-          console.error("Upload error:", error);
-          reject(error);
-        },
-        async () => {
-          // Upload complete
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve(downloadURL);
-        }
-      );
-    });
+    if (!user) {
+      // Remove from localStorage
+      const wishlist = JSON.parse(localStorage.getItem('irya_wishlist') || '[]');
+      const newWishlist = wishlist.filter(id => id !== productId);
+      localStorage.setItem('irya_wishlist', JSON.stringify(newWishlist));
+      return { success: true, isLocal: true };
+    }
+    
+    // Remove from Firestore
+    const q = query(
+      collection(db, "wishlist"),
+      where("userId", "==", user.uid),
+      where("productId", "==", productId)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      await deleteDoc(doc(db, "wishlist", querySnapshot.docs[0].id));
+    }
+    
+    return { success: true, isLocal: false };
   } catch (error) {
-    console.error("Error uploading image:", error);
-    throw error;
+    console.error("Error removing from wishlist:", error);
+    return { 
+      success: false, 
+      error: error.message 
+    };
   }
 };
 
-// Upload product image
-const uploadProductImage = async (productId, file) => {
-  const filename = `${Date.now()}_${file.name}`;
-  const path = storagePaths.productImages(productId, filename);
-  return uploadImage(file, path);
+// ==============================================
+// UTILITY FUNCTIONS
+// ==============================================
+
+// Calculate totals
+const calculateCartTotal = (items) => {
+  let subtotal = 0;
+  
+  items.forEach(item => {
+    const price = parseFloat(item.productData?.price?.replace('£', '') || 0);
+    subtotal += price * item.quantity;
+  });
+  
+  const vat = subtotal * 0.20; // 20% VAT
+  const total = subtotal + vat;
+  const deposit = total * 0.30; // 30% deposit
+  const balance = total * 0.70; // 70% balance
+  
+  return {
+    subtotal: parseFloat(subtotal.toFixed(2)),
+    vat: parseFloat(vat.toFixed(2)),
+    total: parseFloat(total.toFixed(2)),
+    deposit: parseFloat(deposit.toFixed(2)),
+    balance: parseFloat(balance.toFixed(2))
+  };
+};
+
+// Format price
+const formatPrice = (price) => {
+  if (typeof price === 'string' && price.startsWith('£')) {
+    return price;
+  }
+  return `£${parseFloat(price).toFixed(2)}`;
+};
+
+// Sync localStorage cart with Firestore on login
+const syncCartOnLogin = async () => {
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    const localCart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
+    
+    if (localCart.length > 0) {
+      // Move local cart to Firestore
+      for (const item of localCart) {
+        await addToCart(item.productId, item.quantity, item.productData);
+      }
+      
+      // Clear localStorage cart
+      localStorage.removeItem('irya_cart');
+    }
+    
+    // Sync wishlist
+    const localWishlist = JSON.parse(localStorage.getItem('irya_wishlist') || '[]');
+    
+    if (localWishlist.length > 0) {
+      for (const productId of localWishlist) {
+        await addToWishlist(productId);
+      }
+      
+      localStorage.removeItem('irya_wishlist');
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error syncing cart:", error);
+    return { success: false, error: error.message };
+  }
 };
 
 // ==============================================
-// Utility Functions
+// AUTH STATE LISTENER
 // ==============================================
 
-// Generate order number
-const generateOrderNumber = () => {
-  const prefix = 'STONE';
-  const timestamp = Date.now().toString().slice(-6);
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  return `${prefix}-${timestamp}-${random}`;
-};
+let authStateListeners = [];
 
-// Calculate VAT (20% UK VAT)
-const calculateVAT = (amount) => {
-  return parseFloat((amount * 0.20).toFixed(2));
-};
+// Listen to auth state changes
+onAuthStateChanged(auth, (user) => {
+  // Notify all listeners
+  authStateListeners.forEach(listener => {
+    try {
+      listener(user);
+    } catch (error) {
+      console.error("Auth listener error:", error);
+    }
+  });
+  
+  // Sync cart when user logs in
+  if (user) {
+    setTimeout(() => {
+      syncCartOnLogin();
+    }, 1000);
+  }
+});
 
-// Calculate deposit (30%)
-const calculateDeposit = (total) => {
-  return parseFloat((total * 0.30).toFixed(2));
-};
-
-// Calculate balance (70%)
-const calculateBalance = (total) => {
-  return parseFloat((total * 0.70).toFixed(2));
-};
-
-// Format currency
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency: 'GBP'
-  }).format(amount);
+// Subscribe to auth state changes
+const subscribeToAuth = (callback) => {
+  authStateListeners.push(callback);
+  
+  // Return unsubscribe function
+  return () => {
+    const index = authStateListeners.indexOf(callback);
+    if (index > -1) {
+      authStateListeners.splice(index, 1);
+    }
+  };
 };
 
 // ==============================================
-// Export Everything
+// EXPORT ALL FUNCTIONS
 // ==============================================
+
 export {
-  // Firebase services
+  // Firebase instances
   app,
-  analytics,
-  auth,
   db,
-  storage,
+  auth,
   
-  // Collections
-  collections,
-  storagePaths,
-  
-  // Auth
-  currentUser,
-  subscribeToAuth,
+  // Authentication
   registerUser,
   loginUser,
   signInWithGoogle,
   logoutUser,
-  updateUserProfile,
-  getCurrentUserData,
-  sendPasswordResetEmail,
+  getCurrentUser,
+  isUserLoggedIn,
+  resetPassword,
+  subscribeToAuth,
   
-  // Database helpers
-  getDocument,
-  addDocument,
-  updateDocument,
-  deleteDocument,
-  queryDocuments,
-  listenToCollection,
+  // User Profile
+  getUserData,
+  updateUserProfile,
   
   // Products
+  getAllProducts,
   getFeaturedProducts,
   getProductsByCategory,
   getProductById,
+  searchProducts,
   
   // Cart
   addToCart,
@@ -801,35 +1114,14 @@ export {
   // Orders
   createOrder,
   getUserOrders,
-  updateOrderStatus,
   
-  // Storage
-  uploadImage,
-  uploadProductImage,
+  // Wishlist
+  addToWishlist,
+  getWishlist,
+  removeFromWishlist,
   
   // Utilities
-  generateOrderNumber,
-  calculateVAT,
-  calculateDeposit,
-  calculateBalance,
-  formatCurrency,
-  
-  // Firestore functions
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  serverTimestamp,
-  onSnapshot,
-  writeBatch,
-  arrayUnion,
-  arrayRemove,
-  increment
+  calculateCartTotal,
+  formatPrice,
+  syncCartOnLogin
 };
