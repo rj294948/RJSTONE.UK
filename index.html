@@ -11,6 +11,11 @@
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- Firebase SDK (Legacy Version for Compatibility) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
 <style>
 :root {
     --primary-gold: #c9a227;
@@ -1099,15 +1104,19 @@ header.scrolled {
 
 <script>
     // Global variables
-    let firebaseLoaded = false;
+    let firebaseInitialized = false;
+    let firebaseApp = null;
+    let firebaseDB = null;
+    let firebaseAuth = null;
     
     // Initialize Firebase
-    async function initializeFirebase() {
+    function initializeFirebase() {
         try {
-            // Check if Firebase is already loaded
+            // Check if Firebase scripts are loaded
             if (typeof firebase === 'undefined') {
-                // Load Firebase dynamically
-                await loadFirebaseScripts();
+                console.error('Firebase scripts not loaded');
+                showError('Firebase not loaded. Check internet connection.');
+                return false;
             }
             
             // Firebase configuration
@@ -1122,15 +1131,13 @@ header.scrolled {
             };
             
             // Initialize Firebase
-            const app = firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore();
-            const auth = firebase.auth();
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            firebaseDB = firebase.firestore();
+            firebaseAuth = firebase.auth();
             
-            // Make available globally
-            window.firebaseApp = { app, db, auth };
-            firebaseLoaded = true;
-            
+            firebaseInitialized = true;
             console.log('Firebase initialized successfully');
+            
             return true;
             
         } catch (error) {
@@ -1138,36 +1145,6 @@ header.scrolled {
             showError('Firebase initialization failed. Using default data.');
             return false;
         }
-    }
-    
-    // Load Firebase scripts dynamically
-    function loadFirebaseScripts() {
-        return new Promise((resolve, reject) => {
-            // Check if already loaded
-            if (typeof firebase !== 'undefined') {
-                resolve();
-                return;
-            }
-            
-            // Load Firebase scripts
-            const script1 = document.createElement('script');
-            script1.src = 'https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js';
-            script1.onload = () => {
-                const script2 = document.createElement('script');
-                script2.src = 'https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js';
-                script2.onload = () => {
-                    const script3 = document.createElement('script');
-                    script3.src = 'https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js';
-                    script3.onload = resolve;
-                    script3.onerror = reject;
-                    document.head.appendChild(script3);
-                };
-                script2.onerror = reject;
-                document.head.appendChild(script2);
-            };
-            script1.onerror = reject;
-            document.head.appendChild(script1);
-        });
     }
     
     // Header Hide/Show on Scroll
@@ -1222,7 +1199,7 @@ header.scrolled {
         });
     });
     
-    // Load products from Firebase (WITHOUT INDEX ERROR)
+    // Load products from Firebase (SIMPLE VERSION)
     async function loadProductsFromFirebase() {
         const loadingSpinner = document.getElementById('loadingSpinner');
         const container = document.getElementById('productGrid');
@@ -1236,21 +1213,16 @@ header.scrolled {
             loadingSpinner.style.display = 'block';
             
             // Initialize Firebase if not already done
-            if (!firebaseLoaded) {
-                const initialized = await initializeFirebase();
+            if (!firebaseInitialized) {
+                const initialized = initializeFirebase();
                 if (!initialized) {
                     showDefaultProducts();
                     return;
                 }
             }
             
-            const { db } = window.firebaseApp;
-            
-            // SIMPLE QUERY - NO COMPLEX WHERE CLAUSES THAT NEED INDEXES
-            // This query doesn't need an index
-            const querySnapshot = await db.collection("products")
-                .limit(8)  // Just limit, no orderBy or where that needs index
-                .get();
+            // Try to get products from Firebase
+            const querySnapshot = await firebaseDB.collection("products").limit(8).get();
             
             if (querySnapshot.empty) {
                 showDefaultProducts();
@@ -1278,8 +1250,7 @@ header.scrolled {
                     density: data.density || '',
                     compressive_strength: data.compressive_strength || '',
                     water_absorption: data.water_absorption || '',
-                    status: data.status || 'active',
-                    created_at: data.created_at?.toDate() || null
+                    status: data.status || 'active'
                 });
             });
             
@@ -1287,97 +1258,41 @@ header.scrolled {
             displayProducts(products);
             
         } catch (error) {
-            console.error('Error loading products:', error);
+            console.error('Error loading products from Firebase:', error);
             
-            // Check if it's an index error
-            if (error.message && error.message.includes('index')) {
-                showError('Firebase index required. Please create the index in Firebase Console.');
-            }
-            
-            showDefaultProducts();
-        } finally {
-            loadingSpinner.style.display = 'none';
-        }
-    }
-    
-    // Alternative method - Get all products and filter locally
-    async function loadAllProductsAndFilter() {
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const container = document.getElementById('productGrid');
-        
-        if (!container) {
-            showDefaultProducts();
-            return;
-        }
-        
-        try {
-            loadingSpinner.style.display = 'block';
-            
-            // Initialize Firebase if not already done
-            if (!firebaseLoaded) {
-                const initialized = await initializeFirebase();
-                if (!initialized) {
-                    showDefaultProducts();
-                    return;
-                }
-            }
-            
-            const { db } = window.firebaseApp;
-            
-            // Get ALL products without any filtering
-            const querySnapshot = await db.collection("products").get();
-            
-            if (querySnapshot.empty) {
-                showDefaultProducts();
-                return;
-            }
-            
-            const products = [];
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                // Filter locally for active products
-                if (data.status === 'active') {
-                    products.push({
-                        id: doc.id,
-                        name: data.name || data.stone_name || 'Stone Product',
-                        stone_name: data.stone_name || '',
-                        category: data.category || '',
-                        type: data.type || 'Natural Stone',
-                        color: data.color || '',
-                        price: data.price || '£0.00',
-                        price_unit: data.price_unit || 'sqft',
-                        description: data.description || 'Premium natural stone product',
-                        image: data.image || '',
-                        size: data.size || '',
-                        thickness: data.thickness || '',
-                        finish: data.finish || 'Natural',
-                        usage: data.usage || '',
-                        density: data.density || '',
-                        compressive_strength: data.compressive_strength || '',
-                        water_absorption: data.water_absorption || '',
-                        status: data.status || 'active',
-                        created_at: data.created_at?.toDate() || null
+            // Try alternative approach - get all and filter
+            try {
+                const allSnapshot = await firebaseDB.collection("products").get();
+                if (!allSnapshot.empty) {
+                    const allProducts = [];
+                    allSnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        // Filter active products locally
+                        if (data.status === 'active') {
+                            allProducts.push({
+                                id: doc.id,
+                                name: data.name || data.stone_name || 'Stone Product',
+                                description: data.description || 'Premium natural stone product',
+                                price: data.price || '£0.00',
+                                image: data.image || '',
+                                category: data.category || ''
+                            });
+                        }
                     });
+                    
+                    // Take only 8 products
+                    const limitedProducts = allProducts.slice(0, 8);
+                    if (limitedProducts.length > 0) {
+                        displayProducts(limitedProducts);
+                        return;
+                    }
                 }
-            });
+            } catch (secondError) {
+                console.error('Second attempt failed:', secondError);
+            }
             
-            // Sort by date locally
-            products.sort((a, b) => {
-                if (b.created_at && a.created_at) {
-                    return b.created_at - a.created_at;
-                }
-                return 0;
-            });
-            
-            // Take only 8 products
-            const limitedProducts = products.slice(0, 8);
-            
-            // Display products
-            displayProducts(limitedProducts);
-            
-        } catch (error) {
-            console.error('Error loading products:', error);
             showDefaultProducts();
+            
         } finally {
             loadingSpinner.style.display = 'none';
         }
@@ -1441,7 +1356,8 @@ header.scrolled {
                 description: 'Natural outdoor paving stone with excellent weather resistance. Perfect for garden pathways and patios.',
                 price: '£28.50/m²',
                 image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800',
-                badge: 'Best Seller'
+                badge: 'Best Seller',
+                category: 'sandstone'
             },
             {
                 id: 'kota1',
@@ -1449,7 +1365,8 @@ header.scrolled {
                 description: 'Durable limestone flooring solution for indoor spaces. Natural blue shades with elegant texture.',
                 price: '£32.75/m²',
                 image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800',
-                badge: 'Popular'
+                badge: 'Popular',
+                category: 'kota'
             },
             {
                 id: 'sand2',
@@ -1457,7 +1374,8 @@ header.scrolled {
                 description: 'Warm brown sandstone with natural variations. Ideal for driveways and outdoor landscaping.',
                 price: '£26.90/m²',
                 image: 'https://images.unsplash.com/photo-1598300054893-ef06c8935c52?auto=format&fit=crop&w=800',
-                badge: 'New'
+                badge: 'New',
+                category: 'sandstone'
             },
             {
                 id: 'stone1',
@@ -1465,7 +1383,44 @@ header.scrolled {
                 description: 'Versatile natural stone suitable for both indoor and outdoor applications with timeless look.',
                 price: '£29.99/m²',
                 image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800',
-                badge: ''
+                badge: 'Featured',
+                category: 'limestone'
+            },
+            {
+                id: 'kota2',
+                name: 'Natural Kota Stone',
+                description: 'Premium quality natural kota stone for flooring with excellent durability and finish.',
+                price: '£31.50/m²',
+                image: 'https://images.unsplash.com/photo-1502005097973-6a7082348e28?auto=format&fit=crop&w=800',
+                badge: '',
+                category: 'kota'
+            },
+            {
+                id: 'sand3',
+                name: 'Mint Fossil Sandstone',
+                description: 'Unique mint colored sandstone with fossil patterns for exclusive landscaping projects.',
+                price: '£34.20/m²',
+                image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800',
+                badge: 'Premium',
+                category: 'sandstone'
+            },
+            {
+                id: 'granite1',
+                name: 'Black Granite',
+                description: 'Premium black granite slabs for countertops and luxury interior applications.',
+                price: '£45.00/m²',
+                image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800',
+                badge: 'Luxury',
+                category: 'granite'
+            },
+            {
+                id: 'limestone2',
+                name: 'Beige Limestone',
+                description: 'Warm beige limestone tiles perfect for both indoor and outdoor flooring applications.',
+                price: '£27.80/m²',
+                image: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&w=800',
+                badge: '',
+                category: 'limestone'
             }
         ];
         
@@ -1521,7 +1476,7 @@ header.scrolled {
     }
     
     // Add to cart function
-    async function addToCart(productId, productName, productPrice, productImage) {
+    function addToCart(productId, productName, productPrice, productImage) {
         try {
             // Get cart from localStorage
             const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
@@ -1548,26 +1503,13 @@ header.scrolled {
             // Show notification
             showNotification(`${productName} added to cart!`);
             
-            // Try to sync with Firebase if user is logged in
-            if (firebaseLoaded && window.firebaseApp) {
-                const { auth, db } = window.firebaseApp;
-                const user = auth.currentUser;
-                
-                if (user) {
-                    try {
-                        await db.collection("cart").add({
-                            userId: user.uid,
-                            productId: productId,
-                            productName: productName,
-                            productPrice: productPrice,
-                            productImage: productImage,
-                            quantity: 1,
-                            addedAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    } catch (firebaseError) {
-                        console.error('Firebase cart sync error:', firebaseError);
-                    }
-                }
+            // Animation for cart badge
+            const cartBadge = document.getElementById('cartBadge');
+            if (cartBadge) {
+                cartBadge.style.transform = 'scale(1.5)';
+                setTimeout(() => {
+                    cartBadge.style.transform = 'scale(1)';
+                }, 200);
             }
             
         } catch (error) {
@@ -1702,10 +1644,16 @@ header.scrolled {
         console.log('IRYA STONE Website initialized');
         
         // Initialize Firebase
-        await initializeFirebase();
+        initializeFirebase();
         
-        // Load products - Using method that doesn't require index
-        await loadAllProductsAndFilter();
+        // Try to load products from Firebase
+        try {
+            await loadProductsFromFirebase();
+        } catch (error) {
+            console.error('Failed to load products:', error);
+            // Show default products as fallback
+            showDefaultProducts();
+        }
         
         // Initialize cart
         updateCartBadge();
@@ -1730,57 +1678,25 @@ header.scrolled {
         }
         
         // Set up auth state listener if Firebase is loaded
-        if (firebaseLoaded && window.firebaseApp) {
-            const { auth } = window.firebaseApp;
-            
-            auth.onAuthStateChanged((user) => {
+        if (firebaseInitialized && firebaseAuth) {
+            firebaseAuth.onAuthStateChanged((user) => {
                 if (user) {
                     console.log('User is signed in:', user.email);
                     document.getElementById('signinBtn').textContent = 'Account';
-                    
-                    // Sync cart from localStorage to Firebase
-                    syncCartToFirebase(user.uid);
+                    document.getElementById('signinBtn').style.background = 'linear-gradient(135deg, #1a1a1a, #333)';
                 } else {
                     console.log('User is signed out');
                     document.getElementById('signinBtn').textContent = 'Sign In';
+                    document.getElementById('signinBtn').style.background = 'linear-gradient(135deg, var(--primary-gold), var(--gold-dark))';
                 }
             });
         }
     });
     
-    // Sync localStorage cart to Firebase when user logs in
-    async function syncCartToFirebase(userId) {
-        try {
-            const localCart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
-            
-            if (localCart.length > 0 && firebaseLoaded && window.firebaseApp) {
-                const { db } = window.firebaseApp;
-                
-                for (const item of localCart) {
-                    await db.collection("cart").add({
-                        userId: userId,
-                        productId: item.productId,
-                        productName: item.productName,
-                        productPrice: item.productPrice,
-                        productImage: item.productImage,
-                        quantity: item.quantity,
-                        addedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-                
-                // Clear localStorage cart
-                localStorage.removeItem('irya_cart');
-                updateCartBadge();
-                showNotification('Cart synced with your account!');
-            }
-        } catch (error) {
-            console.error('Error syncing cart:', error);
-        }
-    }
-    
     // Make functions available globally
     window.addToCart = addToCart;
     window.viewProduct = viewProduct;
+    window.loadProductsFromFirebase = loadProductsFromFirebase;
 </script>
 </body>
 </html>
