@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In | IRYA STONE</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary-gold: #c9a227;
+    --gold-light: #f0d77c;
+    --stone-dark: #1a1a1a;
+    --bg-light: #f7f9fc;
+    --white: #ffffff;
+    --shadow: 0 4px 20px rgba(0,0,0,0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: var(--bg-light);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 450px;
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo i {
+    font-size: 48px;
+    color: var(--primary-gold);
+    margin-bottom: 10px;
+}
+
+.logo h1 {
+    color: var(--stone-dark);
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.auth-container {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tabs {
+    display: flex;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.tab-btn.active {
+    color: var(--primary-gold);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary-gold);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--stone-dark);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 15px;
+    transition: var(--transition);
+    background: var(--bg-light);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.1);
+}
+
+.btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-primary {
+    background: var(--primary-gold);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background: #b8941f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(201, 162, 39, 0.3);
+}
+
+.btn-google {
+    background: var(--white);
+    color: var(--stone-dark);
+    border: 1px solid #e0e0e0;
+    margin-top: 15px;
+}
+
+.btn-google:hover {
+    background: #f8f8f8;
+    border-color: #ccc;
+}
+
+.divider {
+    text-align: center;
+    margin: 25px 0;
+    position: relative;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #eee;
+}
+
+.divider span {
+    background: var(--white);
+    padding: 0 15px;
+    color: #666;
+    font-size: 14px;
+}
+
+.forgot-link {
+    display: block;
+    text-align: center;
+    color: var(--primary-gold);
+    text-decoration: none;
+    font-size: 14px;
+    margin-top: 15px;
+    transition: var(--transition);
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+}
+
+.error-message {
+    background: #ffebee;
+    color: #c62828;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.success-message {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(201, 162, 39, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--primary-gold);
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.back-home {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.back-home a {
+    color: var(--primary-gold);
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (max-width: 480px) {
+    .auth-container {
+        padding: 30px 20px;
+    }
+    
+    .tab-btn {
+        font-size: 14px;
+        padding: 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-gem"></i>
+            <h1>IRYA STONE</h1>
+        </div>
+        
+        <div class="auth-container">
+            <!-- Error/Success Messages -->
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+            
+            <!-- Loading Spinner -->
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Processing...</p>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('signin')">Sign In</button>
+                <button class="tab-btn" onclick="switchTab('signup')">Sign Up</button>
+            </div>
+            
+            <!-- Sign In Form -->
+            <div id="signinTab" class="tab-content active">
+                <form id="signinForm">
+                    <div class="form-group">
+                        <label for="signinEmail">Email Address</label>
+                        <input type="email" id="signinEmail" class="form-control" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signinPassword">Password</label>
+                        <input type="password" id="signinPassword" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                    
+                    <div class="divider">
+                        <span>or continue with</span>
+                    </div>
+                    
+                    <button type="button" class="btn btn-google" onclick="signInWithGoogle()">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    
+                    <a href="#forgot" class="forgot-link" onclick="showForgotPassword()">Forgot Password?</a>
+                </form>
+            </div>
+            
+            <!-- Sign Up Form -->
+            <div id="signupTab" class="tab-content">
+                <form id="signupForm">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" class="form-control" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupEmail">Email Address</label>
+                        <input type="email" id="signupEmail" class="form-control" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupPhone">Phone Number</label>
+                        <input type="tel" id="signupPhone" class="form-control" placeholder="Enter your phone number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" class="form-control" placeholder="Create a password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupConfirmPassword">Confirm Password</label>
+                        <input type="password" id="signupConfirmPassword" class="form-control" placeholder="Confirm your password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Forgot Password Form -->
+            <div id="forgotTab" class="tab-content">
+                <form id="forgotForm">
+                    <div class="form-group">
+                        <label for="forgotEmail">Email Address</label>
+                        <input type="email" id="forgotEmail" class="form-control" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-key"></i> Reset Password
+                    </button>
+                    
+                    <button type="button" class="btn btn-google" style="margin-top: 15px;" onclick="switchTab('signin')">
+                        <i class="fas fa-arrow-left"></i> Back to Sign In
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="back-home">
+            <a href="index.html">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+
+<!-- Firebase Scripts -->
+<script type="module">
+// Import Firebase functions
+import {
+    registerUser,
+    loginUser,
+    signInWithGoogle,
+    resetPassword,
+    subscribeToAuth
+} from './firebase-config.js';
+
+// Tab switching
+function switchTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + 'Tab').classList.add('active');
+    
+    // Activate selected button
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.textContent.toLowerCase().includes(tabName)) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Clear messages
+    clearMessages();
+}
+
+// Forgot password
+function showForgotPassword() {
+    switchTab('forgot');
+}
+
+// Clear messages
+function clearMessages() {
+    document.getElementById('errorMessage').style.display = 'none';
+    document.getElementById('successMessage').style.display = 'none';
+}
+
+// Show error
+function showError(message) {
+    const errorDiv = document.getElementById('errorMessage');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 5000);
+}
+
+// Show success
+function showSuccess(message) {
+    const successDiv = document.getElementById('successMessage');
+    successDiv.textContent = message;
+    successDiv.style.display = 'block';
+    setTimeout(() => {
+        successDiv.style.display = 'none';
+    }, 5000);
+}
+
+// Show loading
+function showLoading() {
+    document.getElementById('loading').style.display = 'block';
+}
+
+// Hide loading
+function hideLoading() {
+    document.getElementById('loading').style.display = 'none';
+}
+
+// Sign Up Form Handler
+document.getElementById('signupForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const phone = document.getElementById('signupPhone').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('signupConfirmPassword').value;
+    
+    // Validation
+    if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showError('Password must be at least 6 characters long');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const result = await registerUser(email, password, {
+            displayName: name,
+            phone: phone,
+            newsletter: true
+        });
+        
+        if (result.success) {
+            showSuccess('Account created successfully! Redirecting...');
+            
+            // Redirect to home page after 2 seconds
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        } else {
+            showError(result.error || 'Registration failed');
+        }
+    } catch (error) {
+        showError(error.message || 'An error occurred');
+    } finally {
+        hideLoading();
+    }
+});
+
+// Sign In Form Handler
+document.getElementById('signinForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('signinEmail').value.trim();
+    const password = document.getElementById('signinPassword').value;
+    
+    showLoading();
+    
+    try {
+        const result = await loginUser(email, password);
+        
+        if (result.success) {
+            showSuccess('Login successful! Redirecting...');
+            
+            // Redirect to home page after 1 second
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        } else {
+            showError(result.error || 'Login failed');
+        }
+    } catch (error) {
+        showError(error.message || 'An error occurred');
+    } finally {
+        hideLoading();
+    }
+});
+
+// Forgot Password Form Handler
+document.getElementById('forgotForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('forgotEmail').value.trim();
+    
+    if (!email) {
+        showError('Please enter your email address');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const result = await resetPassword(email);
+        
+        if (result.success) {
+            showSuccess('Password reset email sent! Check your inbox.');
+            document.getElementById('forgotForm').reset();
+            
+            // Switch back to sign in after 3 seconds
+            setTimeout(() => {
+                switchTab('signin');
+            }, 3000);
+        } else {
+            showError(result.error || 'Failed to send reset email');
+        }
+    } catch (error) {
+        showError(error.message || 'An error occurred');
+    } finally {
+        hideLoading();
+    }
+});
+
+// Google Sign In
+window.signInWithGoogle = async function() {
+    showLoading();
+    
+    try {
+        const result = await signInWithGoogle();
+        
+        if (result.success) {
+            showSuccess('Google login successful! Redirecting...');
+            
+            // Redirect to home page
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        } else {
+            showError(result.error || 'Google login failed');
+        }
+    } catch (error) {
+        showError(error.message || 'An error occurred');
+    } finally {
+        hideLoading();
+    }
+};
+
+// Listen to auth state changes
+subscribeToAuth((user) => {
+    if (user) {
+        console.log('User logged in:', user.email);
+    } else {
+        console.log('User logged out');
+    }
+});
+
+// Auto-focus first input
+document.addEventListener('DOMContentLoaded', function() {
+    const activeInput = document.querySelector('.tab-content.active input');
+    if (activeInput) {
+        activeInput.focus();
+    }
+});
+</script>
+</body>
+</html>
