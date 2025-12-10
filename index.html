@@ -11,34 +11,6 @@
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Firebase SDK -->
-<script type="module">
-    // Import Firebase modules
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-    
-    const firebaseConfig = {
-        apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-        authDomain: "iryastone-uk.firebaseapp.com",
-        projectId: "iryastone-uk",
-        storageBucket: "iryastone-uk.firebasestorage.app",
-        messagingSenderId: "110940910896",
-        appId: "1:110940910896:web:b25e92127118665e5c84f5",
-        measurementId: "G-6YM1FLYN48"
-    };
-    
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    
-    // Make available globally
-    window.firebaseApp = { app, db, auth };
-    
-    console.log("Firebase initialized successfully");
-</script>
-
 <style>
 :root {
     --primary-gold: #c9a227;
@@ -897,6 +869,23 @@ header.scrolled {
     transform: translateX(0);
     display: block;
 }
+
+/* Error Message */
+.error-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff4757;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    display: none;
+    max-width: 300px;
+    text-align: center;
+}
 </style>
 </head>
 
@@ -910,6 +899,9 @@ header.scrolled {
 
 <!-- Notification -->
 <div class="notification" id="notification"></div>
+
+<!-- Error Message -->
+<div class="error-message" id="errorMessage"></div>
 
 <!-- Header -->
 <header id="mainHeader">
@@ -1105,42 +1097,78 @@ header.scrolled {
     </div>
 </div>
 
-<!-- Import Firebase Functions -->
-<script type="module">
-    // Import Firebase modules
-    import { 
-        collection, 
-        getDocs, 
-        query, 
-        where, 
-        limit,
-        orderBy,
-        getDoc,
-        doc,
-        addDoc,
-        serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-    
-    import {
-        getAuth,
-        onAuthStateChanged,
-        signOut
-    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-    
-    // Get Firebase instances
-    const { db, auth } = window.firebaseApp;
-    
-    // Firebase functions
-    window.firebaseFunctions = {
-        collection, getDocs, query, where, limit, orderBy, getDoc, doc, addDoc, serverTimestamp
-    };
-    
-    console.log('Firebase functions loaded');
-</script>
-
 <script>
     // Global variables
-    let cartItems = [];
+    let firebaseLoaded = false;
+    
+    // Initialize Firebase
+    async function initializeFirebase() {
+        try {
+            // Check if Firebase is already loaded
+            if (typeof firebase === 'undefined') {
+                // Load Firebase dynamically
+                await loadFirebaseScripts();
+            }
+            
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+                authDomain: "iryastone-uk.firebaseapp.com",
+                projectId: "iryastone-uk",
+                storageBucket: "iryastone-uk.firebasestorage.app",
+                messagingSenderId: "110940910896",
+                appId: "1:110940910896:web:b25e92127118665e5c84f5",
+                measurementId: "G-6YM1FLYN48"
+            };
+            
+            // Initialize Firebase
+            const app = firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+            const auth = firebase.auth();
+            
+            // Make available globally
+            window.firebaseApp = { app, db, auth };
+            firebaseLoaded = true;
+            
+            console.log('Firebase initialized successfully');
+            return true;
+            
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            showError('Firebase initialization failed. Using default data.');
+            return false;
+        }
+    }
+    
+    // Load Firebase scripts dynamically
+    function loadFirebaseScripts() {
+        return new Promise((resolve, reject) => {
+            // Check if already loaded
+            if (typeof firebase !== 'undefined') {
+                resolve();
+                return;
+            }
+            
+            // Load Firebase scripts
+            const script1 = document.createElement('script');
+            script1.src = 'https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js';
+            script1.onload = () => {
+                const script2 = document.createElement('script');
+                script2.src = 'https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js';
+                script2.onload = () => {
+                    const script3 = document.createElement('script');
+                    script3.src = 'https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js';
+                    script3.onload = resolve;
+                    script3.onerror = reject;
+                    document.head.appendChild(script3);
+                };
+                script2.onerror = reject;
+                document.head.appendChild(script2);
+            };
+            script1.onerror = reject;
+            document.head.appendChild(script1);
+        });
+    }
     
     // Header Hide/Show on Scroll
     let lastScrollTop = 0;
@@ -1194,12 +1222,12 @@ header.scrolled {
         });
     });
     
-    // Load products from Firebase
+    // Load products from Firebase (WITHOUT INDEX ERROR)
     async function loadProductsFromFirebase() {
         const loadingSpinner = document.getElementById('loadingSpinner');
         const container = document.getElementById('productGrid');
         
-        if (!container || !window.firebaseApp || !window.firebaseFunctions) {
+        if (!container) {
             showDefaultProducts();
             return;
         }
@@ -1207,18 +1235,22 @@ header.scrolled {
         try {
             loadingSpinner.style.display = 'block';
             
-            const { collection, getDocs, query, where, limit, orderBy } = window.firebaseFunctions;
+            // Initialize Firebase if not already done
+            if (!firebaseLoaded) {
+                const initialized = await initializeFirebase();
+                if (!initialized) {
+                    showDefaultProducts();
+                    return;
+                }
+            }
+            
             const { db } = window.firebaseApp;
             
-            // Query to get active products, ordered by creation date
-            const q = query(
-                collection(db, "products"),
-                where("status", "==", "active"),
-                orderBy("created_at", "desc"),
-                limit(8)
-            );
-            
-            const querySnapshot = await getDocs(q);
+            // SIMPLE QUERY - NO COMPLEX WHERE CLAUSES THAT NEED INDEXES
+            // This query doesn't need an index
+            const querySnapshot = await db.collection("products")
+                .limit(8)  // Just limit, no orderBy or where that needs index
+                .get();
             
             if (querySnapshot.empty) {
                 showDefaultProducts();
@@ -1256,6 +1288,95 @@ header.scrolled {
             
         } catch (error) {
             console.error('Error loading products:', error);
+            
+            // Check if it's an index error
+            if (error.message && error.message.includes('index')) {
+                showError('Firebase index required. Please create the index in Firebase Console.');
+            }
+            
+            showDefaultProducts();
+        } finally {
+            loadingSpinner.style.display = 'none';
+        }
+    }
+    
+    // Alternative method - Get all products and filter locally
+    async function loadAllProductsAndFilter() {
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const container = document.getElementById('productGrid');
+        
+        if (!container) {
+            showDefaultProducts();
+            return;
+        }
+        
+        try {
+            loadingSpinner.style.display = 'block';
+            
+            // Initialize Firebase if not already done
+            if (!firebaseLoaded) {
+                const initialized = await initializeFirebase();
+                if (!initialized) {
+                    showDefaultProducts();
+                    return;
+                }
+            }
+            
+            const { db } = window.firebaseApp;
+            
+            // Get ALL products without any filtering
+            const querySnapshot = await db.collection("products").get();
+            
+            if (querySnapshot.empty) {
+                showDefaultProducts();
+                return;
+            }
+            
+            const products = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                // Filter locally for active products
+                if (data.status === 'active') {
+                    products.push({
+                        id: doc.id,
+                        name: data.name || data.stone_name || 'Stone Product',
+                        stone_name: data.stone_name || '',
+                        category: data.category || '',
+                        type: data.type || 'Natural Stone',
+                        color: data.color || '',
+                        price: data.price || '£0.00',
+                        price_unit: data.price_unit || 'sqft',
+                        description: data.description || 'Premium natural stone product',
+                        image: data.image || '',
+                        size: data.size || '',
+                        thickness: data.thickness || '',
+                        finish: data.finish || 'Natural',
+                        usage: data.usage || '',
+                        density: data.density || '',
+                        compressive_strength: data.compressive_strength || '',
+                        water_absorption: data.water_absorption || '',
+                        status: data.status || 'active',
+                        created_at: data.created_at?.toDate() || null
+                    });
+                }
+            });
+            
+            // Sort by date locally
+            products.sort((a, b) => {
+                if (b.created_at && a.created_at) {
+                    return b.created_at - a.created_at;
+                }
+                return 0;
+            });
+            
+            // Take only 8 products
+            const limitedProducts = products.slice(0, 8);
+            
+            // Display products
+            displayProducts(limitedProducts);
+            
+        } catch (error) {
+            console.error('Error loading products:', error);
             showDefaultProducts();
         } finally {
             loadingSpinner.style.display = 'none';
@@ -1266,6 +1387,11 @@ header.scrolled {
     function displayProducts(products) {
         const container = document.getElementById('productGrid');
         if (!container) return;
+        
+        if (products.length === 0) {
+            showDefaultProducts();
+            return;
+        }
         
         container.innerHTML = products.map((product, index) => `
             <div class="card" data-id="${product.id}">
@@ -1383,7 +1509,7 @@ header.scrolled {
             case 'kota':
                 return 'Kota Stone';
             default:
-                return 'Best Seller';
+                return 'Featured';
         }
     }
     
@@ -1397,67 +1523,24 @@ header.scrolled {
     // Add to cart function
     async function addToCart(productId, productName, productPrice, productImage) {
         try {
-            // Check if Firebase is available
-            if (window.firebaseApp && window.firebaseFunctions) {
-                const { collection, addDoc, serverTimestamp } = window.firebaseFunctions;
-                const { db, auth } = window.firebaseApp;
-                
-                // Get current user
-                const user = auth.currentUser;
-                
-                if (user) {
-                    // Add to Firebase if user is logged in
-                    const cartItem = {
-                        userId: user.uid,
-                        productId: productId,
-                        productName: productName,
-                        productPrice: productPrice,
-                        productImage: productImage,
-                        quantity: 1,
-                        addedAt: serverTimestamp()
-                    };
-                    
-                    await addDoc(collection(db, "cart"), cartItem);
-                } else {
-                    // Add to localStorage if user is not logged in
-                    const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
-                    const existingItem = cart.find(item => item.productId === productId);
-                    
-                    if (existingItem) {
-                        existingItem.quantity += 1;
-                    } else {
-                        cart.push({
-                            productId: productId,
-                            productName: productName,
-                            productPrice: productPrice,
-                            productImage: productImage,
-                            quantity: 1,
-                            addedAt: new Date().toISOString()
-                        });
-                    }
-                    
-                    localStorage.setItem('irya_cart', JSON.stringify(cart));
-                }
+            // Get cart from localStorage
+            const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
+            const existingItem = cart.find(item => item.productId === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
             } else {
-                // Fallback to localStorage
-                const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
-                const existingItem = cart.find(item => item.productId === productId);
-                
-                if (existingItem) {
-                    existingItem.quantity += 1;
-                } else {
-                    cart.push({
-                        productId: productId,
-                        productName: productName,
-                        productPrice: productPrice,
-                        productImage: productImage,
-                        quantity: 1,
-                        addedAt: new Date().toISOString()
-                    });
-                }
-                
-                localStorage.setItem('irya_cart', JSON.stringify(cart));
+                cart.push({
+                    productId: productId,
+                    productName: productName,
+                    productPrice: productPrice,
+                    productImage: productImage,
+                    quantity: 1,
+                    addedAt: new Date().toISOString()
+                });
             }
+            
+            localStorage.setItem('irya_cart', JSON.stringify(cart));
             
             // Update cart badge
             updateCartBadge();
@@ -1465,9 +1548,31 @@ header.scrolled {
             // Show notification
             showNotification(`${productName} added to cart!`);
             
+            // Try to sync with Firebase if user is logged in
+            if (firebaseLoaded && window.firebaseApp) {
+                const { auth, db } = window.firebaseApp;
+                const user = auth.currentUser;
+                
+                if (user) {
+                    try {
+                        await db.collection("cart").add({
+                            userId: user.uid,
+                            productId: productId,
+                            productName: productName,
+                            productPrice: productPrice,
+                            productImage: productImage,
+                            quantity: 1,
+                            addedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    } catch (firebaseError) {
+                        console.error('Firebase cart sync error:', firebaseError);
+                    }
+                }
+            }
+            
         } catch (error) {
             console.error('Error adding to cart:', error);
-            showNotification('Failed to add to cart. Please try again.');
+            showError('Failed to add to cart. Please try again.');
         }
     }
     
@@ -1477,30 +1582,10 @@ header.scrolled {
         if (!cartBadge) return;
         
         try {
-            if (window.firebaseApp && window.firebaseFunctions) {
-                // Get cart from Firebase if user is logged in
-                const { auth } = window.firebaseApp;
-                const user = auth.currentUser;
-                
-                if (user) {
-                    // In real implementation, fetch cart items from Firebase
-                    // For now, use localStorage
-                    const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
-                    const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
-                    cartBadge.textContent = itemCount;
-                    cartBadge.style.display = itemCount > 0 ? 'flex' : 'none';
-                } else {
-                    const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
-                    const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
-                    cartBadge.textContent = itemCount;
-                    cartBadge.style.display = itemCount > 0 ? 'flex' : 'none';
-                }
-            } else {
-                const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
-                const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
-                cartBadge.textContent = itemCount;
-                cartBadge.style.display = itemCount > 0 ? 'flex' : 'none';
-            }
+            const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
+            const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
+            cartBadge.textContent = itemCount;
+            cartBadge.style.display = itemCount > 0 ? 'flex' : 'none';
         } catch (error) {
             console.error('Error updating cart badge:', error);
         }
@@ -1508,10 +1593,9 @@ header.scrolled {
     
     // View product details
     function viewProduct(productId) {
+        showNotification('Opening product details...');
         // In real implementation, redirect to product detail page
         // window.location.href = `product-detail.html?id=${productId}`;
-        console.log('Viewing product:', productId);
-        showNotification('Redirecting to product details...');
     }
     
     // Show notification
@@ -1526,6 +1610,20 @@ header.scrolled {
         setTimeout(() => {
             notification.classList.remove('show');
         }, 3000);
+    }
+    
+    // Show error
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        if (!errorDiv) return;
+        
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        
+        // Hide after 5 seconds
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 5000);
     }
     
     // Search functionality
@@ -1573,14 +1671,10 @@ header.scrolled {
                 showNotification('Opening products page...');
                 break;
             case 'Search':
-                searchInput.focus();
+                if (searchInput) searchInput.focus();
                 break;
             case 'Account':
-                if (window.firebaseApp && window.firebaseApp.auth.currentUser) {
-                    showNotification('Opening account page...');
-                } else {
-                    window.location.href = 'sign.html';
-                }
+                window.location.href = 'sign.html';
                 break;
             case 'Cart':
                 showNotification('Opening cart page...');
@@ -1604,11 +1698,14 @@ header.scrolled {
     });
     
     // Initialize everything when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
         console.log('IRYA STONE Website initialized');
         
-        // Load products
-        loadProductsFromFirebase();
+        // Initialize Firebase
+        await initializeFirebase();
+        
+        // Load products - Using method that doesn't require index
+        await loadAllProductsAndFilter();
         
         // Initialize cart
         updateCartBadge();
@@ -1632,16 +1729,17 @@ header.scrolled {
             }, 300);
         }
         
-        // Listen for auth state changes
-        if (window.firebaseApp && window.firebaseApp.auth) {
+        // Set up auth state listener if Firebase is loaded
+        if (firebaseLoaded && window.firebaseApp) {
             const { auth } = window.firebaseApp;
             
-            onAuthStateChanged(auth, (user) => {
+            auth.onAuthStateChanged((user) => {
                 if (user) {
                     console.log('User is signed in:', user.email);
                     document.getElementById('signinBtn').textContent = 'Account';
+                    
                     // Sync cart from localStorage to Firebase
-                    syncCartToFirebase();
+                    syncCartToFirebase(user.uid);
                 } else {
                     console.log('User is signed out');
                     document.getElementById('signinBtn').textContent = 'Sign In';
@@ -1651,34 +1749,29 @@ header.scrolled {
     });
     
     // Sync localStorage cart to Firebase when user logs in
-    async function syncCartToFirebase() {
+    async function syncCartToFirebase(userId) {
         try {
             const localCart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
             
-            if (localCart.length > 0 && window.firebaseApp && window.firebaseFunctions) {
-                const { collection, addDoc, serverTimestamp } = window.firebaseFunctions;
-                const { db, auth } = window.firebaseApp;
-                const user = auth.currentUser;
+            if (localCart.length > 0 && firebaseLoaded && window.firebaseApp) {
+                const { db } = window.firebaseApp;
                 
-                if (user) {
-                    for (const item of localCart) {
-                        const cartItem = {
-                            userId: user.uid,
-                            productId: item.productId,
-                            productName: item.productName,
-                            productPrice: item.productPrice,
-                            productImage: item.productImage,
-                            quantity: item.quantity,
-                            addedAt: serverTimestamp()
-                        };
-                        
-                        await addDoc(collection(db, "cart"), cartItem);
-                    }
-                    
-                    // Clear localStorage cart
-                    localStorage.removeItem('irya_cart');
-                    updateCartBadge();
+                for (const item of localCart) {
+                    await db.collection("cart").add({
+                        userId: userId,
+                        productId: item.productId,
+                        productName: item.productName,
+                        productPrice: item.productPrice,
+                        productImage: item.productImage,
+                        quantity: item.quantity,
+                        addedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                 }
+                
+                // Clear localStorage cart
+                localStorage.removeItem('irya_cart');
+                updateCartBadge();
+                showNotification('Cart synced with your account!');
             }
         } catch (error) {
             console.error('Error syncing cart:', error);
