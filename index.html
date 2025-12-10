@@ -47,9 +47,10 @@ body {
     color: var(--text-dark);
     padding-bottom: 80px;
     font-size: 14px;
+    scroll-behavior: smooth;
 }
 
-/* Header */
+/* Header - Fixed with hide/show on scroll */
 header {
     position: fixed;
     top: 0;
@@ -63,6 +64,12 @@ header {
     box-shadow: var(--shadow-sm);
     z-index: 1000;
     gap: 10px;
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+header.hidden {
+    transform: translateY(-100%);
 }
 
 .logo {
@@ -131,6 +138,9 @@ header {
     transition: var(--transition);
     white-space: nowrap;
     min-width: 80px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
 }
 
 .signin-btn:hover {
@@ -152,6 +162,7 @@ header {
     cursor: pointer;
     transition: var(--transition);
     position: relative;
+    text-decoration: none;
 }
 
 .action-btn:hover {
@@ -171,6 +182,8 @@ header {
     justify-content: center;
     background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
     color: var(--white);
+    margin-top: 0;
+    transition: margin-top 0.3s ease;
 }
 
 .hero h1 {
@@ -190,29 +203,165 @@ header {
     line-height: 1.6;
 }
 
+/* Stone Uses Section */
+.uses-section {
+    padding: 40px 16px;
+    background: var(--white);
+}
+
+.uses-section h2 {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--stone-dark);
+    font-family: 'Roboto Slab', serif;
+}
+
+.uses-section .subtitle {
+    text-align: center;
+    color: var(--text-light);
+    margin-bottom: 30px;
+    font-size: 16px;
+}
+
+.uses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.use-card {
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: 1px solid #f0f0f0;
+}
+
+.use-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-gold);
+}
+
+.use-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.use-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.use-card:hover .use-image img {
+    transform: scale(1.05);
+}
+
+.use-content {
+    padding: 20px;
+}
+
+.use-content h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.use-content h3 i {
+    color: var(--primary-gold);
+}
+
+.use-content p {
+    color: var(--text-light);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.use-stones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.stone-tag {
+    background: rgba(201, 162, 39, 0.1);
+    color: var(--primary-gold);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.view-all-uses {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.view-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 2px solid var(--primary-gold);
+    color: var(--primary-gold);
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.view-all-btn:hover {
+    background: var(--primary-gold);
+    color: var(--white);
+}
+
 /* Products Section */
 .products {
     padding: 40px 16px;
     background: var(--bg-light);
 }
 
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.section-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-header h2 i {
+    color: var(--primary-gold);
+}
+
 .product-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
-}
-
-@media (min-width: 768px) {
-    .product-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 25px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .product-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
 }
 
 .card {
@@ -225,6 +374,7 @@ header {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 .card:hover {
@@ -235,7 +385,7 @@ header {
 
 .product-image-container {
     width: 100%;
-    height: 200px;
+    height: 250px;
     overflow: hidden;
     position: relative;
     background: var(--bg-light);
@@ -273,12 +423,19 @@ header {
     flex-direction: column;
 }
 
-.product-content h3 {
+.stone-name {
     font-size: 17px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--stone-dark);
+    margin-bottom: 5px;
+    font-family: 'Roboto Slab', serif;
+}
+
+.stone-category {
+    font-size: 13px;
+    color: var(--primary-gold);
     margin-bottom: 10px;
-    line-height: 1.4;
+    font-weight: 500;
 }
 
 .product-content p {
@@ -289,12 +446,40 @@ header {
     flex-grow: 1;
 }
 
+.product-specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.spec-tag {
+    background: var(--bg-light);
+    color: var(--text-light);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.price-section {
+    margin-top: auto;
+}
+
 .price {
     color: var(--primary-gold);
     font-weight: 700;
-    font-size: 20px;
-    margin-bottom: 20px;
+    font-size: 22px;
+    margin-bottom: 15px;
     font-family: 'Roboto Slab', serif;
+}
+
+.rate-unit {
+    font-size: 12px;
+    color: var(--text-light);
+    font-weight: normal;
 }
 
 .card-actions {
@@ -304,13 +489,17 @@ header {
 
 .card-btn {
     flex: 1;
-    padding: 10px 15px;
+    padding: 12px 15px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     border: none;
     transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .btn-primary {
@@ -335,7 +524,7 @@ header {
     border-color: var(--primary-gold);
 }
 
-/* Bottom Navigation */
+/* Bottom Navigation - Fixed with hide/show on scroll */
 .bottom-nav {
     position: fixed;
     left: 0;
@@ -348,6 +537,12 @@ header {
     border-top: 1px solid #eee;
     z-index: 999;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+.bottom-nav.hidden {
+    transform: translateY(100%);
 }
 
 .nav-btn {
@@ -363,6 +558,7 @@ header {
     padding: 5px 10px;
     border-radius: 10px;
     min-width: 70px;
+    text-decoration: none;
 }
 
 .nav-btn:hover {
@@ -387,8 +583,8 @@ header {
     color: var(--white);
     font-size: 10px;
     font-weight: 600;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -454,19 +650,109 @@ header {
     text-align: center;
 }
 
-/* Firebase Debug Info */
-.firebase-debug {
+/* Filter Controls */
+.filter-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 10px 15px;
+    border-radius: 20px;
+    border: 1px solid #e0e0e0;
+    background: var(--white);
+    color: var(--text-dark);
+    font-size: 14px;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+}
+
+/* Scroll to Top Button */
+.scroll-top {
     position: fixed;
-    bottom: 10px;
-    left: 10px;
-    background: rgba(0,0,0,0.8);
+    bottom: 80px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: var(--primary-gold);
     color: white;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 12px;
-    z-index: 9999;
-    max-width: 300px;
-    display: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 998;
+    opacity: 0;
+    transform: translateY(20px);
+    box-shadow: var(--shadow-md);
+}
+
+.scroll-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.scroll-top:hover {
+    background: var(--gold-dark);
+    transform: translateY(-5px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 28px;
+    }
+    
+    .hero p {
+        font-size: 16px;
+    }
+    
+    .uses-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-controls {
+        justify-content: center;
+    }
+    
+    header {
+        padding: 10px 12px;
+    }
+    
+    .logo span {
+        font-size: 16px;
+    }
+    
+    .search-box {
+        margin: 0 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-actions {
+        flex-direction: column;
+    }
+    
+    .nav-btn {
+        min-width: 60px;
+        padding: 5px;
+    }
+    
+    .nav-btn span {
+        font-size: 10px;
+    }
 }
 </style>
 </head>
@@ -482,11 +768,13 @@ header {
 <!-- Error Message -->
 <div class="error-message" id="errorMessage"></div>
 
-<!-- Firebase Debug Info -->
-<div class="firebase-debug" id="firebaseDebug"></div>
+<!-- Scroll to Top Button -->
+<div class="scroll-top" id="scrollTopBtn">
+    <i class="fas fa-arrow-up"></i>
+</div>
 
 <!-- Header -->
-<header>
+<header id="mainHeader">
     <div class="logo">
         <i class="fa-solid fa-gem"></i>
         <span>IRYA STONE</span>
@@ -500,7 +788,7 @@ header {
 
     <!-- Header Actions -->
     <div style="display: flex; gap: 10px; align-items: center;">
-        <button class="action-btn">
+        <button class="action-btn" id="wishlistBtn">
             <i class="far fa-heart"></i>
         </button>
         <a href="cart.html" class="action-btn" style="position: relative;">
@@ -514,27 +802,60 @@ header {
 </header>
 
 <!-- Hero Section -->
-<section class="hero">
+<section class="hero" id="heroSection">
     <div class="hero-content">
         <h1>Premium Natural Stones</h1>
         <p>Export Quality Sandstone & Kota Stone from Indian quarries to UK homes</p>
     </div>
 </section>
 
+<!-- Stone Uses Section -->
+<section class="uses-section">
+    <h2>Sandstone & Kota Stone Uses</h2>
+    <p class="subtitle">Discover the versatile applications of our premium natural stones</p>
+    
+    <div class="uses-grid" id="usesGrid">
+        <!-- Uses will be dynamically loaded -->
+    </div>
+    
+    <div class="view-all-uses">
+        <a href="uses.html" class="view-all-btn">
+            <i class="fas fa-eye"></i>
+            View All Uses
+        </a>
+    </div>
+</section>
+
 <!-- Products Section -->
 <section class="products">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-        <h2 style="font-size: 20px; font-weight: 600; color: var(--stone-dark); display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-gem" style="color: var(--primary-gold);"></i> 
-            All Products
+    <div class="section-header">
+        <h2>
+            <i class="fas fa-gem"></i> 
+            All Stone Products
         </h2>
-        <div style="display: flex; gap: 10px;">
-            <select id="categoryFilter" style="padding: 8px 15px; border-radius: 20px; border: 1px solid #e0e0e0; background: var(--white);">
+        <div class="filter-controls">
+            <select id="categoryFilter" class="filter-select">
                 <option value="all">All Categories</option>
                 <option value="Sand Stone">Sand Stone</option>
                 <option value="Kota Stone">Kota Stone</option>
                 <option value="Granite">Granite</option>
                 <option value="Limestone">Limestone</option>
+                <option value="Marble">Marble</option>
+                <option value="Slate">Slate</option>
+            </select>
+            
+            <select id="priceFilter" class="filter-select">
+                <option value="all">All Prices</option>
+                <option value="low">Under £30</option>
+                <option value="medium">£30 - £60</option>
+                <option value="high">Over £60</option>
+            </select>
+            
+            <select id="sortFilter" class="filter-select">
+                <option value="newest">Newest First</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+                <option value="name">Name A-Z</option>
             </select>
         </div>
     </div>
@@ -545,13 +866,13 @@ header {
     
     <div style="text-align: center; margin-top: 30px;">
         <button id="loadMoreBtn" style="padding: 12px 30px; background: var(--bg-light); border: 1px solid #e0e0e0; border-radius: 25px; font-weight: 500; cursor: pointer; display: none;">
-            Load More Products
+            <i class="fas fa-plus"></i> Load More Products
         </button>
     </div>
 </section>
 
 <!-- Bottom Menu -->
-<div class="bottom-nav">
+<div class="bottom-nav" id="bottomNav">
     <a href="index.html" class="nav-btn active">
         <i class="fas fa-home"></i>
         <span>Home</span>
@@ -591,8 +912,106 @@ const firebaseConfig = {
 
 // Firebase variables
 let firebaseApp, firebaseDB, firebaseAuth;
+let lastVisible = null;
+let isLoading = false;
+let currentCategory = 'all';
+let currentPriceFilter = 'all';
+let currentSort = 'newest';
 
-// Initialize Firebase
+// ============================================
+// CART SYSTEM - INTEGRATED
+// ============================================
+
+class CartSystem {
+    constructor() {
+        this.userId = this.getUserId();
+        this.cartKey = `irya_cart_${this.userId}`;
+    }
+    
+    getUserId() {
+        let userId = localStorage.getItem('irya_user_id');
+        if (!userId) {
+            userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('irya_user_id', userId);
+        }
+        return userId;
+    }
+    
+    addToCart(productId, productName, productPrice, productImage, productCategory, stoneName = '') {
+        try {
+            const cart = this.getCart();
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: productId,
+                    name: productName,
+                    stoneName: stoneName || productName,
+                    price: productPrice,
+                    image: productImage,
+                    category: productCategory,
+                    quantity: 1,
+                    addedAt: new Date().toISOString()
+                });
+            }
+            
+            localStorage.setItem(this.cartKey, JSON.stringify(cart));
+            this.updateCartBadge();
+            showNotification(`${stoneName || productName} added to cart!`);
+            return true;
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            showError('Failed to add to cart. Please try again.');
+            return false;
+        }
+    }
+    
+    getCart() {
+        try {
+            return JSON.parse(localStorage.getItem(this.cartKey) || '[]');
+        } catch (error) {
+            console.error('Error reading cart:', error);
+            return [];
+        }
+    }
+    
+    getCartCount() {
+        const cart = this.getCart();
+        return cart.reduce((total, item) => total + item.quantity, 0);
+    }
+    
+    updateCartBadge() {
+        const count = this.getCartCount();
+        const cartBadge = document.getElementById('cartBadge');
+        if (cartBadge) {
+            cartBadge.textContent = count;
+            cartBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+    
+    removeFromCart(productId) {
+        try {
+            const cart = this.getCart();
+            const newCart = cart.filter(item => item.id !== productId);
+            localStorage.setItem(this.cartKey, JSON.stringify(newCart));
+            this.updateCartBadge();
+            return true;
+        } catch (error) {
+            console.error('Error removing from cart:', error);
+            return false;
+        }
+    }
+}
+
+// Initialize cart system
+const cartSystem = new CartSystem();
+
+// ============================================
+// FIREBASE INITIALIZATION
+// ============================================
+
 function initializeFirebase() {
     try {
         if (typeof firebase === 'undefined') {
@@ -600,14 +1019,16 @@ function initializeFirebase() {
             return false;
         }
         
-        // Initialize Firebase
-        firebaseApp = firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+        } else {
+            firebaseApp = firebase.app();
+        }
+        
         firebaseDB = firebase.firestore();
         firebaseAuth = firebase.auth();
         
-        showDebugInfo('✅ Firebase initialized successfully');
         console.log('Firebase initialized successfully');
-        
         return true;
     } catch (error) {
         console.error('Firebase initialization error:', error);
@@ -617,14 +1038,93 @@ function initializeFirebase() {
 }
 
 // ============================================
-// FIREBASE DATA FETCHING - FIXED VERSION
+// STONE USES DATA
 // ============================================
 
-let lastVisible = null;
-let isLoading = false;
-let currentCategory = 'all';
+const stoneUses = [
+    {
+        id: 1,
+        title: "Flooring & Pavement",
+        description: "Natural stone flooring adds elegance and durability to any space. Perfect for indoor floors, outdoor patios, and walkways.",
+        image: "https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=800",
+        stones: ["Sandstone", "Kota Stone", "Granite", "Limestone"],
+        uses: ["Indoor flooring", "Outdoor paving", "Garden paths", "Driveways"]
+    },
+    {
+        id: 2,
+        title: "Wall Cladding",
+        description: "Transform your walls with natural stone cladding for a rustic or modern look. Excellent for both interior and exterior walls.",
+        image: "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=800",
+        stones: ["Sandstone", "Kota Stone", "Slate", "Marble"],
+        uses: ["Feature walls", "Exterior facades", "Fireplace surrounds", "Accent walls"]
+    },
+    {
+        id: 3,
+        title: "Kitchen Countertops",
+        description: "Durable and beautiful stone surfaces for kitchens. Resistant to heat, scratches, and easy to maintain.",
+        image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w-800",
+        stones: ["Granite", "Marble", "Quartzite", "Limestone"],
+        uses: ["Kitchen tops", "Islands", "Breakfast bars", "Backsplashes"]
+    },
+    {
+        id: 4,
+        title: "Bathroom Surfaces",
+        description: "Create a spa-like atmosphere with natural stone in bathrooms. Water-resistant and easy to clean.",
+        image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800",
+        stones: ["Marble", "Travertine", "Granite", "Limestone"],
+        uses: ["Vanity tops", "Shower walls", "Bath surrounds", "Flooring"]
+    },
+    {
+        id: 5,
+        title: "Garden & Landscape",
+        description: "Enhance outdoor spaces with natural stone features. Perfect for gardens, water features, and decorative elements.",
+        image: "https://images.unsplash.com/photo-1560743641-3914f2c45636?auto=format&fit=crop&w=800",
+        stones: ["Sandstone", "Kota Stone", "Slate", "Granite"],
+        uses: ["Garden edges", "Water features", "Retaining walls", "Decorative rocks"]
+    },
+    {
+        id: 6,
+        title: "Commercial Spaces",
+        description: "Premium stone solutions for hotels, offices, and retail spaces. Combines durability with aesthetic appeal.",
+        image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=800",
+        stones: ["Granite", "Marble", "Limestone", "Sandstone"],
+        uses: ["Hotel lobbies", "Office flooring", "Restaurant tables", "Retail displays"]
+    }
+];
 
-async function loadProductsFromFirebase(category = 'all', loadMore = false) {
+function loadStoneUses() {
+    const usesGrid = document.getElementById('usesGrid');
+    if (!usesGrid) return;
+    
+    const usesHTML = stoneUses.map(use => `
+        <div class="use-card" data-use-id="${use.id}">
+            <div class="use-image">
+                <img src="${use.image}" alt="${use.title}" 
+                     onerror="this.src='https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800'">
+            </div>
+            <div class="use-content">
+                <h3><i class="fas fa-star"></i> ${use.title}</h3>
+                <p>${use.description}</p>
+                
+                <div class="use-stones">
+                    ${use.stones.map(stone => `<span class="stone-tag">${stone}</span>`).join('')}
+                </div>
+                
+                <div style="margin-top: 15px; font-size: 12px; color: var(--text-light);">
+                    <strong>Common Uses:</strong> ${use.uses.join(', ')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    usesGrid.innerHTML = usesHTML;
+}
+
+// ============================================
+// PRODUCT LOADING FROM FIREBASE
+// ============================================
+
+async function loadProductsFromFirebase(loadMore = false) {
     const container = document.getElementById('productGrid');
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     
@@ -648,8 +1148,30 @@ async function loadProductsFromFirebase(category = 'all', loadMore = false) {
         let query = firebaseDB.collection("products");
         
         // Apply category filter
-        if (category !== 'all') {
-            query = query.where("category", "==", category);
+        if (currentCategory !== 'all') {
+            query = query.where("category", "==", currentCategory);
+        }
+        
+        // Apply price filter
+        if (currentPriceFilter !== 'all') {
+            let priceQuery;
+            switch(currentPriceFilter) {
+                case 'low':
+                    priceQuery = firebaseDB.collection("products").where("price", "<", 30);
+                    break;
+                case 'medium':
+                    priceQuery = firebaseDB.collection("products")
+                        .where("price", ">=", 30)
+                        .where("price", "<=", 60);
+                    break;
+                case 'high':
+                    priceQuery = firebaseDB.collection("products").where("price", ">", 60);
+                    break;
+            }
+            if (priceQuery) {
+                // For simplicity, we'll filter client-side for multiple conditions
+                // In production, you'd need composite indexes
+            }
         }
         
         // For load more, start after last document
@@ -660,11 +1182,8 @@ async function loadProductsFromFirebase(category = 'all', loadMore = false) {
         // Get products with limit
         const querySnapshot = await query.limit(12).get();
         
-        showDebugInfo(`📦 Found ${querySnapshot.size} products in Firebase`);
-        
         if (querySnapshot.empty) {
             if (!loadMore) {
-                showDebugInfo('No products found in Firebase');
                 showDefaultProducts();
             } else {
                 showNotification('No more products to load');
@@ -681,16 +1200,15 @@ async function loadProductsFromFirebase(category = 'all', loadMore = false) {
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             
-            // SAFELY EXTRACT DATA FROM YOUR FIREBASE STRUCTURE
             const product = {
                 id: doc.id,
                 name: data.stone_name || data.name || 'Stone Product',
-                stone_name: data.stone_name || '',
+                stone_name: data.stone_name || data.name || '',
                 category: data.category || '',
                 sub_category: data.sub_category || '',
                 type: data.type || 'Natural',
                 color: data.color || '',
-                price: data.price || 0,
+                price: parseFloat(data.price) || 0,
                 price_unit: data.price_unit || 'piece',
                 description: data.description || '',
                 size: data.size || '',
@@ -703,33 +1221,25 @@ async function loadProductsFromFirebase(category = 'all', loadMore = false) {
                 userId: data.userId || ''
             };
             
-            // Handle images array safely
+            // Handle images
             if (data.images && Array.isArray(data.images) && data.images.length > 0) {
                 product.image = data.images[0];
             } else if (typeof data.image === 'string') {
                 product.image = data.image;
             } else {
-                // Default image based on category
                 product.image = getDefaultImage(product.category);
-            }
-            
-            // Handle additional_fields array if exists
-            if (data.additional_fields && Array.isArray(data.additional_fields)) {
-                // You can process additional fields here if needed
-                console.log('Additional fields found:', data.additional_fields);
             }
             
             products.push(product);
         });
         
-        showDebugInfo(`✅ Processed ${products.length} products`);
+        // Apply sorting
+        sortProducts(products);
         
         // Display products
         if (loadMore) {
-            // Append to existing products
             displayProducts(products, true);
         } else {
-            // Replace existing products
             displayProducts(products, false);
         }
         
@@ -742,7 +1252,6 @@ async function loadProductsFromFirebase(category = 'all', loadMore = false) {
         
     } catch (error) {
         console.error('Error loading products from Firebase:', error);
-        showDebugInfo(`❌ Error: ${error.message}`);
         showError('Failed to load products. Using default data.');
         
         if (!loadMore) {
@@ -753,21 +1262,22 @@ async function loadProductsFromFirebase(category = 'all', loadMore = false) {
     }
 }
 
-// Get default image based on category
-function getDefaultImage(category) {
-    const categoryLower = (category || '').toLowerCase();
-    
-    if (categoryLower.includes('sand')) {
-        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
-    } else if (categoryLower.includes('kota')) {
-        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800';
-    } else if (categoryLower.includes('granite')) {
-        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800';
-    } else if (categoryLower.includes('limestone')) {
-        return 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800';
+function sortProducts(products) {
+    switch(currentSort) {
+        case 'price_low':
+            products.sort((a, b) => a.price - b.price);
+            break;
+        case 'price_high':
+            products.sort((a, b) => b.price - a.price);
+            break;
+        case 'name':
+            products.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        case 'newest':
+        default:
+            // Already sorted by Firestore timestamp
+            break;
     }
-    
-    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
 }
 
 // Display products
@@ -784,20 +1294,16 @@ function displayProducts(products, append = false) {
             <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-light);">
                 <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
                 <h3>No products found</h3>
-                <p>Try selecting a different category</p>
+                <p>Try selecting a different category or filter</p>
             </div>
         `;
         return;
     }
     
     const productsHTML = products.map(product => {
-        // Get badge based on price
-        let badge = '';
-        const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
-        
-        if (price > 100) badge = 'Premium';
-        else if (price > 50) badge = 'Popular';
-        else if (product.category === 'Sand Stone') badge = 'Sandstone';
+        // Get badge based on category
+        let badge = product.category || '';
+        if (product.category === 'Sand Stone') badge = 'Sandstone';
         else if (product.category === 'Kota Stone') badge = 'Kota';
         
         // Format price
@@ -806,31 +1312,42 @@ function displayProducts(products, append = false) {
         return `
             <div class="card" data-id="${product.id}" data-category="${product.category || ''}">
                 <div class="product-image-container">
-                    <img src="${product.image}" alt="${product.name}" class="product-image" 
-                         onerror="this.src='${getDefaultImage(product.category)}'">
+                    <img src="${product.image}" alt="${product.stone_name}" class="product-image" 
+                         onerror="this.src='${getDefaultImage(product.category)}'"
+                         loading="lazy">
                     ${badge ? `<div class="product-badge">${badge}</div>` : ''}
                 </div>
                 <div class="product-content">
-                    <h3>${product.name}</h3>
-                    <p>${product.description ? (product.description.length > 100 ? 
-                        product.description.substring(0, 100) + '...' : product.description) : 
-                        'Premium quality natural stone product'}</p>
+                    <div class="stone-name">${product.stone_name}</div>
+                    <div class="stone-category">${product.category || 'Natural Stone'}</div>
                     
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
-                        ${product.category ? `<span style="font-size: 12px; background: rgba(201, 162, 39, 0.1); padding: 4px 8px; border-radius: 10px; color: var(--primary-gold);">${product.category}</span>` : ''}
-                        ${product.finish ? `<span style="font-size: 12px; background: var(--bg-light); padding: 4px 8px; border-radius: 10px; color: var(--text-light);">${product.finish}</span>` : ''}
-                        ${product.thickness ? `<span style="font-size: 12px; background: var(--bg-light); padding: 4px 8px; border-radius: 10px; color: var(--text-light);">${product.thickness}</span>` : ''}
+                    <p>${product.description ? (product.description.length > 120 ? 
+                        product.description.substring(0, 120) + '...' : product.description) : 
+                        'Premium quality natural stone product suitable for various applications.'}</p>
+                    
+                    <div class="product-specs">
+                        ${product.finish ? `<span class="spec-tag"><i class="fas fa-paint-roller"></i> ${product.finish}</span>` : ''}
+                        ${product.size ? `<span class="spec-tag"><i class="fas fa-ruler-combined"></i> ${product.size}</span>` : ''}
+                        ${product.thickness ? `<span class="spec-tag"><i class="fas fa-layer-group"></i> ${product.thickness}</span>` : ''}
+                        ${product.color ? `<span class="spec-tag"><i class="fas fa-palette"></i> ${product.color}</span>` : ''}
                     </div>
                     
-                    <div class="price">${formattedPrice}</div>
-                    
-                    <div class="card-actions">
-                        <button class="card-btn btn-primary" onclick="addToCart('${product.id}', '${product.name.replace(/'/g, "\\'")}', ${price}, '${product.image.replace(/'/g, "\\'")}', '${product.category || "Natural Stone"}')">
-                            Add to Cart
-                        </button>
-                        <button class="card-btn btn-secondary" onclick="viewProductDetails('${product.id}')">
-                            View Details
-                        </button>
+                    <div class="price-section">
+                        <div class="price">
+                            ${formattedPrice}
+                            ${product.price_unit !== 'piece' ? `<span class="rate-unit">/${product.price_unit}</span>` : ''}
+                        </div>
+                        
+                        <div class="card-actions">
+                            <button class="card-btn btn-primary" onclick="addToCartWithStoneName('${product.id}', '${product.name.replace(/'/g, "\\'")}', '${product.stone_name.replace(/'/g, "\\'")}', ${product.price}, '${product.image.replace(/'/g, "\\'")}', '${product.category || "Natural Stone"}')">
+                                <i class="fas fa-cart-plus"></i>
+                                Add to Cart
+                            </button>
+                            <button class="card-btn btn-secondary" onclick="viewProductDetails('${product.id}')">
+                                <i class="fas fa-eye"></i>
+                                Details
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -844,154 +1361,27 @@ function displayProducts(products, append = false) {
     }
 }
 
-// Show default products (fallback)
-function showDefaultProducts() {
-    const products = [
-        {
-            id: '1',
-            name: 'Raj Green Sandstone',
-            description: 'Premium quality sandstone for outdoor flooring',
-            price: 28.50,
-            image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800',
-            category: 'Sand Stone',
-            finish: 'Matt',
-            thickness: '22mm'
-        },
-        {
-            id: '2',
-            name: 'Kota Blue Stone',
-            description: 'Natural blue limestone for indoor flooring',
-            price: 32.75,
-            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800',
-            category: 'Kota Stone',
-            finish: 'Polished',
-            thickness: '18mm'
-        },
-        {
-            id: '3',
-            name: 'Autumn Brown Sandstone',
-            description: 'Warm brown sandstone for driveways',
-            price: 26.90,
-            image: 'https://images.unsplash.com/photo-1598300054893-ef06c8935c52?auto=format&fit=crop&w=800',
-            category: 'Sand Stone',
-            finish: 'Natural',
-            thickness: '25mm'
-        },
-        {
-            id: '4',
-            name: 'Black Granite',
-            description: 'Premium black granite slabs',
-            price: 45.00,
-            image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800',
-            category: 'Granite',
-            finish: 'Polished',
-            thickness: '30mm'
+// Enhanced add to cart function
+function addToCartWithStoneName(productId, productName, stoneName, productPrice, productImage, productCategory) {
+    const success = cartSystem.addToCart(
+        productId, 
+        productName, 
+        productPrice, 
+        productImage, 
+        productCategory,
+        stoneName
+    );
+    
+    if (success) {
+        // Animate cart button
+        const cartBtn = document.querySelector('a[href="cart.html"]');
+        if (cartBtn) {
+            cartBtn.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                cartBtn.style.transform = 'scale(1)';
+            }, 300);
         }
-    ];
-    
-    displayProducts(products);
-}
-
-// Format price
-function formatPrice(price, unit = 'piece') {
-    if (!price && price !== 0) return 'Price on request';
-    
-    const priceNum = typeof price === 'number' ? price : parseFloat(price);
-    
-    if (isNaN(priceNum)) return 'Price on request';
-    
-    if (unit === 'sqft' || unit === 'm²') {
-        return `£${priceNum.toFixed(2)}/${unit}`;
-    } else if (unit === 'piece') {
-        return `£${priceNum.toFixed(2)} per piece`;
-    } else {
-        return `£${priceNum.toFixed(2)}`;
     }
-}
-
-// ============================================
-// CART SYSTEM
-// ============================================
-
-function addToCart(productId, productName, productPrice, productImage, productCategory) {
-    try {
-        // Get user ID
-        let userId = localStorage.getItem('irya_user_id');
-        if (!userId) {
-            userId = 'user_' + Date.now();
-            localStorage.setItem('irya_user_id', userId);
-        }
-        
-        // Get cart from localStorage
-        const cartKey = `cart_${userId}`;
-        const cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
-        
-        // Check if item already exists
-        const existingItem = cart.find(item => item.id === productId);
-        
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            cart.push({
-                id: productId,
-                name: productName,
-                price: productPrice,
-                image: productImage,
-                category: productCategory,
-                quantity: 1,
-                addedAt: new Date().toISOString()
-            });
-        }
-        
-        // Save cart
-        localStorage.setItem(cartKey, JSON.stringify(cart));
-        
-        // Update cart badge
-        updateCartBadge();
-        
-        // Show notification
-        showNotification(`${productName} added to cart!`);
-        
-    } catch (error) {
-        console.error('Error adding to cart:', error);
-        showError('Failed to add to cart. Please try again.');
-    }
-}
-
-function updateCartBadge() {
-    try {
-        // Get user ID
-        let userId = localStorage.getItem('irya_user_id');
-        if (!userId) {
-            userId = 'user_' + Date.now();
-            localStorage.setItem('irya_user_id', userId);
-        }
-        
-        // Get cart from localStorage
-        const cartKey = `cart_${userId}`;
-        const cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
-        
-        // Calculate total items
-        const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
-        
-        // Update badge
-        const cartBadge = document.getElementById('cartBadge');
-        if (cartBadge) {
-            cartBadge.textContent = itemCount;
-            cartBadge.style.display = itemCount > 0 ? 'flex' : 'none';
-        }
-        
-        return itemCount;
-    } catch (error) {
-        console.error('Error updating cart badge:', error);
-        return 0;
-    }
-}
-
-function viewProductDetails(productId) {
-    showNotification('Opening product details...');
-    // In real implementation, redirect to product detail page
-    // window.location.href = `product-detail.html?id=${productId}`;
 }
 
 // ============================================
@@ -1029,16 +1419,121 @@ function showError(message) {
     }, 5000);
 }
 
-function showDebugInfo(message) {
-    const debugDiv = document.getElementById('firebaseDebug');
-    if (!debugDiv) return;
+function getDefaultImage(category) {
+    const categoryLower = (category || '').toLowerCase();
     
-    debugDiv.textContent = message;
-    debugDiv.style.display = 'block';
+    if (categoryLower.includes('sand')) {
+        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('kota')) {
+        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('granite')) {
+        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('limestone')) {
+        return 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('marble')) {
+        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800';
+    }
     
-    setTimeout(() => {
-        debugDiv.style.display = 'none';
-    }, 5000);
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+}
+
+function formatPrice(price, unit = 'piece') {
+    if (!price && price !== 0) return 'Price on request';
+    
+    const priceNum = typeof price === 'number' ? price : parseFloat(price);
+    
+    if (isNaN(priceNum)) return 'Price on request';
+    
+    if (unit === 'sqft' || unit === 'm²') {
+        return `£${priceNum.toFixed(2)}/${unit}`;
+    } else if (unit === 'piece') {
+        return `£${priceNum.toFixed(2)} per piece`;
+    } else {
+        return `£${priceNum.toFixed(2)}`;
+    }
+}
+
+function viewProductDetails(productId) {
+    showNotification('Opening product details...');
+    // In real implementation, redirect to product detail page
+    // window.location.href = `product-detail.html?id=${productId}`;
+}
+
+// Show default products (fallback)
+function showDefaultProducts() {
+    const products = [
+        {
+            id: '1',
+            name: 'Raj Green Sandstone',
+            stone_name: 'Raj Green Sandstone',
+            description: 'Premium quality sandstone for outdoor flooring with natural green hues',
+            price: 28.50,
+            image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800',
+            category: 'Sand Stone',
+            finish: 'Matt',
+            thickness: '22mm',
+            size: '600x400mm',
+            color: 'Green',
+            price_unit: 'sqft'
+        },
+        {
+            id: '2',
+            name: 'Kota Blue Stone',
+            stone_name: 'Kota Blue Stone',
+            description: 'Natural blue limestone for indoor flooring with elegant finish',
+            price: 32.75,
+            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800',
+            category: 'Kota Stone',
+            finish: 'Polished',
+            thickness: '18mm',
+            size: '300x300mm',
+            color: 'Blue',
+            price_unit: 'sqft'
+        }
+    ];
+    
+    displayProducts(products);
+}
+
+// ============================================
+// SCROLL HANDLING - Hide/Show Header & Footer
+// ============================================
+
+let lastScrollTop = 0;
+const header = document.getElementById('mainHeader');
+const bottomNav = document.getElementById('bottomNav');
+const scrollTopBtn = document.getElementById('scrollTopBtn');
+const heroSection = document.getElementById('heroSection');
+
+function handleScroll() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Hide/show header on scroll
+    if (scrollTop > lastScrollTop && scrollTop > 100) {
+        // Scrolling down
+        header.classList.add('hidden');
+        bottomNav.classList.add('hidden');
+    } else {
+        // Scrolling up
+        header.classList.remove('hidden');
+        bottomNav.classList.remove('hidden');
+    }
+    
+    lastScrollTop = scrollTop;
+    
+    // Show/hide scroll to top button
+    if (scrollTop > 500) {
+        scrollTopBtn.classList.add('visible');
+    } else {
+        scrollTopBtn.classList.remove('visible');
+    }
+    
+    // Adjust hero margin based on header visibility
+    if (header.classList.contains('hidden')) {
+        heroSection.style.marginTop = '0';
+    } else {
+        heroSection.style.marginTop = '';
+    }
 }
 
 // ============================================
@@ -1049,7 +1544,10 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('IRYA STONE Website initialized');
     
     // Initialize cart badge
-    updateCartBadge();
+    cartSystem.updateCartBadge();
+    
+    // Load stone uses
+    loadStoneUses();
     
     // Initialize Firebase and load products
     initializeFirebase();
@@ -1060,8 +1558,28 @@ document.addEventListener('DOMContentLoaded', function() {
     if (categoryFilter) {
         categoryFilter.addEventListener('change', function() {
             currentCategory = this.value;
-            lastVisible = null; // Reset pagination
-            loadProductsFromFirebase(currentCategory, false);
+            lastVisible = null;
+            loadProductsFromFirebase(false);
+        });
+    }
+    
+    // Price filter change
+    const priceFilter = document.getElementById('priceFilter');
+    if (priceFilter) {
+        priceFilter.addEventListener('change', function() {
+            currentPriceFilter = this.value;
+            lastVisible = null;
+            loadProductsFromFirebase(false);
+        });
+    }
+    
+    // Sort filter change
+    const sortFilter = document.getElementById('sortFilter');
+    if (sortFilter) {
+        sortFilter.addEventListener('change', function() {
+            currentSort = this.value;
+            lastVisible = null;
+            loadProductsFromFirebase(false);
         });
     }
     
@@ -1069,7 +1587,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', function() {
-            loadProductsFromFirebase(currentCategory, true);
+            loadProductsFromFirebase(true);
         });
     }
     
@@ -1089,30 +1607,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Bottom navigation
-    const navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            if (this.href) return; // If it's a link, let it work
-            
-            e.preventDefault();
-            navButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
+    // Scroll to top button
+    if (scrollTopBtn) {
+        scrollTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         });
-    });
+    }
+    
+    // Setup scroll handling
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Initial scroll check
+    handleScroll();
+    
+    // Make functions globally available
+    window.addToCartWithStoneName = addToCartWithStoneName;
+    window.viewProductDetails = viewProductDetails;
+    window.cartSystem = cartSystem;
 });
 
 function searchProducts(query) {
     if (query.trim()) {
         showNotification(`Searching for: ${query}`);
         // In real implementation, filter products based on search
+        // You would call Firebase with search query
     }
 }
-
-// Make functions globally available
-window.addToCart = addToCart;
-window.viewProductDetails = viewProductDetails;
-window.loadProductsFromFirebase = loadProductsFromFirebase;
 </script>
 </body>
 </html>
