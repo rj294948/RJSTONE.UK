@@ -414,9 +414,10 @@ header.hidden {
     font-size: 16px;
 }
 
+/* UPDATED: Categories Grid - Special layout for Sand & Kota */
 .categories-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     margin-bottom: 30px;
 }
@@ -434,6 +435,26 @@ header.hidden {
     display: block;
     position: relative;
     height: 200px;
+}
+
+/* Special large cards for Sand Stone & Kota Stone */
+.category-card.large {
+    grid-column: span 1;
+    height: 250px;
+}
+
+/* Other categories in smaller size */
+.category-card.small {
+    grid-column: span 1;
+    height: 180px;
+}
+
+/* For other categories grid (after first 2) */
+.other-categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
 }
 
 .category-card:hover {
@@ -482,7 +503,7 @@ header.hidden {
     opacity: 0.9;
 }
 
-/* Stone Uses Section - UPDATED: Same as Shop by Category */
+/* Stone Uses Section */
 .uses-section {
     padding: 40px 16px;
     background: var(--bg-light);
@@ -572,7 +593,7 @@ header.hidden {
     opacity: 0.9;
 }
 
-/* Products Section */
+/* Products Section - UPDATED */
 .products {
     padding: 40px 16px;
     background: var(--white);
@@ -600,7 +621,7 @@ header.hidden {
     color: var(--primary-gold);
 }
 
-/* Image Grid Layout */
+/* NEW: Image Grid Layout */
 .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -676,6 +697,42 @@ header.hidden {
     transform: scale(1.1) !important;
 }
 
+/* Wishlist Icon */
+.wishlist-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 40px;
+    height: 40px;
+    background: var(--white);
+    color: var(--text-dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 2;
+    border: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.image-card:hover .wishlist-icon {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.wishlist-icon:hover {
+    color: #ff4757;
+    transform: scale(1.1) !important;
+}
+
+.wishlist-icon.active {
+    color: #ff4757;
+}
+
 /* Product Info Overlay */
 .product-info-overlay {
     position: absolute;
@@ -713,7 +770,7 @@ header.hidden {
 /* Product Badge */
 .product-badge {
     position: absolute;
-    top: 10px;
+    top: 60px;
     left: 10px;
     background: var(--primary-gold);
     color: var(--white);
@@ -728,6 +785,192 @@ header.hidden {
 /* Featured Products Section - REMOVED */
 .featured-section {
     display: none !important;
+}
+
+/* Wishlist Modal */
+.wishlist-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 9998;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.wishlist-modal.active {
+    display: flex;
+}
+
+.wishlist-content {
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.wishlist-header {
+    padding: 25px 30px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wishlist-header h2 {
+    font-size: 24px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.wishlist-header h2 i {
+    color: #ff4757;
+}
+
+.wishlist-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--stone-dark);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.wishlist-close:hover {
+    background: #ff4757;
+    transform: rotate(90deg);
+}
+
+.wishlist-body {
+    padding: 30px;
+}
+
+.wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.wishlist-item {
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    position: relative;
+}
+
+.wishlist-item-image {
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+}
+
+.wishlist-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wishlist-item-info {
+    padding: 15px;
+}
+
+.wishlist-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--stone-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wishlist-item-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-gold);
+    margin-bottom: 10px;
+}
+
+.wishlist-item-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.wishlist-action-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-view {
+    background: var(--primary-gold);
+    color: white;
+}
+
+.btn-view:hover {
+    background: var(--gold-dark);
+}
+
+.btn-remove {
+    background: #ff4757;
+    color: white;
+}
+
+.btn-remove:hover {
+    background: #ff2e43;
+}
+
+.empty-wishlist {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-wishlist i {
+    font-size: 48px;
+    color: #ff4757;
+    opacity: 0.5;
+    margin-bottom: 20px;
+}
+
+.empty-wishlist h3 {
+    font-size: 20px;
+    color: var(--stone-dark);
+    margin-bottom: 10px;
+}
+
+.empty-wishlist p {
+    color: var(--text-light);
+    margin-bottom: 20px;
 }
 
 /* Bottom Navigation */
@@ -856,7 +1099,7 @@ header.hidden {
     text-align: center;
 }
 
-/* Filter Controls */
+/* Filter Controls - UPDATED */
 .filter-controls {
     display: flex;
     gap: 10px;
@@ -877,6 +1120,7 @@ header.hidden {
 .filter-select:focus {
     outline: none;
     border-color: var(--primary-gold);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.1);
 }
 
 /* Scroll to Top Button */
@@ -910,6 +1154,30 @@ header.hidden {
     transform: translateY(-5px);
 }
 
+/* View All Button */
+.view-all-container {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.view-all-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background: var(--primary-gold);
+    color: white;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    border: 2px solid var(--primary-gold);
+}
+
+.view-all-btn:hover {
+    background: transparent;
+    color: var(--primary-gold);
+    transform: translateY(-2px);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .hero h1 {
@@ -920,7 +1188,22 @@ header.hidden {
         font-size: 16px;
     }
     
-    .categories-grid,
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .category-card.large {
+        height: 220px;
+    }
+    
+    .category-card.small {
+        height: 160px;
+    }
+    
+    .other-categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
     .uses-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -936,6 +1219,10 @@ header.hidden {
     
     .filter-controls {
         justify-content: center;
+    }
+    
+    .wishlist-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
     
     header {
@@ -968,11 +1255,16 @@ header.hidden {
 
 @media (max-width: 480px) {
     .categories-grid,
+    .other-categories-grid,
     .uses-grid {
         grid-template-columns: 1fr;
     }
     
     .product-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .wishlist-grid {
         grid-template-columns: 1fr;
     }
     
@@ -1003,6 +1295,21 @@ header.hidden {
 <!-- Error Message -->
 <div class="error-message" id="errorMessage"></div>
 
+<!-- Wishlist Modal -->
+<div class="wishlist-modal" id="wishlistModal">
+    <div class="wishlist-content">
+        <div class="wishlist-header">
+            <h2><i class="fas fa-heart"></i> My Wishlist</h2>
+            <button class="wishlist-close" id="wishlistCloseBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="wishlist-body" id="wishlistBody">
+            <!-- Wishlist items will be loaded here -->
+        </div>
+    </div>
+</div>
+
 <!-- Scroll to Top Button -->
 <div class="scroll-top" id="scrollTopBtn">
     <i class="fas fa-arrow-up"></i>
@@ -1024,7 +1331,7 @@ header.hidden {
 
     <!-- Header Actions -->
     <div style="display: flex; gap: 10px; align-items: center;">
-        <button class="action-btn" id="wishlistBtn">
+        <button class="action-btn" id="wishlistBtn" title="Wishlist">
             <i class="far fa-heart"></i>
         </button>
         <a href="cart.html" class="action-btn" style="position: relative;">
@@ -1063,12 +1370,16 @@ header.hidden {
     <div class="categories-grid" id="categoriesGrid">
         <!-- Categories will be dynamically loaded -->
     </div>
+    
+    <div class="other-categories-grid" id="otherCategoriesGrid">
+        <!-- Other categories will be loaded here -->
+    </div>
 </section>
 
-<!-- Stone Uses Section - UPDATED: Same layout as Shop by Category -->
+<!-- Stone Uses Section -->
 <section class="uses-section" id="uses">
     <h2>Sandstone & Kota Stone Uses</h2>
-    <p class="subtitle">Explore various applications of our premium natural stones</p>
+    <p class="subtitle">Discover the versatile applications of our premium natural stones</p>
     
     <div class="uses-grid" id="usesGrid">
         <!-- Uses will be dynamically loaded from Firebase -->
@@ -1101,6 +1412,16 @@ header.hidden {
                 <option value="100+">Over £100</option>
             </select>
             
+            <select id="usageFilter" class="filter-select">
+                <option value="all">All Uses</option>
+                <option value="Wall Cladding">Wall Cladding</option>
+                <option value="Flooring">Flooring</option>
+                <option value="Kitchen Countertops">Kitchen Countertops</option>
+                <option value="Garden Paving">Garden Paving</option>
+                <option value="Pool Surround">Pool Surround</option>
+                <option value="Patio Flooring">Patio Flooring</option>
+            </select>
+            
             <select id="sortFilter" class="filter-select">
                 <option value="newest">Newest First</option>
                 <option value="price_low">Price: Low to High</option>
@@ -1115,10 +1436,10 @@ header.hidden {
         <!-- Images will load here from Firebase -->
     </div>
     
-    <div style="text-align: center; margin-top: 30px;">
-        <button id="loadMoreBtn" style="padding: 12px 30px; background: var(--bg-light); border: 1px solid #e0e0e0; border-radius: 25px; font-weight: 500; cursor: pointer; display: none;">
-            <i class="fas fa-plus"></i> Load More Products
-        </button>
+    <div class="view-all-container">
+        <a href="products.html" class="view-all-btn">
+            <i class="fas fa-eye"></i> View All Products
+        </a>
     </div>
 </section>
 
@@ -1163,13 +1484,14 @@ const firebaseConfig = {
 
 // Firebase variables
 let firebaseApp, firebaseDB, firebaseAuth;
-let lastVisible = null;
-let isLoading = false;
+let allProducts = [];
+let filteredProducts = [];
+let cartSystem = null;
 let currentCategory = 'all';
 let currentPriceFilter = 'all';
+let currentUsageFilter = 'all';
 let currentSort = 'newest';
-let allProducts = [];
-let cartSystem = null;
+let wishlistItems = [];
 
 // ============================================
 // AUTHENTICATION SYSTEM
@@ -1313,7 +1635,7 @@ class AuthSystem {
                         </a>
                         <a href="wishlist.html" class="dropdown-item">
                             <i class="fas fa-heart"></i>
-                            <span>Wishlist</span>
+                            <span>My Wishlist</span>
                         </a>
                         <div class="dropdown-divider"></div>
                         <a href="javascript:void(0)" class="dropdown-item signout-btn" onclick="authSystem.logout()">
@@ -1510,6 +1832,81 @@ class CartSystem {
 }
 
 // ============================================
+// WISHLIST SYSTEM
+// ============================================
+
+class WishlistSystem {
+    constructor() {
+        this.wishlistKey = 'irya_wishlist_';
+    }
+    
+    init() {
+        this.loadWishlist();
+        return this;
+    }
+    
+    getUserId() {
+        return window.authSystem ? window.authSystem.getUserId() : 'guest';
+    }
+    
+    loadWishlist() {
+        const userId = this.getUserId();
+        const wishlistKey = this.wishlistKey + userId;
+        const wishlistData = localStorage.getItem(wishlistKey);
+        wishlistItems = wishlistData ? JSON.parse(wishlistData) : [];
+        return wishlistItems;
+    }
+    
+    saveWishlist() {
+        const userId = this.getUserId();
+        const wishlistKey = this.wishlistKey + userId;
+        localStorage.setItem(wishlistKey, JSON.stringify(wishlistItems));
+    }
+    
+    addToWishlist(product) {
+        const existingItem = wishlistItems.find(item => item.id === product.id);
+        
+        if (!existingItem) {
+            wishlistItems.push({
+                id: product.id,
+                stone_name: product.stone_name,
+                category: product.category,
+                price: product.price,
+                price_unit: product.price_unit,
+                image: product.image,
+                addedAt: new Date().toISOString()
+            });
+            
+            this.saveWishlist();
+            showNotification(`${product.stone_name} added to wishlist!`);
+            return true;
+        }
+        return false;
+    }
+    
+    removeFromWishlist(productId) {
+        const index = wishlistItems.findIndex(item => item.id === productId);
+        
+        if (index !== -1) {
+            const productName = wishlistItems[index].stone_name;
+            wishlistItems.splice(index, 1);
+            this.saveWishlist();
+            showNotification(`${productName} removed from wishlist`);
+            return true;
+        }
+        return false;
+    }
+    
+    isInWishlist(productId) {
+        return wishlistItems.some(item => item.id === productId);
+    }
+    
+    getWishlistCount() {
+        return wishlistItems.length;
+    }
+}
+
+// ============================================
 // FIREBASE INITIALIZATION
 // ============================================
 
@@ -1539,12 +1936,14 @@ function initializeFirebase() {
 }
 
 // ============================================
-// LOAD CATEGORIES
+// LOAD CATEGORIES - UPDATED
 // ============================================
 
 async function loadCategories() {
     const categoriesGrid = document.getElementById('categoriesGrid');
-    if (!categoriesGrid) return;
+    const otherCategoriesGrid = document.getElementById('otherCategoriesGrid');
+    
+    if (!categoriesGrid || !otherCategoriesGrid) return;
     
     try {
         if (!firebaseDB) {
@@ -1564,7 +1963,15 @@ async function loadCategories() {
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 const category = data.category || 'Natural Stone';
-                const image = data.image || getDefaultImage(category);
+                
+                // Get image from Firebase (check both image and images fields)
+                let image = data.image || '';
+                if (!image && data.images && Array.isArray(data.images) && data.images.length > 0) {
+                    image = data.images[0];
+                }
+                if (!image) {
+                    image = getDefaultImage(category);
+                }
                 
                 if (!categoryMap.has(category)) {
                     categoryMap.set(category, {
@@ -1577,11 +1984,70 @@ async function loadCategories() {
                 }
             });
             
-            const categories = Array.from(categoryMap.values())
-                .sort((a, b) => b.count - a.count)
-                .slice(0, 6);
+            // Get all categories sorted by count
+            const allCategories = Array.from(categoryMap.values())
+                .sort((a, b) => b.count - a.count);
             
-            displayCategories(categories);
+            // Special handling for Sand Stone and Kota Stone
+            const sandStone = allCategories.find(c => c.name.toLowerCase().includes('sand'));
+            const kotaStone = allCategories.find(c => c.name.toLowerCase().includes('kota'));
+            
+            // Other categories (excluding Sand Stone and Kota Stone if found)
+            const otherCategories = allCategories.filter(c => 
+                c !== sandStone && c !== kotaStone
+            ).slice(0, 6); // Limit to 6 other categories
+            
+            // Display Sand Stone and Kota Stone in large cards
+            let mainCategoriesHTML = '';
+            
+            if (sandStone) {
+                mainCategoriesHTML += `
+                    <a href="products.html?category=${encodeURIComponent(sandStone.name)}" class="category-card large">
+                        <div class="category-image">
+                            <img src="${sandStone.image}" alt="${sandStone.name}"
+                                 onerror="this.src='${getDefaultImage(sandStone.name)}'">
+                            <div class="category-overlay">
+                                <div class="category-name">${sandStone.name}</div>
+                                <div class="category-count">${sandStone.count} products</div>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }
+            
+            if (kotaStone) {
+                mainCategoriesHTML += `
+                    <a href="products.html?category=${encodeURIComponent(kotaStone.name)}" class="category-card large">
+                        <div class="category-image">
+                            <img src="${kotaStone.image}" alt="${kotaStone.name}"
+                                 onerror="this.src='${getDefaultImage(kotaStone.name)}'">
+                            <div class="category-overlay">
+                                <div class="category-name">${kotaStone.name}</div>
+                                <div class="category-count">${kotaStone.count} products</div>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }
+            
+            categoriesGrid.innerHTML = mainCategoriesHTML;
+            
+            // Display other categories in smaller grid
+            const otherCategoriesHTML = otherCategories.map(category => `
+                <a href="products.html?category=${encodeURIComponent(category.name)}" class="category-card small">
+                    <div class="category-image">
+                        <img src="${category.image}" alt="${category.name}"
+                             onerror="this.src='${getDefaultImage(category.name)}'">
+                        <div class="category-overlay">
+                            <div class="category-name">${category.name}</div>
+                            <div class="category-count">${category.count}</div>
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+            
+            otherCategoriesGrid.innerHTML = otherCategoriesHTML;
+            
         } else {
             loadDefaultCategories();
         }
@@ -1592,15 +2058,48 @@ async function loadCategories() {
     }
 }
 
-function displayCategories(categories) {
+function loadDefaultCategories() {
     const categoriesGrid = document.getElementById('categoriesGrid');
-    if (!categoriesGrid) return;
+    const otherCategoriesGrid = document.getElementById('otherCategoriesGrid');
     
-    const categoriesHTML = categories.map(category => `
-        <a href="products.html?category=${encodeURIComponent(category.name)}" class="category-card">
+    if (!categoriesGrid || !otherCategoriesGrid) return;
+    
+    // Sand Stone and Kota Stone in large cards
+    const mainCategoriesHTML = `
+        <a href="products.html?category=Sand%20Stone" class="category-card large">
             <div class="category-image">
-                <img src="${category.image}" alt="${category.name}"
-                     onerror="this.src='${getDefaultImage(category.name)}'">
+                <img src="https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800" alt="Sand Stone">
+                <div class="category-overlay">
+                    <div class="category-name">Sand Stone</div>
+                    <div class="category-count">25 products</div>
+                </div>
+            </div>
+        </a>
+        <a href="products.html?category=Kota%20Stone" class="category-card large">
+            <div class="category-image">
+                <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800" alt="Kota Stone">
+                <div class="category-overlay">
+                    <div class="category-name">Kota Stone</div>
+                    <div class="category-count">18 products</div>
+                </div>
+            </div>
+        </a>
+    `;
+    
+    categoriesGrid.innerHTML = mainCategoriesHTML;
+    
+    // Other categories in smaller grid
+    const otherCategories = [
+        { name: 'Granite', count: 15, image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800' },
+        { name: 'Marble', count: 12, image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800' },
+        { name: 'Limestone', count: 10, image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800' },
+        { name: 'Slate', count: 8, image: 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=800' }
+    ];
+    
+    const otherCategoriesHTML = otherCategories.map(category => `
+        <a href="products.html?category=${encodeURIComponent(category.name)}" class="category-card small">
+            <div class="category-image">
+                <img src="${category.image}" alt="${category.name}">
                 <div class="category-overlay">
                     <div class="category-name">${category.name}</div>
                     <div class="category-count">${category.count} products</div>
@@ -1609,48 +2108,11 @@ function displayCategories(categories) {
         </a>
     `).join('');
     
-    categoriesGrid.innerHTML = categoriesHTML;
-}
-
-function loadDefaultCategories() {
-    const defaultCategories = [
-        {
-            name: 'Sand Stone',
-            image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800',
-            count: 25
-        },
-        {
-            name: 'Kota Stone',
-            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800',
-            count: 18
-        },
-        {
-            name: 'Granite',
-            image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800',
-            count: 15
-        },
-        {
-            name: 'Marble',
-            image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800',
-            count: 12
-        },
-        {
-            name: 'Limestone',
-            image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800',
-            count: 10
-        },
-        {
-            name: 'Slate',
-            image: 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=800',
-            count: 8
-        }
-    ];
-    
-    displayCategories(defaultCategories);
+    otherCategoriesGrid.innerHTML = otherCategoriesHTML;
 }
 
 // ============================================
-// LOAD STONE USES FROM FIREBASE - UPDATED: Same as Shop by Category
+// LOAD STONE USES FROM FIREBASE - UPDATED
 // ============================================
 
 async function loadStoneUsesFromFirebase() {
@@ -1668,7 +2130,6 @@ async function loadStoneUsesFromFirebase() {
             }
         }
         
-        // Load uses from products collection
         const querySnapshot = await firebaseDB.collection("products").limit(100).get();
         
         if (!querySnapshot.empty) {
@@ -1676,9 +2137,16 @@ async function loadStoneUsesFromFirebase() {
             
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                // Extract usage from product data
                 const usage = data.usage || data.uses || 'General Use';
-                const image = data.image || getDefaultUseImage(usage);
+                
+                // Get image from Firebase (check both image and images fields)
+                let image = data.image || '';
+                if (!image && data.images && Array.isArray(data.images) && data.images.length > 0) {
+                    image = data.images[0];
+                }
+                if (!image) {
+                    image = getDefaultUseImage(usage);
+                }
                 
                 if (!usesMap.has(usage)) {
                     usesMap.set(usage, {
@@ -1691,7 +2159,7 @@ async function loadStoneUsesFromFirebase() {
                 }
             });
             
-            // Convert to array and sort
+            // Convert to array and sort by count
             const uses = Array.from(usesMap.values())
                 .sort((a, b) => b.count - a.count)
                 .slice(0, 6); // Show top 6 uses
@@ -1777,20 +2245,17 @@ function getDefaultUseImage(use) {
         return 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=800';
     } else if (useLower.includes('pool')) {
         return 'https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?auto=format&fit=crop&w=800';
-    } else if (useLower.includes('garden')) {
-        return 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=800';
     }
     
     return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
 }
 
 // ============================================
-// PRODUCT LOADING WITH IMAGE GRID
+// LOAD PRODUCTS FROM FIREBASE - UPDATED
 // ============================================
 
 async function loadProductsFromFirebase(loadMore = false) {
     const container = document.getElementById('productGrid');
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
     
     if (!container) return;
     
@@ -1807,10 +2272,12 @@ async function loadProductsFromFirebase(loadMore = false) {
         
         let query = firebaseDB.collection("products");
         
+        // Apply category filter
         if (currentCategory !== 'all') {
             query = query.where("category", "==", currentCategory);
         }
         
+        // Apply price filter - FIXED
         if (currentPriceFilter !== 'all') {
             const priceRange = currentPriceFilter.split('-');
             if (priceRange.length === 2) {
@@ -1823,6 +2290,12 @@ async function loadProductsFromFirebase(loadMore = false) {
             }
         }
         
+        // Apply usage filter - ADDED
+        if (currentUsageFilter !== 'all') {
+            query = query.where("usage", "==", currentUsageFilter);
+        }
+        
+        // Apply sorting
         if (currentSort === 'price_low') {
             query = query.orderBy("price", "asc");
         } else if (currentSort === 'price_high') {
@@ -1833,23 +2306,12 @@ async function loadProductsFromFirebase(loadMore = false) {
             query = query.orderBy("created_at", "desc");
         }
         
-        if (loadMore && lastVisible) {
-            query = query.startAfter(lastVisible);
-        }
-        
         const querySnapshot = await query.limit(12).get();
         
         if (querySnapshot.empty) {
-            if (!loadMore) {
-                showDefaultProducts();
-            } else {
-                showNotification('No more products to load');
-                loadMoreBtn.style.display = 'none';
-            }
+            showDefaultProducts();
             return;
         }
-        
-        lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
         
         const products = [];
         querySnapshot.forEach((doc) => {
@@ -1873,6 +2335,7 @@ async function loadProductsFromFirebase(loadMore = false) {
                 type: data.type || ''
             };
             
+            // Get image from Firebase (check both image and images fields)
             if (data.images && Array.isArray(data.images) && data.images.length > 0) {
                 product.image = data.images[0];
             } else if (typeof data.image === 'string') {
@@ -1890,25 +2353,12 @@ async function loadProductsFromFirebase(loadMore = false) {
             allProducts = [...allProducts, ...products];
         }
         
-        if (loadMore) {
-            displayImageProducts(products, true);
-        } else {
-            displayImageProducts(products, false);
-        }
-        
-        if (querySnapshot.size >= 12) {
-            loadMoreBtn.style.display = 'block';
-        } else {
-            loadMoreBtn.style.display = 'none';
-        }
+        displayImageProducts(products, loadMore);
         
     } catch (error) {
         console.error('Error loading products:', error);
         showError('Failed to load products. Using default data.');
-        
-        if (!loadMore) {
-            showDefaultProducts();
-        }
+        showDefaultProducts();
     } finally {
         showLoading(false);
     }
@@ -1940,27 +2390,31 @@ function displayImageProducts(products, append = false) {
         if (product.category === 'Sand Stone') badge = 'Sandstone';
         else if (product.category === 'Kota Stone') badge = 'Kota';
         
-        // CHANGED: Product card now links to product details page
+        const isInWishlist = wishlistSystem.isInWishlist(product.id);
+        
         return `
             <div class="image-card" data-id="${product.id}">
-                <a href="product-details.html?id=${product.id}" class="product-link" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
-                    <div class="card-image-container">
-                        <img src="${product.image}" alt="${product.stone_name}" class="card-image" 
-                             onerror="this.src='${getDefaultImage(product.category)}'"
-                             loading="lazy">
-                        
-                        <button class="add-cart-icon" onclick="event.preventDefault(); event.stopPropagation(); addToCartDirect('${product.id}')">
-                            <i class="fas fa-cart-plus"></i>
-                        </button>
-                        
-                        ${badge ? `<div class="product-badge">${badge}</div>` : ''}
-                        
-                        <div class="product-info-overlay">
-                            <div class="product-name">${product.stone_name}</div>
-                            <div class="product-price">${formattedPrice}</div>
-                        </div>
+                <div class="card-image-container">
+                    <img src="${product.image}" alt="${product.stone_name}" class="card-image" 
+                         onerror="this.src='${getDefaultImage(product.category)}'"
+                         loading="lazy">
+                    
+                    <button class="wishlist-icon ${isInWishlist ? 'active' : ''}" 
+                            onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
+                        <i class="${isInWishlist ? 'fas' : 'far'} fa-heart"></i>
+                    </button>
+                    
+                    <button class="add-cart-icon" onclick="event.stopPropagation(); addToCartDirect('${product.id}')">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                    
+                    ${badge ? `<div class="product-badge">${badge}</div>` : ''}
+                    
+                    <div class="product-info-overlay">
+                        <div class="product-name">${product.stone_name}</div>
+                        <div class="product-price">${formattedPrice}</div>
                     </div>
-                </a>
+                </div>
             </div>
         `;
     }).join('');
@@ -1984,6 +2438,124 @@ async function addToCartDirect(productId) {
         console.error('Error adding to cart:', error);
         showError('Failed to add to cart');
     }
+}
+
+// ============================================
+// WISHLIST FUNCTIONS
+// ============================================
+
+let wishlistSystem;
+
+function toggleWishlist(productId) {
+    const product = allProducts.find(p => p.id === productId);
+    
+    if (!product) return;
+    
+    if (wishlistSystem.isInWishlist(productId)) {
+        wishlistSystem.removeFromWishlist(productId);
+        updateWishlistIcon(productId, false);
+    } else {
+        wishlistSystem.addToWishlist(product);
+        updateWishlistIcon(productId, true);
+    }
+    
+    updateWishlistUI();
+}
+
+function updateWishlistIcon(productId, isInWishlist) {
+    const wishlistIcon = document.querySelector(`.image-card[data-id="${productId}"] .wishlist-icon`);
+    if (wishlistIcon) {
+        const heartIcon = wishlistIcon.querySelector('i');
+        if (isInWishlist) {
+            wishlistIcon.classList.add('active');
+            heartIcon.classList.remove('far');
+            heartIcon.classList.add('fas');
+        } else {
+            wishlistIcon.classList.remove('active');
+            heartIcon.classList.remove('fas');
+            heartIcon.classList.add('far');
+        }
+    }
+}
+
+function updateWishlistUI() {
+    const wishlistBtn = document.getElementById('wishlistBtn');
+    if (wishlistBtn) {
+        const count = wishlistSystem.getWishlistCount();
+        if (count > 0) {
+            wishlistBtn.innerHTML = `<i class="fas fa-heart"></i>`;
+            wishlistBtn.style.position = 'relative';
+        } else {
+            wishlistBtn.innerHTML = `<i class="far fa-heart"></i>`;
+        }
+    }
+}
+
+function openWishlistModal() {
+    const modal = document.getElementById('wishlistModal');
+    const wishlistBody = document.getElementById('wishlistBody');
+    
+    if (wishlistItems.length === 0) {
+        wishlistBody.innerHTML = `
+            <div class="empty-wishlist">
+                <i class="far fa-heart"></i>
+                <h3>Your Wishlist is Empty</h3>
+                <p>Add products to your wishlist by clicking the heart icon</p>
+                <button class="signin-btn" onclick="closeWishlistModal()" style="margin-top: 20px;">
+                    Continue Shopping
+                </button>
+            </div>
+        `;
+    } else {
+        const wishlistHTML = wishlistItems.map(item => `
+            <div class="wishlist-item" data-id="${item.id}">
+                <div class="wishlist-item-image">
+                    <img src="${item.image}" alt="${item.stone_name}"
+                         onerror="this.src='${getDefaultImage(item.category)}'">
+                </div>
+                <div class="wishlist-item-info">
+                    <div class="wishlist-item-name">${item.stone_name}</div>
+                    <div class="wishlist-item-price">£${item.price ? item.price.toFixed(2) : '0.00'}</div>
+                    <div class="wishlist-item-actions">
+                        <button class="wishlist-action-btn btn-view" onclick="viewWishlistItem('${item.id}')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="wishlist-action-btn btn-remove" onclick="removeWishlistItem('${item.id}')">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        wishlistBody.innerHTML = `
+            <div class="wishlist-grid">
+                ${wishlistHTML}
+            </div>
+        `;
+    }
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeWishlistModal() {
+    const modal = document.getElementById('wishlistModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+function viewWishlistItem(productId) {
+    closeWishlistModal();
+    // You can implement product view functionality here
+    showNotification('Opening product details...');
+}
+
+function removeWishlistItem(productId) {
+    wishlistSystem.removeFromWishlist(productId);
+    updateWishlistIcon(productId, false);
+    openWishlistModal(); // Refresh modal
+    updateWishlistUI();
 }
 
 // ============================================
@@ -2080,6 +2652,17 @@ function hideSearchResults() {
     }
 }
 
+function applyFilters() {
+    // Update current filters from dropdowns
+    currentCategory = document.getElementById('categoryFilter').value;
+    currentPriceFilter = document.getElementById('priceFilter').value;
+    currentUsageFilter = document.getElementById('usageFilter').value;
+    currentSort = document.getElementById('sortFilter').value;
+    
+    // Reload products with new filters
+    loadProductsFromFirebase(false);
+}
+
 // ============================================
 // SCROLL HANDLING
 // ============================================
@@ -2133,6 +2716,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     cartSystem = new CartSystem();
     await cartSystem.init();
     
+    wishlistSystem = new WishlistSystem();
+    wishlistSystem.init();
+    updateWishlistUI();
+    
     // Load all sections
     await Promise.all([
         loadCategories(),
@@ -2140,38 +2727,51 @@ document.addEventListener('DOMContentLoaded', async function() {
         loadProductsFromFirebase()
     ]);
     
-    // Event Listeners
+    // Event Listeners for Filters
     const categoryFilter = document.getElementById('categoryFilter');
-    if (categoryFilter) {
-        categoryFilter.addEventListener('change', function() {
-            currentCategory = this.value;
-            lastVisible = null;
-            loadProductsFromFirebase(false);
-        });
-    }
-    
     const priceFilter = document.getElementById('priceFilter');
-    if (priceFilter) {
-        priceFilter.addEventListener('change', function() {
-            currentPriceFilter = this.value;
-            lastVisible = null;
-            loadProductsFromFirebase(false);
-        });
-    }
-    
+    const usageFilter = document.getElementById('usageFilter');
     const sortFilter = document.getElementById('sortFilter');
-    if (sortFilter) {
-        sortFilter.addEventListener('change', function() {
-            currentSort = this.value;
-            lastVisible = null;
-            loadProductsFromFirebase(false);
-        });
+    
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', applyFilters);
     }
     
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', function() {
-            loadProductsFromFirebase(true);
+    if (priceFilter) {
+        priceFilter.addEventListener('change', applyFilters);
+    }
+    
+    if (usageFilter) {
+        usageFilter.addEventListener('change', applyFilters);
+    }
+    
+    if (sortFilter) {
+        sortFilter.addEventListener('change', applyFilters);
+    }
+    
+    // Wishlist Button
+    const wishlistBtn = document.getElementById('wishlistBtn');
+    if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', openWishlistModal);
+    }
+    
+    // Wishlist Modal Close
+    const wishlistCloseBtn = document.getElementById('wishlistCloseBtn');
+    const wishlistModal = document.getElementById('wishlistModal');
+    
+    if (wishlistCloseBtn && wishlistModal) {
+        wishlistCloseBtn.addEventListener('click', closeWishlistModal);
+        
+        wishlistModal.addEventListener('click', function(e) {
+            if (e.target === wishlistModal) {
+                closeWishlistModal();
+            }
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && wishlistModal.classList.contains('active')) {
+                closeWishlistModal();
+            }
         });
     }
     
@@ -2223,7 +2823,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Make systems globally available
     window.authSystem = authSystem;
     window.cartSystem = cartSystem;
+    window.wishlistSystem = wishlistSystem;
+    window.toggleWishlist = toggleWishlist;
     window.addToCartDirect = addToCartDirect;
+    window.openWishlistModal = openWishlistModal;
+    window.closeWishlistModal = closeWishlistModal;
+    window.removeWishlistItem = removeWishlistItem;
+    window.viewWishlistItem = viewWishlistItem;
 });
 </script>
 </body>
