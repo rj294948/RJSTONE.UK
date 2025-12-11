@@ -365,11 +365,15 @@ header.hidden {
     text-align: center;
     position: relative;
     overflow: hidden;
-    min-height: 300px;
+    min-height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                url('https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=1600&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     color: var(--white);
     margin-top: 0;
     transition: margin-top 0.3s ease;
@@ -639,6 +643,9 @@ header.hidden {
     cursor: pointer;
     height: 250px;
     aspect-ratio: 1/1;
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 
 .image-card:hover {
@@ -767,19 +774,9 @@ header.hidden {
     font-family: 'Roboto Slab', serif;
 }
 
-/* Product Badge */
+/* Product Badge - REMOVED */
 .product-badge {
-    position: absolute;
-    top: 60px;
-    left: 10px;
-    background: var(--primary-gold);
-    color: var(--white);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    z-index: 2;
-    box-shadow: var(--shadow-sm);
+    display: none !important;
 }
 
 /* Featured Products Section - REMOVED */
@@ -930,6 +927,7 @@ header.hidden {
     align-items: center;
     justify-content: center;
     gap: 5px;
+    text-decoration: none;
 }
 
 .btn-view {
@@ -1437,7 +1435,7 @@ header.hidden {
     </div>
     
     <div class="view-all-container">
-        <a href="products.html" class="view-all-btn">
+        <a href="product.html" class="view-all-btn">
             <i class="fas fa-eye"></i> View All Products
         </a>
     </div>
@@ -1449,7 +1447,7 @@ header.hidden {
         <i class="fas fa-home"></i>
         <span>Home</span>
     </a>
-    <a href="products.html" class="nav-btn">
+    <a href="product.html" class="nav-btn">
         <i class="fas fa-th-large"></i>
         <span>Products</span>
     </a>
@@ -2002,7 +2000,7 @@ async function loadCategories() {
             
             if (sandStone) {
                 mainCategoriesHTML += `
-                    <a href="products.html?category=${encodeURIComponent(sandStone.name)}" class="category-card large">
+                    <a href="product.html?category=${encodeURIComponent(sandStone.name)}" class="category-card large">
                         <div class="category-image">
                             <img src="${sandStone.image}" alt="${sandStone.name}"
                                  onerror="this.src='${getDefaultImage(sandStone.name)}'">
@@ -2017,7 +2015,7 @@ async function loadCategories() {
             
             if (kotaStone) {
                 mainCategoriesHTML += `
-                    <a href="products.html?category=${encodeURIComponent(kotaStone.name)}" class="category-card large">
+                    <a href="product.html?category=${encodeURIComponent(kotaStone.name)}" class="category-card large">
                         <div class="category-image">
                             <img src="${kotaStone.image}" alt="${kotaStone.name}"
                                  onerror="this.src='${getDefaultImage(kotaStone.name)}'">
@@ -2034,7 +2032,7 @@ async function loadCategories() {
             
             // Display other categories in smaller grid
             const otherCategoriesHTML = otherCategories.map(category => `
-                <a href="products.html?category=${encodeURIComponent(category.name)}" class="category-card small">
+                <a href="product.html?category=${encodeURIComponent(category.name)}" class="category-card small">
                     <div class="category-image">
                         <img src="${category.image}" alt="${category.name}"
                              onerror="this.src='${getDefaultImage(category.name)}'">
@@ -2066,7 +2064,7 @@ function loadDefaultCategories() {
     
     // Sand Stone and Kota Stone in large cards
     const mainCategoriesHTML = `
-        <a href="products.html?category=Sand%20Stone" class="category-card large">
+        <a href="product.html?category=Sand%20Stone" class="category-card large">
             <div class="category-image">
                 <img src="https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800" alt="Sand Stone">
                 <div class="category-overlay">
@@ -2075,7 +2073,7 @@ function loadDefaultCategories() {
                 </div>
             </div>
         </a>
-        <a href="products.html?category=Kota%20Stone" class="category-card large">
+        <a href="product.html?category=Kota%20Stone" class="category-card large">
             <div class="category-image">
                 <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800" alt="Kota Stone">
                 <div class="category-overlay">
@@ -2097,7 +2095,7 @@ function loadDefaultCategories() {
     ];
     
     const otherCategoriesHTML = otherCategories.map(category => `
-        <a href="products.html?category=${encodeURIComponent(category.name)}" class="category-card small">
+        <a href="product.html?category=${encodeURIComponent(category.name)}" class="category-card small">
             <div class="category-image">
                 <img src="${category.image}" alt="${category.name}">
                 <div class="category-overlay">
@@ -2182,7 +2180,7 @@ function displayUses(uses) {
     if (!usesGrid) return;
     
     const usesHTML = uses.map(use => `
-        <a href="products.html?usage=${encodeURIComponent(use.name)}" class="use-card">
+        <a href="product.html?usage=${encodeURIComponent(use.name)}" class="use-card">
             <div class="use-image">
                 <img src="${use.image}" alt="${use.name}" 
                      onerror="this.src='${getDefaultUseImage(use.name)}'">
@@ -2386,36 +2384,36 @@ function displayImageProducts(products, append = false) {
     
     const productsHTML = products.map(product => {
         const formattedPrice = formatPrice(product.price, product.price_unit);
-        let badge = product.category || '';
-        if (product.category === 'Sand Stone') badge = 'Sandstone';
-        else if (product.category === 'Kota Stone') badge = 'Kota';
-        
         const isInWishlist = wishlistSystem.isInWishlist(product.id);
         
+        // Product ID से product.html पर लिंक बनाएं
+        const productUrl = `product.html?id=${encodeURIComponent(product.id)}`;
+        
         return `
-            <div class="image-card" data-id="${product.id}">
+            <a href="${productUrl}" class="image-card" data-id="${product.id}">
                 <div class="card-image-container">
                     <img src="${product.image}" alt="${product.stone_name}" class="card-image" 
                          onerror="this.src='${getDefaultImage(product.category)}'"
                          loading="lazy">
                     
+                    <!-- Wishlist Button - event propagation stop -->
                     <button class="wishlist-icon ${isInWishlist ? 'active' : ''}" 
-                            onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
+                            onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${product.id}')">
                         <i class="${isInWishlist ? 'fas' : 'far'} fa-heart"></i>
                     </button>
                     
-                    <button class="add-cart-icon" onclick="event.stopPropagation(); addToCartDirect('${product.id}')">
+                    <!-- Add to Cart Button - event propagation stop -->
+                    <button class="add-cart-icon" 
+                            onclick="event.preventDefault(); event.stopPropagation(); addToCartDirect('${product.id}')">
                         <i class="fas fa-cart-plus"></i>
                     </button>
-                    
-                    ${badge ? `<div class="product-badge">${badge}</div>` : ''}
                     
                     <div class="product-info-overlay">
                         <div class="product-name">${product.stone_name}</div>
                         <div class="product-price">${formattedPrice}</div>
                     </div>
                 </div>
-            </div>
+            </a>
         `;
     }).join('');
     
@@ -2427,7 +2425,12 @@ function displayImageProducts(products, append = false) {
 }
 
 // Add to cart directly from image
-async function addToCartDirect(productId) {
+async function addToCartDirect(productId, event = null) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
     try {
         const product = allProducts.find(p => p.id === productId);
         
@@ -2517,9 +2520,9 @@ function openWishlistModal() {
                     <div class="wishlist-item-name">${item.stone_name}</div>
                     <div class="wishlist-item-price">£${item.price ? item.price.toFixed(2) : '0.00'}</div>
                     <div class="wishlist-item-actions">
-                        <button class="wishlist-action-btn btn-view" onclick="viewWishlistItem('${item.id}')">
+                        <a href="product.html?id=${encodeURIComponent(item.id)}" class="wishlist-action-btn btn-view">
                             <i class="fas fa-eye"></i> View
-                        </button>
+                        </a>
                         <button class="wishlist-action-btn btn-remove" onclick="removeWishlistItem('${item.id}')">
                             <i class="fas fa-trash"></i> Remove
                         </button>
@@ -2546,9 +2549,7 @@ function closeWishlistModal() {
 }
 
 function viewWishlistItem(productId) {
-    closeWishlistModal();
-    // You can implement product view functionality here
-    showNotification('Opening product details...');
+    window.location.href = `product.html?id=${encodeURIComponent(productId)}`;
 }
 
 function removeWishlistItem(productId) {
