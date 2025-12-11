@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Checkout - IRYA STONE</title>
+<title>Shopping Cart - IRYA STONE</title>
 
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,105 +11,355 @@
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<style>
-/* Add similar styles as cart.html with checkout-specific styles */
-/* Include all styles from cart.html and add checkout form styles */
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
-.checkout-form {
-    background: var(--white);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
-    padding: 30px;
+<style>
+:root {
+    --primary-gold: #c9a227;
+    --gold-light: #f0d77c;
+    --gold-dark: #9c7c1f;
+    --stone-dark: #1a1a1a;
+    --stone-light: #f4f6f4;
+    --bg-light: #f7f9fc;
+    --text-dark: #222222;
+    --text-light: #666666;
+    --white: #ffffff;
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+    --transition: all 0.3s ease;
+    --border-radius: 12px;
+    --border-radius-lg: 20px;
 }
 
-.form-section {
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    padding-bottom: 80px;
+    font-size: 14px;
+}
+
+/* Header */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    z-index: 1000;
+    gap: 10px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    min-width: 140px;
+}
+
+.logo i {
+    color: var(--primary-gold);
+    font-size: 24px;
+}
+
+.logo span {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--stone-dark);
+    font-family: 'Roboto Slab', serif;
+}
+
+/* Back Button */
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-light);
+    color: var(--text-dark);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    background: var(--primary-gold);
+    color: var(--white);
+}
+
+/* Main Content */
+.main-content {
+    padding: 90px 16px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
     margin-bottom: 30px;
 }
 
-.form-section h3 {
+.page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--stone-dark);
+    margin-bottom: 10px;
+    font-family: 'Roboto Slab', serif;
+}
+
+.page-subtitle {
+    color: var(--text-light);
+    font-size: 16px;
+}
+
+/* Cart Layout */
+.cart-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+}
+
+/* Cart Items */
+.cart-items {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.cart-item {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: center;
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.cart-item-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg-light);
+}
+
+.cart-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cart-item-details {
+    flex: 1;
+}
+
+.cart-item-name {
     font-size: 18px;
     font-weight: 600;
     color: var(--stone-dark);
+    margin-bottom: 8px;
+    font-family: 'Roboto Slab', serif;
+}
+
+.cart-item-category {
+    color: var(--primary-gold);
+    font-weight: 500;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.cart-item-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-gold);
+    margin-bottom: 15px;
+}
+
+.cart-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-light);
+    border-radius: 25px;
+    padding: 5px 15px;
+}
+
+.quantity-btn {
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    font-size: 16px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.quantity-btn:hover {
+    background: var(--primary-gold);
+    color: white;
+}
+
+.quantity-value {
+    min-width: 30px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    color: #ff4757;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: var(--transition);
+    padding: 8px 15px;
+    border-radius: 20px;
+}
+
+.remove-btn:hover {
+    background: rgba(255, 71, 87, 0.1);
+}
+
+.cart-item-total {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--stone-dark);
+    text-align: right;
+    min-width: 100px;
+}
+
+/* Empty Cart */
+.empty-cart {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-cart-icon {
+    font-size: 64px;
+    color: var(--text-light);
     margin-bottom: 20px;
-    padding-bottom: 10px;
+    opacity: 0.5;
+}
+
+.empty-cart h2 {
+    font-size: 24px;
+    color: var(--stone-dark);
+    margin-bottom: 10px;
+}
+
+.empty-cart p {
+    color: var(--text-light);
+    margin-bottom: 30px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.continue-shopping-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    color: white;
+    padding: 12px 30px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.continue-shopping-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Order Summary */
+.order-summary {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 25px;
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+
+.order-summary h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--stone-dark);
+    margin-bottom: 20px;
+    padding-bottom: 15px;
     border-bottom: 1px solid #f0f0f0;
 }
 
-.form-group {
-    margin-bottom: 20px;
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 15px;
 }
 
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+.summary-label {
+    color: var(--text-light);
 }
 
-.form-label {
-    display: block;
-    margin-bottom: 8px;
+.summary-value {
     font-weight: 500;
     color: var(--stone-dark);
 }
 
-.form-input {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: var(--transition);
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--primary-gold);
-    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.1);
-}
-
-.payment-methods {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.payment-method {
-    border: 2px solid #f0f0f0;
-    border-radius: 8px;
-    padding: 15px;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.payment-method:hover {
-    border-color: var(--primary-gold);
-}
-
-.payment-method.selected {
-    border-color: var(--primary-gold);
-    background: rgba(201, 162, 39, 0.05);
-}
-
-.payment-method i {
-    font-size: 24px;
-    margin-bottom: 10px;
-    color: var(--primary-gold);
-}
-
-.terms-checkbox {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
+.summary-total {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--stone-dark);
     margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
 }
 
-.terms-checkbox input {
-    margin-top: 4px;
+.summary-total .summary-value {
+    color: var(--primary-gold);
+    font-size: 24px;
 }
 
-.place-order-btn {
+.checkout-btn {
     width: 100%;
     padding: 16px;
     background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
@@ -127,15 +377,785 @@
     gap: 10px;
 }
 
-.place-order-btn:hover {
+.checkout-btn:hover {
     opacity: 0.9;
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
+}
+
+.checkout-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Promo Code */
+.promo-section {
+    margin-top: 20px;
+}
+
+.promo-input {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.promo-input input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.apply-promo-btn {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    border: 1px solid #e0e0e0;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.apply-promo-btn:hover {
+    background: #f0f0f0;
+    border-color: var(--primary-gold);
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid #eee;
+    z-index: 999;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-btn {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 10px;
+    min-width: 70px;
+    text-decoration: none;
+}
+
+.nav-btn:hover {
+    color: var(--primary-gold);
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.nav-btn.active {
+    color: var(--primary-gold);
+}
+
+.nav-btn i {
+    font-size: 18px;
+}
+
+/* Cart Badge */
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 600;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Loading & Notifications */
+.loading-spinner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(201, 162, 39, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-gold);
+    animation: spin 1s ease-in-out infinite;
+    z-index: 9999;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--primary-gold);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: none;
+}
+
+.notification.show {
+    transform: translateX(0);
+    display: block;
+}
+
+.error-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff4757;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    display: none;
+    max-width: 300px;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .cart-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .order-summary {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .cart-item {
+        grid-template-columns: 100px 1fr;
+        gap: 15px;
+    }
+    
+    .cart-item-total {
+        grid-column: 1 / -1;
+        text-align: left;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #f0f0f0;
+    }
+    
+    .cart-item-image {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .main-content {
+        padding: 80px 12px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cart-item {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .cart-item-image {
+        width: 100%;
+        height: 200px;
+        margin: 0 auto;
+    }
+    
+    .cart-item-actions {
+        justify-content: center;
+    }
+    
+    .promo-input {
+        flex-direction: column;
+    }
+    
+    .nav-btn {
+        min-width: 60px;
+        padding: 5px;
+    }
+    
+    .nav-btn span {
+        font-size: 10px;
+    }
 }
 </style>
 </head>
 
 <body>
-<!-- Similar structure to cart.html with checkout form -->
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loadingSpinner"></div>
+
+<!-- Notification -->
+<div class="notification" id="notification"></div>
+
+<!-- Error Message -->
+<div class="error-message" id="errorMessage"></div>
+
+<!-- Header -->
+<header>
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+    </a>
+    
+    <div class="logo">
+        <i class="fa-solid fa-gem"></i>
+        <span>IRYA STONE</span>
+    </div>
+    
+    <div style="min-width: 140px; text-align: right;">
+        <!-- Empty div for alignment -->
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="main-content">
+    <div class="page-header">
+        <h1>Shopping Cart</h1>
+        <p class="page-subtitle">Review your selected stone products</p>
+    </div>
+    
+    <div class="cart-container">
+        <!-- Cart Items Section -->
+        <div class="cart-section">
+            <div class="cart-items" id="cartItemsContainer">
+                <!-- Cart items will be loaded here -->
+                <div class="empty-cart" id="emptyCartMessage" style="display: none;">
+                    <div class="empty-cart-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h2>Your cart is empty</h2>
+                    <p>Add some premium natural stones to your cart and they will appear here.</p>
+                    <a href="index.html" class="continue-shopping-btn">
+                        <i class="fas fa-gem"></i>
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Summary Section -->
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            
+            <div class="summary-row">
+                <span class="summary-label">Subtotal</span>
+                <span class="summary-value" id="subtotalAmount">£0.00</span>
+            </div>
+            
+            <div class="summary-row">
+                <span class="summary-label">Shipping</span>
+                <span class="summary-value">Calculated at checkout</span>
+            </div>
+            
+            <div class="summary-row">
+                <span class="summary-label">Tax (VAT)</span>
+                <span class="summary-value" id="taxAmount">£0.00</span>
+            </div>
+            
+            <div class="promo-section">
+                <div class="summary-row">
+                    <span class="summary-label">Promo Code</span>
+                    <span class="summary-value"><a href="#" id="applyPromoLink">Apply</a></span>
+                </div>
+                <div class="promo-input" id="promoInputContainer" style="display: none;">
+                    <input type="text" placeholder="Enter promo code" id="promoCodeInput">
+                    <button class="apply-promo-btn" id="applyPromoBtn">Apply</button>
+                </div>
+            </div>
+            
+            <div class="summary-total">
+                <span class="summary-label">Total</span>
+                <span class="summary-value" id="totalAmount">£0.00</span>
+            </div>
+            
+            <button class="checkout-btn" id="checkoutBtn" disabled>
+                <i class="fas fa-lock"></i>
+                Proceed to Checkout
+            </button>
+            
+            <div style="margin-top: 20px; text-align: center; font-size: 12px; color: var(--text-light);">
+                <i class="fas fa-shield-alt"></i> Secure checkout • SSL encrypted
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+    <a href="index.html" class="nav-btn">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </a>
+    <a href="products.html" class="nav-btn">
+        <i class="fas fa-th-large"></i>
+        <span>Products</span>
+    </a>
+    <a href="#" class="nav-btn" onclick="document.getElementById('searchInput')?.focus()">
+        <i class="fas fa-search"></i>
+        <span>Search</span>
+    </a>
+    <a href="account.html" class="nav-btn">
+        <i class="fas fa-user"></i>
+        <span>Account</span>
+    </a>
+    <a href="cart.html" class="nav-btn active">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Cart</span>
+        <span class="cart-badge" id="cartBadge">0</span>
+    </a>
+</div>
+
+<script>
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+    authDomain: "iryastone-uk.firebaseapp.com",
+    projectId: "iryastone-uk",
+    storageBucket: "iryastone-uk.firebasestorage.app",
+    messagingSenderId: "110940910896",
+    appId: "1:110940910896:web:b25e92127118665e5c84f5",
+    measurementId: "G-6YM1FLYN48"
+};
+
+// Firebase variables
+let firebaseApp, firebaseDB, firebaseAuth;
+let cartSystem = null;
+
+// ============================================
+// CART SYSTEM (SAME AS MAIN PAGE)
+// ============================================
+
+class CartSystem {
+    constructor() {
+        this.localCartKey = 'irya_local_cart_';
+        this.cartItems = [];
+    }
+    
+    async init() {
+        await this.loadCart();
+        this.updateCartBadge();
+        return this;
+    }
+    
+    getUserId() {
+        // Try to get from global auth system or localStorage
+        if (typeof window !== 'undefined' && window.authSystem) {
+            return window.authSystem.getUserId();
+        }
+        
+        let guestId = localStorage.getItem('irya_guest_id');
+        if (!guestId) {
+            guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('irya_guest_id', guestId);
+        }
+        return guestId;
+    }
+    
+    async loadCart() {
+        try {
+            const userId = this.getUserId();
+            
+            // Try to initialize Firebase
+            await initializeFirebase();
+            
+            if (firebaseDB) {
+                // Check if user is logged in (simplified check)
+                const userEmail = localStorage.getItem('irya_stone_user_email');
+                if (userEmail) {
+                    // Load from Firebase
+                    await this.loadFromFirebase(userId);
+                } else {
+                    // Load from localStorage for guests
+                    this.loadFromLocalStorage(userId);
+                }
+            } else {
+                // Firebase not available, use localStorage
+                this.loadFromLocalStorage(userId);
+            }
+            
+            return this.cartItems;
+        } catch (error) {
+            console.error('Error loading cart:', error);
+            this.loadFromLocalStorage(this.getUserId());
+            return this.cartItems;
+        }
+    }
+    
+    async loadFromFirebase(userId) {
+        try {
+            const cartDoc = await firebaseDB.collection('userCarts').doc(userId).get();
+            
+            if (cartDoc.exists) {
+                this.cartItems = cartDoc.data().items || [];
+                this.saveToLocalStorage(userId);
+            } else {
+                this.loadFromLocalStorage(userId);
+                
+                // Save to Firebase if there are items
+                if (this.cartItems.length > 0) {
+                    await this.saveToFirebase(userId);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading cart from Firebase:', error);
+            this.loadFromLocalStorage(userId);
+        }
+    }
+    
+    loadFromLocalStorage(userId) {
+        const cartKey = this.localCartKey + userId;
+        const cartData = localStorage.getItem(cartKey);
+        this.cartItems = cartData ? JSON.parse(cartData) : [];
+    }
+    
+    async saveCart() {
+        const userId = this.getUserId();
+        
+        this.saveToLocalStorage(userId);
+        
+        if (firebaseDB) {
+            await this.saveToFirebase(userId);
+        }
+        
+        this.updateCartBadge();
+        return this.cartItems;
+    }
+    
+    saveToLocalStorage(userId) {
+        const cartKey = this.localCartKey + userId;
+        localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
+    }
+    
+    async saveToFirebase(userId) {
+        try {
+            await firebaseDB.collection('userCarts').doc(userId).set({
+                userId: userId,
+                items: this.cartItems,
+                updatedAt: new Date().toISOString(),
+                itemCount: this.cartItems.reduce((sum, item) => sum + item.quantity, 0),
+                totalAmount: this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+            }, { merge: true });
+        } catch (error) {
+            console.error('Error saving cart to Firebase:', error);
+        }
+    }
+    
+    async updateQuantity(productId, newQuantity) {
+        try {
+            const item = this.cartItems.find(item => item.id === productId);
+            if (item) {
+                if (newQuantity <= 0) {
+                    this.cartItems = this.cartItems.filter(item => item.id !== productId);
+                } else {
+                    item.quantity = newQuantity;
+                    item.updatedAt = new Date().toISOString();
+                }
+                
+                await this.saveCart();
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error updating quantity:', error);
+            showError('Failed to update quantity');
+            return false;
+        }
+    }
+    
+    async removeFromCart(productId) {
+        try {
+            this.cartItems = this.cartItems.filter(item => item.id !== productId);
+            await this.saveCart();
+            showNotification('Item removed from cart');
+            return true;
+        } catch (error) {
+            console.error('Error removing from cart:', error);
+            showError('Failed to remove item');
+            return false;
+        }
+    }
+    
+    getCartCount() {
+        return this.cartItems.reduce((total, item) => total + item.quantity, 0);
+    }
+    
+    getTotalAmount() {
+        return this.cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    }
+    
+    getCartItems() {
+        return this.cartItems;
+    }
+    
+    updateCartBadge() {
+        const count = this.getCartCount();
+        const cartBadge = document.getElementById('cartBadge');
+        if (cartBadge) {
+            cartBadge.textContent = count;
+            cartBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+}
+
+// ============================================
+// FIREBASE INITIALIZATION
+// ============================================
+
+async function initializeFirebase() {
+    try {
+        if (typeof firebase === 'undefined') {
+            return false;
+        }
+        
+        if (!firebase.apps.length) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+        } else {
+            firebaseApp = firebase.app();
+        }
+        
+        firebaseDB = firebase.firestore();
+        firebaseAuth = firebase.auth();
+        
+        return true;
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        return false;
+    }
+}
+
+// ============================================
+// UI FUNCTIONS
+// ============================================
+
+function showLoading(show) {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = show ? 'block' : 'none';
+    }
+}
+
+function showNotification(message) {
+    const notification = document.getElementById('notification');
+    if (!notification) return;
+    
+    notification.textContent = message;
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('errorMessage');
+    if (!errorDiv) return;
+    
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 5000);
+}
+
+function formatPrice(price) {
+    if (!price && price !== 0) return '£0.00';
+    return `£${parseFloat(price).toFixed(2)}`;
+}
+
+// ============================================
+// CART RENDERING
+// ============================================
+
+function renderCartItems() {
+    const container = document.getElementById('cartItemsContainer');
+    const emptyCartMessage = document.getElementById('emptyCartMessage');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    
+    if (!cartSystem || !container) return;
+    
+    const cartItems = cartSystem.getCartItems();
+    
+    if (cartItems.length === 0) {
+        container.innerHTML = '';
+        emptyCartMessage.style.display = 'block';
+        checkoutBtn.disabled = true;
+        updateOrderSummary(0);
+        return;
+    }
+    
+    emptyCartMessage.style.display = 'none';
+    checkoutBtn.disabled = false;
+    
+    const itemsHTML = cartItems.map(item => `
+        <div class="cart-item" data-id="${item.id}">
+            <div class="cart-item-image">
+                <img src="${item.image || 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800'}" 
+                     alt="${item.name}"
+                     onerror="this.src='https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800'">
+            </div>
+            
+            <div class="cart-item-details">
+                <div class="cart-item-name">${item.stoneName || item.name}</div>
+                <div class="cart-item-category">${item.category || 'Natural Stone'}</div>
+                <div class="cart-item-price">${formatPrice(item.price)} ${item.priceUnit ? 'per ' + item.priceUnit : ''}</div>
+                
+                <div class="cart-item-actions">
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="updateItemQuantity('${item.id}', ${item.quantity - 1})">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="quantity-value">${item.quantity}</span>
+                        <button class="quantity-btn" onclick="updateItemQuantity('${item.id}', ${item.quantity + 1})">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <button class="remove-btn" onclick="removeItemFromCart('${item.id}')">
+                        <i class="fas fa-trash"></i>
+                        Remove
+                    </button>
+                </div>
+            </div>
+            
+            <div class="cart-item-total">
+                ${formatPrice(item.price * item.quantity)}
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = itemsHTML;
+    updateOrderSummary(cartSystem.getTotalAmount());
+}
+
+function updateOrderSummary(subtotal) {
+    const subtotalEl = document.getElementById('subtotalAmount');
+    const taxEl = document.getElementById('taxAmount');
+    const totalEl = document.getElementById('totalAmount');
+    
+    if (!subtotalEl || !taxEl || !totalEl) return;
+    
+    const tax = subtotal * 0.2; // 20% VAT
+    const total = subtotal + tax;
+    
+    subtotalEl.textContent = formatPrice(subtotal);
+    taxEl.textContent = formatPrice(tax);
+    totalEl.textContent = formatPrice(total);
+}
+
+async function updateItemQuantity(productId, newQuantity) {
+    if (!cartSystem) return;
+    
+    showLoading(true);
+    try {
+        await cartSystem.updateQuantity(productId, newQuantity);
+        renderCartItems();
+    } catch (error) {
+        console.error('Error updating quantity:', error);
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function removeItemFromCart(productId) {
+    if (!cartSystem) return;
+    
+    showLoading(true);
+    try {
+        await cartSystem.removeFromCart(productId);
+        renderCartItems();
+    } catch (error) {
+        console.error('Error removing item:', error);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Cart page initialized');
+    
+    showLoading(true);
+    
+    try {
+        // Initialize Firebase
+        await initializeFirebase();
+        
+        // Initialize cart system
+        cartSystem = new CartSystem();
+        await cartSystem.init();
+        
+        // Render cart items
+        renderCartItems();
+        
+        // Setup promo code toggle
+        const applyPromoLink = document.getElementById('applyPromoLink');
+        const promoInputContainer = document.getElementById('promoInputContainer');
+        
+        if (applyPromoLink && promoInputContainer) {
+            applyPromoLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                promoInputContainer.style.display = 'flex';
+                this.style.display = 'none';
+            });
+        }
+        
+        // Setup checkout button
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', function() {
+                if (cartSystem.getCartCount() > 0) {
+                    // Redirect to checkout page
+                    window.location.href = 'checkout.html';
+                }
+            });
+        }
+        
+    } catch (error) {
+        console.error('Initialization error:', error);
+        showError('Failed to load cart. Please refresh the page.');
+    } finally {
+        showLoading(false);
+    }
+});
+
+// Make functions available globally
+window.updateItemQuantity = updateItemQuantity;
+window.removeItemFromCart = removeItemFromCart;
+</script>
 </body>
 </html>
