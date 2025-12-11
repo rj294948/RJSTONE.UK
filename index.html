@@ -1934,7 +1934,7 @@ function initializeFirebase() {
 }
 
 // ============================================
-// LOAD CATEGORIES - UPDATED
+// LOAD CATEGORIES - UPDATED WITH PRODUCTS.HTML LINKS
 // ============================================
 
 async function loadCategories() {
@@ -1995,12 +1995,12 @@ async function loadCategories() {
                 c !== sandStone && c !== kotaStone
             ).slice(0, 6); // Limit to 6 other categories
             
-            // Display Sand Stone and Kota Stone in large cards
+            // Display Sand Stone and Kota Stone in large cards WITH PRODUCTS.HTML LINK
             let mainCategoriesHTML = '';
             
             if (sandStone) {
                 mainCategoriesHTML += `
-                    <a href="product.html?category=${encodeURIComponent(sandStone.name)}" class="category-card large">
+                    <a href="products.html?category=${encodeURIComponent(sandStone.name)}" class="category-card large">
                         <div class="category-image">
                             <img src="${sandStone.image}" alt="${sandStone.name}"
                                  onerror="this.src='${getDefaultImage(sandStone.name)}'">
@@ -2015,7 +2015,7 @@ async function loadCategories() {
             
             if (kotaStone) {
                 mainCategoriesHTML += `
-                    <a href="product.html?category=${encodeURIComponent(kotaStone.name)}" class="category-card large">
+                    <a href="products.html?category=${encodeURIComponent(kotaStone.name)}" class="category-card large">
                         <div class="category-image">
                             <img src="${kotaStone.image}" alt="${kotaStone.name}"
                                  onerror="this.src='${getDefaultImage(kotaStone.name)}'">
@@ -2030,9 +2030,9 @@ async function loadCategories() {
             
             categoriesGrid.innerHTML = mainCategoriesHTML;
             
-            // Display other categories in smaller grid
+            // Display other categories in smaller grid WITH PRODUCTS.HTML LINK
             const otherCategoriesHTML = otherCategories.map(category => `
-                <a href="product.html?category=${encodeURIComponent(category.name)}" class="category-card small">
+                <a href="products.html?category=${encodeURIComponent(category.name)}" class="category-card small">
                     <div class="category-image">
                         <img src="${category.image}" alt="${category.name}"
                              onerror="this.src='${getDefaultImage(category.name)}'">
@@ -2062,9 +2062,9 @@ function loadDefaultCategories() {
     
     if (!categoriesGrid || !otherCategoriesGrid) return;
     
-    // Sand Stone and Kota Stone in large cards
+    // Sand Stone and Kota Stone in large cards WITH PRODUCTS.HTML LINK
     const mainCategoriesHTML = `
-        <a href="product.html?category=Sand%20Stone" class="category-card large">
+        <a href="products.html?category=Sand%20Stone" class="category-card large">
             <div class="category-image">
                 <img src="https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800" alt="Sand Stone">
                 <div class="category-overlay">
@@ -2073,7 +2073,7 @@ function loadDefaultCategories() {
                 </div>
             </div>
         </a>
-        <a href="product.html?category=Kota%20Stone" class="category-card large">
+        <a href="products.html?category=Kota%20Stone" class="category-card large">
             <div class="category-image">
                 <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800" alt="Kota Stone">
                 <div class="category-overlay">
@@ -2086,7 +2086,7 @@ function loadDefaultCategories() {
     
     categoriesGrid.innerHTML = mainCategoriesHTML;
     
-    // Other categories in smaller grid
+    // Other categories in smaller grid WITH PRODUCTS.HTML LINK
     const otherCategories = [
         { name: 'Granite', count: 15, image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800' },
         { name: 'Marble', count: 12, image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800' },
@@ -2095,7 +2095,7 @@ function loadDefaultCategories() {
     ];
     
     const otherCategoriesHTML = otherCategories.map(category => `
-        <a href="product.html?category=${encodeURIComponent(category.name)}" class="category-card small">
+        <a href="products.html?category=${encodeURIComponent(category.name)}" class="category-card small">
             <div class="category-image">
                 <img src="${category.image}" alt="${category.name}">
                 <div class="category-overlay">
@@ -2110,7 +2110,7 @@ function loadDefaultCategories() {
 }
 
 // ============================================
-// LOAD STONE USES FROM FIREBASE - UPDATED
+// LOAD STONE USES FROM FIREBASE - UPDATED WITH PRODUCTS.HTML LINKS
 // ============================================
 
 async function loadStoneUsesFromFirebase() {
@@ -2179,8 +2179,9 @@ function displayUses(uses) {
     const usesGrid = document.getElementById('usesGrid');
     if (!usesGrid) return;
     
+    // Use cards with PRODUCTS.HTML link
     const usesHTML = uses.map(use => `
-        <a href="product.html?usage=${encodeURIComponent(use.name)}" class="use-card">
+        <a href="products.html?usage=${encodeURIComponent(use.name)}" class="use-card">
             <div class="use-image">
                 <img src="${use.image}" alt="${use.name}" 
                      onerror="this.src='${getDefaultUseImage(use.name)}'">
@@ -2249,7 +2250,7 @@ function getDefaultUseImage(use) {
 }
 
 // ============================================
-// LOAD PRODUCTS FROM FIREBASE - UPDATED
+// LOAD PRODUCTS FROM FIREBASE - UPDATED WITH BOX/CARD LAYOUT
 // ============================================
 
 async function loadProductsFromFirebase(loadMore = false) {
@@ -2362,7 +2363,7 @@ async function loadProductsFromFirebase(loadMore = false) {
     }
 }
 
-// Display products as image cards
+// Display products as image cards (BOX/CARD LAYOUT)
 function displayImageProducts(products, append = false) {
     const container = document.getElementById('productGrid');
     if (!container) return;
