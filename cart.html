@@ -11,11 +11,6 @@
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-
 <style>
 :root {
     --primary-gold: #c9a227;
@@ -640,6 +635,7 @@ header {
     <div class="page-header">
         <h1>Shopping Cart</h1>
         <p class="page-subtitle">Review your selected stone products</p>
+        <div id="syncStatus" style="margin-top: 10px;"></div>
     </div>
     
     <div class="cart-container">
@@ -735,7 +731,7 @@ header {
 
 <script>
 // ============================================
-// FIREBASE CONFIGURATION
+// FIREBASE CONFIGURATION (SAME AS INDEX.HTML)
 // ============================================
 
 const firebaseConfig = {
@@ -750,208 +746,24 @@ const firebaseConfig = {
 
 // Firebase variables
 let firebaseApp, firebaseDB, firebaseAuth;
+let authSystem = null;
 let cartSystem = null;
 
 // ============================================
-// CART SYSTEM (SAME AS MAIN PAGE)
+// FIREBASE CART SYSTEM (COPY FROM INDEX.HTML)
 // ============================================
 
-class CartSystem {
-    constructor() {
-        this.localCartKey = 'irya_local_cart_';
-        this.cartItems = [];
-    }
-    
-    async init() {
-        await this.loadCart();
-        this.updateCartBadge();
-        return this;
-    }
-    
-    getUserId() {
-        // Try to get from global auth system or localStorage
-        if (typeof window !== 'undefined' && window.authSystem) {
-            return window.authSystem.getUserId();
-        }
-        
-        let guestId = localStorage.getItem('irya_guest_id');
-        if (!guestId) {
-            guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('irya_guest_id', guestId);
-        }
-        return guestId;
-    }
-    
-    async loadCart() {
-        try {
-            const userId = this.getUserId();
-            
-            // Try to initialize Firebase
-            await initializeFirebase();
-            
-            if (firebaseDB) {
-                // Check if user is logged in (simplified check)
-                const userEmail = localStorage.getItem('irya_stone_user_email');
-                if (userEmail) {
-                    // Load from Firebase
-                    await this.loadFromFirebase(userId);
-                } else {
-                    // Load from localStorage for guests
-                    this.loadFromLocalStorage(userId);
-                }
-            } else {
-                // Firebase not available, use localStorage
-                this.loadFromLocalStorage(userId);
-            }
-            
-            return this.cartItems;
-        } catch (error) {
-            console.error('Error loading cart:', error);
-            this.loadFromLocalStorage(this.getUserId());
-            return this.cartItems;
-        }
-    }
-    
-    async loadFromFirebase(userId) {
-        try {
-            const cartDoc = await firebaseDB.collection('userCarts').doc(userId).get();
-            
-            if (cartDoc.exists) {
-                this.cartItems = cartDoc.data().items || [];
-                this.saveToLocalStorage(userId);
-            } else {
-                this.loadFromLocalStorage(userId);
-                
-                // Save to Firebase if there are items
-                if (this.cartItems.length > 0) {
-                    await this.saveToFirebase(userId);
-                }
-            }
-        } catch (error) {
-            console.error('Error loading cart from Firebase:', error);
-            this.loadFromLocalStorage(userId);
-        }
-    }
-    
-    loadFromLocalStorage(userId) {
-        const cartKey = this.localCartKey + userId;
-        const cartData = localStorage.getItem(cartKey);
-        this.cartItems = cartData ? JSON.parse(cartData) : [];
-    }
-    
-    async saveCart() {
-        const userId = this.getUserId();
-        
-        this.saveToLocalStorage(userId);
-        
-        if (firebaseDB) {
-            await this.saveToFirebase(userId);
-        }
-        
-        this.updateCartBadge();
-        return this.cartItems;
-    }
-    
-    saveToLocalStorage(userId) {
-        const cartKey = this.localCartKey + userId;
-        localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
-    }
-    
-    async saveToFirebase(userId) {
-        try {
-            await firebaseDB.collection('userCarts').doc(userId).set({
-                userId: userId,
-                items: this.cartItems,
-                updatedAt: new Date().toISOString(),
-                itemCount: this.cartItems.reduce((sum, item) => sum + item.quantity, 0),
-                totalAmount: this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-            }, { merge: true });
-        } catch (error) {
-            console.error('Error saving cart to Firebase:', error);
-        }
-    }
-    
-    async updateQuantity(productId, newQuantity) {
-        try {
-            const item = this.cartItems.find(item => item.id === productId);
-            if (item) {
-                if (newQuantity <= 0) {
-                    this.cartItems = this.cartItems.filter(item => item.id !== productId);
-                } else {
-                    item.quantity = newQuantity;
-                    item.updatedAt = new Date().toISOString();
-                }
-                
-                await this.saveCart();
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.error('Error updating quantity:', error);
-            showError('Failed to update quantity');
-            return false;
-        }
-    }
-    
-    async removeFromCart(productId) {
-        try {
-            this.cartItems = this.cartItems.filter(item => item.id !== productId);
-            await this.saveCart();
-            showNotification('Item removed from cart');
-            return true;
-        } catch (error) {
-            console.error('Error removing from cart:', error);
-            showError('Failed to remove item');
-            return false;
-        }
-    }
-    
-    getCartCount() {
-        return this.cartItems.reduce((total, item) => total + item.quantity, 0);
-    }
-    
-    getTotalAmount() {
-        return this.cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-    }
-    
-    getCartItems() {
-        return this.cartItems;
-    }
-    
-    updateCartBadge() {
-        const count = this.getCartCount();
-        const cartBadge = document.getElementById('cartBadge');
-        if (cartBadge) {
-            cartBadge.textContent = count;
-            cartBadge.style.display = count > 0 ? 'flex' : 'none';
-        }
-    }
+class FirebaseCartSystem {
+    // COPY THE ENTIRE FirebaseCartSystem CLASS FROM MY PREVIOUS RESPONSE
+    // This includes all methods: init, addToCart, updateQuantity, removeFromCart, etc.
 }
 
 // ============================================
-// FIREBASE INITIALIZATION
+// ENHANCED AUTHENTICATION SYSTEM
 // ============================================
 
-async function initializeFirebase() {
-    try {
-        if (typeof firebase === 'undefined') {
-            return false;
-        }
-        
-        if (!firebase.apps.length) {
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-        } else {
-            firebaseApp = firebase.app();
-        }
-        
-        firebaseDB = firebase.firestore();
-        firebaseAuth = firebase.auth();
-        
-        return true;
-    } catch (error) {
-        console.error('Firebase initialization error:', error);
-        return false;
-    }
+class EnhancedAuthSystem {
+    // COPY THE ENTIRE EnhancedAuthSystem CLASS FROM MY PREVIOUS RESPONSE
 }
 
 // ============================================
@@ -995,10 +807,10 @@ function formatPrice(price) {
 }
 
 // ============================================
-// CART RENDERING
+// CART RENDERING FUNCTIONS
 // ============================================
 
-function renderCartItems() {
+async function renderCartItems() {
     const container = document.getElementById('cartItemsContainer');
     const emptyCartMessage = document.getElementById('emptyCartMessage');
     const checkoutBtn = document.getElementById('checkoutBtn');
@@ -1009,16 +821,21 @@ function renderCartItems() {
     
     if (cartItems.length === 0) {
         container.innerHTML = '';
-        emptyCartMessage.style.display = 'block';
-        checkoutBtn.disabled = true;
+        if (emptyCartMessage) emptyCartMessage.style.display = 'block';
+        if (checkoutBtn) checkoutBtn.disabled = true;
         updateOrderSummary(0);
         return;
     }
     
-    emptyCartMessage.style.display = 'none';
-    checkoutBtn.disabled = false;
+    if (emptyCartMessage) emptyCartMessage.style.display = 'none';
+    if (checkoutBtn) checkoutBtn.disabled = false;
     
-    const itemsHTML = cartItems.map(item => `
+    // Sort by most recently updated
+    const sortedItems = [...cartItems].sort((a, b) => 
+        new Date(b.updatedAt || b.addedAt) - new Date(a.updatedAt || a.addedAt)
+    );
+    
+    const itemsHTML = sortedItems.map(item => `
         <div class="cart-item" data-id="${item.id}">
             <div class="cart-item-image">
                 <img src="${item.image || 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800'}" 
@@ -1027,9 +844,9 @@ function renderCartItems() {
             </div>
             
             <div class="cart-item-details">
-                <div class="cart-item-name">${item.stoneName || item.name}</div>
+                <div class="cart-item-name">${item.stone_name || item.name}</div>
                 <div class="cart-item-category">${item.category || 'Natural Stone'}</div>
-                <div class="cart-item-price">${formatPrice(item.price)} ${item.priceUnit ? 'per ' + item.priceUnit : ''}</div>
+                <div class="cart-item-price">${formatPrice(item.price)} ${item.price_unit ? 'per ' + item.price_unit : ''}</div>
                 
                 <div class="cart-item-actions">
                     <div class="quantity-controls">
@@ -1057,6 +874,9 @@ function renderCartItems() {
     
     container.innerHTML = itemsHTML;
     updateOrderSummary(cartSystem.getTotalAmount());
+    
+    // Show sync status
+    updateSyncStatus();
 }
 
 function updateOrderSummary(subtotal) {
@@ -1074,6 +894,27 @@ function updateOrderSummary(subtotal) {
     totalEl.textContent = formatPrice(total);
 }
 
+function updateSyncStatus() {
+    const syncStatus = document.getElementById('syncStatus');
+    if (syncStatus) {
+        if (authSystem && authSystem.isLoggedIn()) {
+            syncStatus.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; color: var(--primary-gold); font-size: 12px;">
+                    <i class="fas fa-cloud"></i>
+                    <span>Cart synced across devices</span>
+                </div>
+            `;
+        } else {
+            syncStatus.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; color: var(--text-light); font-size: 12px;">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Sign in to sync cart across devices</span>
+                </div>
+            `;
+        }
+    }
+}
+
 async function updateItemQuantity(productId, newQuantity) {
     if (!cartSystem) return;
     
@@ -1083,6 +924,7 @@ async function updateItemQuantity(productId, newQuantity) {
         renderCartItems();
     } catch (error) {
         console.error('Error updating quantity:', error);
+        showError('Failed to update quantity');
     } finally {
         showLoading(false);
     }
@@ -1097,17 +939,44 @@ async function removeItemFromCart(productId) {
         renderCartItems();
     } catch (error) {
         console.error('Error removing item:', error);
+        showError('Failed to remove item');
     } finally {
         showLoading(false);
     }
 }
 
 // ============================================
-// INITIALIZATION
+// FIREBASE INITIALIZATION
+// ============================================
+
+async function initializeFirebase() {
+    try {
+        if (typeof firebase === 'undefined') {
+            return false;
+        }
+        
+        if (!firebase.apps.length) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+        } else {
+            firebaseApp = firebase.app();
+        }
+        
+        firebaseDB = firebase.firestore();
+        firebaseAuth = firebase.auth();
+        
+        return true;
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        return false;
+    }
+}
+
+// ============================================
+// CART PAGE INITIALIZATION
 // ============================================
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('Cart page initialized');
+    console.log('Cart page initializing...');
     
     showLoading(true);
     
@@ -1115,43 +984,57 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Initialize Firebase
         await initializeFirebase();
         
-        // Initialize cart system
-        cartSystem = new CartSystem();
+        // Initialize systems
+        authSystem = new EnhancedAuthSystem();
+        await authSystem.init();
+        
+        cartSystem = new FirebaseCartSystem();
         await cartSystem.init();
+        
+        authSystem.setCartSystem(cartSystem);
         
         // Render cart items
         renderCartItems();
         
-        // Setup promo code toggle
-        const applyPromoLink = document.getElementById('applyPromoLink');
-        const promoInputContainer = document.getElementById('promoInputContainer');
+        // Listen for real-time updates
+        window.addEventListener('cartUpdated', function() {
+            renderCartItems();
+        });
         
-        if (applyPromoLink && promoInputContainer) {
-            applyPromoLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                promoInputContainer.style.display = 'flex';
-                this.style.display = 'none';
-            });
-        }
-        
-        // Setup checkout button
-        const checkoutBtn = document.getElementById('checkoutBtn');
-        if (checkoutBtn) {
-            checkoutBtn.addEventListener('click', function() {
-                if (cartSystem.getCartCount() > 0) {
-                    // Redirect to checkout page
-                    window.location.href = 'checkout.html';
-                }
-            });
-        }
+        // Setup event listeners
+        setupCartPageListeners();
         
     } catch (error) {
-        console.error('Initialization error:', error);
-        showError('Failed to load cart. Please refresh the page.');
+        console.error('Cart page initialization error:', error);
+        showError('Failed to load cart');
     } finally {
         showLoading(false);
     }
 });
+
+function setupCartPageListeners() {
+    // Promo code toggle
+    const applyPromoLink = document.getElementById('applyPromoLink');
+    const promoInputContainer = document.getElementById('promoInputContainer');
+    
+    if (applyPromoLink && promoInputContainer) {
+        applyPromoLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            promoInputContainer.style.display = 'flex';
+            this.style.display = 'none';
+        });
+    }
+    
+    // Checkout button
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', function() {
+            if (cartSystem.getCartCount() > 0) {
+                window.location.href = 'checkout.html';
+            }
+        });
+    }
+}
 
 // Make functions available globally
 window.updateItemQuantity = updateItemQuantity;
