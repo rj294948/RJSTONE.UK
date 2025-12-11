@@ -3,1192 +3,139 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your Cart - IRYA STONE</title>
+<title>Checkout - IRYA STONE</title>
 
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-:root {
-    --primary-gold: #c9a227;
-    --gold-light: #f0d77c;
-    --gold-dark: #9c7c1f;
-    --stone-dark: #1a1a1a;
-    --stone-light: #f4f6f4;
-    --bg-light: #f7f9fc;
-    --text-dark: #222222;
-    --text-light: #666666;
-    --white: #ffffff;
-    --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
-    --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
-    --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
-    --transition: all 0.3s ease;
-    --border-radius: 12px;
-    --border-radius-lg: 20px;
-    --danger: #ff4757;
-    --success: #2ed573;
-}
+/* Add similar styles as cart.html with checkout-specific styles */
+/* Include all styles from cart.html and add checkout form styles */
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
-
-body {
-    background: var(--bg-light);
-    color: var(--text-dark);
-    padding-top: 70px;
-    padding-bottom: 100px;
-}
-
-/* Header */
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: var(--white);
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: var(--shadow-sm);
-    z-index: 1000;
-    gap: 10px;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
-}
-
-.logo i {
-    color: var(--primary-gold);
-    font-size: 24px;
-}
-
-.logo span {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--stone-dark);
-}
-
-.cart-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.cart-header i {
-    font-size: 24px;
-    color: var(--primary-gold);
-}
-
-/* Cart Container */
-.cart-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.cart-title {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 30px;
-    color: var(--stone-dark);
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.cart-title i {
-    color: var(--primary-gold);
-}
-
-/* Empty Cart */
-.empty-cart {
-    text-align: center;
-    padding: 60px 20px;
+.checkout-form {
     background: var(--white);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
+    padding: 30px;
 }
 
-.empty-cart i {
-    font-size: 64px;
-    color: var(--primary-gold);
-    opacity: 0.5;
+.form-section {
+    margin-bottom: 30px;
+}
+
+.form-section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--stone-dark);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.form-group {
     margin-bottom: 20px;
 }
 
-.empty-cart h3 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    color: var(--stone-dark);
-}
-
-.empty-cart p {
-    color: var(--text-light);
-    margin-bottom: 30px;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.btn {
-    padding: 12px 30px;
-    border-radius: 25px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
-    color: var(--white);
-}
-
-.btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-}
-
-/* Cart Items */
-.cart-items-container {
-    background: var(--white);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-}
-
-.cart-item {
+.form-row {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
-    padding: 20px;
-    border-bottom: 1px solid #f0f0f0;
-    align-items: center;
 }
 
-.cart-item:last-child {
-    border-bottom: none;
-}
-
-.cart-item-image {
-    width: 120px;
-    height: 120px;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    background: var(--bg-light);
-}
-
-.cart-item-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.cart-item-details {
-    flex: 1;
-}
-
-.cart-item-name {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 5px;
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
     color: var(--stone-dark);
 }
 
-.cart-item-stone-name {
-    font-size: 14px;
-    color: var(--primary-gold);
-    font-weight: 500;
-    margin-bottom: 5px;
-}
-
-.cart-item-category {
-    font-size: 14px;
-    color: var(--text-light);
-    margin-bottom: 10px;
-    padding: 4px 12px;
-    background: rgba(201, 162, 39, 0.1);
-    border-radius: 20px;
-    display: inline-block;
-}
-
-.cart-item-price {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--primary-gold);
-    margin: 10px 0;
-}
-
-.cart-item-unit {
-    font-size: 14px;
-    color: var(--text-light);
-    margin-left: 5px;
-}
-
-/* Quantity Controls */
-.quantity-controls {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-top: 10px;
-}
-
-.quantity-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--bg-light);
-    border: 1px solid #e0e0e0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.quantity-btn:hover {
-    background: var(--primary-gold);
-    color: var(--white);
-    border-color: var(--primary-gold);
-}
-
-.quantity-input {
-    width: 60px;
-    text-align: center;
-    padding: 8px;
+.form-input {
+    width: 100%;
+    padding: 12px 15px;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    font-weight: 600;
-    font-size: 16px;
+    font-size: 14px;
+    transition: var(--transition);
 }
 
-.quantity-input:focus {
+.form-input:focus {
     outline: none;
     border-color: var(--primary-gold);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.1);
 }
 
-/* Actions */
-.cart-item-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.payment-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
 }
 
-.remove-btn {
-    padding: 10px 20px;
-    background: var(--danger);
-    color: var(--white);
-    border: none;
+.payment-method {
+    border: 2px solid #f0f0f0;
     border-radius: 8px;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-}
-
-.remove-btn:hover {
-    background: #ff3742;
-    transform: translateY(-2px);
-}
-
-.save-btn {
-    padding: 10px 20px;
-    background: var(--success);
-    color: var(--white);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-}
-
-.save-btn:hover {
-    background: #26c46a;
-    transform: translateY(-2px);
-}
-
-/* Cart Summary */
-.cart-summary {
-    margin-top: 30px;
-    background: var(--white);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
-    padding: 25px;
-}
-
-.summary-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: var(--stone-dark);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.summary-row:last-child {
-    border-bottom: none;
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--stone-dark);
-    padding-top: 15px;
-}
-
-.summary-label {
-    color: var(--text-light);
-}
-
-.summary-value {
-    font-weight: 500;
-}
-
-.total {
-    color: var(--primary-gold);
-    font-size: 24px;
-}
-
-/* Checkout Button */
-.checkout-btn {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
-    color: var(--white);
-    border: none;
-    border-radius: var(--border-radius);
-    font-size: 18px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 25px;
-}
-
-.checkout-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
-}
-
-/* Bottom Navigation */
-.bottom-nav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--white);
-    display: flex;
-    justify-content: space-around;
-    padding: 12px 0;
-    border-top: 1px solid #eee;
-    z-index: 999;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-}
-
-.nav-btn {
+    padding: 15px;
     text-align: center;
-    font-size: 11px;
-    color: var(--text-light);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    transition: var(--transition);
     cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 10px;
-    min-width: 70px;
-    text-decoration: none;
+    transition: var(--transition);
 }
 
-.nav-btn:hover {
-    color: var(--primary-gold);
+.payment-method:hover {
+    border-color: var(--primary-gold);
+}
+
+.payment-method.selected {
+    border-color: var(--primary-gold);
     background: rgba(201, 162, 39, 0.05);
 }
 
-.nav-btn.active {
+.payment-method i {
+    font-size: 24px;
+    margin-bottom: 10px;
     color: var(--primary-gold);
 }
 
-.nav-btn i {
-    font-size: 18px;
-}
-
-/* Cart Badge */
-.cart-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #ff4757;
-    color: var(--white);
-    font-size: 10px;
-    font-weight: 600;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
+.terms-checkbox {
     display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Messages */
-.message {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    border-radius: 10px;
-    box-shadow: var(--shadow-lg);
-    z-index: 9999;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    display: none;
-    max-width: 300px;
-}
-
-.message.show {
-    transform: translateX(0);
-    display: block;
-}
-
-.message.success {
-    background: var(--success);
-    color: white;
-}
-
-.message.error {
-    background: var(--danger);
-    color: white;
-}
-
-.message.info {
-    background: var(--primary-gold);
-    color: white;
-}
-
-/* Loading */
-.loading {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    display: none;
-}
-
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid rgba(201, 162, 39, 0.3);
-    border-radius: 50%;
-    border-top-color: var(--primary-gold);
-    animation: spin 1s ease-in-out infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* User Info */
-.user-info {
-    display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
-    margin-right: 10px;
+    margin-top: 20px;
 }
 
-.user-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+.terms-checkbox input {
+    margin-top: 4px;
+}
+
+.place-order-btn {
+    width: 100%;
+    padding: 16px;
     background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 25px;
+    transition: var(--transition);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
+    gap: 10px;
 }
 
-.user-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--stone-dark);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .cart-item {
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
-    
-    .cart-item-image {
-        margin: 0 auto;
-    }
-    
-    .cart-item-actions {
-        flex-direction: row;
-        justify-content: center;
-    }
-    
-    .quantity-controls {
-        justify-content: center;
-    }
-    
-    .user-info {
-        display: none;
-    }
-}
-
-@media (max-width: 480px) {
-    .cart-title {
-        font-size: 22px;
-    }
-    
-    .cart-item-name {
-        font-size: 16px;
-    }
-    
-    .cart-item-price {
-        font-size: 18px;
-    }
+.place-order-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 </style>
 </head>
+
 <body>
-
-<!-- Loading Spinner -->
-<div class="loading" id="loading">
-    <div class="loading-spinner"></div>
-</div>
-
-<!-- Messages -->
-<div class="message" id="message"></div>
-
-<!-- Header -->
-<header>
-    <a href="index.html" class="logo">
-        <i class="fa-solid fa-gem"></i>
-        <span>IRYA STONE</span>
-    </a>
-    
-    <div class="cart-header">
-        <i class="fas fa-shopping-cart"></i>
-        <span>Your Cart</span>
-    </div>
-    
-    <!-- User Info -->
-    <div class="user-info" id="userInfo">
-        <div class="user-avatar" id="userAvatar">U</div>
-        <div class="user-name" id="userName">Guest</div>
-    </div>
-</header>
-
-<!-- Cart Container -->
-<div class="cart-container">
-    <h1 class="cart-title">
-        <i class="fas fa-shopping-cart"></i>
-        Your Shopping Cart
-    </h1>
-    
-    <!-- Cart Items will be loaded here -->
-    <div id="cartItemsContainer"></div>
-    
-    <!-- Cart Summary -->
-    <div class="cart-summary" id="cartSummary" style="display: none;">
-        <h3 class="summary-title">
-            <i class="fas fa-receipt"></i>
-            Order Summary
-        </h3>
-        
-        <div class="summary-row">
-            <span class="summary-label">Subtotal</span>
-            <span class="summary-value" id="subtotal">£0.00</span>
-        </div>
-        
-        <div class="summary-row">
-            <span class="summary-label">Delivery</span>
-            <span class="summary-value">FREE</span>
-        </div>
-        
-        <div class="summary-row">
-            <span class="summary-label">VAT (20%)</span>
-            <span class="summary-value" id="vat">£0.00</span>
-        </div>
-        
-        <div class="summary-row">
-            <span class="summary-label">Total</span>
-            <span class="summary-value total" id="total">£0.00</span>
-        </div>
-        
-        <button class="checkout-btn" onclick="proceedToCheckout()">
-            <i class="fas fa-lock"></i>
-            Proceed to Checkout
-        </button>
-    </div>
-</div>
-
-<!-- Bottom Navigation -->
-<div class="bottom-nav">
-    <a href="index.html" class="nav-btn">
-        <i class="fas fa-home"></i>
-        <span>Home</span>
-    </a>
-    <a href="products.html" class="nav-btn">
-        <i class="fas fa-th-large"></i>
-        <span>Products</span>
-    </a>
-    <a href="#" class="nav-btn active">
-        <i class="fas fa-shopping-cart"></i>
-        <span>Cart</span>
-        <span id="cartCountNav" style="display: none;"></span>
-    </a>
-    <a href="account.html" class="nav-btn">
-        <i class="fas fa-user"></i>
-        <span>Account</span>
-    </a>
-</div>
-
-<script>
-// ============================================
-// AUTHENTICATION SYSTEM
-// ============================================
-
-class AuthSystem {
-    constructor() {
-        this.currentUser = null;
-        this.authKey = 'irya_stone_user';
-    }
-    
-    init() {
-        this.checkLocalStorage();
-        this.updateUserUI();
-    }
-    
-    checkLocalStorage() {
-        const userData = localStorage.getItem(this.authKey);
-        if (userData) {
-            this.currentUser = JSON.parse(userData);
-        }
-    }
-    
-    getUserFromLocalStorage() {
-        const userData = localStorage.getItem(this.authKey);
-        return userData ? JSON.parse(userData) : null;
-    }
-    
-    isLoggedIn() {
-        return this.currentUser !== null;
-    }
-    
-    getUserId() {
-        if (this.isLoggedIn()) {
-            return this.currentUser.uid;
-        }
-        
-        // For guests, create a unique ID
-        let guestId = localStorage.getItem('irya_guest_id');
-        if (!guestId) {
-            guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('irya_guest_id', guestId);
-        }
-        return guestId;
-    }
-    
-    getUserName() {
-        return this.currentUser ? this.currentUser.displayName : 'Guest';
-    }
-    
-    getUserInitial() {
-        const name = this.getUserName();
-        return name.charAt(0).toUpperCase();
-    }
-    
-    updateUserUI() {
-        const userAvatar = document.getElementById('userAvatar');
-        const userName = document.getElementById('userName');
-        
-        if (userAvatar && userName) {
-            userAvatar.textContent = this.getUserInitial();
-            userName.textContent = this.getUserName();
-        }
-    }
-}
-
-// ============================================
-// CART SYSTEM - USER SPECIFIC
-// ============================================
-
-class CartSystem {
-    constructor() {
-        this.authSystem = new AuthSystem();
-        this.authSystem.init();
-        this.cartKey = 'irya_cart_';
-        this.init();
-    }
-    
-    getCartKey() {
-        const userId = this.authSystem.getUserId();
-        return this.cartKey + userId;
-    }
-    
-    init() {
-        this.loadCart();
-        this.renderCart();
-        this.updateCartCount();
-    }
-    
-    // Load cart from localStorage
-    loadCart() {
-        try {
-            const cartKey = this.getCartKey();
-            const cartData = localStorage.getItem(cartKey);
-            if (cartData) {
-                this.cart = JSON.parse(cartData);
-            } else {
-                this.cart = [];
-            }
-        } catch (error) {
-            console.error('Error loading cart:', error);
-            this.cart = [];
-        }
-    }
-    
-    // Save cart to localStorage
-    saveCart() {
-        try {
-            const cartKey = this.getCartKey();
-            localStorage.setItem(cartKey, JSON.stringify(this.cart));
-            this.updateCartCount();
-            return true;
-        } catch (error) {
-            console.error('Error saving cart:', error);
-            this.showMessage('Error saving cart!', 'error');
-            return false;
-        }
-    }
-    
-    // Add item to cart (compatible with homepage)
-    addToCart(productId, productName, stoneName, productPrice, productImage, productCategory, priceUnit = 'piece') {
-        try {
-            const existingItem = this.cart.find(item => item.id === productId);
-            
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                this.cart.push({
-                    id: productId,
-                    name: productName,
-                    stoneName: stoneName || productName,
-                    price: productPrice,
-                    priceUnit: priceUnit,
-                    image: productImage,
-                    category: productCategory,
-                    quantity: 1,
-                    addedAt: new Date().toISOString()
-                });
-            }
-            
-            this.saveCart();
-            this.renderCart();
-            this.showMessage(`${stoneName || productName} added to cart!`, 'success');
-            return true;
-        } catch (error) {
-            console.error('Error adding to cart:', error);
-            this.showMessage('Failed to add to cart. Please try again.', 'error');
-            return false;
-        }
-    }
-    
-    // Remove item from cart
-    removeItem(itemId) {
-        const index = this.cart.findIndex(item => item.id === itemId);
-        if (index !== -1) {
-            const itemName = this.cart[index].name;
-            this.cart.splice(index, 1);
-            this.saveCart();
-            this.renderCart();
-            this.showMessage(`${itemName} removed from cart!`, 'info');
-        }
-    }
-    
-    // Update item quantity
-    updateQuantity(itemId, quantity) {
-        const item = this.cart.find(i => i.id === itemId);
-        if (item) {
-            if (quantity <= 0) {
-                this.removeItem(itemId);
-            } else {
-                item.quantity = quantity;
-                item.updatedAt = new Date().toISOString();
-                this.saveCart();
-                this.renderCart();
-            }
-        }
-    }
-    
-    // Clear entire cart
-    clearCart() {
-        this.cart = [];
-        this.saveCart();
-        this.renderCart();
-        this.showMessage('Cart cleared!', 'info');
-    }
-    
-    // Get cart total
-    getCartTotal() {
-        return this.cart.reduce((total, item) => {
-            const price = this.parsePrice(item.price);
-            return total + (price * item.quantity);
-        }, 0);
-    }
-    
-    // Parse price string to number
-    parsePrice(priceString) {
-        if (typeof priceString === 'number') return priceString;
-        if (typeof priceString === 'string') {
-            const match = priceString.match(/£?([0-9.]+)/);
-            if (match) return parseFloat(match[1]);
-        }
-        return 0;
-    }
-    
-    // Format price
-    formatPrice(amount) {
-        return '£' + amount.toFixed(2);
-    }
-    
-    // Format price with unit
-    formatPriceWithUnit(price, unit) {
-        if (!price && price !== 0) return 'Price on request';
-        
-        const priceNum = typeof price === 'number' ? price : parseFloat(price);
-        
-        if (isNaN(priceNum)) return 'Price on request';
-        
-        if (unit === 'sqft' || unit === 'm²') {
-            return `£${priceNum.toFixed(2)}/${unit}`;
-        } else if (unit === 'piece') {
-            return `£${priceNum.toFixed(2)} per piece`;
-        } else {
-            return `£${priceNum.toFixed(2)}`;
-        }
-    }
-    
-    // Render cart items
-    renderCart() {
-        const container = document.getElementById('cartItemsContainer');
-        const summary = document.getElementById('cartSummary');
-        
-        if (!this.cart || this.cart.length === 0) {
-            container.innerHTML = `
-                <div class="empty-cart">
-                    <i class="fas fa-shopping-cart"></i>
-                    <h3>Your cart is empty</h3>
-                    <p>Add some premium stones to get started with your project</p>
-                    <a href="index.html" class="btn btn-primary">
-                        <i class="fas fa-gem"></i>
-                        Browse Products
-                    </a>
-                </div>
-            `;
-            summary.style.display = 'none';
-            return;
-        }
-        
-        // Show summary
-        summary.style.display = 'block';
-        
-        // Render cart items
-        container.innerHTML = this.cart.map(item => {
-            const price = this.parsePrice(item.price);
-            const total = price * item.quantity;
-            const priceWithUnit = this.formatPriceWithUnit(price, item.priceUnit || 'piece');
-            
-            return `
-                <div class="cart-item" data-id="${item.id}">
-                    <div class="cart-item-image">
-                        <img src="${item.image || 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=300'}" 
-                             alt="${item.name}" 
-                             onerror="this.src='https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=300'">
-                    </div>
-                    
-                    <div class="cart-item-details">
-                        <h3 class="cart-item-name">${item.name}</h3>
-                        ${item.stoneName && item.stoneName !== item.name ? 
-                            `<div class="cart-item-stone-name">${item.stoneName}</div>` : ''}
-                        <span class="cart-item-category">${item.category || 'Natural Stone'}</span>
-                        
-                        <div class="cart-item-price">
-                            ${priceWithUnit}
-                            <span class="cart-item-unit">each</span>
-                        </div>
-                        
-                        <div class="quantity-controls">
-                            <button class="quantity-btn" onclick="cartSystem.updateQuantity('${item.id}', ${item.quantity - 1})">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            
-                            <input type="number" 
-                                   class="quantity-input" 
-                                   value="${item.quantity}" 
-                                   min="1" 
-                                   max="100"
-                                   onchange="cartSystem.updateQuantity('${item.id}', parseInt(this.value))">
-                            
-                            <button class="quantity-btn" onclick="cartSystem.updateQuantity('${item.id}', ${item.quantity + 1})">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            
-                            <span style="margin-left: 20px; font-weight: 600;">
-                                Total: ${this.formatPrice(total)}
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="cart-item-actions">
-                        <button class="remove-btn" onclick="cartSystem.removeItem('${item.id}')">
-                            <i class="fas fa-trash"></i>
-                            Remove
-                        </button>
-                        <button class="save-btn" onclick="cartSystem.saveForLater('${item.id}')">
-                            <i class="far fa-bookmark"></i>
-                            Save for Later
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-        // Update summary
-        this.updateSummary();
-    }
-    
-    // Update cart summary
-    updateSummary() {
-        const subtotal = this.getCartTotal();
-        const vat = subtotal * 0.20; // 20% VAT
-        const total = subtotal + vat;
-        
-        document.getElementById('subtotal').textContent = this.formatPrice(subtotal);
-        document.getElementById('vat').textContent = this.formatPrice(vat);
-        document.getElementById('total').textContent = this.formatPrice(total);
-    }
-    
-    // Update cart count in navigation
-    updateCartCount() {
-        const count = this.cart.reduce((sum, item) => sum + item.quantity, 0);
-        
-        // Update badge in cart page
-        const cartCountNav = document.getElementById('cartCountNav');
-        if (cartCountNav) {
-            if (count > 0) {
-                cartCountNav.textContent = count;
-                cartCountNav.style.display = 'inline';
-                cartCountNav.style.background = 'var(--primary-gold)';
-                cartCountNav.style.color = 'white';
-                cartCountNav.style.padding = '2px 8px';
-                cartCountNav.style.borderRadius = '10px';
-                cartCountNav.style.fontSize = '10px';
-                cartCountNav.style.marginLeft = '5px';
-            } else {
-                cartCountNav.style.display = 'none';
-            }
-        }
-        
-        // Dispatch event for other pages to update
-        window.dispatchEvent(new Event('cartUpdated'));
-    }
-    
-    // Save item for later (wishlist functionality)
-    saveForLater(itemId) {
-        const item = this.cart.find(i => i.id === itemId);
-        if (item) {
-            // Save to wishlist
-            let wishlist = JSON.parse(localStorage.getItem('irya_wishlist') || '[]');
-            wishlist.push({
-                ...item,
-                savedAt: new Date().toISOString()
-            });
-            localStorage.setItem('irya_wishlist', JSON.stringify(wishlist));
-            
-            // Remove from cart
-            this.removeItem(itemId);
-            this.showMessage('Item saved for later!', 'success');
-        }
-    }
-    
-    // Show message/notification
-    showMessage(text, type = 'info') {
-        const messageDiv = document.getElementById('message');
-        messageDiv.textContent = text;
-        messageDiv.className = `message ${type} show`;
-        
-        setTimeout(() => {
-            messageDiv.classList.remove('show');
-        }, 3000);
-    }
-    
-    // Show loading
-    showLoading(show) {
-        const loadingDiv = document.getElementById('loading');
-        loadingDiv.style.display = show ? 'flex' : 'none';
-    }
-    
-    // Export cart data
-    exportCart() {
-        return {
-            userId: this.authSystem.getUserId(),
-            items: this.cart,
-            total: this.getCartTotal(),
-            itemCount: this.cart.reduce((sum, item) => sum + item.quantity, 0),
-            timestamp: new Date().toISOString()
-        };
-    }
-    
-    // Import cart data
-    importCart(data) {
-        if (data && data.items && Array.isArray(data.items)) {
-            this.cart = data.items;
-            this.saveCart();
-            this.renderCart();
-            return true;
-        }
-        return false;
-    }
-}
-
-// ============================================
-// INITIALIZATION
-// ============================================
-
-// Initialize cart system
-let cartSystem;
-
-// Proceed to checkout
-function proceedToCheckout() {
-    const cartData = cartSystem.exportCart();
-    
-    if (cartData.itemCount === 0) {
-        cartSystem.showMessage('Your cart is empty!', 'error');
-        return;
-    }
-    
-    // Show loading
-    cartSystem.showLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-        cartSystem.showLoading(false);
-        
-        // In real implementation, redirect to checkout page
-        // window.location.href = 'checkout.html';
-        
-        // For demo, show success message
-        cartSystem.showMessage(`Proceeding to checkout with ${cartData.itemCount} items!`, 'success');
-        
-        // Save checkout data to localStorage
-        localStorage.setItem('irya_checkout_data', JSON.stringify(cartData));
-        
-        console.log('Checkout Data:', cartData);
-    }, 1500);
-}
-
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize cart system
-    cartSystem = new CartSystem();
-    
-    // Check if there are any items to add from homepage
-    const pendingCart = localStorage.getItem('irya_pending_cart');
-    if (pendingCart) {
-        try {
-            const items = JSON.parse(pendingCart);
-            items.forEach(item => {
-                cartSystem.addToCart(
-                    item.id,
-                    item.name,
-                    item.stoneName,
-                    item.price,
-                    item.image,
-                    item.category,
-                    item.priceUnit
-                );
-            });
-            localStorage.removeItem('irya_pending_cart');
-        } catch (error) {
-            console.error('Error loading pending cart:', error);
-        }
-    }
-    
-    // Update cart count in real-time
-    window.addEventListener('cartUpdated', function() {
-        cartSystem.updateCartCount();
-    });
-    
-    // Make cartSystem globally available
-    window.cartSystem = cartSystem;
-    
-    // Listen for messages from homepage
-    window.addEventListener('message', function(event) {
-        if (event.data && event.data.type === 'ADD_TO_CART') {
-            const { productId, productName, stoneName, productPrice, productImage, productCategory, priceUnit } = event.data;
-            cartSystem.addToCart(
-                productId,
-                productName,
-                stoneName,
-                productPrice,
-                productImage,
-                productCategory,
-                priceUnit
-            );
-        }
-    });
-});
-
-// Function to sync cart from homepage (called via postMessage)
-function syncCartFromHomepage(cartData) {
-    if (cartSystem && cartData && cartData.items) {
-        cartSystem.cart = cartData.items;
-        cartSystem.saveCart();
-        cartSystem.renderCart();
-    }
-}
-</script>
+<!-- Similar structure to cart.html with checkout form -->
 </body>
 </html>
