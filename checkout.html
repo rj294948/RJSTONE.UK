@@ -61,14 +61,12 @@ header {
     box-shadow: var(--shadow-sm);
     z-index: 1000;
     gap: 10px;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.3s ease;
     transform: translateY(0);
-    opacity: 1;
 }
 
 header.hidden {
     transform: translateY(-100%);
-    opacity: 0;
 }
 
 .logo {
@@ -118,11 +116,6 @@ header.hidden {
     padding: 90px 16px 20px;
     background: var(--white);
     border-bottom: 1px solid #f0f0f0;
-    transition: padding 0.3s ease;
-}
-
-.breadcrumb.scrolled {
-    padding-top: 20px;
 }
 
 .breadcrumb-content {
@@ -693,14 +686,12 @@ header.hidden {
     border-top: 1px solid #eee;
     z-index: 999;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.3s ease;
     transform: translateY(0);
-    opacity: 1;
 }
 
 .bottom-nav.hidden {
     transform: translateY(100%);
-    opacity: 0;
 }
 
 .nav-btn {
@@ -827,7 +818,7 @@ header.hidden {
 </header>
 
 <!-- Breadcrumb -->
-<section class="breadcrumb" id="breadcrumb">
+<section class="breadcrumb">
     <div class="breadcrumb-content">
         <div class="breadcrumb-item">
             <a href="index.html"><i class="fas fa-home"></i> Home</a>
@@ -1161,67 +1152,71 @@ let userAddress = null;
 let isBuyNow = false;
 let currentPaymentType = 'advance';
 let lastScrollTop = 0;
+let scrollTimeout;
 
 // ============================================
-// SCROLL HIDE/SHOW FUNCTIONALITY
+// SCROLL HIDE/SHOW FUNCTIONALITY - SIMPLIFIED
 // ============================================
 
 function initScrollHideShow() {
     const header = document.getElementById('mainHeader');
     const bottomNav = document.getElementById('bottomNav');
-    const breadcrumb = document.getElementById('breadcrumb');
-    
-    let ticking = false;
     
     window.addEventListener('scroll', function() {
-        if (!ticking) {
-            window.requestAnimationFrame(function() {
-                handleScroll(header, bottomNav, breadcrumb);
-                ticking = false;
-            });
-            ticking = true;
+        // Clear existing timeout
+        if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
         }
+        
+        // Set new timeout
+        scrollTimeout = setTimeout(function() {
+            handleScroll(header, bottomNav);
+        }, 100);
     });
     
-    // Initial call to set proper state
-    handleScroll(header, bottomNav, breadcrumb);
+    // Initial call
+    handleScroll(header, bottomNav);
 }
 
-function handleScroll(header, bottomNav, breadcrumb) {
+function handleScroll(header, bottomNav) {
     const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
     
-    // For mobile screens, hide/show based on scroll direction
+    // Only hide on mobile
     if (window.innerWidth <= 768) {
         if (currentScroll > lastScrollTop && currentScroll > 100) {
-            // Scrolling down
+            // Scrolling down - hide
             header.classList.add('hidden');
             bottomNav.classList.add('hidden');
-            breadcrumb.classList.add('scrolled');
-        } else {
-            // Scrolling up
+        } else if (currentScroll < lastScrollTop) {
+            // Scrolling up - show
             header.classList.remove('hidden');
             bottomNav.classList.remove('hidden');
-            
-            // Only add scrolled class if we're not at the very top
-            if (currentScroll > 50) {
-                breadcrumb.classList.add('scrolled');
-            } else {
-                breadcrumb.classList.remove('scrolled');
-            }
         }
     } else {
-        // For desktop, always show but adjust breadcrumb
+        // On desktop, always show
         header.classList.remove('hidden');
         bottomNav.classList.remove('hidden');
-        
-        if (currentScroll > 50) {
-            breadcrumb.classList.add('scrolled');
-        } else {
-            breadcrumb.classList.remove('scrolled');
-        }
     }
     
     lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+}
+
+// ============================================
+// UTILITY FUNCTION TO REMOVE UNDEFINED VALUES
+// ============================================
+
+function removeUndefinedValues(obj) {
+    const newObj = {};
+    for (const key in obj) {
+        if (obj[key] !== undefined && obj[key] !== null) {
+            if (typeof obj[key] === 'object' && !Array.isArray(obj[key]) && obj[key] !== null) {
+                newObj[key] = removeUndefinedValues(obj[key]);
+            } else {
+                newObj[key] = obj[key];
+            }
+        }
+    }
+    return newObj;
 }
 
 // ============================================
@@ -1235,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize Firebase
     await initializeFirebase();
     
-    // Initialize Stripe
+    // Initialize Stripe (optional - don't fail if not available)
     await initializeStripe();
     
     // Check if this is Buy Now flow
@@ -1264,7 +1259,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 async function initializeFirebase() {
     try {
         if (typeof firebase === 'undefined') {
-            showError('Firebase not loaded');
+            console.warn('Firebase not loaded');
             return false;
         }
         
@@ -1277,6 +1272,7 @@ async function initializeFirebase() {
         firebaseDB = firebase.firestore();
         firebaseAuth = firebase.auth();
         
+        console.log('Firebase initialized successfully');
         return true;
     } catch (error) {
         console.error('Firebase initialization error:', error);
@@ -1291,7 +1287,8 @@ async function initializeFirebase() {
 async function initializeStripe() {
     try {
         // Initialize Stripe with your publishable key
-        stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // Replace with your Stripe key
+        // Use test key for development
+        stripe = Stripe('pk_test_51QK1V2RqVv8b8p5x5Z4X9vHjK8l7mN6pL2zRtS8w9cF3yA7bD1'); // Replace with your actual Stripe key
         
         // Create card element
         const elements = stripe.elements();
@@ -1318,7 +1315,7 @@ async function initializeStripe() {
         });
         
     } catch (error) {
-        console.error('Stripe initialization error:', error);
+        console.warn('Stripe initialization error:', error);
         // Don't show error for Stripe as it might be optional
     }
 }
@@ -1399,13 +1396,13 @@ function displayOrderItems() {
         return `
             <div class="order-item">
                 <div class="order-item-image">
-                    <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800'">
+                    <img src="${item.image || 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800'}" alt="${item.name}">
                 </div>
                 <div class="order-item-details">
-                    <div class="order-item-name">${item.name}</div>
-                    <div class="order-item-info">${item.category}</div>
+                    <div class="order-item-name">${item.name || 'Product'}</div>
+                    <div class="order-item-info">${item.category || 'General'}</div>
                     <div class="order-item-info">${calculationInfo}</div>
-                    <div class="order-item-price">£${item.calculatedPrice ? parseFloat(item.calculatedPrice).toFixed(2) : (item.price * item.quantity).toFixed(2)}</div>
+                    <div class="order-item-price">£${item.calculatedPrice ? parseFloat(item.calculatedPrice).toFixed(2) : ((item.price || 0) * (item.quantity || 1)).toFixed(2)}</div>
                 </div>
             </div>
         `;
@@ -1420,7 +1417,7 @@ function calculateTotals() {
     let remainingTotal = 0;
     
     cartItems.forEach(item => {
-        const itemTotal = item.calculatedPrice || (item.price * item.quantity);
+        const itemTotal = item.calculatedPrice || ((item.price || 0) * (item.quantity || 1));
         subtotal += itemTotal;
         
         // Use stored advance and remaining if available
@@ -1440,7 +1437,7 @@ function calculateTotals() {
     
     // Update stored values in cart items
     cartItems.forEach(item => {
-        const itemTotal = item.calculatedPrice || (item.price * item.quantity);
+        const itemTotal = item.calculatedPrice || ((item.price || 0) * (item.quantity || 1));
         if (item.advancePayment === undefined) {
             item.advancePayment = itemTotal * 0.3;
         }
@@ -1504,7 +1501,7 @@ function updatePaymentBreakdown(total, advanceTotal, remainingTotal) {
 
 function calculateShippingCost() {
     // Simple shipping calculation based on subtotal
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.calculatedPrice || (item.price * item.quantity)), 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.calculatedPrice || ((item.price || 0) * (item.quantity || 1))), 0);
     
     if (subtotal > 500) {
         return 0; // Free shipping for orders over £500
@@ -1524,7 +1521,7 @@ function calculateShipping() {
 }
 
 // ============================================
-// PAYMENT OPTIONS - FIXED ERROR
+// PAYMENT OPTIONS
 // ============================================
 
 function initializePaymentOptions() {
@@ -1677,7 +1674,7 @@ function getCountryName(countryCode) {
 }
 
 // ============================================
-// PLACE ORDER
+// PLACE ORDER - FIXED FOR UNDEFINED VALUES
 // ============================================
 
 async function placeOrder() {
@@ -1718,20 +1715,20 @@ async function placeOrder() {
         const paymentType = currentPaymentType;
         const paymentAmount = paymentType === 'advance' ? totals.advanceTotal : totals.total * 0.95;
         
-        // Create order object
+        // Create order object with safe values
         const order = {
             userId: getUserId(),
             items: cartItems.map(item => ({
-                id: item.id,
-                name: item.name,
-                quantity: item.quantity,
-                price: item.price,
-                calculatedPrice: item.calculatedPrice,
-                calculationData: item.calculationData,
-                customRequirements: item.customRequirements,
-                advancePayment: item.advancePayment,
-                remainingPayment: item.remainingPayment,
-                totalPrice: item.totalPrice
+                id: item.id || '',
+                name: item.name || 'Product',
+                quantity: item.quantity || 1,
+                price: item.price || 0,
+                calculatedPrice: item.calculatedPrice || 0,
+                calculationData: item.calculationData || null,
+                customRequirements: item.customRequirements || '',
+                advancePayment: item.advancePayment || 0,
+                remainingPayment: item.remainingPayment || 0,
+                totalPrice: item.totalPrice || 0
             })),
             shippingAddress: addressData,
             billingAddress: addressData,
@@ -1749,19 +1746,22 @@ async function placeOrder() {
             orderNumber: generateOrderNumber(),
             paymentStatus: 'pending',
             customRequirements: cartItems
-                .map(item => item.customRequirements)
+                .map(item => item.customRequirements || '')
                 .filter(req => req && req.trim() !== '')
         };
+        
+        // Remove undefined values before saving to Firebase
+        const cleanOrder = removeUndefinedValues(order);
         
         // Process payment
         let paymentResult;
         
         switch(selectedPaymentMethod) {
             case 'stripe':
-                paymentResult = await processStripePayment(order, paymentAmount);
+                paymentResult = await processStripePayment(cleanOrder, paymentAmount);
                 break;
             case 'paypal':
-                paymentResult = await processPayPalPayment(order, paymentAmount);
+                paymentResult = await processPayPalPayment(cleanOrder, paymentAmount);
                 break;
             case 'bank':
                 paymentResult = { success: true, method: 'bank_transfer' };
@@ -1772,24 +1772,25 @@ async function placeOrder() {
         
         if (paymentResult.success) {
             // Update order with payment info
-            order.paymentStatus = paymentType === 'full' ? 'paid' : 'advance_paid';
-            order.paymentId = paymentResult.paymentId;
-            order.paymentMethod = paymentResult.method;
-            order.transactionDetails = paymentResult.transactionDetails;
+            cleanOrder.paymentStatus = paymentType === 'full' ? 'paid' : 'advance_paid';
+            cleanOrder.paymentId = paymentResult.paymentId || '';
+            cleanOrder.paymentMethod = paymentResult.method || selectedPaymentMethod;
+            cleanOrder.transactionDetails = paymentResult.transactionDetails || {};
+            cleanOrder.updatedAt = new Date().toISOString();
             
             // Save order to Firebase
-            const orderId = await saveOrderToFirebase(order);
+            const orderId = await saveOrderToFirebase(cleanOrder);
             
             // Save custom requirements if any
-            if (order.customRequirements && order.customRequirements.length > 0) {
-                await saveCustomRequirements(orderId, order.customRequirements);
+            if (cleanOrder.customRequirements && cleanOrder.customRequirements.length > 0) {
+                await saveCustomRequirements(orderId, cleanOrder.customRequirements);
             }
             
             // Clear cart
             await clearCart();
             
             // Redirect to order confirmation
-            window.location.href = `order-confirmation.html?order=${order.orderNumber}`;
+            window.location.href = `order-confirmation.html?order=${cleanOrder.orderNumber}`;
             
         } else {
             throw new Error(paymentResult.error || 'Payment failed');
@@ -1848,7 +1849,7 @@ async function processPayPalPayment(order, amount) {
 }
 
 // ============================================
-// FIREBASE ORDER MANAGEMENT
+// FIREBASE ORDER MANAGEMENT - FIXED FOR UNDEFINED
 // ============================================
 
 async function saveOrderToFirebase(order) {
@@ -1860,12 +1861,36 @@ async function saveOrderToFirebase(order) {
         // Generate document ID
         const orderId = firebaseDB.collection('orders').doc().id;
         
-        // Save to main orders collection
-        await firebaseDB.collection('orders').doc(orderId).set({
-            ...order,
+        // Create final order object with all required fields
+        const finalOrder = {
             id: orderId,
+            userId: order.userId || '',
+            items: order.items || [],
+            shippingAddress: order.shippingAddress || {},
+            billingAddress: order.billingAddress || order.shippingAddress || {},
+            paymentMethod: order.paymentMethod || 'stripe',
+            paymentType: order.paymentType || 'advance',
+            subtotal: order.subtotal || 0,
+            tax: order.tax || 0,
+            shipping: order.shipping || 0,
+            total: order.total || 0,
+            advancePayment: order.advancePayment || 0,
+            remainingPayment: order.remainingPayment || 0,
+            amountPaid: order.amountPaid || 0,
+            status: order.status || 'pending',
+            createdAt: order.createdAt || new Date().toISOString(),
+            orderNumber: order.orderNumber || generateOrderNumber(),
+            paymentStatus: order.paymentStatus || 'pending',
+            paymentId: order.paymentId || '',
+            transactionDetails: order.transactionDetails || {},
             updatedAt: new Date().toISOString()
-        });
+        };
+        
+        // Remove any remaining undefined values
+        const cleanOrder = removeUndefinedValues(finalOrder);
+        
+        // Save to main orders collection
+        await firebaseDB.collection('orders').doc(orderId).set(cleanOrder);
         
         return orderId;
     } catch (error) {
@@ -1895,8 +1920,10 @@ async function saveUserAddress(addressData) {
         if (!firebaseDB) return false;
         
         const userId = getUserId();
+        const cleanAddress = removeUndefinedValues(addressData);
+        
         await firebaseDB.collection('userAddresses').doc(userId).set({
-            ...addressData,
+            ...cleanAddress,
             userId: userId,
             updatedAt: new Date().toISOString()
         }, { merge: true });
@@ -1950,7 +1977,7 @@ function updateCartBadge() {
     const cartKey = 'irya_local_cart_' + userId;
     const cartData = localStorage.getItem(cartKey);
     const cartItems = cartData ? JSON.parse(cartData) : [];
-    const count = cartItems.reduce((total, item) => total + item.quantity, 0);
+    const count = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
     
     const cartBadge = document.getElementById('cartBadge');
     if (cartBadge) {
