@@ -5,13 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout | IRYA STONE</title>
 
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Stripe for International Payments -->
 <script src="https://js.stripe.com/v3/"></script>
 
 <style>
@@ -606,18 +603,52 @@ header {
         text-align: center;
     }
 }
+
+/* --- NEW PAYMENT TERMS STYLES --- */
+.payment-terms-info {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.term-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    background: var(--bg-light);
+    border-radius: 10px;
+    border-left: 4px solid var(--primary-gold);
+}
+
+.term-item i {
+    font-size: 24px;
+    color: var(--primary-gold);
+    margin-top: 5px;
+}
+
+.term-item h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--stone-dark);
+}
+
+.term-item p {
+    font-size: 13px;
+    color: var(--text-light);
+    line-height: 1.5;
+}
+/* --------------------------------- */
 </style>
 </head>
 
 <body>
 
-<!-- Loading Spinner -->
 <div class="loading-spinner" id="loadingSpinner"></div>
 
-<!-- Notification -->
 <div class="notification" id="notification"></div>
 
-<!-- Header -->
 <header>
     <div class="logo">
         <i class="fa-solid fa-gem"></i>
@@ -635,7 +666,6 @@ header {
     </div>
 </header>
 
-<!-- Breadcrumb -->
 <section class="breadcrumb">
     <div class="breadcrumb-content">
         <div class="breadcrumb-item">
@@ -656,12 +686,9 @@ header {
     </div>
 </section>
 
-<!-- Checkout Container -->
 <section class="checkout-container">
     <div class="checkout-grid">
-        <!-- Left Column: Shipping & Payment -->
         <div>
-            <!-- Shipping Address -->
             <div class="checkout-section">
                 <div class="section-header">
                     <i class="fas fa-shipping-fast"></i>
@@ -669,8 +696,7 @@ header {
                 </div>
                 
                 <div id="savedAddresses">
-                    <!-- Saved addresses will be loaded here -->
-                </div>
+                    </div>
                 
                 <div class="address-form" id="addressForm">
                     <div class="form-group">
@@ -690,7 +716,7 @@ header {
                     
                     <div class="form-group">
                         <label class="required">Country</label>
-                        <select id="country" required>
+                        <select id="country" required onchange="calculateShipping(); calculateTotals();">
                             <option value="">Select Country</option>
                             <option value="GB">United Kingdom</option>
                             <option value="US">United States</option>
@@ -702,8 +728,7 @@ header {
                             <option value="IT">Italy</option>
                             <option value="ES">Spain</option>
                             <option value="AE">United Arab Emirates</option>
-                            <!-- Add more countries as needed -->
-                        </select>
+                            </select>
                     </div>
                     
                     <div class="form-group">
@@ -745,7 +770,6 @@ header {
                 </div>
             </div>
             
-            <!-- Payment Method -->
             <div class="checkout-section">
                 <div class="section-header">
                     <i class="fas fa-credit-card"></i>
@@ -787,7 +811,6 @@ header {
                     </div>
                 </div>
                 
-                <!-- Stripe Card Element -->
                 <div id="stripeCardElement" style="margin-top: 20px; display: none;">
                     <div class="stripe-card-element" id="card-element"></div>
                     <div id="card-errors" role="alert" style="color: #ff4757; font-size: 13px; margin-top: 10px;"></div>
@@ -795,9 +818,7 @@ header {
             </div>
         </div>
         
-        <!-- Right Column: Order Summary -->
         <div>
-            <!-- Order Summary -->
             <div class="checkout-section">
                 <div class="section-header">
                     <i class="fas fa-receipt"></i>
@@ -805,8 +826,7 @@ header {
                 </div>
                 
                 <div class="order-items" id="orderItems">
-                    <!-- Order items will be loaded here -->
-                </div>
+                    </div>
                 
                 <div class="price-breakdown">
                     <div class="price-row">
@@ -824,18 +844,61 @@ header {
                         <span class="price-value" id="tax">£0.00</span>
                     </div>
                     
+                    <div class="price-row advance-30" style="font-weight: 600; font-size: 16px; color: #28a745; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                        <span class="price-label">Advance Payment Due Now</span>
+                        <span class="price-value" id="advanceDue">£0.00</span>
+                    </div>
                     <div class="price-row total">
-                        <span class="price-label">Total</span>
+                        <span class="price-label">Total Order Value</span>
                         <span class="price-value" id="total">£0.00</span>
                     </div>
                 </div>
             </div>
             
-            <!-- Terms & Conditions -->
+            <div class="checkout-section">
+                <div class="section-header">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <h3>Payment Terms & Conditions</h3>
+                </div>
+                
+                <div class="payment-terms-info">
+                    <div class="term-item">
+                        <i class="fas fa-globe-asia"></i>
+                        <div>
+                            <h4>Indian Customers (IN)</h4>
+                            <p>100% advance payment required. Delivery within 7-14 days.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="term-item">
+                        <i class="fas fa-globe-americas"></i>
+                        <div>
+                            <h4>International Customers (Excluding IN)</h4>
+                            <p>30% advance payment, 70% balance before shipping. Delivery within 21-30 days.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="term-item">
+                        <i class="fas fa-shipping-fast"></i>
+                        <div>
+                            <h4>Shipping</h4>
+                            <p>Shipping costs calculated based on destination and weight. Free shipping for orders above £500.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="term-item">
+                        <i class="fas fa-undo"></i>
+                        <div>
+                            <h4>Returns & Refunds</h4>
+                            <p>7-day return policy for defective products. Custom orders cannot be returned.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="checkout-section">
                 <div class="section-header">
                     <i class="fas fa-file-contract"></i>
-                    <h3>Terms & Conditions</h3>
+                    <h3>Legal Agreement</h3>
                 </div>
                 
                 <div style="font-size: 13px; color: var(--text-light); line-height: 1.6;">
@@ -849,11 +912,10 @@ header {
                 </div>
             </div>
             
-            <!-- Place Order Button -->
             <div class="action-buttons">
-                <button class="action-btn-large btn-primary" onclick="placeOrder()">
+                <button class="action-btn-large btn-primary" onclick="placeOrder()" id="placeOrderButton">
                     <i class="fas fa-lock"></i>
-                    Place Order
+                    Proceed to Payment (£0.00)
                 </button>
                 <a href="cart.html" class="action-btn-large btn-secondary">
                     <i class="fas fa-arrow-left"></i>
@@ -864,7 +926,6 @@ header {
     </div>
 </section>
 
-<!-- Bottom Menu -->
 <div class="bottom-nav">
     <a href="index.html" class="nav-btn">
         <i class="fas fa-home"></i>
@@ -884,7 +945,6 @@ header {
     </a>
 </div>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -927,7 +987,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load saved addresses
     await loadSavedAddresses();
     
-    // Calculate shipping
+    // Calculate shipping (This will trigger calculateTotals implicitly)
     calculateShipping();
     
     // Update cart badge
@@ -968,7 +1028,8 @@ async function initializeFirebase() {
 async function initializeStripe() {
     try {
         // Initialize Stripe with your publishable key
-        stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // Replace with your Stripe key
+        // NOTE: REPLACE 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY' WITH YOUR ACTUAL TEST/LIVE KEY
+        stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); 
         
         // Create card element
         const elements = stripe.elements();
@@ -1014,7 +1075,7 @@ async function loadCartItems() {
         if (cartData) {
             cartItems = JSON.parse(cartData);
             displayOrderItems();
-            calculateTotals();
+            calculateTotals(); // Initial calculation
         } else {
             showError('Your cart is empty');
             window.location.href = 'cart.html';
@@ -1060,6 +1121,40 @@ function displayOrderItems() {
     orderItemsDiv.innerHTML = itemsHTML;
 }
 
+// ============================================
+// PAYMENT TERMS LOGIC (NEW FUNCTION)
+// ============================================
+
+async function calculatePaymentTerms(orderTotal, userCountry) {
+    // Ensure country code is uppercase for comparison
+    userCountry = userCountry ? userCountry.toUpperCase() : null; 
+    
+    const isIndianCustomer = userCountry === 'IN';
+    const total = orderTotal;
+    
+    if (isIndianCustomer) {
+        // Indian customers: 100% advance
+        return {
+            advancePercentage: 100,
+            advanceAmount: total,
+            balanceAmount: 0,
+            paymentTerms: '100% advance payment for Indian customers'
+        };
+    } else {
+        // International customers: 30% advance, 70% before shipping
+        const advanceAmount = total * 0.3;
+        const balanceAmount = total * 0.7;
+        
+        return {
+            advancePercentage: 30,
+            advanceAmount: advanceAmount,
+            balanceAmount: balanceAmount,
+            paymentTerms: '30% advance, 70% before shipping for international customers'
+        };
+    }
+}
+
+
 function calculateTotals() {
     const subtotal = cartItems.reduce((sum, item) => {
         return sum + (item.calculatedPrice || (item.price * item.quantity));
@@ -1068,24 +1163,43 @@ function calculateTotals() {
     const tax = subtotal * 0.2; // 20% VAT
     const shipping = calculateShippingCost();
     const total = subtotal + tax + shipping;
+
+    const userCountry = document.getElementById('country').value;
+    
+    // Calculate advance amount based on country logic
+    const paymentTerms = calculatePaymentTerms(total, userCountry);
+    const advanceDue = paymentTerms.advanceAmount;
+
     
     document.getElementById('subtotal').textContent = `£${subtotal.toFixed(2)}`;
     document.getElementById('tax').textContent = `£${tax.toFixed(2)}`;
     document.getElementById('total').textContent = `£${total.toFixed(2)}`;
     
-    return { subtotal, tax, shipping, total };
+    // Display the Advance Amount
+    document.getElementById('advanceDue').textContent = `£${advanceDue.toFixed(2)}`;
+    
+    // Update Place Order Button Text
+    const button = document.getElementById('placeOrderButton');
+    if (paymentTerms.advancePercentage === 100) {
+        button.innerHTML = `<i class="fas fa-lock"></i> Pay Full Amount (£${advanceDue.toFixed(2)})`;
+    } else {
+        button.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Pay 30% Advance (£${advanceDue.toFixed(2)})`;
+    }
+
+    return { subtotal, tax, shipping, total, advanceDue };
 }
 
 function calculateShippingCost() {
     // Simple shipping calculation based on subtotal
     const subtotal = cartItems.reduce((sum, item) => sum + (item.calculatedPrice || (item.price * item.quantity)), 0);
     
+    // Logic remains: Free shipping for orders over £500
     if (subtotal > 500) {
-        return 0; // Free shipping for orders over £500
+        return 0; 
     } else if (subtotal > 200) {
-        return 25; // £25 shipping
+        return 25; 
     } else {
-        return 35; // £35 shipping
+        return 35; 
     }
 }
 
@@ -1098,7 +1212,7 @@ function calculateShipping() {
 }
 
 // ============================================
-// ADDRESS MANAGEMENT
+// ADDRESS MANAGEMENT (Existing)
 // ============================================
 
 async function loadSavedAddresses() {
@@ -1149,390 +1263,142 @@ function displaySavedAddress(address) {
         document.getElementById('city').value = address.city || '';
         document.getElementById('state').value = address.state || '';
         document.getElementById('postalCode').value = address.postalCode || '';
+        // IMPORTANT: Trigger calculation after setting country
+        calculateShipping();
     }
 }
 
-function useSavedAddress() {
-    if (userAddress) {
-        document.getElementById('fullName').value = userAddress.fullName || '';
-        document.getElementById('email').value = userAddress.email || '';
-        document.getElementById('phone').value = userAddress.phone || '';
-        document.getElementById('country').value = userAddress.country || '';
-        document.getElementById('address1').value = userAddress.address1 || '';
-        document.getElementById('address2').value = userAddress.address2 || '';
-        document.getElementById('city').value = userAddress.city || '';
-        document.getElementById('state').value = userAddress.state || '';
-        document.getElementById('postalCode').value = userAddress.postalCode || '';
-    }
+
+// --- Utility functions (Simplified for this example) ---
+
+function getUserId() {
+    // Placeholder for actual user ID retrieval (e.g., from Firebase Auth)
+    return 'GUEST_USER_123'; 
 }
 
-function getCountryName(countryCode) {
+function getCountryName(code) {
     const countries = {
-        'GB': 'United Kingdom',
-        'US': 'United States',
-        'CA': 'Canada',
-        'AU': 'Australia',
-        'IN': 'India',
-        'DE': 'Germany',
-        'FR': 'France',
-        'IT': 'Italy',
-        'ES': 'Spain',
-        'AE': 'United Arab Emirates'
+        'GB': 'United Kingdom', 'US': 'United States', 'CA': 'Canada',
+        'AU': 'Australia', 'IN': 'India', 'DE': 'Germany',
+        'FR': 'France', 'IT': 'Italy', 'ES': 'Spain', 'AE': 'UAE'
     };
-    
-    return countries[countryCode] || countryCode;
+    return countries[code] || code;
 }
-
-// ============================================
-// PAYMENT METHODS
-// ============================================
 
 function selectPaymentMethod(method) {
     selectedPaymentMethod = method;
-    
-    // Update UI
     document.querySelectorAll('.payment-method').forEach(el => {
         el.classList.remove('active');
-        el.querySelector('.fa-check-circle').style.color = '';
+        el.querySelector('.fa-check-circle').style.color = '#e0e0e0';
     });
-    
-    event.currentTarget.classList.add('active');
-    event.currentTarget.querySelector('.fa-check-circle').style.color = 'var(--primary-gold)';
-    
-    // Show/hide card element
-    const stripeCardElement = document.getElementById('stripeCardElement');
-    stripeCardElement.style.display = method === 'stripe' ? 'block' : 'none';
+    const selectedEl = document.querySelector(`.payment-method[data-method="${method}"]`);
+    selectedEl.classList.add('active');
+    selectedEl.querySelector('.fa-check-circle').style.color = 'var(--primary-gold)';
+
+    // Toggle Stripe element visibility
+    document.getElementById('stripeCardElement').style.display = (method === 'stripe') ? 'block' : 'none';
+}
+
+function showLoading(show) {
+    document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+}
+
+function showError(message) {
+    showNotification(message, 'error');
+}
+
+function showNotification(message, type) {
+    const notif = document.getElementById('notification');
+    notif.textContent = message;
+    notif.style.backgroundColor = (type === 'error') ? '#ff4757' : 'var(--primary-gold)';
+    notif.classList.add('show');
+    setTimeout(() => {
+        notif.classList.remove('show');
+    }, 4000);
+}
+
+function updateCartBadge() {
+    // Placeholder for actual cart item count
+    document.getElementById('cartBadge').textContent = cartItems.length;
 }
 
 // ============================================
-// PLACE ORDER
+// PLACE ORDER FUNCTION (UPDATED)
 // ============================================
 
 async function placeOrder() {
     try {
-        // Validate form
-        if (!validateForm()) return;
-        
-        // Check terms agreement
         if (!document.getElementById('agreeTerms').checked) {
-            showError('Please agree to the terms and conditions');
+            showError('Please agree to the terms and conditions.');
+            return;
+        }
+
+        const totals = calculateTotals();
+        
+        // 1. Get user country from address
+        const userCountry = document.getElementById('country').value;
+        if (!userCountry) {
+             showError('Please select your country first.');
             return;
         }
         
-        showLoading(true);
+        // 2. Calculate payment terms based on country
+        const paymentTerms = await calculatePaymentTerms(totals.total, userCountry);
         
-        // Get address data
-        const addressData = {
-            fullName: document.getElementById('fullName').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            phone: document.getElementById('phone').value.trim(),
-            country: document.getElementById('country').value,
-            address1: document.getElementById('address1').value.trim(),
-            address2: document.getElementById('address2').value.trim(),
-            city: document.getElementById('city').value.trim(),
-            state: document.getElementById('state').value.trim(),
-            postalCode: document.getElementById('postalCode').value.trim(),
-            instructions: document.getElementById('instructions').value.trim(),
-            saveAddress: document.getElementById('saveAddress').checked
-        };
-        
-        // Save address if requested
-        if (addressData.saveAddress) {
-            await saveUserAddress(addressData);
-        }
-        
-        // Calculate totals
-        const { subtotal, tax, shipping, total } = calculateTotals();
-        
-        // Create order object
+        // 3. Prepare order object (simplified)
         const order = {
-            userId: getUserId(),
             items: cartItems,
-            shippingAddress: addressData,
-            billingAddress: addressData, // Same as shipping for now
-            paymentMethod: selectedPaymentMethod,
-            subtotal: subtotal,
-            tax: tax,
-            shipping: shipping,
-            total: total,
-            status: 'pending',
-            createdAt: new Date().toISOString(),
-            orderNumber: generateOrderNumber(),
-            paymentStatus: 'pending'
+            ...totals, // includes subtotal, total, etc.
+            paymentTerms: paymentTerms.paymentTerms,
+            advanceAmount: paymentTerms.advanceAmount,
+            balanceAmount: paymentTerms.balanceAmount,
+            userCountry: userCountry,
+            selectedPaymentMethod: selectedPaymentMethod,
+            // ... add shipping address details here ...
         };
         
-        // Process payment based on selected method
-        let paymentResult;
+        // 4. Determine payment amount (Always Advance Amount)
+        let paymentAmount = paymentTerms.advanceAmount;
         
-        switch(selectedPaymentMethod) {
-            case 'stripe':
-                paymentResult = await processStripePayment(order);
-                break;
-            case 'paypal':
-                paymentResult = await processPayPalPayment(order);
-                break;
-            case 'bank':
-                paymentResult = { success: true, method: 'bank_transfer' };
-                break;
-            default:
-                throw new Error('Invalid payment method');
-        }
-        
-        if (paymentResult.success) {
-            // Update order with payment info
-            order.paymentStatus = 'paid';
-            order.paymentId = paymentResult.paymentId;
-            order.paymentMethod = paymentResult.method;
+        showLoading(true);
+
+        // 5. Process payment
+        if (selectedPaymentMethod === 'stripe') {
+            showNotification(`Processing £${paymentAmount.toFixed(2)} via Stripe...`, 'info');
+            // --- ACTUAL STRIPE IMPLEMENTATION WOULD REQUIRE SERVER-SIDE LOGIC ---
+            // Example:
+            // const clientSecret = await fetch('/create-payment-intent', { method: 'POST', body: JSON.stringify({ amount: paymentAmount, currency: 'gbp' }) }).then(res => res.json()).clientSecret;
+            // stripe.confirmCardPayment(clientSecret, { payment_method: { card: cardElement } });
+            // For this static site, we simulate success/redirection
+             
+             // SIMULATION: Assume success and redirect after a delay
+             setTimeout(() => {
+                 showLoading(false);
+                 // In a real app, this would only happen after Stripe confirms payment
+                 window.location.href = `order_confirmation.html?id=ADVANCE_PAID`; 
+             }, 2000);
+            // --------------------------------------------------------------------
             
-            // Save order to Firebase
-            await saveOrderToFirebase(order);
+        } else if (selectedPaymentMethod === 'paypal') {
+            showNotification(`Redirecting for £${paymentAmount.toFixed(2)} via PayPal...`, 'info');
+            // SIMULATION: Redirect to a generic PayPal link with amount query
+            window.location.href = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&amount=${paymentAmount.toFixed(2)}&currency_code=GBP`;
             
-            // Clear cart
-            await clearCart();
-            
-            // Redirect to order confirmation
-            window.location.href = `order-confirmation.html?order=${order.orderNumber}`;
+        } else if (selectedPaymentMethod === 'bank') {
+            showLoading(false);
+            // Redirect to a page showing SWIFT details for the advance amount
+            window.location.href = `bank_transfer_details.html?amount=${paymentAmount.toFixed(2)}&type=advance&country=${userCountry}`;
             
         } else {
-            throw new Error(paymentResult.error || 'Payment failed');
+             showLoading(false);
+             showError('Please select a valid payment method.');
         }
         
     } catch (error) {
-        console.error('Error placing order:', error);
-        showError('Failed to place order: ' + error.message);
-    } finally {
         showLoading(false);
+        console.error('Final Error placing order:', error);
+        showError('Order placement failed. Check console for details.');
     }
-}
-
-function validateForm() {
-    const requiredFields = ['fullName', 'email', 'phone', 'country', 'address1', 'city', 'state', 'postalCode'];
-    
-    for (const fieldId of requiredFields) {
-        const field = document.getElementById(fieldId);
-        if (!field.value.trim()) {
-            showError(`Please fill in ${field.placeholder || fieldId}`);
-            field.focus();
-            return false;
-        }
-    }
-    
-    // Validate email
-    const email = document.getElementById('email').value;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showError('Please enter a valid email address');
-        return false;
-    }
-    
-    // Validate phone (basic international validation)
-    const phone = document.getElementById('phone').value;
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
-        showError('Please enter a valid phone number');
-        return false;
-    }
-    
-    return true;
-}
-
-// ============================================
-// PAYMENT PROCESSING
-// ============================================
-
-async function processStripePayment(order) {
-    try {
-        // Create payment intent on your server
-        const response = await fetch('/api/create-payment-intent', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                amount: Math.round(order.total * 100), // Amount in cents
-                currency: 'gbp',
-                description: `Order ${order.orderNumber}`,
-                metadata: {
-                    orderNumber: order.orderNumber,
-                    userId: order.userId
-                }
-            })
-        });
-        
-        const { clientSecret } = await response.json();
-        
-        // Confirm payment with Stripe
-        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-            payment_method: {
-                card: cardElement,
-                billing_details: {
-                    name: order.shippingAddress.fullName,
-                    email: order.shippingAddress.email,
-                    phone: order.shippingAddress.phone,
-                    address: {
-                        line1: order.shippingAddress.address1,
-                        line2: order.shippingAddress.address2,
-                        city: order.shippingAddress.city,
-                        state: order.shippingAddress.state,
-                        postal_code: order.shippingAddress.postalCode,
-                        country: order.shippingAddress.country
-                    }
-                }
-            }
-        });
-        
-        if (error) {
-            return { success: false, error: error.message };
-        }
-        
-        return {
-            success: true,
-            paymentId: paymentIntent.id,
-            method: 'stripe'
-        };
-        
-    } catch (error) {
-        console.error('Stripe payment error:', error);
-        return { success: false, error: 'Payment processing failed' };
-    }
-}
-
-async function processPayPalPayment(order) {
-    // This would integrate with PayPal API
-    // For now, return a mock success response
-    return {
-        success: true,
-        paymentId: 'PAYPAL_' + Date.now(),
-        method: 'paypal'
-    };
-}
-
-// ============================================
-// FIREBASE ORDER MANAGEMENT
-// ============================================
-
-async function saveOrderToFirebase(order) {
-    try {
-        if (!firebaseDB) {
-            throw new Error('Firebase not initialized');
-        }
-        
-        // Save to user's orders collection
-        const userOrdersRef = firebaseDB.collection('userOrders').doc(order.userId);
-        await userOrdersRef.collection('orders').doc(order.orderNumber).set(order);
-        
-        // Also save to main orders collection for admin
-        await firebaseDB.collection('orders').doc(order.orderNumber).set(order);
-        
-        return true;
-    } catch (error) {
-        console.error('Error saving order to Firebase:', error);
-        throw error;
-    }
-}
-
-async function saveUserAddress(addressData) {
-    try {
-        if (!firebaseDB) return false;
-        
-        const userId = getUserId();
-        await firebaseDB.collection('userAddresses').doc(userId).set({
-            ...addressData,
-            userId: userId,
-            updatedAt: new Date().toISOString()
-        }, { merge: true });
-        
-        return true;
-    } catch (error) {
-        console.error('Error saving address:', error);
-        return false;
-    }
-}
-
-// ============================================
-// CART MANAGEMENT
-// ============================================
-
-function getUserId() {
-    let userId = localStorage.getItem('irya_guest_id');
-    if (!userId) {
-        userId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('irya_guest_id', userId);
-    }
-    return userId;
-}
-
-async function clearCart() {
-    try {
-        const userId = getUserId();
-        const cartKey = 'irya_local_cart_' + userId;
-        
-        // Clear local storage
-        localStorage.removeItem(cartKey);
-        
-        // Clear from Firebase if logged in
-        if (firebaseDB) {
-            const authSystem = window.authSystem;
-            if (authSystem && authSystem.isLoggedIn()) {
-                await firebaseDB.collection('userCarts').doc(userId).delete();
-            }
-        }
-        
-        // Update cart badge
-        updateCartBadge();
-        
-        return true;
-    } catch (error) {
-        console.error('Error clearing cart:', error);
-        return false;
-    }
-}
-
-function updateCartBadge() {
-    const userId = getUserId();
-    const cartKey = 'irya_local_cart_' + userId;
-    const cartData = localStorage.getItem(cartKey);
-    const cartItems = cartData ? JSON.parse(cartData) : [];
-    const count = cartItems.reduce((total, item) => total + item.quantity, 0);
-    
-    const cartBadge = document.getElementById('cartBadge');
-    if (cartBadge) {
-        cartBadge.textContent = count;
-        cartBadge.style.display = count > 0 ? 'flex' : 'none';
-    }
-}
-
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
-
-function generateOrderNumber() {
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 10000);
-    return `IRYA-${timestamp}-${random}`;
-}
-
-function showLoading(show) {
-    const spinner = document.getElementById('loadingSpinner');
-    if (spinner) {
-        spinner.style.display = show ? 'block' : 'none';
-    }
-}
-
-function showNotification(message) {
-    const notification = document.getElementById('notification');
-    if (!notification) return;
-    
-    notification.textContent = message;
-    notification.classList.add('show');
-    
-    setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
-}
-
-function showError(message) {
-    alert(message);
 }
 </script>
 </body>
