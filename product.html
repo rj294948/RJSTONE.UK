@@ -1,1 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Details | IRYA STONE</title>
 
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary-gold: #c9a227;
+    --gold-light: #f0d77c;
+    --gold-dark: #9c7c1f;
+    --stone-dark: #1a1a1a;
+    --stone-light: #f4f6f4;
+    --bg-light: #f7f9fc;
+    --text-dark: #222222;
+    --text-light: #666666;
+    --white: #ffffff;
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+    --transition: all 0.3s ease;
+    --border-radius: 12px;
+    --border-radius-lg: 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    padding-bottom: 80px;
+    font-size: 14px;
+}
+
+/* Header */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    z-index: 1000;
+    gap: 10px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    min-width: 140px;
+}
+
+.logo i {
+    color: var(--primary-gold);
+    font-size: 24px;
+}
+
+.logo span {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--stone-dark);
+    font-family: 'Roboto Slab', serif;
+}
+
+.action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-light);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    background: var(--primary-gold);
+    color: var(--white);
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    padding: 90px 16px 20px;
+    background: var(--white);
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.breadcrumb-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.breadcrumb-item a {
+    color: var(--text-light);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary-gold);
+}
+
+.breadcrumb-item.active {
+    color: var(--primary-gold);
+    font-weight: 500;
+}
+
+.breadcrumb-divider {
+    color: var(--text-light);
+}
+
+/* Product Details Container */
+.product-details-container {
+    padding: 30px 16px;
+    background: var(--white);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+/* Product Gallery */
+.product-gallery {
+    position: relative;
+}
+
+.main-image-container {
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+    background: var(--bg-light);
+    margin-bottom: 15px;
+}
+
+.main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.thumbnails {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.thumbnail {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: var(--transition);
+}
+
+.thumbnail.active {
+    border-color: var(--primary-gold);
+}
+
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Product Info */
+.product-info h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+    color: var(--stone-dark);
+    font-family: 'Roboto Slab', serif;
+}
+
+.product-category-badge {
+    display: inline-block;
+    background: var(--primary-gold);
+    color: white;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.product-description {
+    margin-bottom: 25px;
+    line-height: 1.6;
+    color: var(--text-dark);
+    font-size: 16px;
+}
+
+.price-section {
+    margin-bottom: 25px;
+}
+
+.price-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary-gold);
+    font-family: 'Roboto Slab', serif;
+}
+
+.price-unit {
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+/* Specifications */
+.product-specifications {
+    margin-bottom: 25px;
+}
+
+.product-specifications h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.product-specifications h3 i {
+    color: var(--primary-gold);
+}
+
+.specs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.spec-item {
+    background: var(--bg-light);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.spec-label {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 5px;
+}
+
+.spec-value {
+    font-weight: 600;
+    color: var(--stone-dark);
+}
+
+/* Price Calculator */
+.price-calculator {
+    background: var(--bg-light);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    margin-bottom: 25px;
+}
+
+.price-calculator h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.price-calculator h3 i {
+    color: var(--primary-gold);
+}
+
+.calculator-inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--stone-dark);
+}
+
+.input-group input {
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.1);
+}
+
+.unit-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.unit-btn {
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 2px solid #e0e0e0;
+    background: var(--white);
+    color: var(--text-dark);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.unit-btn.active {
+    background: var(--primary-gold);
+    color: white;
+    border-color: var(--primary-gold);
+}
+
+.calculation-result {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid var(--primary-gold);
+}
+
+.calculation-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.calculation-row:last-child {
+    margin-bottom: 0;
+    padding-top: 10px;
+    border-top: 1px solid #e0e0e0;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--primary-gold);
+}
+
+.calculation-label {
+    color: var(--text-light);
+}
+
+.calculation-value {
+    font-weight: 600;
+    color: var(--stone-dark);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.action-btn-large {
+    flex: 1;
+    padding: 16px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 16px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(201, 162, 39, 0.3);
+}
+
+.btn-secondary {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    border: 2px solid #e0e0e0;
+}
+
+.btn-secondary:hover {
+    background: #f0f0f0;
+    border-color: var(--primary-gold);
+}
+
+/* Related Products */
+.related-products {
+    padding: 40px 16px;
+    background: var(--white);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.related-products h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 25px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.related-products h2 i {
+    color: var(--primary-gold);
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid #eee;
+    z-index: 999;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-btn {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 10px;
+    min-width: 70px;
+    text-decoration: none;
+}
+
+.nav-btn:hover {
+    color: var(--primary-gold);
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.nav-btn.active {
+    color: var(--primary-gold);
+}
+
+.nav-btn i {
+    font-size: 18px;
+}
+
+/* Loading */
+.loading-spinner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(201, 162, 39, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-gold);
+    animation: spin 1s ease-in-out infinite;
+    z-index: 9999;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .main-image-container {
+        height: 350px;
+    }
+}
+
+@media (max-width: 768px) {
+    .specs-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .calculator-inputs {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .main-image-container {
+        height: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-details-container {
+        padding: 20px 12px;
+    }
+    
+    .product-info h1 {
+        font-size: 24px;
+    }
+    
+    .thumbnails {
+        justify-content: center;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loadingSpinner"></div>
+
+<!-- Header -->
+<header>
+    <div class="logo">
+        <i class="fa-solid fa-gem"></i>
+        <span>IRYA STONE</span>
+    </div>
+    
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <a href="wishlist.html" class="action-btn" title="Wishlist">
+            <i class="far fa-heart"></i>
+        </a>
+        <a href="cart.html" class="action-btn" style="position: relative;">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge" id="cartBadge">0</span>
+        </a>
+        <a href="products.html" class="action-btn">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </div>
+</header>
+
+<!-- Breadcrumb -->
+<section class="breadcrumb">
+    <div class="breadcrumb-content">
+        <div class="breadcrumb-item">
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+        </div>
+        <div class="breadcrumb-divider">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+        <div class="breadcrumb-item">
+            <a href="products.html">Products</a>
+        </div>
+        <div class="breadcrumb-divider">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+        <div class="breadcrumb-item active" id="productNameBreadcrumb">
+            Product Details
+        </div>
+    </div>
+</section>
+
+<!-- Product Details -->
+<section class="product-details-container">
+    <div class="product-grid" id="productDetails">
+        <!-- Product details will be loaded here -->
+    </div>
+</section>
+
+<!-- Related Products -->
+<section class="related-products" id="relatedProducts" style="display: none;">
+    <h2><i class="fas fa-th-large"></i> Related Products</h2>
+    <div class="products-grid" id="relatedProductsGrid">
+        <!-- Related products will be loaded here -->
+    </div>
+</section>
+
+<!-- Bottom Menu -->
+<div class="bottom-nav">
+    <a href="index.html" class="nav-btn">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </a>
+    <a href="products.html" class="nav-btn active">
+        <i class="fas fa-th-large"></i>
+        <span>Products</span>
+    </a>
+    <a href="wishlist.html" class="nav-btn">
+        <i class="far fa-heart"></i>
+        <span>Wishlist</span>
+    </a>
+    <a href="account.html" class="nav-btn">
+        <i class="fas fa-user"></i>
+        <span>Account</span>
+    </a>
+</div>
+
+<script>
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+    authDomain: "iryastone-uk.firebaseapp.com",
+    projectId: "iryastone-uk",
+    storageBucket: "iryastone-uk.firebasestorage.app",
+    messagingSenderId: "110940910896",
+    appId: "1:110940910896:web:b25e92127118665e5c84f5",
+    measurementId: "G-6YM1FLYN48"
+};
+
+let firebaseApp, firebaseDB;
+let currentProduct = null;
+let currentUnit = 'sqft';
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
+document.addEventListener('DOMContentLoaded', async function() {
+    // Get product ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    
+    if (!productId) {
+        window.location.href = 'products.html';
+        return;
+    }
+    
+    await loadProductDetails(productId);
+});
+
+// ============================================
+// LOAD PRODUCT DETAILS
+// ============================================
+
+async function loadProductDetails(productId) {
+    try {
+        showLoading(true);
+        
+        // Initialize Firebase
+        if (typeof firebase === 'undefined') {
+            showError('Firebase not loaded');
+            return;
+        }
+        
+        if (!firebase.apps.length) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+        } else {
+            firebaseApp = firebase.app();
+        }
+        
+        firebaseDB = firebase.firestore();
+        
+        // Get product from Firebase
+        const doc = await firebaseDB.collection("products").doc(productId).get();
+        
+        if (!doc.exists) {
+            showError('Product not found');
+            window.location.href = 'products.html';
+            return;
+        }
+        
+        const data = doc.data();
+        
+        currentProduct = {
+            id: doc.id,
+            stone_name: data.stone_name || data.name || 'Stone Product',
+            category: data.category || 'Natural Stone',
+            description: data.description || 'Premium quality natural stone.',
+            price: parseFloat(data.price) || 0,
+            price_unit: data.price_unit || 'piece',
+            finish: data.finish || '',
+            size: data.size || '',
+            thickness: data.thickness || '',
+            color: data.color || '',
+            usage: data.usage || data.uses || 'General Use',
+            compressive_strength: data.compressive_strength || '',
+            density: data.density || '',
+            water_absorption: data.water_absorption || '',
+            type: data.type || '',
+            images: [],
+            min_order: data.min_order || 1
+        };
+        
+        // Handle images
+        if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+            currentProduct.images = data.images;
+        } else if (typeof data.image === 'string') {
+            currentProduct.images = [data.image];
+        } else {
+            currentProduct.images = [getDefaultImage(currentProduct.category)];
+        }
+        
+        // Display product details
+        displayProductDetails();
+        
+        // Load related products
+        await loadRelatedProducts(currentProduct.category);
+        
+    } catch (error) {
+        console.error('Error loading product details:', error);
+        showError('Failed to load product details');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
+// DISPLAY PRODUCT DETAILS
+// ============================================
+
+function displayProductDetails() {
+    const productDetails = document.getElementById('productDetails');
+    const productNameBreadcrumb = document.getElementById('productNameBreadcrumb');
+    
+    if (!currentProduct) return;
+    
+    // Update breadcrumb
+    if (productNameBreadcrumb) {
+        productNameBreadcrumb.textContent = currentProduct.stone_name;
+    }
+    
+    const html = `
+        <div class="product-gallery">
+            <div class="main-image-container">
+                <img src="${currentProduct.images[0]}" alt="${currentProduct.stone_name}" 
+                     class="main-image" id="mainProductImage">
+            </div>
+            
+            <div class="thumbnails" id="thumbnailContainer">
+                ${currentProduct.images.map((img, index) => `
+                    <div class="thumbnail ${index === 0 ? 'active' : ''}" 
+                         onclick="changeMainImage('${img}', this)">
+                        <img src="${img}" alt="Thumbnail ${index + 1}">
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <div class="product-info">
+            <h1>${currentProduct.stone_name}</h1>
+            <div class="product-category-badge">${currentProduct.category}</div>
+            
+            <div class="product-description">
+                ${currentProduct.description}
+            </div>
+            
+            <div class="price-section">
+                <div class="price-value">£${currentProduct.price.toFixed(2)}</div>
+                <div class="price-unit">per ${currentProduct.price_unit}</div>
+            </div>
+            
+            <!-- Specifications -->
+            <div class="product-specifications">
+                <h3><i class="fas fa-info-circle"></i> Specifications</h3>
+                <div class="specs-grid">
+                    ${currentProduct.finish ? `
+                        <div class="spec-item">
+                            <div class="spec-label">Finish</div>
+                            <div class="spec-value">${currentProduct.finish}</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${currentProduct.color ? `
+                        <div class="spec-item">
+                            <div class="spec-label">Color</div>
+                            <div class="spec-value">${currentProduct.color}</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${currentProduct.size ? `
+                        <div class="spec-item">
+                            <div class="spec-label">Size</div>
+                            <div class="spec-value">${currentProduct.size}</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${currentProduct.thickness ? `
+                        <div class="spec-item">
+                            <div class="spec-label">Thickness</div>
+                            <div class="spec-value">${currentProduct.thickness}</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${currentProduct.usage ? `
+                        <div class="spec-item">
+                            <div class="spec-label">Recommended Use</div>
+                            <div class="spec-value">${currentProduct.usage}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+            
+            <!-- Price Calculator -->
+            <div class="price-calculator">
+                <h3><i class="fas fa-calculator"></i> Price Calculator</h3>
+                
+                <div class="calculator-inputs">
+                    <div class="input-group">
+                        <label for="lengthInput">Length (ft)</label>
+                        <input type="number" id="lengthInput" min="0" step="0.01" value="1">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="widthInput">Width (ft)</label>
+                        <input type="number" id="widthInput" min="0" step="0.01" value="1">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="quantityInput">Quantity</label>
+                        <input type="number" id="quantityInput" min="${currentProduct.min_order}" step="1" value="${currentProduct.min_order}">
+                    </div>
+                </div>
+                
+                <div class="unit-selector">
+                    <button class="unit-btn ${currentProduct.price_unit === 'sqft' ? 'active' : ''}" 
+                            onclick="changeUnit('sqft')">Square Feet (sqft)</button>
+                    <button class="unit-btn ${currentProduct.price_unit === 'piece' ? 'active' : ''}" 
+                            onclick="changeUnit('piece')">Pieces</button>
+                    <button class="unit-btn ${currentProduct.price_unit === 'sqm' ? 'active' : ''}" 
+                            onclick="changeUnit('sqm')">Square Meters (m²)</button>
+                </div>
+                
+                <div class="calculation-result" id="calculationResult">
+                    <!-- Calculation results will be updated here -->
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="action-btn-large btn-primary" onclick="addToCart()">
+                    <i class="fas fa-cart-plus"></i>
+                    Add to Cart
+                </button>
+                <button class="action-btn-large btn-secondary" onclick="addToWishlist()">
+                    <i class="far fa-heart"></i>
+                    Add to Wishlist
+                </button>
+            </div>
+        </div>
+    `;
+    
+    productDetails.innerHTML = html;
+    
+    // Initialize calculator
+    currentUnit = currentProduct.price_unit || 'sqft';
+    updateCalculator();
+    
+    // Add event listeners to inputs
+    ['lengthInput', 'widthInput', 'quantityInput'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', updateCalculator);
+        }
+    });
+}
+
+// ============================================
+// PRICE CALCULATOR FUNCTIONS
+// ============================================
+
+function changeMainImage(imageUrl, thumbnailElement) {
+    const mainImage = document.getElementById('mainProductImage');
+    mainImage.src = imageUrl;
+    
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.classList.remove('active');
+    });
+    thumbnailElement.classList.add('active');
+}
+
+function changeUnit(unit) {
+    currentUnit = unit;
+    document.querySelectorAll('.unit-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    updateCalculator();
+}
+
+function updateCalculator() {
+    if (!currentProduct) return;
+    
+    const length = parseFloat(document.getElementById('lengthInput').value) || 0;
+    const width = parseFloat(document.getElementById('widthInput').value) || 0;
+    const quantity = parseInt(document.getElementById('quantityInput').value) || currentProduct.min_order;
+    
+    let area = 0;
+    let unitPrice = currentProduct.price;
+    let totalQuantity = quantity;
+    let totalPrice = 0;
+    
+    switch(currentUnit) {
+        case 'sqft':
+            area = length * width;
+            totalQuantity = Math.ceil(area);
+            totalPrice = unitPrice * totalQuantity;
+            break;
+            
+        case 'sqm':
+            area = length * width;
+            const areaSqft = area * 10.7639;
+            totalQuantity = Math.ceil(areaSqft);
+            totalPrice = unitPrice * totalQuantity;
+            break;
+            
+        case 'piece':
+        default:
+            totalQuantity = quantity;
+            totalPrice = unitPrice * totalQuantity;
+            break;
+    }
+    
+    // Ensure minimum order quantity
+    if (totalQuantity < currentProduct.min_order) {
+        totalQuantity = currentProduct.min_order;
+        totalPrice = unitPrice * totalQuantity;
+        document.getElementById('quantityInput').value = currentProduct.min_order;
+    }
+    
+    const calculationResult = document.getElementById('calculationResult');
+    calculationResult.innerHTML = `
+        <div class="calculation-row">
+            <span class="calculation-label">Unit Price:</span>
+            <span class="calculation-value">£${unitPrice.toFixed(2)} per ${currentUnit}</span>
+        </div>
+        <div class="calculation-row">
+            <span class="calculation-label">Quantity:</span>
+            <span class="calculation-value">${totalQuantity} ${currentUnit}</span>
+        </div>
+        <div class="calculation-row">
+            <span class="calculation-label">Subtotal:</span>
+            <span class="calculation-value">£${totalPrice.toFixed(2)}</span>
+        </div>
+    `;
+}
+
+// ============================================
+// CART & WISHLIST FUNCTIONS
+// ============================================
+
+async function addToCart() {
+    if (!currentProduct) return;
+    
+    const quantity = parseInt(document.getElementById('quantityInput').value) || currentProduct.min_order;
+    const length = parseFloat(document.getElementById('lengthInput').value) || 0;
+    const width = parseFloat(document.getElementById('widthInput').value) || 0;
+    
+    let calculatedPrice = currentProduct.price * quantity;
+    
+    if (currentUnit === 'sqft' || currentUnit === 'sqm') {
+        const area = length * width;
+        let areaSqft = currentUnit === 'sqm' ? area * 10.7639 : area;
+        calculatedPrice = currentProduct.price * Math.ceil(areaSqft);
+    }
+    
+    // Save to localStorage (simple cart system)
+    const cartKey = 'irya_cart';
+    let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
+    
+    const existingItem = cart.find(item => item.id === currentProduct.id);
+    
+    if (existingItem) {
+        existingItem.quantity += quantity;
+        existingItem.calculatedPrice = calculatedPrice;
+    } else {
+        cart.push({
+            id: currentProduct.id,
+            name: currentProduct.stone_name,
+            price: currentProduct.price,
+            calculatedPrice: calculatedPrice,
+            quantity: quantity,
+            image: currentProduct.images[0],
+            category: currentProduct.category
+        });
+    }
+    
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+    
+    // Update cart badge
+    updateCartBadge();
+    
+    // Show notification
+    showNotification(`${currentProduct.stone_name} added to cart!`);
+}
+
+function addToWishlist() {
+    if (!currentProduct) return;
+    
+    const wishlistKey = 'irya_wishlist';
+    let wishlist = JSON.parse(localStorage.getItem(wishlistKey)) || [];
+    
+    const existingItem = wishlist.find(item => item.id === currentProduct.id);
+    
+    if (!existingItem) {
+        wishlist.push({
+            id: currentProduct.id,
+            name: currentProduct.stone_name,
+            price: currentProduct.price,
+            image: currentProduct.images[0],
+            category: currentProduct.category
+        });
+        
+        localStorage.setItem(wishlistKey, JSON.stringify(wishlist));
+        showNotification(`${currentProduct.stone_name} added to wishlist!`);
+    } else {
+        showNotification(`${currentProduct.stone_name} is already in your wishlist`);
+    }
+}
+
+function updateCartBadge() {
+    const cartKey = 'irya_cart';
+    const cart = JSON.parse(localStorage.getItem(cartKey)) || [];
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    
+    const cartBadge = document.getElementById('cartBadge');
+    if (cartBadge) {
+        cartBadge.textContent = totalItems;
+        cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
+    }
+}
+
+// ============================================
+// LOAD RELATED PRODUCTS
+// ============================================
+
+async function loadRelatedProducts(category) {
+    try {
+        const querySnapshot = await firebaseDB.collection("products")
+            .where("category", "==", category)
+            .limit(4)
+            .get();
+        
+        if (!querySnapshot.empty) {
+            const relatedProducts = [];
+            
+            querySnapshot.forEach((doc) => {
+                if (doc.id !== currentProduct.id) {
+                    const data = doc.data();
+                    relatedProducts.push({
+                        id: doc.id,
+                        stone_name: data.stone_name || data.name,
+                        category: data.category,
+                        price: parseFloat(data.price) || 0,
+                        price_unit: data.price_unit || 'piece',
+                        image: data.images?.[0] || data.image || getDefaultImage(data.category)
+                    });
+                }
+            });
+            
+            if (relatedProducts.length > 0) {
+                displayRelatedProducts(relatedProducts);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading related products:', error);
+    }
+}
+
+function displayRelatedProducts(products) {
+    const relatedProductsSection = document.getElementById('relatedProducts');
+    const relatedProductsGrid = document.getElementById('relatedProductsGrid');
+    
+    if (products.length === 0) return;
+    
+    relatedProductsSection.style.display = 'block';
+    
+    const productsHTML = products.map(product => `
+        <a href="product-details.html?id=${product.id}" class="product-card">
+            <div class="product-image-container">
+                <img src="${product.image}" alt="${product.stone_name}" 
+                     class="product-image"
+                     onerror="this.src='${getDefaultImage(product.category)}'">
+            </div>
+            
+            <div class="product-info">
+                <h3 class="product-name">${product.stone_name}</h3>
+                <div class="product-price">
+                    <div class="price-value">£${product.price.toFixed(2)}</div>
+                    <div class="price-unit">per ${product.price_unit}</div>
+                </div>
+            </div>
+        </a>
+    `).join('');
+    
+    relatedProductsGrid.innerHTML = productsHTML;
+}
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+function getDefaultImage(category) {
+    const categoryLower = (category || '').toLowerCase();
+    
+    if (categoryLower.includes('sand')) {
+        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('kota')) {
+        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('granite')) {
+        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800';
+    }
+    
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+}
+
+function showLoading(show) {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = show ? 'block' : 'none';
+    }
+}
+
+function showNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--primary-gold);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        z-index: 9999;
+        max-width: 300px;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    notification.innerHTML = `
+        <style>
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        </style>
+        <div>${message}</div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+function showError(message) {
+    alert(message);
+}
+
+// Initialize cart badge on page load
+updateCartBadge();
+</script>
+</body>
+</html>
