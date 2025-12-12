@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account | IRYA STONE</title>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary-gold: #c9a227;
+    --gold-light: #f0d77c;
+    --gold-dark: #9c7c1f;
+    --stone-dark: #1a1a1a;
+    --stone-light: #f4f6f4;
+    --bg-light: #f7f9fc;
+    --text-dark: #222222;
+    --text-light: #666666;
+    --white: #ffffff;
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+    --transition: all 0.3s ease;
+    --border-radius: 12px;
+    --border-radius-lg: 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    padding-bottom: 80px;
+    font-size: 14px;
+}
+
+/* Header */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    z-index: 1000;
+    gap: 10px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    min-width: 140px;
+}
+
+.logo i {
+    color: var(--primary-gold);
+    font-size: 24px;
+}
+
+.logo span {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--stone-dark);
+    font-family: 'Roboto Slab', serif;
+}
+
+.action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-light);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    background: var(--primary-gold);
+    color: var(--white);
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    padding: 90px 16px 20px;
+    background: var(--white);
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.breadcrumb-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.breadcrumb-item a {
+    color: var(--text-light);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary-gold);
+}
+
+.breadcrumb-item.active {
+    color: var(--primary-gold);
+    font-weight: 500;
+}
+
+.breadcrumb-divider {
+    color: var(--text-light);
+}
+
+/* Account Container */
+.account-container {
+    padding: 30px 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.account-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 40px;
+}
+
+/* Account Sidebar */
+.account-sidebar {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    box-shadow: var(--shadow-sm);
+    height: fit-content;
+}
+
+.user-profile-summary {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    color: white;
+    font-size: 32px;
+}
+
+.user-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--stone-dark);
+}
+
+.user-email {
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+.account-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background: var(--bg-light);
+    color: var(--primary-gold);
+}
+
+.menu-item.active {
+    background: rgba(201, 162, 39, 0.1);
+    color: var(--primary-gold);
+    font-weight: 500;
+}
+
+.menu-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+}
+
+/* Account Content */
+.account-content {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--shadow-sm);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.section-header h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-header h2 i {
+    color: var(--primary-gold);
+}
+
+.edit-btn {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 2px solid var(--primary-gold);
+    background: transparent;
+    color: var(--primary-gold);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-btn:hover {
+    background: var(--primary-gold);
+    color: white;
+}
+
+/* Profile Form */
+.profile-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--stone-dark);
+}
+
+.form-group label.required::after {
+    content: " *";
+    color: #ff4757;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+    transition: var(--transition);
+    background: var(--white);
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Address Cards */
+.addresses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.address-card {
+    background: var(--bg-light);
+    border-radius: 10px;
+    padding: 20px;
+    border: 2px solid transparent;
+    transition: var(--transition);
+    position: relative;
+}
+
+.address-card:hover {
+    border-color: var(--primary-gold);
+}
+
+.address-card.default {
+    border-color: var(--primary-gold);
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.default-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--primary-gold);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.address-type {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.address-details {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+}
+
+.address-details .name {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.address-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.address-action-btn {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    background: var(--white);
+    color: var(--text-dark);
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.address-action-btn:hover {
+    border-color: var(--primary-gold);
+    color: var(--primary-gold);
+}
+
+.address-action-btn.delete {
+    color: #ff4757;
+    border-color: #ff4757;
+}
+
+.address-action-btn.delete:hover {
+    background: #ff4757;
+    color: white;
+}
+
+/* Add New Address */
+.add-new-address {
+    border: 2px dashed #e0e0e0;
+    background: transparent;
+    border-radius: 10px;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.add-new-address:hover {
+    border-color: var(--primary-gold);
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.add-new-address i {
+    font-size: 32px;
+    color: var(--primary-gold);
+}
+
+.add-new-address span {
+    font-weight: 500;
+    color: var(--stone-dark);
+}
+
+/* Modal */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--stone-dark);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    border: none;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    background: #ff4757;
+    transform: rotate(90deg);
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-header h3 {
+    font-size: 20px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-header h3 i {
+    color: var(--primary-gold);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+/* Loading */
+.loading-spinner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(201, 162, 39, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-gold);
+    animation: spin 1s ease-in-out infinite;
+    z-index: 9999;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid #eee;
+    z-index: 999;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-btn {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 10px;
+    min-width: 70px;
+    text-decoration: none;
+}
+
+.nav-btn:hover {
+    color: var(--primary-gold);
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.nav-btn.active {
+    color: var(--primary-gold);
+}
+
+.nav-btn i {
+    font-size: 18px;
+}
+
+/* Cart Badge */
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 600;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .account-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .addresses-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .account-content {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .account-container {
+        padding: 20px 12px;
+    }
+    
+    .address-card {
+        padding: 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loadingSpinner"></div>
+
+<!-- Address Modal -->
+<div class="modal-overlay" id="addressModal">
+    <div class="modal">
+        <button class="modal-close" id="modalCloseBtn">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-header">
+            <h3><i class="fas fa-map-marker-alt"></i> <span id="modalTitle">Add New Address</span></h3>
+        </div>
+        <div class="modal-body">
+            <form id="addressForm">
+                <div class="form-group">
+                    <label class="required">Address Type</label>
+                    <select id="addressType" required>
+                        <option value="home">Home</option>
+                        <option value="office">Office</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="required">Full Name</label>
+                    <input type="text" id="addressFullName" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="required">Phone Number</label>
+                    <input type="tel" id="addressPhone" placeholder="+1 234 567 8900" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="required">Country</label>
+                    <select id="addressCountry" required>
+                        <option value="">Select Country</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="AU">Australia</option>
+                        <option value="IN">India</option>
+                        <option value="DE">Germany</option>
+                        <option value="FR">France</option>
+                        <option value="IT">Italy</option>
+                        <option value="ES">Spain</option>
+                        <option value="AE">United Arab Emirates</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="required">Address Line 1</label>
+                    <input type="text" id="addressLine1" placeholder="Street address, P.O. box, company name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Address Line 2</label>
+                    <input type="text" id="addressLine2" placeholder="Apartment, suite, unit, building, floor, etc.">
+                </div>
+                
+                <div class="form-group">
+                    <label class="required">City</label>
+                    <input type="text" id="addressCity" placeholder="City" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="required">State/Province</label>
+                    <input type="text" id="addressState" placeholder="State or Province" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="required">Postal Code</label>
+                    <input type="text" id="addressPostalCode" placeholder="ZIP or Postal code" required>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="setAsDefault">
+                        <span>Set as default address</span>
+                    </label>
+                </div>
+                
+                <div class="action-buttons" style="margin-top: 25px; display: flex; gap: 15px;">
+                    <button type="submit" class="edit-btn" style="flex: 1; justify-content: center;">
+                        <i class="fas fa-save"></i>
+                        Save Address
+                    </button>
+                    <button type="button" class="edit-btn" onclick="closeAddressModal()" style="background: #f0f0f0; color: var(--text-dark); border-color: #e0e0e0;">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Header -->
+<header>
+    <div class="logo">
+        <i class="fa-solid fa-gem"></i>
+        <span>IRYA STONE</span>
+    </div>
+    
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <a href="cart.html" class="action-btn" style="position: relative;">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge" id="cartBadge">0</span>
+        </a>
+        <a href="products.html" class="action-btn">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </div>
+</header>
+
+<!-- Breadcrumb -->
+<section class="breadcrumb">
+    <div class="breadcrumb-content">
+        <div class="breadcrumb-item">
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+        </div>
+        <div class="breadcrumb-divider">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+        <div class="breadcrumb-item active">
+            My Account
+        </div>
+    </div>
+</section>
+
+<!-- Account Container -->
+<section class="account-container">
+    <div class="account-grid">
+        <!-- Sidebar -->
+        <div class="account-sidebar">
+            <div class="user-profile-summary">
+                <div class="profile-avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-name" id="userName">Loading...</div>
+                <div class="user-email" id="userEmail">Loading...</div>
+            </div>
+            
+            <div class="account-menu">
+                <a href="#profile" class="menu-item active" onclick="showSection('profile')">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile Information</span>
+                </a>
+                <a href="#addresses" class="menu-item" onclick="showSection('addresses')">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>My Addresses</span>
+                </a>
+                <a href="#orders" class="menu-item" onclick="showSection('orders')">
+                    <i class="fas fa-box"></i>
+                    <span>My Orders</span>
+                </a>
+                <a href="#wishlist" class="menu-item" onclick="showSection('wishlist')">
+                    <i class="far fa-heart"></i>
+                    <span>My Wishlist</span>
+                </a>
+                <a href="#security" class="menu-item" onclick="showSection('security')">
+                    <i class="fas fa-lock"></i>
+                    <span>Security</span>
+                </a>
+                <a href="javascript:void(0)" class="menu-item" onclick="logout()" style="color: #ff4757;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="account-content">
+            <!-- Profile Section -->
+            <div class="account-section" id="profileSection">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-circle"></i> Profile Information</h2>
+                    <button class="edit-btn" onclick="editProfile()">
+                        <i class="fas fa-edit"></i>
+                        Edit Profile
+                    </button>
+                </div>
+                
+                <div class="profile-info" id="profileInfo">
+                    <!-- Profile info will be loaded here -->
+                </div>
+                
+                <form class="profile-form" id="profileForm" style="display: none;">
+                    <div class="form-group">
+                        <label class="required">First Name</label>
+                        <input type="text" id="firstName" placeholder="Enter your first name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">Last Name</label>
+                        <input type="text" id="lastName" placeholder="Enter your last name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">Email Address</label>
+                        <input type="email" id="profileEmail" placeholder="your.email@example.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="profilePhone" placeholder="+1 234 567 8900">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <div style="display: flex; gap: 15px;">
+                            <button type="submit" class="edit-btn" style="flex: 1; justify-content: center;">
+                                <i class="fas fa-save"></i>
+                                Save Changes
+                            </button>
+                            <button type="button" class="edit-btn" onclick="cancelEditProfile()" style="background: #f0f0f0; color: var(--text-dark); border-color: #e0e0e0;">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Addresses Section -->
+            <div class="account-section" id="addressesSection" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-map-marker-alt"></i> My Addresses</h2>
+                    <button class="edit-btn" onclick="addNewAddress()">
+                        <i class="fas fa-plus"></i>
+                        Add New Address
+                    </button>
+                </div>
+                
+                <div class="addresses-grid" id="addressesGrid">
+                    <!-- Addresses will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Orders Section -->
+            <div class="account-section" id="ordersSection" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-box"></i> My Orders</h2>
+                    <a href="orders.html" class="edit-btn">
+                        <i class="fas fa-external-link-alt"></i>
+                        View All Orders
+                    </a>
+                </div>
+                
+                <div id="recentOrders">
+                    <!-- Recent orders will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Wishlist Section -->
+            <div class="account-section" id="wishlistSection" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="far fa-heart"></i> My Wishlist</h2>
+                    <a href="wishlist.html" class="edit-btn">
+                        <i class="fas fa-external-link-alt"></i>
+                        View All
+                    </a>
+                </div>
+                
+                <div id="wishlistItems">
+                    <!-- Wishlist items will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Security Section -->
+            <div class="account-section" id="securitySection" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-lock"></i> Security</h2>
+                </div>
+                
+                <div class="profile-form">
+                    <div class="form-group">
+                        <label class="required">Current Password</label>
+                        <input type="password" id="currentPassword" placeholder="Enter your current password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">New Password</label>
+                        <input type="password" id="newPassword" placeholder="Enter new password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password" required>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <button type="button" class="edit-btn" onclick="changePassword()" style="width: 100%; justify-content: center;">
+                            <i class="fas fa-key"></i>
+                            Change Password
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Bottom Menu -->
+<div class="bottom-nav">
+    <a href="index.html" class="nav-btn">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </a>
+    <a href="products.html" class="nav-btn">
+        <i class="fas fa-th-large"></i>
+        <span>Products</span>
+    </a>
+    <a href="orders.html" class="nav-btn">
+        <i class="fas fa-box"></i>
+        <span>Orders</span>
+    </a>
+    <a href="account.html" class="nav-btn active">
+        <i class="fas fa-user"></i>
+        <span>Account</span>
+    </a>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<script>
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+    authDomain: "iryastone-uk.firebasestorage.app",
+    projectId: "iryastone-uk",
+    storageBucket: "iryastone-uk.firebasestorage.app",
+    messagingSenderId: "110940910896",
+    appId: "1:110940910896:web:b25e92127118665e5c84f5",
+    measurementId: "G-6YM1FLYN48"
+};
+
+let firebaseApp, firebaseDB, firebaseAuth;
+let currentUser = null;
+let userAddresses = [];
+let editingAddressId = null;
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
+document.addEventListener('DOMContentLoaded', async function() {
+    // Initialize Firebase
+    await initializeFirebase();
+    
+    // Load user data
+    await loadUserData();
+    
+    // Update cart badge
+    updateCartBadge();
+    
+    // Initialize event listeners
+    initEventListeners();
+});
+
+// ============================================
+// FIREBASE INITIALIZATION
+// ============================================
+
+async function initializeFirebase() {
+    try {
+        if (typeof firebase === 'undefined') {
+            showError('Firebase not loaded');
+            return false;
+        }
+        
+        if (!firebase.apps.length) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+        } else {
+            firebaseApp = firebase.app();
+        }
+        
+        firebaseDB = firebase.firestore();
+        firebaseAuth = firebase.auth();
+        
+        return true;
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        return false;
+    }
+}
+
+// ============================================
+// LOAD USER DATA
+// ============================================
+
+async function loadUserData() {
+    try {
+        showLoading(true);
+        
+        // Check if user is logged in
+        const authKey = 'irya_stone_user';
+        const userData = localStorage.getItem(authKey);
+        
+        if (!userData) {
+            // Redirect to sign in if not logged in
+            window.location.href = 'sign.html';
+            return;
+        }
+        
+        currentUser = JSON.parse(userData);
+        
+        // Update UI with user data
+        updateUserProfileUI();
+        
+        // Load user addresses
+        await loadUserAddresses();
+        
+        // Load recent orders
+        await loadRecentOrders();
+        
+        // Load wishlist items
+        await loadWishlistItems();
+        
+    } catch (error) {
+        console.error('Error loading user data:', error);
+        showError('Failed to load user data');
+    } finally {
+        showLoading(false);
+    }
+}
+
+function updateUserProfileUI() {
+    if (!currentUser) return;
+    
+    const userName = currentUser.displayName || 'User';
+    const userEmail = currentUser.email || '';
+    const firstName = userName.split(' ')[0];
+    const firstLetter = firstName.charAt(0).toUpperCase();
+    
+    // Update avatar
+    const userAvatar = document.getElementById('userAvatar');
+    if (userAvatar) {
+        userAvatar.innerHTML = firstLetter;
+    }
+    
+    // Update name and email
+    document.getElementById('userName').textContent = userName;
+    document.getElementById('userEmail').textContent = userEmail;
+    
+    // Update profile info
+    const profileInfo = document.getElementById('profileInfo');
+    profileInfo.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <div style="font-size: 13px; color: var(--text-light); margin-bottom: 5px;">Full Name</div>
+                <div style="font-weight: 600; font-size: 16px;">${userName}</div>
+            </div>
+            <div>
+                <div style="font-size: 13px; color: var(--text-light); margin-bottom: 5px;">Email Address</div>
+                <div style="font-weight: 600; font-size: 16px;">${userEmail}</div>
+            </div>
+            <div>
+                <div style="font-size: 13px; color: var(--text-light); margin-bottom: 5px;">Phone Number</div>
+                <div style="font-weight: 600; font-size: 16px;">${currentUser.phone || 'Not provided'}</div>
+            </div>
+            <div>
+                <div style="font-size: 13px; color: var(--text-light); margin-bottom: 5px;">Member Since</div>
+                <div style="font-weight: 600; font-size: 16px;">${formatDate(currentUser.createdAt) || 'N/A'}</div>
+            </div>
+        </div>
+    `;
+    
+    // Pre-fill edit form
+    const nameParts = userName.split(' ');
+    document.getElementById('firstName').value = nameParts[0] || '';
+    document.getElementById('lastName').value = nameParts.slice(1).join(' ') || '';
+    document.getElementById('profileEmail').value = userEmail;
+    document.getElementById('profilePhone').value = currentUser.phone || '';
+}
+
+// ============================================
+// ADDRESS MANAGEMENT
+// ============================================
+
+async function loadUserAddresses() {
+    try {
+        if (!firebaseDB || !currentUser) return;
+        
+        const userId = currentUser.uid;
+        const addressesRef = firebaseDB.collection('userAddresses').doc(userId);
+        const addressesSnapshot = await addressesRef.collection('addresses').get();
+        
+        userAddresses = [];
+        
+        if (!addressesSnapshot.empty) {
+            addressesSnapshot.forEach(doc => {
+                userAddresses.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+        }
+        
+        displayAddresses();
+        
+    } catch (error) {
+        console.error('Error loading addresses:', error);
+    }
+}
+
+function displayAddresses() {
+    const addressesGrid = document.getElementById('addressesGrid');
+    
+    if (userAddresses.length === 0) {
+        addressesGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
+                <i class="fas fa-map-marker-alt" style="font-size: 48px; color: var(--text-light); opacity: 0.5; margin-bottom: 20px;"></i>
+                <h3 style="color: var(--stone-dark); margin-bottom: 10px;">No Addresses Saved</h3>
+                <p style="color: var(--text-light); margin-bottom: 20px;">Add your first address to make checkout faster</p>
+                <button class="edit-btn" onclick="addNewAddress()">
+                    <i class="fas fa-plus"></i>
+                    Add New Address
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    const addressesHTML = userAddresses.map(address => `
+        <div class="address-card ${address.isDefault ? 'default' : ''}">
+            ${address.isDefault ? '<div class="default-badge">Default</div>' : ''}
+            <div class="address-type">
+                <i class="fas fa-${getAddressTypeIcon(address.type)}"></i>
+                ${getAddressTypeText(address.type)}
+            </div>
+            <div class="address-details">
+                <div class="name">${address.fullName}</div>
+                <div>${address.addressLine1}</div>
+                ${address.addressLine2 ? `<div>${address.addressLine2}</div>` : ''}
+                <div>${address.city}, ${address.state} ${address.postalCode}</div>
+                <div>${getCountryName(address.country)}</div>
+                <div>Phone: ${address.phone}</div>
+            </div>
+            <div class="address-actions">
+                <button class="address-action-btn" onclick="editAddress('${address.id}')">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                ${!address.isDefault ? `
+                    <button class="address-action-btn" onclick="setDefaultAddress('${address.id}')">
+                        <i class="fas fa-star"></i> Set Default
+                    </button>
+                ` : ''}
+                <button class="address-action-btn delete" onclick="deleteAddress('${address.id}')">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    addressesGrid.innerHTML = addressesHTML + `
+        <div class="add-new-address" onclick="addNewAddress()">
+            <i class="fas fa-plus"></i>
+            <span>Add New Address</span>
+        </div>
+    `;
+}
+
+function getAddressTypeIcon(type) {
+    switch(type) {
+        case 'home': return 'home';
+        case 'office': return 'building';
+        default: return 'map-marker-alt';
+    }
+}
+
+function getAddressTypeText(type) {
+    switch(type) {
+        case 'home': return 'Home Address';
+        case 'office': return 'Office Address';
+        default: return 'Other Address';
+    }
+}
+
+function getCountryName(countryCode) {
+    const countries = {
+        'GB': 'United Kingdom',
+        'US': 'United States',
+        'CA': 'Canada',
+        'AU': 'Australia',
+        'IN': 'India',
+        'DE': 'Germany',
+        'FR': 'France',
+        'IT': 'Italy',
+        'ES': 'Spain',
+        'AE': 'United Arab Emirates'
+    };
+    
+    return countries[countryCode] || countryCode;
+}
+
+// ============================================
+// ADDRESS MODAL
+// ============================================
+
+function addNewAddress() {
+    editingAddressId = null;
+    document.getElementById('modalTitle').textContent = 'Add New Address';
+    document.getElementById('addressForm').reset();
+    document.getElementById('addressModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function editAddress(addressId) {
+    const address = userAddresses.find(a => a.id === addressId);
+    if (!address) return;
+    
+    editingAddressId = addressId;
+    document.getElementById('modalTitle').textContent = 'Edit Address';
+    
+    // Fill form with address data
+    document.getElementById('addressType').value = address.type || 'home';
+    document.getElementById('addressFullName').value = address.fullName || '';
+    document.getElementById('addressPhone').value = address.phone || '';
+    document.getElementById('addressCountry').value = address.country || '';
+    document.getElementById('addressLine1').value = address.addressLine1 || '';
+    document.getElementById('addressLine2').value = address.addressLine2 || '';
+    document.getElementById('addressCity').value = address.city || '';
+    document.getElementById('addressState').value = address.state || '';
+    document.getElementById('addressPostalCode').value = address.postalCode || '';
+    document.getElementById('setAsDefault').checked = address.isDefault || false;
+    
+    document.getElementById('addressModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAddressModal() {
+    document.getElementById('addressModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+    editingAddressId = null;
+}
+
+async function saveAddress(event) {
+    event.preventDefault();
+    
+    try {
+        if (!currentUser || !firebaseDB) {
+            showError('Please sign in to save addresses');
+            return;
+        }
+        
+        const addressData = {
+            type: document.getElementById('addressType').value,
+            fullName: document.getElementById('addressFullName').value.trim(),
+            phone: document.getElementById('addressPhone').value.trim(),
+            country: document.getElementById('addressCountry').value,
+            addressLine1: document.getElementById('addressLine1').value.trim(),
+            addressLine2: document.getElementById('addressLine2').value.trim(),
+            city: document.getElementById('addressCity').value.trim(),
+            state: document.getElementById('addressState').value.trim(),
+            postalCode: document.getElementById('addressPostalCode').value.trim(),
+            isDefault: document.getElementById('setAsDefault').checked,
+            updatedAt: new Date().toISOString()
+        };
+        
+        // Validate required fields
+        if (!addressData.fullName || !addressData.phone || !addressData.country || 
+            !addressData.addressLine1 || !addressData.city || !addressData.state || !addressData.postalCode) {
+            showError('Please fill in all required fields');
+            return;
+        }
+        
+        showLoading(true);
+        
+        const userId = currentUser.uid;
+        const addressesRef = firebaseDB.collection('userAddresses').doc(userId);
+        
+        if (editingAddressId) {
+            // Update existing address
+            await addressesRef.collection('addresses').doc(editingAddressId).update(addressData);
+            
+            // If set as default, update other addresses
+            if (addressData.isDefault) {
+                await updateDefaultAddress(userId, editingAddressId);
+            }
+            
+            showNotification('Address updated successfully');
+        } else {
+            // Add new address
+            addressData.createdAt = new Date().toISOString();
+            addressData.userId = userId;
+            
+            const docRef = await addressesRef.collection('addresses').add(addressData);
+            
+            // If set as default, update other addresses
+            if (addressData.isDefault) {
+                await updateDefaultAddress(userId, docRef.id);
+            }
+            
+            showNotification('Address added successfully');
+        }
+        
+        // Reload addresses
+        await loadUserAddresses();
+        
+        // Close modal
+        closeAddressModal();
+        
+    } catch (error) {
+        console.error('Error saving address:', error);
+        showError('Failed to save address');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function updateDefaultAddress(userId, defaultAddressId) {
+    try {
+        const addressesRef = firebaseDB.collection('userAddresses').doc(userId);
+        const addressesSnapshot = await addressesRef.collection('addresses').get();
+        
+        const batch = firebaseDB.batch();
+        
+        addressesSnapshot.forEach(doc => {
+            if (doc.id !== defaultAddressId) {
+                const addressRef = addressesRef.collection('addresses').doc(doc.id);
+                batch.update(addressRef, { isDefault: false });
+            }
+        });
+        
+        await batch.commit();
+        
+    } catch (error) {
+        console.error('Error updating default address:', error);
+    }
+}
+
+async function setDefaultAddress(addressId) {
+    try {
+        if (!currentUser || !firebaseDB) return;
+        
+        showLoading(true);
+        
+        const userId = currentUser.uid;
+        await updateDefaultAddress(userId, addressId);
+        
+        // Set this address as default
+        const addressesRef = firebaseDB.collection('userAddresses').doc(userId);
+        await addressesRef.collection('addresses').doc(addressId).update({
+            isDefault: true,
+            updatedAt: new Date().toISOString()
+        });
+        
+        // Reload addresses
+        await loadUserAddresses();
+        
+        showNotification('Default address updated');
+        
+    } catch (error) {
+        console.error('Error setting default address:', error);
+        showError('Failed to update default address');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function deleteAddress(addressId) {
+    if (!confirm('Are you sure you want to delete this address?')) return;
+    
+    try {
+        if (!currentUser || !firebaseDB) return;
+        
+        showLoading(true);
+        
+        const userId = currentUser.uid;
+        const addressesRef = firebaseDB.collection('userAddresses').doc(userId);
+        
+        // Check if this is the default address
+        const addressDoc = await addressesRef.collection('addresses').doc(addressId).get();
+        const isDefault = addressDoc.data()?.isDefault || false;
+        
+        // Delete the address
+        await addressesRef.collection('addresses').doc(addressId).delete();
+        
+        // If it was the default address, set another address as default
+        if (isDefault) {
+            const addressesSnapshot = await addressesRef.collection('addresses').limit(1).get();
+            if (!addressesSnapshot.empty) {
+                const newDefaultId = addressesSnapshot.docs[0].id;
+                await addressesRef.collection('addresses').doc(newDefaultId).update({
+                    isDefault: true,
+                    updatedAt: new Date().toISOString()
+                });
+            }
+        }
+        
+        // Reload addresses
+        await loadUserAddresses();
+        
+        showNotification('Address deleted successfully');
+        
+    } catch (error) {
+        console.error('Error deleting address:', error);
+        showError('Failed to delete address');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
+// ORDER MANAGEMENT
+// ============================================
+
+async function loadRecentOrders() {
+    try {
+        if (!firebaseDB || !currentUser) return;
+        
+        const userId = currentUser.uid;
+        const ordersRef = firebaseDB.collection('userOrders').doc(userId);
+        const ordersSnapshot = await ordersRef.collection('orders')
+            .orderBy('createdAt', 'desc')
+            .limit(3)
+            .get();
+        
+        if (!ordersSnapshot.empty) {
+            const orders = [];
+            ordersSnapshot.forEach(doc => {
+                orders.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            
+            displayRecentOrders(orders);
+        }
+        
+    } catch (error) {
+        console.error('Error loading recent orders:', error);
+    }
+}
+
+function displayRecentOrders(orders) {
+    const recentOrdersDiv = document.getElementById('recentOrders');
+    
+    if (orders.length === 0) {
+        recentOrdersDiv.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+                <i class="fas fa-box-open" style="font-size: 48px; color: var(--text-light); opacity: 0.5; margin-bottom: 20px;"></i>
+                <h3 style="color: var(--stone-dark); margin-bottom: 10px;">No Orders Yet</h3>
+                <p style="color: var(--text-light); margin-bottom: 20px;">Start shopping to see your orders here</p>
+                <a href="products.html" class="edit-btn">
+                    <i class="fas fa-shopping-bag"></i>
+                    Start Shopping
+                </a>
+            </div>
+        `;
+        return;
+    }
+    
+    const ordersHTML = orders.map(order => `
+        <div style="background: var(--bg-light); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                    <div style="font-weight: 600; color: var(--stone-dark);">Order #${order.orderNumber}</div>
+                    <div style="font-size: 13px; color: var(--text-light);">${formatDate(order.createdAt)}</div>
+                </div>
+                <div style="padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: 600; 
+                    ${getStatusStyle(order.status)}">
+                    ${getStatusText(order.status)}
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 14px; color: var(--text-dark);">
+                    ${order.items.length} item${order.items.length !== 1 ? 's' : ''} • £${order.total?.toFixed(2) || '0.00'}
+                </div>
+                <a href="order-details.html?id=${order.id}" style="font-size: 13px; color: var(--primary-gold); text-decoration: none;">
+                    View Details <i class="fas fa-arrow-right" style="font-size: 11px;"></i>
+                </a>
+            </div>
+        </div>
+    `).join('');
+    
+    recentOrdersDiv.innerHTML = ordersHTML;
+}
+
+function getStatusStyle(status) {
+    switch(status) {
+        case 'pending': return 'background: #fff3cd; color: #856404;';
+        case 'processing': return 'background: #cce5ff; color: #004085;';
+        case 'shipped': return 'background: #d4edda; color: #155724;';
+        case 'delivered': return 'background: #d1ecf1; color: #0c5460;';
+        case 'cancelled': return 'background: #f8d7da; color: #721c24;';
+        default: return 'background: #f8f9fa; color: #6c757d;';
+    }
+}
+
+function getStatusText(status) {
+    const statusMap = {
+        'pending': 'Pending',
+        'processing': 'Processing',
+        'shipped': 'Shipped',
+        'delivered': 'Delivered',
+        'cancelled': 'Cancelled'
+    };
+    return statusMap[status] || status;
+}
+
+// ============================================
+// WISHLIST MANAGEMENT
+// ============================================
+
+async function loadWishlistItems() {
+    try {
+        const userId = currentUser?.uid || getUserId();
+        const wishlistKey = `irya_wishlist_${userId}`;
+        const wishlistData = localStorage.getItem(wishlistKey);
+        
+        if (wishlistData) {
+            const wishlistItems = JSON.parse(wishlistData);
+            displayWishlistItems(wishlistItems);
+        }
+        
+    } catch (error) {
+        console.error('Error loading wishlist:', error);
+    }
+}
+
+function displayWishlistItems(items) {
+    const wishlistDiv = document.getElementById('wishlistItems');
+    
+    if (items.length === 0) {
+        wishlistDiv.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+                <i class="far fa-heart" style="font-size: 48px; color: var(--text-light); opacity: 0.5; margin-bottom: 20px;"></i>
+                <h3 style="color: var(--stone-dark); margin-bottom: 10px;">Wishlist is Empty</h3>
+                <p style="color: var(--text-light); margin-bottom: 20px;">Save products you love to your wishlist</p>
+                <a href="products.html" class="edit-btn">
+                    <i class="fas fa-shopping-bag"></i>
+                    Browse Products
+                </a>
+            </div>
+        `;
+        return;
+    }
+    
+    // Display first 3 items
+    const displayItems = items.slice(0, 3);
+    
+    const itemsHTML = displayItems.map(item => `
+        <div style="display: flex; gap: 15px; padding: 15px; background: var(--bg-light); border-radius: 10px; margin-bottom: 15px;">
+            <div style="width: 60px; height: 60px; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
+                <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 5px; color: var(--stone-dark);">${item.name}</div>
+                <div style="font-size: 14px; color: var(--text-light); margin-bottom: 5px;">${item.category}</div>
+                <div style="font-weight: 600; color: var(--primary-gold);">£${item.price?.toFixed(2) || '0.00'}</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <a href="product-details.html?id=${item.id}" style="font-size: 13px; color: var(--primary-gold); text-decoration: none;">
+                    View <i class="fas fa-arrow-right" style="font-size: 11px;"></i>
+                </a>
+                <button onclick="removeFromWishlist('${item.id}')" style="font-size: 13px; color: #ff4757; background: none; border: none; cursor: pointer; text-align: left;">
+                    Remove
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    wishlistDiv.innerHTML = itemsHTML;
+}
+
+function removeFromWishlist(productId) {
+    try {
+        const userId = currentUser?.uid || getUserId();
+        const wishlistKey = `irya_wishlist_${userId}`;
+        const wishlistData = localStorage.getItem(wishlistKey);
+        
+        if (wishlistData) {
+            let wishlistItems = JSON.parse(wishlistData);
+            wishlistItems = wishlistItems.filter(item => item.id !== productId);
+            localStorage.setItem(wishlistKey, JSON.stringify(wishlistItems));
+            
+            // Refresh display
+            loadWishlistItems();
+            
+            showNotification('Product removed from wishlist');
+        }
+    } catch (error) {
+        console.error('Error removing from wishlist:', error);
+    }
+}
+
+// ============================================
+// PROFILE EDITING
+// ============================================
+
+function editProfile() {
+    document.getElementById('profileInfo').style.display = 'none';
+    document.getElementById('profileForm').style.display = 'grid';
+}
+
+function cancelEditProfile() {
+    document.getElementById('profileInfo').style.display = 'block';
+    document.getElementById('profileForm').style.display = 'none';
+}
+
+async function saveProfile(event) {
+    event.preventDefault();
+    
+    try {
+        if (!currentUser || !firebaseDB) return;
+        
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('profileEmail').value.trim();
+        const phone = document.getElementById('profilePhone').value.trim();
+        
+        if (!firstName || !lastName || !email) {
+            showError('Please fill in all required fields');
+            return;
+        }
+        
+        showLoading(true);
+        
+        // Update user data
+        const updatedUser = {
+            ...currentUser,
+            displayName: `${firstName} ${lastName}`.trim(),
+            email: email,
+            phone: phone,
+            updatedAt: new Date().toISOString()
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('irya_stone_user', JSON.stringify(updatedUser));
+        
+        // Save to Firebase if user is logged in
+        if (currentUser.isFirebaseUser && firebaseAuth.currentUser) {
+            await firebaseAuth.currentUser.updateProfile({
+                displayName: updatedUser.displayName
+            });
+            
+            // Save additional data to Firestore
+            await firebaseDB.collection('users').doc(currentUser.uid).set({
+                displayName: updatedUser.displayName,
+                email: updatedUser.email,
+                phone: updatedUser.phone,
+                updatedAt: updatedUser.updatedAt
+            }, { merge: true });
+        }
+        
+        // Update current user
+        currentUser = updatedUser;
+        
+        // Update UI
+        updateUserProfileUI();
+        cancelEditProfile();
+        
+        showNotification('Profile updated successfully');
+        
+    } catch (error) {
+        console.error('Error saving profile:', error);
+        showError('Failed to update profile');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
+// PASSWORD CHANGE
+// ============================================
+
+async function changePassword() {
+    try {
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            showError('Please fill in all password fields');
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            showError('New passwords do not match');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            showError('Password must be at least 6 characters long');
+            return;
+        }
+        
+        showLoading(true);
+        
+        // Update password in Firebase
+        if (currentUser.isFirebaseUser && firebaseAuth.currentUser) {
+            // Re-authenticate user
+            const credential = firebase.auth.EmailAuthProvider.credential(
+                currentUser.email,
+                currentPassword
+            );
+            
+            await firebaseAuth.currentUser.reauthenticateWithCredential(credential);
+            
+            // Update password
+            await firebaseAuth.currentUser.updatePassword(newPassword);
+            
+            // Clear form
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            showNotification('Password updated successfully');
+        } else {
+            showError('Password change not available for guest accounts');
+        }
+        
+    } catch (error) {
+        console.error('Error changing password:', error);
+        
+        if (error.code === 'auth/wrong-password') {
+            showError('Current password is incorrect');
+        } else {
+            showError('Failed to change password');
+        }
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
+// SECTION NAVIGATION
+// ============================================
+
+function showSection(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.account-section').forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Show selected section
+    document.getElementById(sectionId + 'Section').style.display = 'block';
+    
+    // Update active menu item
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+}
+
+// ============================================
+// LOGOUT
+// ============================================
+
+async function logout() {
+    try {
+        if (confirm('Are you sure you want to logout?')) {
+            // Clear localStorage
+            localStorage.removeItem('irya_stone_user');
+            
+            // Sign out from Firebase
+            if (firebaseAuth) {
+                await firebaseAuth.signOut();
+            }
+            
+            // Redirect to home page
+            window.location.href = 'index.html';
+        }
+    } catch (error) {
+        console.error('Error during logout:', error);
+    }
+}
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+function getUserId() {
+    let userId = localStorage.getItem('irya_guest_id');
+    if (!userId) {
+        userId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('irya_guest_id', userId);
+    }
+    return userId;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+}
+
+function showLoading(show) {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = show ? 'block' : 'none';
+    }
+}
+
+function showNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--primary-gold);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: var(--shadow-lg);
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    notification.innerHTML = `
+        <style>
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        </style>
+        <div>${message}</div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+function showError(message) {
+    alert(message);
+}
+
+function updateCartBadge() {
+    const userId = getUserId();
+    const cartKey = 'irya_local_cart_' + userId;
+    const cartData = localStorage.getItem(cartKey);
+    const cartItems = cartData ? JSON.parse(cartData) : [];
+    const count = cartItems.reduce((total, item) => total + item.quantity, 0);
+    
+    const cartBadge = document.getElementById('cartBadge');
+    if (cartBadge) {
+        cartBadge.textContent = count;
+        cartBadge.style.display = count > 0 ? 'flex' : 'none';
+    }
+}
+
+// ============================================
+// EVENT LISTENERS INITIALIZATION
+// ============================================
+
+function initEventListeners() {
+    // Address form submit
+    const addressForm = document.getElementById('addressForm');
+    if (addressForm) {
+        addressForm.addEventListener('submit', saveAddress);
+    }
+    
+    // Profile form submit
+    const profileForm = document.getElementById('profileForm');
+    if (profileForm) {
+        profileForm.addEventListener('submit', saveProfile);
+    }
+    
+    // Modal close
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const addressModal = document.getElementById('addressModal');
+    
+    if (modalCloseBtn && addressModal) {
+        modalCloseBtn.addEventListener('click', closeAddressModal);
+        
+        addressModal.addEventListener('click', function(e) {
+            if (e.target === addressModal) {
+                closeAddressModal();
+            }
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeAddressModal();
+            }
+        });
+    }
+}
+</script>
+</body>
+</html>
