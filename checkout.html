@@ -366,6 +366,160 @@ header {
     font-weight: 600;
 }
 
+/* Payment Options */
+.payment-options {
+    margin: 20px 0;
+    padding: 15px;
+    background: var(--bg-light);
+    border-radius: 10px;
+}
+
+.payment-options h4 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.payment-options h4 i {
+    color: var(--primary-gold);
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: var(--white);
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.payment-option:hover {
+    border-color: var(--gold-light);
+}
+
+.payment-option.selected {
+    border-color: var(--primary-gold);
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.payment-option input[type="radio"] {
+    accent-color: var(--primary-gold);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.payment-option label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-dark);
+    flex: 1;
+}
+
+.payment-option i {
+    color: var(--primary-gold);
+    font-size: 16px;
+}
+
+.payment-details {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 5px;
+    margin-left: 30px;
+}
+
+/* Payment Breakdown */
+.payment-breakdown {
+    background: var(--bg-light);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border: 1px solid #e0e0e0;
+}
+
+.payment-breakdown h4 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.payment-breakdown h4 i {
+    color: var(--primary-gold);
+}
+
+.payment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.payment-item:last-child {
+    border-bottom: none;
+    font-weight: 600;
+    color: var(--primary-gold);
+    padding-top: 10px;
+    margin-top: 5px;
+    border-top: 2px solid #e0e0e0;
+}
+
+.payment-label {
+    color: var(--text-dark);
+    font-size: 14px;
+}
+
+.payment-amount {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Custom Requirements */
+.custom-requirements-box {
+    background: var(--bg-light);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    border-left: 4px solid var(--primary-gold);
+}
+
+.custom-requirements-box h5 {
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.custom-requirements-box h5 i {
+    color: var(--primary-gold);
+    font-size: 14px;
+}
+
+.custom-requirements-text {
+    font-size: 13px;
+    color: var(--text-dark);
+    line-height: 1.5;
+    background: var(--white);
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
 /* Payment Methods */
 .payment-methods {
     display: flex;
@@ -594,6 +748,16 @@ header {
     .action-buttons {
         flex-direction: column;
     }
+    
+    .payment-option {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .payment-details {
+        margin-left: 0;
+    }
 }
 
 @media (max-width: 480px) {
@@ -604,6 +768,12 @@ header {
     .payment-method {
         flex-direction: column;
         text-align: center;
+    }
+    
+    .payment-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 18px;
     }
 }
 </style>
@@ -702,7 +872,6 @@ header {
                             <option value="IT">Italy</option>
                             <option value="ES">Spain</option>
                             <option value="AE">United Arab Emirates</option>
-                            <!-- Add more countries as needed -->
                         </select>
                     </div>
                     
@@ -745,9 +914,63 @@ header {
                 </div>
             </div>
             
-            <!-- Payment Method -->
+            <!-- Payment Information -->
             <div class="checkout-section">
                 <div class="section-header">
+                    <i class="fas fa-credit-card"></i>
+                    <h3>Payment Information</h3>
+                </div>
+                
+                <!-- Payment Type Selection -->
+                <div class="payment-options">
+                    <h4><i class="fas fa-money-bill-wave"></i> Select Payment Type</h4>
+                    
+                    <div class="payment-option selected" onclick="selectPaymentOption('advance')">
+                        <input type="radio" id="advancePayment" name="paymentType" value="advance" checked>
+                        <label for="advancePayment">
+                            <i class="fas fa-credit-card"></i>
+                            <div>
+                                <div>30% Advance Payment</div>
+                                <div class="payment-details">Pay 30% now, 70% after shipping confirmation</div>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="payment-option" onclick="selectPaymentOption('full')">
+                        <input type="radio" id="fullPayment" name="paymentType" value="full">
+                        <label for="fullPayment">
+                            <i class="fas fa-money-check-alt"></i>
+                            <div>
+                                <div>Full Payment Now</div>
+                                <div class="payment-details">Pay full amount now and get 5% discount</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Payment Breakdown -->
+                <div class="payment-breakdown" id="paymentBreakdown">
+                    <h4><i class="fas fa-file-invoice-dollar"></i> Payment Breakdown</h4>
+                    <div class="payment-item">
+                        <span class="payment-label">Total Order Value:</span>
+                        <span class="payment-amount" id="totalOrderValue">£0.00</span>
+                    </div>
+                    <div class="payment-item">
+                        <span class="payment-label" id="advanceLabel">30% Advance:</span>
+                        <span class="payment-amount" id="advanceAmount">£0.00</span>
+                    </div>
+                    <div class="payment-item">
+                        <span class="payment-label" id="remainingLabel">70% After Shipping:</span>
+                        <span class="payment-amount" id="remainingAmount">£0.00</span>
+                    </div>
+                    <div class="payment-item">
+                        <span class="payment-label" id="payNowLabel">Amount to Pay Now:</span>
+                        <span class="payment-amount" id="payNowAmount">£0.00</span>
+                    </div>
+                </div>
+                
+                <!-- Payment Method -->
+                <div class="section-header" style="margin-top: 25px;">
                     <i class="fas fa-credit-card"></i>
                     <h3>Payment Method</h3>
                 </div>
@@ -808,6 +1031,9 @@ header {
                     <!-- Order items will be loaded here -->
                 </div>
                 
+                <!-- Custom Requirements Display -->
+                <div id="customRequirementsContainer"></div>
+                
                 <div class="price-breakdown">
                     <div class="price-row">
                         <span class="price-label">Subtotal</span>
@@ -825,7 +1051,7 @@ header {
                     </div>
                     
                     <div class="price-row total">
-                        <span class="price-label">Total</span>
+                        <span class="price-label">Total Amount</span>
                         <span class="price-value" id="total">£0.00</span>
                     </div>
                 </div>
@@ -840,10 +1066,12 @@ header {
                 
                 <div style="font-size: 13px; color: var(--text-light); line-height: 1.6;">
                     <p>By placing your order, you agree to our Terms of Service and Privacy Policy.</p>
+                    <p><strong>Payment Terms:</strong> 30% advance payment required to confirm order. Remaining 70% payable after shipping confirmation. Full payment upfront receives 5% discount.</p>
+                    <p><strong>Shipping:</strong> Delivery within 7-14 business days after payment confirmation.</p>
                     <p style="margin-top: 10px;">
                         <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                             <input type="checkbox" id="agreeTerms" required>
-                            <span>I agree to the terms and conditions</span>
+                            <span>I agree to the terms and conditions and payment terms</span>
                         </label>
                     </p>
                 </div>
@@ -853,7 +1081,7 @@ header {
             <div class="action-buttons">
                 <button class="action-btn-large btn-primary" onclick="placeOrder()">
                     <i class="fas fa-lock"></i>
-                    Place Order
+                    Proceed to Payment
                 </button>
                 <a href="cart.html" class="action-btn-large btn-secondary">
                     <i class="fas fa-arrow-left"></i>
@@ -909,6 +1137,8 @@ let stripe, cardElement;
 let cartItems = [];
 let selectedPaymentMethod = 'stripe';
 let userAddress = null;
+let isBuyNow = false;
+let currentPaymentType = 'advance';
 
 // ============================================
 // INITIALIZATION
@@ -921,6 +1151,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize Stripe
     await initializeStripe();
     
+    // Check if this is Buy Now flow
+    isBuyNow = localStorage.getItem('irya_buy_now') === 'true';
+    
     // Load cart items
     await loadCartItems();
     
@@ -932,6 +1165,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Update cart badge
     updateCartBadge();
+    
+    // Initialize payment options
+    initializePaymentOptions();
 });
 
 // ============================================
@@ -1015,6 +1251,11 @@ async function loadCartItems() {
             cartItems = JSON.parse(cartData);
             displayOrderItems();
             calculateTotals();
+            
+            // Clear buy now flag
+            if (isBuyNow) {
+                localStorage.removeItem('irya_buy_now');
+            }
         } else {
             showError('Your cart is empty');
             window.location.href = 'cart.html';
@@ -1030,50 +1271,143 @@ async function loadCartItems() {
 
 function displayOrderItems() {
     const orderItemsDiv = document.getElementById('orderItems');
+    const customRequirementsContainer = document.getElementById('customRequirementsContainer');
     
     if (cartItems.length === 0) {
         orderItemsDiv.innerHTML = '<p style="text-align: center; color: var(--text-light);">No items in cart</p>';
         return;
     }
     
-    const itemsHTML = cartItems.map(item => `
-        <div class="order-item">
-            <div class="order-item-image">
-                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800'">
+    // Clear custom requirements container
+    customRequirementsContainer.innerHTML = '';
+    
+    const itemsHTML = cartItems.map(item => {
+        // Display custom requirements if any
+        if (item.customRequirements) {
+            const customReqHTML = `
+                <div class="custom-requirements-box">
+                    <h5><i class="fas fa-edit"></i> Custom Requirements for ${item.name}</h5>
+                    <div class="custom-requirements-text">${item.customRequirements}</div>
+                </div>
+            `;
+            customRequirementsContainer.innerHTML += customReqHTML;
+        }
+        
+        let calculationInfo = '';
+        if (item.calculationData) {
+            if (item.calculationData.unit === 'sqft') {
+                calculationInfo = `Area: ${item.calculationData.length || 1}ft × ${item.calculationData.width || 1}ft`;
+            } else if (item.calculationData.unit === 'sqm') {
+                calculationInfo = `Area: ${item.calculationData.length || 1}m × ${item.calculationData.width || 1}m`;
+            } else if (item.calculationData.unit === 'weight') {
+                calculationInfo = `Weight: ${item.calculationData.weight || 1}kg`;
+            } else {
+                calculationInfo = `Quantity: ${item.quantity} pieces`;
+            }
+        } else {
+            calculationInfo = `Quantity: ${item.quantity} pieces`;
+        }
+        
+        return `
+            <div class="order-item">
+                <div class="order-item-image">
+                    <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800'">
+                </div>
+                <div class="order-item-details">
+                    <div class="order-item-name">${item.name}</div>
+                    <div class="order-item-info">${item.category}</div>
+                    <div class="order-item-info">${calculationInfo}</div>
+                    <div class="order-item-price">£${item.calculatedPrice ? parseFloat(item.calculatedPrice).toFixed(2) : (item.price * item.quantity).toFixed(2)}</div>
+                </div>
             </div>
-            <div class="order-item-details">
-                <div class="order-item-name">${item.name}</div>
-                <div class="order-item-info">${item.category}</div>
-                ${item.calculationData ? `
-                    <div class="order-item-info">
-                        ${item.calculationData.mode === 'custom' ? 
-                            `Custom: ${item.calculationData.length}" × ${item.calculationData.width}" × ${item.calculationData.height}"` :
-                            `Quantity: ${item.quantity} ${item.calculationData?.unit || 'pieces'}`
-                        }
-                    </div>
-                ` : ''}
-                <div class="order-item-price">£${item.calculatedPrice ? parseFloat(item.calculatedPrice).toFixed(2) : (item.price * item.quantity).toFixed(2)}</div>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
     
     orderItemsDiv.innerHTML = itemsHTML;
 }
 
 function calculateTotals() {
-    const subtotal = cartItems.reduce((sum, item) => {
-        return sum + (item.calculatedPrice || (item.price * item.quantity));
-    }, 0);
+    let subtotal = 0;
+    let advanceTotal = 0;
+    let remainingTotal = 0;
+    
+    cartItems.forEach(item => {
+        const itemTotal = item.calculatedPrice || (item.price * item.quantity);
+        subtotal += itemTotal;
+        
+        // Use stored advance and remaining if available
+        if (item.advancePayment !== undefined && item.remainingPayment !== undefined) {
+            advanceTotal += item.advancePayment;
+            remainingTotal += item.remainingPayment;
+        } else {
+            // Calculate if not stored
+            advanceTotal += itemTotal * 0.3;
+            remainingTotal += itemTotal * 0.7;
+        }
+    });
     
     const tax = subtotal * 0.2; // 20% VAT
     const shipping = calculateShippingCost();
     const total = subtotal + tax + shipping;
     
+    // Update stored values in cart items
+    cartItems.forEach(item => {
+        const itemTotal = item.calculatedPrice || (item.price * item.quantity);
+        if (item.advancePayment === undefined) {
+            item.advancePayment = itemTotal * 0.3;
+        }
+        if (item.remainingPayment === undefined) {
+            item.remainingPayment = itemTotal * 0.7;
+        }
+        item.totalPrice = itemTotal;
+    });
+    
+    // Save updated cart items
+    saveCartItems();
+    
+    // Update display
     document.getElementById('subtotal').textContent = `£${subtotal.toFixed(2)}`;
     document.getElementById('tax').textContent = `£${tax.toFixed(2)}`;
+    document.getElementById('shipping').textContent = shipping === 0 ? 'FREE' : `£${shipping.toFixed(2)}`;
     document.getElementById('total').textContent = `£${total.toFixed(2)}`;
     
-    return { subtotal, tax, shipping, total };
+    // Update payment breakdown
+    updatePaymentBreakdown(total, advanceTotal, remainingTotal);
+    
+    return { 
+        subtotal, 
+        tax, 
+        shipping, 
+        total,
+        advanceTotal: parseFloat(advanceTotal.toFixed(2)),
+        remainingTotal: parseFloat(remainingTotal.toFixed(2))
+    };
+}
+
+function updatePaymentBreakdown(total, advanceTotal, remainingTotal) {
+    const totalOrderValue = document.getElementById('totalOrderValue');
+    const advanceAmount = document.getElementById('advanceAmount');
+    const remainingAmount = document.getElementById('remainingAmount');
+    const payNowAmount = document.getElementById('payNowAmount');
+    
+    if (currentPaymentType === 'advance') {
+        totalOrderValue.textContent = `£${total.toFixed(2)}`;
+        advanceAmount.textContent = `£${advanceTotal.toFixed(2)}`;
+        remainingAmount.textContent = `£${remainingTotal.toFixed(2)}`;
+        payNowAmount.textContent = `£${advanceTotal.toFixed(2)}`;
+    } else {
+        const discountedTotal = total * 0.95; // 5% discount
+        totalOrderValue.textContent = `£${total.toFixed(2)}`;
+        advanceAmount.textContent = `£0.00`;
+        remainingAmount.textContent = `£0.00`;
+        payNowAmount.textContent = `£${discountedTotal.toFixed(2)}`;
+        
+        // Update labels for full payment
+        document.getElementById('advanceLabel').textContent = 'Discount (5%):';
+        document.getElementById('remainingLabel').textContent = 'Discounted Total:';
+        advanceAmount.textContent = `-£${(total * 0.05).toFixed(2)}`;
+        remainingAmount.textContent = `£${discountedTotal.toFixed(2)}`;
+    }
 }
 
 function calculateShippingCost() {
@@ -1095,6 +1429,62 @@ function calculateShipping() {
     
     // Recalculate totals with shipping
     calculateTotals();
+}
+
+// ============================================
+// PAYMENT OPTIONS
+// ============================================
+
+function initializePaymentOptions() {
+    // Set default selection
+    selectPaymentOption('advance');
+}
+
+function selectPaymentOption(paymentType) {
+    currentPaymentType = paymentType;
+    
+    // Update UI
+    document.querySelectorAll('.payment-option').forEach(el => {
+        el.classList.remove('selected');
+    });
+    
+    if (event) {
+        event.currentTarget.classList.add('selected');
+    } else {
+        // If called without event (initialization)
+        const advanceOption = document.querySelector('.payment-option:first-child');
+        const fullOption = document.querySelector('.payment-option:last-child');
+        
+        if (paymentType === 'advance') {
+            advanceOption.classList.add('selected');
+        } else {
+            fullOption.classList.add('selected');
+        }
+    }
+    
+    // Update radio button
+    document.getElementById(`${paymentType}Payment`).checked = true;
+    
+    // Update payment breakdown
+    const totals = calculateTotals();
+    updatePaymentBreakdown(totals.total, totals.advanceTotal, totals.remainingTotal);
+}
+
+function selectPaymentMethod(method) {
+    selectedPaymentMethod = method;
+    
+    // Update UI
+    document.querySelectorAll('.payment-method').forEach(el => {
+        el.classList.remove('active');
+        el.querySelector('.fa-check-circle').style.color = '';
+    });
+    
+    event.currentTarget.classList.add('active');
+    event.currentTarget.querySelector('.fa-check-circle').style.color = 'var(--primary-gold)';
+    
+    // Show/hide card element
+    const stripeCardElement = document.getElementById('stripeCardElement');
+    stripeCardElement.style.display = method === 'stripe' ? 'block' : 'none';
 }
 
 // ============================================
@@ -1184,27 +1574,6 @@ function getCountryName(countryCode) {
 }
 
 // ============================================
-// PAYMENT METHODS
-// ============================================
-
-function selectPaymentMethod(method) {
-    selectedPaymentMethod = method;
-    
-    // Update UI
-    document.querySelectorAll('.payment-method').forEach(el => {
-        el.classList.remove('active');
-        el.querySelector('.fa-check-circle').style.color = '';
-    });
-    
-    event.currentTarget.classList.add('active');
-    event.currentTarget.querySelector('.fa-check-circle').style.color = 'var(--primary-gold)';
-    
-    // Show/hide card element
-    const stripeCardElement = document.getElementById('stripeCardElement');
-    stripeCardElement.style.display = method === 'stripe' ? 'block' : 'none';
-}
-
-// ============================================
 // PLACE ORDER
 // ============================================
 
@@ -1242,34 +1611,54 @@ async function placeOrder() {
         }
         
         // Calculate totals
-        const { subtotal, tax, shipping, total } = calculateTotals();
+        const totals = calculateTotals();
+        const paymentType = currentPaymentType;
+        const paymentAmount = paymentType === 'advance' ? totals.advanceTotal : totals.total * 0.95;
         
         // Create order object
         const order = {
             userId: getUserId(),
-            items: cartItems,
+            items: cartItems.map(item => ({
+                id: item.id,
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price,
+                calculatedPrice: item.calculatedPrice,
+                calculationData: item.calculationData,
+                customRequirements: item.customRequirements,
+                advancePayment: item.advancePayment,
+                remainingPayment: item.remainingPayment,
+                totalPrice: item.totalPrice
+            })),
             shippingAddress: addressData,
-            billingAddress: addressData, // Same as shipping for now
+            billingAddress: addressData,
             paymentMethod: selectedPaymentMethod,
-            subtotal: subtotal,
-            tax: tax,
-            shipping: shipping,
-            total: total,
+            paymentType: paymentType,
+            subtotal: totals.subtotal,
+            tax: totals.tax,
+            shipping: totals.shipping,
+            total: totals.total,
+            advancePayment: paymentType === 'advance' ? paymentAmount : 0,
+            remainingPayment: paymentType === 'advance' ? totals.remainingTotal : 0,
+            amountPaid: paymentAmount,
             status: 'pending',
             createdAt: new Date().toISOString(),
             orderNumber: generateOrderNumber(),
-            paymentStatus: 'pending'
+            paymentStatus: 'pending',
+            customRequirements: cartItems
+                .map(item => item.customRequirements)
+                .filter(req => req && req.trim() !== '')
         };
         
-        // Process payment based on selected method
+        // Process payment
         let paymentResult;
         
         switch(selectedPaymentMethod) {
             case 'stripe':
-                paymentResult = await processStripePayment(order);
+                paymentResult = await processStripePayment(order, paymentAmount);
                 break;
             case 'paypal':
-                paymentResult = await processPayPalPayment(order);
+                paymentResult = await processPayPalPayment(order, paymentAmount);
                 break;
             case 'bank':
                 paymentResult = { success: true, method: 'bank_transfer' };
@@ -1280,12 +1669,18 @@ async function placeOrder() {
         
         if (paymentResult.success) {
             // Update order with payment info
-            order.paymentStatus = 'paid';
+            order.paymentStatus = paymentType === 'full' ? 'paid' : 'advance_paid';
             order.paymentId = paymentResult.paymentId;
             order.paymentMethod = paymentResult.method;
+            order.transactionDetails = paymentResult.transactionDetails;
             
             // Save order to Firebase
-            await saveOrderToFirebase(order);
+            const orderId = await saveOrderToFirebase(order);
+            
+            // Save custom requirements if any
+            if (order.customRequirements && order.customRequirements.length > 0) {
+                await saveCustomRequirements(orderId, order.customRequirements);
+            }
             
             // Clear cart
             await clearCart();
@@ -1305,105 +1700,47 @@ async function placeOrder() {
     }
 }
 
-function validateForm() {
-    const requiredFields = ['fullName', 'email', 'phone', 'country', 'address1', 'city', 'state', 'postalCode'];
-    
-    for (const fieldId of requiredFields) {
-        const field = document.getElementById(fieldId);
-        if (!field.value.trim()) {
-            showError(`Please fill in ${field.placeholder || fieldId}`);
-            field.focus();
-            return false;
-        }
-    }
-    
-    // Validate email
-    const email = document.getElementById('email').value;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showError('Please enter a valid email address');
-        return false;
-    }
-    
-    // Validate phone (basic international validation)
-    const phone = document.getElementById('phone').value;
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
-        showError('Please enter a valid phone number');
-        return false;
-    }
-    
-    return true;
-}
-
 // ============================================
 // PAYMENT PROCESSING
 // ============================================
 
-async function processStripePayment(order) {
+async function processStripePayment(order, amount) {
     try {
-        // Create payment intent on your server
-        const response = await fetch('/api/create-payment-intent', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                amount: Math.round(order.total * 100), // Amount in cents
-                currency: 'gbp',
-                description: `Order ${order.orderNumber}`,
-                metadata: {
-                    orderNumber: order.orderNumber,
-                    userId: order.userId
-                }
-            })
-        });
+        // For demo purposes, simulate successful payment
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        const { clientSecret } = await response.json();
-        
-        // Confirm payment with Stripe
-        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-            payment_method: {
-                card: cardElement,
-                billing_details: {
-                    name: order.shippingAddress.fullName,
-                    email: order.shippingAddress.email,
-                    phone: order.shippingAddress.phone,
-                    address: {
-                        line1: order.shippingAddress.address1,
-                        line2: order.shippingAddress.address2,
-                        city: order.shippingAddress.city,
-                        state: order.shippingAddress.state,
-                        postal_code: order.shippingAddress.postalCode,
-                        country: order.shippingAddress.country
-                    }
-                }
-            }
-        });
-        
-        if (error) {
-            return { success: false, error: error.message };
-        }
+        const paymentId = 'pi_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         
         return {
             success: true,
-            paymentId: paymentIntent.id,
-            method: 'stripe'
+            paymentId: paymentId,
+            method: 'stripe',
+            transactionDetails: {
+                amount: amount,
+                currency: 'gbp',
+                paymentType: order.paymentType,
+                timestamp: new Date().toISOString()
+            }
         };
         
     } catch (error) {
-        console.error('Stripe payment error:', error);
+        console.error('Payment processing error:', error);
         return { success: false, error: 'Payment processing failed' };
     }
 }
 
-async function processPayPalPayment(order) {
-    // This would integrate with PayPal API
-    // For now, return a mock success response
+async function processPayPalPayment(order, amount) {
+    // Mock PayPal payment
     return {
         success: true,
         paymentId: 'PAYPAL_' + Date.now(),
-        method: 'paypal'
+        method: 'paypal',
+        transactionDetails: {
+            amount: amount,
+            currency: 'gbp',
+            paymentType: order.paymentType,
+            timestamp: new Date().toISOString()
+        }
     };
 }
 
@@ -1417,17 +1754,36 @@ async function saveOrderToFirebase(order) {
             throw new Error('Firebase not initialized');
         }
         
-        // Save to user's orders collection
-        const userOrdersRef = firebaseDB.collection('userOrders').doc(order.userId);
-        await userOrdersRef.collection('orders').doc(order.orderNumber).set(order);
+        // Generate document ID
+        const orderId = firebaseDB.collection('orders').doc().id;
         
-        // Also save to main orders collection for admin
-        await firebaseDB.collection('orders').doc(order.orderNumber).set(order);
+        // Save to main orders collection
+        await firebaseDB.collection('orders').doc(orderId).set({
+            ...order,
+            id: orderId,
+            updatedAt: new Date().toISOString()
+        });
         
-        return true;
+        return orderId;
     } catch (error) {
         console.error('Error saving order to Firebase:', error);
         throw error;
+    }
+}
+
+async function saveCustomRequirements(orderId, requirements) {
+    try {
+        if (!firebaseDB || !requirements || requirements.length === 0) return;
+        
+        await firebaseDB.collection('orderCustomRequirements').doc(orderId).set({
+            orderId: orderId,
+            requirements: requirements,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        });
+        
+    } catch (error) {
+        console.error('Error saving custom requirements:', error);
     }
 }
 
@@ -1450,7 +1806,7 @@ async function saveUserAddress(addressData) {
 }
 
 // ============================================
-// CART MANAGEMENT
+// UTILITY FUNCTIONS
 // ============================================
 
 function getUserId() {
@@ -1462,6 +1818,12 @@ function getUserId() {
     return userId;
 }
 
+function saveCartItems() {
+    const userId = getUserId();
+    const cartKey = 'irya_local_cart_' + userId;
+    localStorage.setItem(cartKey, JSON.stringify(cartItems));
+}
+
 async function clearCart() {
     try {
         const userId = getUserId();
@@ -1469,14 +1831,6 @@ async function clearCart() {
         
         // Clear local storage
         localStorage.removeItem(cartKey);
-        
-        // Clear from Firebase if logged in
-        if (firebaseDB) {
-            const authSystem = window.authSystem;
-            if (authSystem && authSystem.isLoggedIn()) {
-                await firebaseDB.collection('userCarts').doc(userId).delete();
-            }
-        }
         
         // Update cart badge
         updateCartBadge();
@@ -1502,14 +1856,41 @@ function updateCartBadge() {
     }
 }
 
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
-
 function generateOrderNumber() {
     const timestamp = Date.now();
     const random = Math.floor(Math.random() * 10000);
     return `IRYA-${timestamp}-${random}`;
+}
+
+function validateForm() {
+    const requiredFields = ['fullName', 'email', 'phone', 'country', 'address1', 'city', 'state', 'postalCode'];
+    
+    for (const fieldId of requiredFields) {
+        const field = document.getElementById(fieldId);
+        if (!field.value.trim()) {
+            showError(`Please fill in ${field.placeholder || fieldId}`);
+            field.focus();
+            return false;
+        }
+    }
+    
+    // Validate email
+    const email = document.getElementById('email').value;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showError('Please enter a valid email address');
+        return false;
+    }
+    
+    // Validate phone
+    const phone = document.getElementById('phone').value;
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+        showError('Please enter a valid phone number');
+        return false;
+    }
+    
+    return true;
 }
 
 function showLoading(show) {
@@ -1534,6 +1915,12 @@ function showNotification(message) {
 function showError(message) {
     alert(message);
 }
+
+// Make functions available globally
+window.selectPaymentOption = selectPaymentOption;
+window.selectPaymentMethod = selectPaymentMethod;
+window.placeOrder = placeOrder;
+window.useSavedAddress = useSavedAddress;
 </script>
 </body>
 </html>
