@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+/* All CSS remains same as before */
 :root {
     --primary-gold: #c9a227;
     --gold-light: #f0d77c;
@@ -1159,9 +1160,9 @@ const firebaseConfig = {
 
 let firebaseApp, firebaseDB, firebaseAuth;
 let cartItems = [];
-let selectedPaymentMethod = 'stripe';
 let isBuyNowFlow = false;
 let currentPaymentType = 'advance';
+let selectedPaymentMethod = 'bank';
 let currentOrderData = null;
 
 // ============================================
@@ -1182,7 +1183,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     
     await initializeFirebase();
-    await loadCartItems();
+    await loadOrderItems();
     
     initializePaymentOptions();
     updateCartBadge();
@@ -1217,74 +1218,190 @@ async function initializeFirebase() {
 }
 
 // ============================================
-// CART MANAGEMENT - UPDATED FOR BUY NOW
+// LOAD ORDER ITEMS - COMPLETELY REWRITTEN
 // ============================================
 
-async function loadCartItems() {
+async function loadOrderItems() {
     try {
         showLoading(true);
         
-        const userId = getUserId();
-        let cartData = null;
-        
         if (isBuyNowFlow) {
-            // For Buy Now flow
-            const buyNowKey = 'irya_buynow_cart_' + userId;
-            cartData = localStorage.getItem(buyNowKey);
-            
-            if (!cartData) {
-                const currentBuyNowItem = localStorage.getItem('irya_current_buynow_item');
-                if (currentBuyNowItem) {
-                    cartData = JSON.stringify([JSON.parse(currentBuyNowItem)]);
-                }
-            }
-            
-            if (!cartData) {
-                showError('Buy Now product not found. Please try again.');
-                window.location.href = 'products.html';
-                return;
-            }
+            await loadBuyNowItems();
         } else {
-            // For regular checkout
-            const cartKey = 'irya_local_cart_' + userId;
-            cartData = localStorage.getItem(cartKey);
-            
-            if (!cartData) {
-                showError('Your cart is empty');
-                window.location.href = 'cart.html';
-                return;
-            }
+            await loadRegularCartItems();
         }
         
-        if (cartData) {
-            cartItems = JSON.parse(cartData);
-            
-            if (isBuyNowFlow) {
-                cartItems = cartItems.filter(item => item.isBuyNow === true);
-                
-                if (cartItems.length === 0) {
-                    showError('Buy Now product not found. Please try again.');
-                    window.location.href = 'products.html';
-                    return;
-                }
-            }
-            
-            displayOrderItems();
-            calculateTotals();
-            
-        } else {
-            showError('Your cart is empty');
+        if (cartItems.length === 0) {
+            showError('No items found');
             window.location.href = isBuyNowFlow ? 'products.html' : 'cart.html';
             return;
         }
         
+        displayOrderItems();
+        calculateTotals();
+        
     } catch (error) {
-        console.error('Error loading cart items:', error);
-        showError('Failed to load cart items');
+        console.error('Error loading order items:', error);
+        showError('Failed to load order items');
         window.location.href = isBuyNowFlow ? 'products.html' : 'cart.html';
     } finally {
         showLoading(false);
     }
+}
+
+async function loadBuyNowItems() {
+    try {
+        const userId = getUserId();
+        let buyNowItem = null;
+        
+        // First try to get from session storage
+        const sessionItem = sessionStorage.getItem('irya_current_buynow');
+        if (sessionItem) {
+            buyNowItem = JSON.parse(sessionItem);
+        }
+        
+        // If not in session, try localStorage
+        if (!buyNowItem) {
+            const buyNowKey = 'irya_buynow_cart_' + userId;
+            const buyNowData = localStorage.getItem(buyNowKey);
+            if (buyNowData) {
+                const items = JSON.parse(buyNowData);
+                if (items.length > 0) {
+                    buyNowItem = items[0];
+                }
+            }
+        }
+        
+        // If still not found, try Firebase
+        if (!buyNowItem) {
+            buyNowItem = await getBuyNowFromFirebase();
+        }
+        
+        // If still not found, use URL parameters to create item
+        if (!buyNowItem) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('product');
+            
+            if (productId) {
+                // Load product from Firebase
+                const productDoc = await firebaseDB.collection('products').doc(productId).get();
+                if (productDoc.exists) {
+                    const product = productDoc.data();
+                    
+                    // Get calculation data from session
+                    const calcDataStr = sessionStorage.getItem('irya_buynow_calc_data');
+                    const calcData = calcDataStr ? JSON.parse(calcDataStr) : null;
+                    const quantity = parseInt(sessionStorage.getItem('irya_buynow_quantity')) || 1;
+                    const customReq = sessionStorage.getItem('irya_buynow_custom_req') || '';
+                    
+                    // Create buy now item
+                    buyNowItem = {
+                        id: productId,
+                        uniqueId: `BUYNOW_${productId}_${Date.now()}`,
+                        name: product.stone_name || product.name || 'Product',
+                        stoneName: product.stone_name || product.name || 'Product',
+                        price: parseFloat(product.price) || 0,
+                        priceUnit: product.price_unit || 'piece',
+                        image: product.images?.[0] || product.image || getDefaultImage(product.category),
+                        category: product.category || 'General',
+                        description: product.description || '',
+                        quantity: quantity,
+                        calculationData: calcData,
+                        customRequirements: customReq,
+                        isBuyNow: true,
+                        buyNowTimestamp: Date.now()
+                    };
+                    
+                    // Calculate price
+                    if (calcData) {
+                        buyNowItem.calculatedPrice = calculateItemPrice(buyNowItem, calcData);
+                    } else {
+                        buyNowItem.calculatedPrice = buyNowItem.price * quantity;
+                    }
+                    
+                    // Calculate payments
+                    const totalPrice = buyNowItem.calculatedPrice;
+                    buyNowItem.advancePayment = totalPrice * 0.3;
+                    buyNowItem.remainingPayment = totalPrice * 0.7;
+                    buyNowItem.totalPrice = totalPrice;
+                }
+            }
+        }
+        
+        if (buyNowItem) {
+            cartItems = [buyNowItem];
+            // Save to session for persistence
+            sessionStorage.setItem('irya_current_buynow', JSON.stringify(buyNowItem));
+        } else {
+            cartItems = [];
+        }
+        
+    } catch (error) {
+        console.error('Error loading buy now items:', error);
+        cartItems = [];
+    }
+}
+
+async function getBuyNowFromFirebase() {
+    try {
+        if (!firebaseDB) return null;
+        
+        const userId = getUserId();
+        const snapshot = await firebaseDB.collection('buyNowItems')
+            .where('userId', '==', userId)
+            .orderBy('createdAt', 'desc')
+            .limit(1)
+            .get();
+        
+        if (!snapshot.empty) {
+            const doc = snapshot.docs[0];
+            const data = doc.data();
+            return data.item;
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Error getting buy now from Firebase:', error);
+        return null;
+    }
+}
+
+async function loadRegularCartItems() {
+    try {
+        const userId = getUserId();
+        const cartKey = 'irya_local_cart_' + userId;
+        const cartData = localStorage.getItem(cartKey);
+        
+        if (cartData) {
+            cartItems = JSON.parse(cartData);
+        } else {
+            cartItems = [];
+        }
+    } catch (error) {
+        console.error('Error loading regular cart:', error);
+        cartItems = [];
+    }
+}
+
+function calculateItemPrice(item, calculationData) {
+    if (!calculationData) return item.price * item.quantity;
+    
+    const unit = calculationData.unit || item.priceUnit || 'piece';
+    const quantity = calculationData.quantity || item.quantity;
+    
+    let totalPrice = item.price * quantity;
+    
+    if (unit === 'sqft' || unit === 'sqm') {
+        const length = calculationData.length || 1;
+        const width = calculationData.width || 1;
+        const area = length * width;
+        totalPrice = item.price * area * quantity;
+    } else if (unit === 'weight') {
+        const weight = calculationData.weight || 1;
+        totalPrice = item.price * weight * quantity;
+    }
+    
+    return parseFloat(totalPrice.toFixed(2));
 }
 
 function displayOrderItems() {
@@ -1292,7 +1409,7 @@ function displayOrderItems() {
     const customRequirementsContainer = document.getElementById('customRequirementsContainer');
     
     if (cartItems.length === 0) {
-        orderItemsDiv.innerHTML = '<p style="text-align: center; color: var(--text-light);">No items in cart</p>';
+        orderItemsDiv.innerHTML = '<p style="text-align: center; color: var(--text-light);">No items found</p>';
         return;
     }
     
@@ -1324,20 +1441,20 @@ function displayOrderItems() {
             calculationInfo = `Quantity: ${item.quantity} pieces`;
         }
         
-        const itemPrice = item.calculatedPrice ? parseFloat(item.calculatedPrice).toFixed(2) : ((item.price || 0) * (item.quantity || 1)).toFixed(2);
+        const itemPrice = item.calculatedPrice || (item.price * item.quantity);
         
         return `
             <div class="order-item">
                 <div class="order-item-image">
-                    <img src="${item.image || 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800'}" 
+                    <img src="${item.image || getDefaultImage(item.category)}" 
                          alt="${item.name}" 
-                         onerror="this.src='https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800'">
+                         onerror="this.src='${getDefaultImage(item.category)}'">
                 </div>
                 <div class="order-item-details">
                     <div class="order-item-name">${item.name || 'Product'}</div>
                     <div class="order-item-info">${item.category || 'General'}</div>
                     <div class="order-item-info">${calculationInfo}</div>
-                    <div class="order-item-price">£${itemPrice}</div>
+                    <div class="order-item-price">£${itemPrice.toFixed(2)}</div>
                 </div>
             </div>
         `;
@@ -1346,16 +1463,20 @@ function displayOrderItems() {
     orderItemsDiv.innerHTML = itemsHTML;
 }
 
+// ============================================
+// CALCULATE TOTALS
+// ============================================
+
 function calculateTotals() {
     let subtotal = 0;
     let advanceTotal = 0;
     let remainingTotal = 0;
     
     cartItems.forEach(item => {
-        const itemTotal = item.calculatedPrice || ((item.price || 0) * (item.quantity || 1));
+        const itemTotal = item.calculatedPrice || (item.price * item.quantity);
         subtotal += itemTotal;
         
-        if (item.advancePayment !== undefined && item.remainingPayment !== undefined) {
+        if (item.advancePayment && item.remainingPayment) {
             advanceTotal += item.advancePayment;
             remainingTotal += item.remainingPayment;
         } else {
@@ -1368,18 +1489,19 @@ function calculateTotals() {
     const shipping = calculateShippingCost();
     const total = subtotal + tax + shipping;
     
+    // Update item payments if not already set
     cartItems.forEach(item => {
-        const itemTotal = item.calculatedPrice || ((item.price || 0) * (item.quantity || 1));
-        if (item.advancePayment === undefined) {
+        const itemTotal = item.calculatedPrice || (item.price * item.quantity);
+        if (!item.advancePayment) {
             item.advancePayment = itemTotal * 0.3;
         }
-        if (item.remainingPayment === undefined) {
+        if (!item.remainingPayment) {
             item.remainingPayment = itemTotal * 0.7;
         }
-        item.totalPrice = itemTotal;
+        if (!item.totalPrice) {
+            item.totalPrice = itemTotal;
+        }
     });
-    
-    saveCartItems();
     
     document.getElementById('subtotal').textContent = `£${subtotal.toFixed(2)}`;
     document.getElementById('tax').textContent = `£${tax.toFixed(2)}`;
@@ -1432,7 +1554,7 @@ function updatePaymentBreakdown(total, advanceTotal, remainingTotal) {
 }
 
 function calculateShippingCost() {
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.calculatedPrice || ((item.price || 0) * (item.quantity || 1))), 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.calculatedPrice || (item.price * item.quantity)), 0);
     
     if (subtotal > 500) {
         return 0;
@@ -1499,32 +1621,10 @@ function selectPaymentMethod(method) {
     
     const paypalButtonsContainer = document.getElementById('paypalButtonsContainer');
     paypalButtonsContainer.style.display = method === 'paypal' ? 'block' : 'none';
-    
-    if (method === 'paypal') {
-        initializePayPalButtons();
-    }
 }
 
 // ============================================
-// PAYPAL PAYMENT INTEGRATION
-// ============================================
-
-function initializePayPalButtons() {
-    const paypalButtonsContainer = document.getElementById('paypalButtonsContainer');
-    paypalButtonsContainer.innerHTML = '';
-    
-    const totals = calculateTotals();
-    const amount = currentPaymentType === 'advance' ? totals.advanceTotal : totals.total * 0.95;
-    
-    paypalButtonsContainer.innerHTML = `
-        <div style="color: #ff4757; padding: 10px; background: #ffeaea; border-radius: 8px;">
-            <i class="fas fa-exclamation-circle"></i> PayPal integration will be available soon. Please use another payment method.
-        </div>
-    `;
-}
-
-// ============================================
-// PAYMENT PROCESSING FLOW
+// PAYMENT PROCESSING
 // ============================================
 
 async function validateAndProcessPayment() {
@@ -1594,7 +1694,7 @@ async function validateAndProcessPayment() {
         if (selectedPaymentMethod === 'bank') {
             await processBankTransfer(currentOrderData);
         } else {
-            showError('Please select Bank Transfer as payment method for now. Other methods coming soon.');
+            showError('Please select Bank Transfer as payment method. Other methods coming soon.');
         }
         
     } catch (error) {
@@ -1602,10 +1702,6 @@ async function validateAndProcessPayment() {
         showError('Payment processing failed: ' + error.message);
     }
 }
-
-// ============================================
-// BANK TRANSFER PROCESSING
-// ============================================
 
 async function processBankTransfer(orderData) {
     try {
@@ -1662,8 +1758,34 @@ async function processBankTransfer(orderData) {
 async function completeOrder() {
     try {
         showLoading(true);
-        await clearCart();
+        
+        // Clear cart items
+        if (isBuyNowFlow) {
+            // Clear buy now storage
+            const userId = getUserId();
+            const buyNowKey = 'irya_buynow_cart_' + userId;
+            localStorage.removeItem(buyNowKey);
+            
+            // Clear session storage
+            sessionStorage.removeItem('irya_current_buynow');
+            sessionStorage.removeItem('irya_buynow_product_id');
+            sessionStorage.removeItem('irya_buynow_quantity');
+            sessionStorage.removeItem('irya_buynow_calc_data');
+            sessionStorage.removeItem('irya_buynow_custom_req');
+            
+            localStorage.removeItem('irya_is_buynow_flow');
+        } else {
+            // Clear regular cart
+            const userId = getUserId();
+            const cartKey = 'irya_local_cart_' + userId;
+            localStorage.removeItem(cartKey);
+        }
+        
+        updateCartBadge();
+        
+        // Redirect to confirmation
         window.location.href = `order-confirmation.html?order=${currentOrderData.orderNumber}&payment=bank_transfer`;
+        
     } catch (error) {
         console.error('Error completing order:', error);
         showError('Failed to complete order');
@@ -1745,44 +1867,18 @@ function getUserId() {
     return userId;
 }
 
-function saveCartItems() {
-    const userId = getUserId();
+function getDefaultImage(category) {
+    const categoryLower = (category || '').toLowerCase();
     
-    if (isBuyNowFlow) {
-        const buyNowKey = 'irya_buynow_cart_' + userId;
-        localStorage.setItem(buyNowKey, JSON.stringify(cartItems));
-    } else {
-        const cartKey = 'irya_local_cart_' + userId;
-        localStorage.setItem(cartKey, JSON.stringify(cartItems));
+    if (categoryLower.includes('sand')) {
+        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('kota')) {
+        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('granite')) {
+        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800';
     }
     
-    updateCartBadge();
-}
-
-async function clearCart() {
-    try {
-        const userId = getUserId();
-        
-        if (isBuyNowFlow) {
-            const buyNowKey = 'irya_buynow_cart_' + userId;
-            localStorage.removeItem(buyNowKey);
-            
-            localStorage.removeItem('irya_current_buynow_item');
-            localStorage.removeItem('irya_is_buynow_flow');
-            localStorage.removeItem('irya_buynow_product_id');
-            localStorage.removeItem('irya_buynow_timestamp');
-        } else {
-            const cartKey = 'irya_local_cart_' + userId;
-            localStorage.removeItem(cartKey);
-        }
-        
-        updateCartBadge();
-        
-        return true;
-    } catch (error) {
-        console.error('Error clearing cart:', error);
-        return false;
-    }
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
 }
 
 function updateCartBadge() {
