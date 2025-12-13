@@ -635,6 +635,31 @@ header {
     justify-content: center;
 }
 
+/* Real-time Indicator */
+.realtime-indicator {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background: var(--primary-gold);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 998;
+    box-shadow: var(--shadow-sm);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .order-header {
@@ -661,6 +686,13 @@ header {
     .step-label, .step-date {
         text-align: left;
     }
+    
+    .realtime-indicator {
+        top: 60px;
+        right: 10px;
+        padding: 6px 12px;
+        font-size: 11px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -684,6 +716,12 @@ header {
 
 <!-- Loading Spinner -->
 <div class="loading-spinner" id="loadingSpinner"></div>
+
+<!-- Real-time Indicator -->
+<div class="realtime-indicator" id="realtimeIndicator" style="display: none;">
+    <i class="fas fa-sync fa-spin"></i>
+    <span>Live Updates</span>
+</div>
 
 <!-- Header -->
 <header>
@@ -787,6 +825,7 @@ let firebaseApp, firebaseDB, firebaseAuth;
 let userOrders = [];
 let currentFilter = 'all';
 let authSystem = null;
+let realtimeUnsubscribe = null;
 
 // ============================================
 // AUTHENTICATION SYSTEM
@@ -938,9 +977,106 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load user orders
     await loadUserOrders();
     
+    // Setup real-time updates
+    setupRealtimeUpdates();
+    
     // Update cart badge
     updateCartBadge();
 });
+
+// ============================================
+// REAL-TIME UPDATES SETUP
+// ============================================
+
+function setupRealtimeUpdates() {
+    const userId = authSystem.getUserId();
+    console.log("🔄 Setting up real-time updates for user:", userId);
+    
+    // Show real-time indicator
+    document.getElementById('realtimeIndicator').style.display = 'flex';
+    
+    // Clean up previous listeners
+    if (realtimeUnsubscribe) {
+        realtimeUnsubscribe();
+    }
+    
+    // METHOD 1: Listen to users/{userId}/orders collection
+    try {
+        realtimeUnsubscribe = firebaseDB.collection('users').doc(userId)
+            .collection('orders')
+            .orderBy('createdAt', 'desc')
+            .onSnapshot((snapshot) => {
+                console.log(`🔄 Real-time update: ${snapshot.size} orders in users/{userId}/orders`);
+                
+                const updatedOrders = [];
+                snapshot.forEach(doc => {
+                    updatedOrders.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                // Update userOrders if we got data
+                if (updatedOrders.length > 0) {
+                    userOrders = updatedOrders;
+                    displayOrders();
+                    console.log(`✅ Real-time update processed: ${userOrders.length} orders`);
+                    
+                    // Show notification if new orders were added
+                    if (updatedOrders.length > 0) {
+                        const newOrders = updatedOrders.filter(newOrder => 
+                            !userOrders.some(oldOrder => oldOrder.id === newOrder.id)
+                        );
+                        
+                        if (newOrders.length > 0) {
+                            showNotification(`📦 ${newOrders.length} new order(s) received!`);
+                        }
+                    }
+                }
+            }, (error) => {
+                console.error("❌ Real-time update error for users collection:", error);
+            });
+        
+        console.log("✅ Real-time listener started for users/{userId}/orders");
+        return;
+        
+    } catch (error) {
+        console.log("❌ Could not setup real-time for users collection:", error.message);
+    }
+    
+    // METHOD 2: Listen to main orders collection
+    try {
+        realtimeUnsubscribe = firebaseDB.collection('orders')
+            .where('userId', '==', userId)
+            .orderBy('createdAt', 'desc')
+            .onSnapshot((snapshot) => {
+                console.log(`🔄 Real-time update: ${snapshot.size} orders in main collection`);
+                
+                const updatedOrders = [];
+                snapshot.forEach(doc => {
+                    updatedOrders.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                if (updatedOrders.length > 0) {
+                    userOrders = updatedOrders;
+                    displayOrders();
+                    console.log(`✅ Real-time update processed: ${userOrders.length} orders`);
+                }
+            }, (error) => {
+                console.error("❌ Real-time update error for main orders:", error);
+            });
+        
+        console.log("✅ Real-time listener started for main orders");
+        
+    } catch (error) {
+        console.log("❌ Could not setup real-time for main orders:", error.message);
+        // Hide real-time indicator if both methods fail
+        document.getElementById('realtimeIndicator').style.display = 'none';
+    }
+}
 
 // ============================================
 // LOAD USER ORDERS FROM FIREBASE
@@ -1121,6 +1257,9 @@ function displayOrders() {
         // Get tracking timeline HTML
         const timelineHTML = getTrackingTimeline(order);
         
+        // Get admin update if available
+        const adminUpdateHTML = getAdminUpdateHTML(order);
+        
         return `
         <div class="order-card">
             <div class="order-header">
@@ -1128,6 +1267,12 @@ function displayOrders() {
                     <h3>Order #${order.orderNumber || order.id.substring(0, 8)}</h3>
                     <div class="order-date">Placed on ${formatDate(order.createdAt)}</div>
                     <div class="order-number">Order ID: ${order.id}</div>
+                    ${order.updatedAt ? `
+                        <div style="font-size: 11px; color: var(--text-light); margin-top: 5px;">
+                            <i class="fas fa-sync-alt" style="margin-right: 5px;"></i>
+                            Last updated: ${formatDate(order.updatedAt)}
+                        </div>
+                    ` : ''}
                 </div>
                 <div class="order-status status-${order.status || 'pending'}">
                     ${getStatusText(order.status || 'pending')}
@@ -1164,6 +1309,9 @@ function displayOrders() {
                     </div>
                 ` : ''}
             </div>
+            
+            <!-- Admin Updates -->
+            ${adminUpdateHTML}
             
             <!-- Payment Status -->
             ${paymentStatusHTML}
@@ -1233,6 +1381,54 @@ function displayOrders() {
 }
 
 // ============================================
+// ADMIN UPDATES HTML
+// ============================================
+
+function getAdminUpdateHTML(order) {
+    if (!order.adminNotes && !order.updatedByAdmin) return '';
+    
+    const updates = [];
+    
+    if (order.adminNotes) {
+        updates.push(order.adminNotes);
+    }
+    
+    if (order.updatedByAdmin) {
+        updates.push(`Updated by admin: ${order.updatedByAdmin}`);
+    }
+    
+    if (order.shippedAt) {
+        updates.push(`Shipped on: ${formatDate(order.shippedAt)}`);
+    }
+    
+    if (order.deliveredAt) {
+        updates.push(`Delivered on: ${formatDate(order.deliveredAt)}`);
+    }
+    
+    if (order.paymentVerifiedAt) {
+        updates.push(`Payment verified on: ${formatDate(order.paymentVerifiedAt)}`);
+    }
+    
+    if (updates.length === 0) return '';
+    
+    return `
+        <div class="payment-info" style="border-left-color: #17a2b8; background: #e7f7fc;">
+            <h5><i class="fas fa-user-shield"></i> Admin Updates</h5>
+            <div class="payment-details">
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    ${updates.map(update => `
+                        <div style="display: flex; align-items: flex-start; gap: 10px;">
+                            <i class="fas fa-info-circle" style="color: #17a2b8; margin-top: 2px;"></i>
+                            <div style="flex: 1; font-size: 13px;">${update}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================
 // PAYMENT STATUS HTML GENERATOR
 // ============================================
 
@@ -1251,11 +1447,17 @@ function getPaymentStatusHTML(order) {
             paymentIcon = 'fa-clock';
             paymentDetails = 'Please complete bank transfer to confirm order';
             break;
-        case 'payment_received':
+        case 'payment_submitted':
             paymentStatusClass = 'status-processing';
-            paymentStatusText = 'Payment Received';
+            paymentStatusText = 'Payment Submitted';
+            paymentIcon = 'fa-clock';
+            paymentDetails = 'Payment details submitted. Admin verification in progress';
+            break;
+        case 'payment_verified':
+            paymentStatusClass = 'status-shipped';
+            paymentStatusText = 'Payment Verified';
             paymentIcon = 'fa-check-circle';
-            paymentDetails = 'Payment confirmed. Processing order...';
+            paymentDetails = 'Payment verified by admin. Order is now being processed';
             break;
         case 'paid':
             paymentStatusClass = 'status-delivered';
@@ -1324,6 +1526,7 @@ function getPaymentStatusHTML(order) {
                 </div>
                 <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 5px; font-size: 12px;">
                     <i class="fas fa-info-circle"></i> ${paymentDetails}
+                    ${order.paymentVerifiedBy ? `<br><small>Verified by: ${order.paymentVerifiedBy}</small>` : ''}
                 </div>
             </div>
         </div>
@@ -1428,7 +1631,7 @@ function getTrackingTimeline(order) {
             label: 'Order Confirmed', 
             icon: 'fa-check-circle',
             showForStatus: ['processing', 'shipped', 'delivered'],
-            date: order.confirmedAt || order.updatedAt
+            date: order.confirmedAt || order.paymentVerifiedAt || order.updatedAt
         },
         { 
             id: 'processing', 
@@ -1500,6 +1703,21 @@ function getTrackingTimeline(order) {
                     </div>
                 </div>
             ` : ''}
+            
+            ${order.tracking ? `
+                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <div style="font-size: 13px; color: var(--text-light); margin-bottom: 5px;">Tracking Information:</div>
+                    <div style="font-size: 14px; color: var(--text-dark);">
+                        <strong>Carrier:</strong> ${order.tracking.carrier || 'Not specified'}<br>
+                        <strong>Tracking ID:</strong> ${order.tracking.id || 'Not available'}<br>
+                        ${order.tracking.url ? `
+                            <a href="${order.tracking.url}" target="_blank" style="color: var(--primary-gold); text-decoration: none; font-weight: 600;">
+                                <i class="fas fa-external-link-alt"></i> Track Package
+                            </a>
+                        ` : ''}
+                    </div>
+                </div>
+            ` : ''}
         </div>
     `;
 }
@@ -1558,7 +1776,9 @@ async function cancelOrder(orderId) {
                 status: 'cancelled',
                 paymentStatus: 'cancelled',
                 cancelledAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                cancelledBy: 'customer',
+                cancelledReason: 'Cancelled by customer'
             });
             console.log(`✅ Order cancelled in users/{userId}/orders`);
         } catch (error) {
@@ -1570,7 +1790,8 @@ async function cancelOrder(orderId) {
             await firebaseDB.collection('orders').doc(orderId).update({
                 status: 'cancelled',
                 paymentStatus: 'cancelled',
-                cancelledAt: new Date().toISOString()
+                cancelledAt: new Date().toISOString(),
+                cancelledBy: 'customer'
             });
             console.log(`✅ Order cancelled in main orders collection`);
         } catch (error) {
@@ -1583,6 +1804,7 @@ async function cancelOrder(orderId) {
             userOrders[orderIndex].status = 'cancelled';
             userOrders[orderIndex].paymentStatus = 'cancelled';
             userOrders[orderIndex].cancelledAt = new Date().toISOString();
+            userOrders[orderIndex].updatedAt = new Date().toISOString();
         }
         
         // Refresh display
@@ -1614,17 +1836,17 @@ async function markPaymentComplete(orderId) {
         
         console.log(`Marking payment complete for order ${orderId}`);
         
-        // Update payment status
+        // Update payment status to submitted
         const updateData = {
-            paymentStatus: 'payment_received',
+            paymentStatus: 'payment_submitted',
             updatedAt: new Date().toISOString(),
-            paymentConfirmedAt: new Date().toISOString()
+            paymentSubmittedAt: new Date().toISOString()
         };
         
         // Update in users/{userId}/orders collection
         try {
             await firebaseDB.collection('users').doc(userId).collection('orders').doc(orderId).update(updateData);
-            console.log(`✅ Payment marked complete in users/{userId}/orders`);
+            console.log(`✅ Payment marked as submitted in users/{userId}/orders`);
         } catch (error) {
             console.log("❌ Could not update in users collection:", error.message);
         }
@@ -1632,7 +1854,7 @@ async function markPaymentComplete(orderId) {
         // Also update in main orders collection if exists
         try {
             await firebaseDB.collection('orders').doc(orderId).update(updateData);
-            console.log(`✅ Payment marked complete in main orders`);
+            console.log(`✅ Payment marked as submitted in main orders`);
         } catch (error) {
             console.log("❌ Could not update in main orders:", error.message);
         }
@@ -1640,15 +1862,15 @@ async function markPaymentComplete(orderId) {
         // Update local data
         const orderIndex = userOrders.findIndex(o => o.id === orderId);
         if (orderIndex !== -1) {
-            userOrders[orderIndex].paymentStatus = 'payment_received';
+            userOrders[orderIndex].paymentStatus = 'payment_submitted';
             userOrders[orderIndex].updatedAt = new Date().toISOString();
-            userOrders[orderIndex].paymentConfirmedAt = new Date().toISOString();
+            userOrders[orderIndex].paymentSubmittedAt = new Date().toISOString();
         }
         
         // Refresh display
         displayOrders();
         
-        showNotification('✅ Payment status updated. Admin will now process your order.');
+        showNotification('✅ Payment status updated. Admin will now verify your payment.');
         
     } catch (error) {
         console.error('Error updating payment status:', error);
@@ -1737,7 +1959,8 @@ function getStatusText(status) {
     const statusMap = {
         'pending': 'Pending',
         'pending_bank_transfer': 'Awaiting Payment',
-        'payment_received': 'Payment Received',
+        'payment_submitted': 'Payment Submitted',
+        'payment_verified': 'Payment Verified',
         'processing': 'Processing',
         'shipped': 'Shipped',
         'delivered': 'Delivered',
@@ -1822,6 +2045,7 @@ function showNotification(message) {
         box-shadow: var(--shadow-lg);
         z-index: 9999;
         animation: slideIn 0.3s ease;
+        max-width: 300px;
     `;
     
     notification.innerHTML = `
@@ -1869,6 +2093,18 @@ function updateCartBadge() {
         console.error('Error updating cart badge:', error);
     }
 }
+
+// ============================================
+// PAGE UNLOAD CLEANUP
+// ============================================
+
+window.addEventListener('beforeunload', () => {
+    // Clean up Firebase listeners
+    if (realtimeUnsubscribe) {
+        realtimeUnsubscribe();
+        console.log('🔴 Real-time listeners cleaned up');
+    }
+});
 
 // Make functions available globally
 window.filterOrders = filterOrders;
