@@ -1167,7 +1167,7 @@ let currentOrderData = null;
 let authSystem = null;
 
 // ============================================
-// AUTHENTICATION SYSTEM FOR CHECKOUT
+// UPDATED AUTHENTICATION SYSTEM FOR CHECKOUT
 // ============================================
 
 class CheckoutAuthSystem {
@@ -1175,6 +1175,7 @@ class CheckoutAuthSystem {
         this.currentUser = null;
         this.authKey = 'irya_stone_auth_user';
         this.guestIdKey = 'irya_guest_id';
+        this.adminStatus = false;
     }
     
     async init() {
@@ -1182,7 +1183,7 @@ class CheckoutAuthSystem {
             await this.initializeFirebase();
             
             return new Promise((resolve) => {
-                firebaseAuth.onAuthStateChanged((user) => {
+                firebaseAuth.onAuthStateChanged(async (user) => {
                     console.log("Auth State Changed:", user ? user.uid : "No user");
                     
                     if (user) {
@@ -1195,6 +1196,9 @@ class CheckoutAuthSystem {
                             providerId: user.providerId,
                             isFirebaseUser: true
                         };
+                        
+                        // Check admin status
+                        await this.checkAdminStatus(user.uid);
                         
                         localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
                         console.log("Firebase user saved:", user.uid);
@@ -1223,6 +1227,22 @@ class CheckoutAuthSystem {
             console.error('Auth init error:', error);
             this.currentUser = this.getUserFromStorage() || this.createGuestUser();
             return this.currentUser;
+        }
+    }
+    
+    async checkAdminStatus(userId) {
+        try {
+            if (!firebaseDB) return false;
+            
+            const adminDoc = await firebaseDB.collection('admins').doc(userId).get();
+            this.adminStatus = adminDoc.exists;
+            
+            console.log("Admin status:", this.adminStatus);
+            return this.adminStatus;
+        } catch (error) {
+            console.error('Error checking admin status:', error);
+            this.adminStatus = false;
+            return false;
         }
     }
     
@@ -2059,7 +2079,7 @@ function validateForm() {
 }
 
 // ============================================
-// PAYMENT PROCESSING
+// PAYMENT PROCESSING WITH FIRESTORE PERMISSIONS
 // ============================================
 
 async function validateAndProcessPayment() {
@@ -2140,7 +2160,8 @@ async function validateAndProcessPayment() {
             createdAt: new Date().toISOString(),
             orderNumber: generateOrderNumber(),
             paymentStatus: 'pending',
-            isBuyNowOrder: isBuyNowFlow
+            isBuyNowOrder: isBuyNowFlow,
+            isGuestOrder: !authSystem.isLoggedIn()
         };
         
         console.log("Order data created:", currentOrderData.orderNumber);
@@ -2168,41 +2189,6 @@ async function processBankTransfer(orderData) {
     try {
         showPaymentProcessing('Preparing Bank Transfer Details...');
         
-        // Update order with bank transfer info
-        orderData.paymentStatus = 'pending_bank_transfer';
-        orderData.bankTransferDetails = {
-            accountName: 'IRYA STONE LTD',
-            accountNumber: '12345678',
-            sortCode: '04-00-04',
-            iban: 'GB29NWBK60161331926819',
-            swift: 'NWBKGB2L',
-            reference: orderData.orderNumber,
-            amount: orderData.amountToPay,
-            currency: 'GBP',
-            bankName: 'NatWest Bank',
-            bankAddress: 'NatWest Bank PLC, 135 Bishopsgate, London EC2M 3UR, United Kingdom'
-        };
-        
-        // Save order to Firebase
-        const orderId = await saveOrderToFirebase(orderData);
-        
-        // Hide processing modal
-        hidePaymentProcessing();
-        
-        // Show bank transfer details
-        showBankTransferDetails(orderData);
-        
-    } catch (error) {
-        console.error('Bank transfer error:', error);
-        hidePaymentProcessing();
-        showError('Failed to process bank transfer: ' + error.message);
-    }
-}
-
-async function processBankTransfer(orderData) {
-    try {
-        showPaymentProcessing('Preparing Bank Transfer Details...');
-        
         orderData.paymentStatus = 'pending_bank_transfer';
         orderData.bankTransferDetails = {
             accountName: 'IRYA STONE LTD',
@@ -2215,7 +2201,9 @@ async function processBankTransfer(orderData) {
             currency: 'GBP'
         };
         
-        const orderId = await saveOrderToFirebase(orderData);
+        // Save order to Firestore with proper permissions
+        const orderId = await saveOrderToFirestoreWithPermissions(orderData);
+        orderData.id = orderId;
         
         hidePaymentProcessing();
         
@@ -2252,17 +2240,183 @@ async function processBankTransfer(orderData) {
 }
 
 // ============================================
-// COMPLETE ORDER FUNCTION
+// FIRESTORE ORDER MANAGEMENT WITH PERMISSIONS
+// ============================================
+
+async function saveOrderToFirestoreWithPermissions(orderData) {
+    try {
+        if (!firebaseDB) {
+            throw new Error('Firebase not initialized');
+        }
+        
+        // Create Firestore-compatible order object
+        const firestoreOrder = {
+            userId: orderData.userId,
+            userEmail: orderData.userEmail,
+            userName: orderData.userName,
+            isLoggedIn: orderData.isLoggedIn,
+            items: orderData.items.map(item => ({
+                id: item.id || '',
+                name: item.name || 'Product',
+                quantity: item.quantity || 1,
+                price: item.price || 0,
+                calculatedPrice: item.calculatedPrice || 0,
+                isBuyNow: item.isBuyNow || false
+            })),
+            shippingAddress: {
+                fullName: orderData.shippingAddress.fullName,
+                email: orderData.shippingAddress.email,
+                phone: orderData.shippingAddress.phone,
+                country: orderData.shippingAddress.country,
+                address1: orderData.shippingAddress.address1,
+                city: orderData.shippingAddress.city,
+                state: orderData.shippingAddress.state,
+                postalCode: orderData.shippingAddress.postalCode
+            },
+            paymentMethod: orderData.paymentMethod,
+            paymentType: orderData.paymentType,
+            subtotal: orderData.subtotal,
+            tax: orderData.tax,
+            shipping: orderData.shipping,
+            total: orderData.total,
+            advancePayment: orderData.advancePayment,
+            remainingPayment: orderData.remainingPayment,
+            amountToPay: orderData.amountToPay,
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            orderNumber: orderData.orderNumber,
+            paymentStatus: orderData.paymentStatus || 'pending',
+            isBuyNowOrder: orderData.isBuyNowOrder || false,
+            isGuestOrder: orderData.isGuestOrder || false
+        };
+        
+        // Add bank transfer details if applicable
+        if (orderData.bankTransferDetails) {
+            firestoreOrder.bankTransferDetails = orderData.bankTransferDetails;
+        }
+        
+        // Generate order ID
+        const orderId = firebaseDB.collection('orders').doc().id;
+        firestoreOrder.id = orderId;
+        
+        // Save based on user authentication status
+        if (orderData.isLoggedIn && firebaseAuth.currentUser) {
+            // User is authenticated - save to both orders and user subcollection
+            await firebaseDB.collection('orders').doc(orderId).set(firestoreOrder);
+            
+            // Save to user's orders subcollection
+            const userOrderRef = firebaseDB.collection('users')
+                .doc(orderData.userId)
+                .collection('orders')
+                .doc(orderId);
+            await userOrderRef.set(firestoreOrder);
+            
+            console.log('✅ Order saved to Firestore (authenticated user)');
+            
+        } else {
+            // Guest user - save to temporary collection
+            const guestOrderData = {
+                ...firestoreOrder,
+                guestId: orderData.userId,
+                requiresAdminProcessing: true,
+                isGuestOrder: true,
+                timestamp: new Date().toISOString()
+            };
+            
+            await firebaseDB.collection('guestOrders').doc(orderId).set(guestOrderData);
+            console.log('✅ Guest order saved to temporary collection');
+        }
+        
+        // Always save locally as backup
+        saveOrderToLocalStorage(orderId, firestoreOrder);
+        
+        return orderId;
+        
+    } catch (error) {
+        console.error('❌ Error saving order to Firestore:', error);
+        
+        // Fallback: Save to localStorage
+        const localId = 'local_' + Date.now();
+        saveOrderToLocalStorage(localId, orderData);
+        
+        throw error;
+    }
+}
+
+function saveOrderToLocalStorage(orderId, orderData) {
+    try {
+        const ordersKey = 'irya_local_orders_' + authSystem.getUserId();
+        let storedOrders = localStorage.getItem(ordersKey);
+        
+        if (storedOrders) {
+            storedOrders = JSON.parse(storedOrders);
+        } else {
+            storedOrders = [];
+        }
+        
+        storedOrders.push({
+            ...orderData,
+            id: orderId,
+            localSave: true,
+            saveTime: new Date().toISOString()
+        });
+        
+        localStorage.setItem(ordersKey, JSON.stringify(storedOrders));
+        console.log('✅ Order saved to localStorage');
+        
+    } catch (error) {
+        console.error('❌ Error saving to localStorage:', error);
+    }
+}
+
+// ============================================
+// UPDATED COMPLETE ORDER FUNCTION
 // ============================================
 
 async function completeOrder() {
     try {
         showLoading(true);
         
-        // Clear cart items based on flow type
+        // Update order status in Firestore
+        if (currentOrderData && currentOrderData.id) {
+            try {
+                const updateData = {
+                    status: 'confirmed',
+                    paymentStatus: 'pending_bank_transfer',
+                    updatedAt: new Date().toISOString()
+                };
+                
+                if (currentOrderData.isLoggedIn && firebaseAuth.currentUser) {
+                    // Update in main orders collection
+                    await firebaseDB.collection('orders').doc(currentOrderData.id).update(updateData);
+                    
+                    // Update in user's orders subcollection
+                    await firebaseDB.collection('users')
+                        .doc(currentOrderData.userId)
+                        .collection('orders')
+                        .doc(currentOrderData.id)
+                        .update(updateData);
+                } else {
+                    // Update guest order
+                    await firebaseDB.collection('guestOrders').doc(currentOrderData.id).update(updateData);
+                }
+                
+                console.log('✅ Order status updated in Firestore');
+            } catch (firestoreError) {
+                console.warn('⚠️ Could not update Firestore order status:', firestoreError);
+                // Continue anyway - order is saved locally
+            }
+        }
+        
+        // Send notification to admin
+        await sendNewOrderNotification(currentOrderData);
+        
+        // Clear cart items
+        const userId = authSystem.getUserId();
+        
         if (isBuyNowFlow) {
             // Clear buy now storage
-            const userId = authSystem.getUserId();
             const buyNowKey = 'irya_buynow_cart_' + userId;
             localStorage.removeItem(buyNowKey);
             
@@ -2272,25 +2426,20 @@ async function completeOrder() {
             sessionStorage.removeItem('irya_buynow_quantity');
             sessionStorage.removeItem('irya_buynow_calc_data');
             sessionStorage.removeItem('irya_buynow_custom_req');
-            
             localStorage.removeItem('irya_is_buynow_flow');
         } else {
             // Clear regular cart
-            const userId = authSystem.getUserId();
             const cartKey = 'irya_local_cart_' + userId;
             localStorage.removeItem(cartKey);
         }
         
         updateCartBadge();
         
-        // Send notification to admin
-        await sendNewOrderNotification(currentOrderData);
-        
         // Redirect to confirmation
         window.location.href = `order-confirmation.html?order=${currentOrderData.orderNumber}&payment=${currentOrderData.paymentMethod}`;
         
     } catch (error) {
-        console.error('Error completing order:', error);
+        console.error('❌ Error completing order:', error);
         showError('Failed to complete order');
     } finally {
         showLoading(false);
@@ -2298,7 +2447,7 @@ async function completeOrder() {
 }
 
 // ============================================
-// SEND NEW ORDER NOTIFICATION FUNCTION
+// UPDATED NOTIFICATION SYSTEM
 // ============================================
 
 async function sendNewOrderNotification(orderData) {
@@ -2320,59 +2469,48 @@ async function sendNewOrderNotification(orderData) {
                 total: orderData.total,
                 paymentMethod: orderData.paymentMethod,
                 paymentStatus: orderData.paymentStatus,
-                itemsCount: orderData.items.length
+                itemsCount: orderData.items.length,
+                isGuestOrder: orderData.isGuestOrder || false
             }
         };
         
-        // Get all admins
-        const adminSnapshot = await firebaseDB.collection('admins').get();
-        
-        if (!adminSnapshot.empty) {
-            const batch = firebaseDB.batch();
+        // Try to save to adminNotifications collection
+        try {
+            // Get all admins
+            const adminSnapshot = await firebaseDB.collection('admins').get();
             
-            adminSnapshot.forEach(doc => {
-                const adminId = doc.id;
-                const adminNotificationRef = firebaseDB.collection('users').doc(adminId)
-                    .collection('adminNotifications').doc();
-                batch.set(adminNotificationRef, notification);
-            });
+            if (!adminSnapshot.empty) {
+                const batch = firebaseDB.batch();
+                
+                adminSnapshot.forEach(doc => {
+                    const adminId = doc.id;
+                    const adminNotificationRef = firebaseDB.collection('adminNotifications').doc();
+                    notification.adminId = adminId;
+                    batch.set(adminNotificationRef, notification);
+                });
+                
+                await batch.commit();
+                console.log('✅ New order notification sent to adminNotifications');
+            }
+        } catch (adminError) {
+            console.warn('⚠️ Could not save to adminNotifications:', adminError);
             
-            await batch.commit();
-            console.log('✅ New order notification sent to all admins');
+            // Fallback: Save to public notifications
+            try {
+                const publicNotificationRef = firebaseDB.collection('publicNotifications').doc();
+                await publicNotificationRef.set({
+                    ...notification,
+                    isPublic: true,
+                    canReadByAdmins: true
+                });
+                console.log('✅ Notification saved to publicNotifications');
+            } catch (publicError) {
+                console.warn('⚠️ Could not save to public notifications:', publicError);
+            }
         }
         
     } catch (error) {
         console.error('❌ Error sending new order notification:', error);
-    }
-}
-
-// ============================================
-// FIREBASE ORDER MANAGEMENT
-// ============================================
-
-async function saveOrderToFirebase(order) {
-    try {
-        if (!firebaseDB) {
-            throw new Error('Firebase not initialized');
-        }
-        
-        const orderId = firebaseDB.collection('orders').doc().id;
-        
-        const finalOrder = {
-            id: orderId,
-            ...order,
-            updatedAt: new Date().toISOString()
-        };
-        
-        await firebaseDB.collection('orders').doc(orderId).set(finalOrder);
-        
-        const userOrderRef = firebaseDB.collection('users').doc(order.userId).collection('orders').doc(orderId);
-        await userOrderRef.set(finalOrder);
-        
-        return orderId;
-    } catch (error) {
-        console.error('Error saving order to Firebase:', error);
-        throw error;
     }
 }
 
@@ -2527,13 +2665,65 @@ function showError(message) {
     alert(message);
 }
 
+// ============================================
+// ADDITIONAL FIREBASE SYNC FUNCTION
+// ============================================
+
+async function syncLocalOrdersToFirebase(userId) {
+    try {
+        if (!firebaseAuth.currentUser || firebaseAuth.currentUser.uid !== userId) {
+            return;
+        }
+        
+        const localOrdersKey = 'irya_local_orders_' + userId;
+        const localOrders = localStorage.getItem(localOrdersKey);
+        
+        if (!localOrders) return;
+        
+        const orders = JSON.parse(localOrders);
+        
+        for (const order of orders) {
+            if (!order.syncedToFirebase) {
+                try {
+                    // Save to user's orders subcollection
+                    await firebaseDB.collection('users')
+                        .doc(userId)
+                        .collection('orders')
+                        .doc(order.id || 'local_' + Date.now())
+                        .set({
+                            ...order,
+                            syncedToFirebase: true,
+                            syncTime: new Date().toISOString()
+                        });
+                    
+                    console.log('✅ Local order synced to Firebase:', order.orderNumber);
+                    
+                    // Remove from localStorage after successful sync
+                    const updatedOrders = orders.filter(o => o.id !== order.id);
+                    localStorage.setItem(localOrdersKey, JSON.stringify(updatedOrders));
+                    
+                } catch (error) {
+                    console.error('❌ Error syncing order:', error);
+                }
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Error syncing local orders:', error);
+    }
+}
+
+// Call this when user logs in
+async function onUserLogin(userId) {
+    await syncLocalOrdersToFirebase(userId);
+}
+
 // Make functions available globally
 window.selectPaymentOption = selectPaymentOption;
 window.selectPaymentMethod = selectPaymentMethod;
 window.validateAndProcessPayment = validateAndProcessPayment;
 window.cancelPayment = cancelPayment;
 window.goBack = goBack;
-window.completeOrder = completeOrder;
-</script>
+window.completeOrder = completeOrder;</script>
 </body>
 </html>
