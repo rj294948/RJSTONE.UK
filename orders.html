@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+/* KEEP ALL ORIGINAL CSS FROM YOUR FIRST FILE */
 :root {
     --primary-gold: #c9a227;
     --gold-light: #f0d77c;
@@ -660,6 +661,120 @@ header {
     100% { opacity: 1; }
 }
 
+/* Admin Controls */
+.admin-controls {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    display: none;
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: var(--bg-light);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    border-left: 4px solid var(--primary-gold);
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-gold);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.admin-search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.admin-search input {
+    flex: 1;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    font-size: 14px;
+}
+
+.admin-search button {
+    padding: 12px 20px;
+    background: var(--primary-gold);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Payment Verification Modal */
+.payment-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h3 {
+    font-size: 20px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.close-modal:hover {
+    color: var(--primary-gold);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .order-header {
@@ -693,6 +808,10 @@ header {
         padding: 6px 12px;
         font-size: 11px;
     }
+    
+    .admin-stats {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 @media (max-width: 480px) {
@@ -708,327 +827,8 @@ header {
     .order-summary {
         grid-template-columns: 1fr;
     }
-
-/* Admin Verification Modal */
-.admin-modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: 10000;
-    align-items: center;
-    justify-content: center;
-}
-
-.admin-modal {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    max-width: 500px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.modal-header h3 {
-    font-size: 20px;
-    color: var(--stone-dark);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.modal-header h3 i {
-    color: var(--primary-gold);
-}
-
-.close-modal {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: var(--text-light);
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.close-modal:hover {
-    color: var(--primary-gold);
-}
-
-/* Verification Form */
-.verification-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-group label {
-    font-weight: 500;
-    color: var(--stone-dark);
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    padding: 12px 15px;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    font-size: 14px;
-    transition: var(--transition);
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: var(--primary-gold);
-    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.1);
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 100px;
-}
-
-/* Payment Details Display */
-.payment-details-display {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 10px;
-    margin: 15px 0;
-}
-
-.payment-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.payment-row:last-child {
-    border-bottom: none;
-}
-
-.payment-label {
-    font-weight: 500;
-    color: var(--text-dark);
-}
-
-.payment-value {
-    font-weight: 600;
-    color: var(--primary-gold);
-}
-
-/* Status Badges */
-.status-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 15px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.badge-pending {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.badge-verified {
-    background: #d4edda;
-    color: #155724;
-}
-
-.badge-rejected {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-/* Admin Actions */
-.admin-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e0e0e0;
-}
-
-.admin-btn {
-    flex: 1;
-    padding: 12px 20px;
-    border-radius: 8px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.admin-btn-primary {
-    background: var(--primary-gold);
-    color: white;
-}
-
-.admin-btn-primary:hover {
-    background: var(--gold-dark);
-}
-
-.admin-btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
-.admin-btn-secondary:hover {
-    background: #5a6268;
-}
-
-.admin-btn-danger {
-    background: #dc3545;
-    color: white;
-}
-
-.admin-btn-danger:hover {
-    background: #c82333;
-}
-
-/* Search and Filter */
-.search-filter {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.search-box {
-    flex: 1;
-    min-width: 250px;
-    position: relative;
-}
-
-.search-box input {
-    width: 100%;
-    padding: 12px 15px 12px 40px;
-    border-radius: 25px;
-    border: 2px solid #e0e0e0;
-    font-size: 14px;
-    transition: var(--transition);
-}
-
-.search-box input:focus {
-    outline: none;
-    border-color: var(--primary-gold);
-}
-
-.search-box i {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-light);
-}
-
-.filter-select {
-    padding: 12px 20px;
-    border-radius: 25px;
-    border: 2px solid #e0e0e0;
-    background: white;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    min-width: 150px;
-}
-
-/* Stats Cards */
-.stats-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 30px;
-}
-
-.stat-card {
-    background: white;
-    padding: 20px;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
-    border-left: 4px solid var(--primary-gold);
-}
-
-.stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--stone-dark);
-    margin-bottom: 5px;
-}
-
-.stat-label {
-    font-size: 14px;
-    color: var(--text-light);
-}
-
-/* Real-time Updates */
-.realtime-updates {
-    position: fixed;
-    bottom: 80px;
-    right: 20px;
-    background: var(--primary-gold);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 10px;
-    box-shadow: var(--shadow-md);
-    z-index: 998;
-    animation: slideIn 0.3s ease;
-    max-width: 300px;
-}
-
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .stats-cards {
-        grid-template-columns: 1fr 1fr;
-    }
     
-    .search-filter {
-        flex-direction: column;
-    }
-    
-    .admin-actions {
-        flex-direction: column;
-    }
-}
-
-@media (max-width: 480px) {
-    .admin-modal {
-        padding: 20px;
-    }
-    
-    .stats-cards {
+    .admin-stats {
         grid-template-columns: 1fr;
     }
 }
@@ -1040,33 +840,26 @@ header {
 <!-- Loading Spinner -->
 <div class="loading-spinner" id="loadingSpinner"></div>
 
-<!-- Admin Verification Modal -->
-<div class="admin-modal-overlay" id="adminModal">
-    <div class="admin-modal">
+<!-- Real-time Indicator -->
+<div class="realtime-indicator" id="realtimeIndicator" style="display: none;">
+    <i class="fas fa-sync fa-spin"></i>
+    <span>Live Updates Active</span>
+</div>
+
+<!-- Payment Verification Modal -->
+<div class="payment-modal" id="paymentModal">
+    <div class="modal-content">
         <div class="modal-header">
             <h3><i class="fas fa-user-shield"></i> Payment Verification</h3>
-            <button class="close-modal" onclick="closeAdminModal()">&times;</button>
+            <button class="close-modal" onclick="closePaymentModal()">&times;</button>
         </div>
-        
-        <div id="verificationContent">
-            <!-- Content will be loaded dynamically -->
-        </div>
-        
-        <div class="admin-actions" id="adminActions">
-            <!-- Actions will be loaded dynamically -->
+        <div id="paymentModalContent">
+            <!-- Content will be loaded here -->
         </div>
     </div>
 </div>
 
-<!-- Real-time Updates -->
-<div class="realtime-updates" id="realtimeUpdates" style="display: none;">
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <i class="fas fa-sync fa-spin"></i>
-        <span id="updateMessage">New order received</span>
-    </div>
-</div>
-
-<!-- Header (same as before) -->
+<!-- Header -->
 <header>
     <div class="logo">
         <i class="fa-solid fa-gem"></i>
@@ -1084,7 +877,7 @@ header {
     </div>
 </header>
 
-<!-- Breadcrumb (same as before) -->
+<!-- Breadcrumb -->
 <section class="breadcrumb">
     <div class="breadcrumb-content">
         <div class="breadcrumb-item">
@@ -1099,44 +892,32 @@ header {
     </div>
 </section>
 
-<!-- Admin Controls (only visible to admin) -->
-<div id="adminControls" style="display: none;">
-    <div class="orders-container">
-        <div class="stats-cards">
-            <div class="stat-card">
-                <div class="stat-value" id="totalOrders">0</div>
-                <div class="stat-label">Total Orders</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="pendingPayments">0</div>
-                <div class="stat-label">Pending Payments</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="pendingVerification">0</div>
-                <div class="stat-label">Pending Verification</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="todaysOrders">0</div>
-                <div class="stat-label">Today's Orders</div>
-            </div>
+<!-- Admin Controls (Hidden by default) -->
+<div class="admin-controls" id="adminControls">
+    <h2 style="margin-bottom: 20px; color: var(--stone-dark);"><i class="fas fa-user-shield"></i> Admin Dashboard</h2>
+    
+    <div class="admin-stats">
+        <div class="stat-card">
+            <div class="stat-value" id="totalOrdersStat">0</div>
+            <div class="stat-label">Total Orders</div>
         </div>
-        
-        <div class="search-filter">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchOrders" placeholder="Search orders by ID, name, email..." onkeyup="searchOrders()">
-            </div>
-            <select class="filter-select" id="adminFilter" onchange="filterAdminOrders()">
-                <option value="all">All Orders</option>
-                <option value="pending_verification">Pending Verification</option>
-                <option value="pending_bank_transfer">Awaiting Bank Transfer</option>
-                <option value="payment_submitted">Payment Submitted</option>
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-            </select>
+        <div class="stat-card">
+            <div class="stat-value" id="pendingPaymentStat">0</div>
+            <div class="stat-label">Pending Payments</div>
         </div>
+        <div class="stat-card">
+            <div class="stat-value" id="pendingVerificationStat">0</div>
+            <div class="stat-label">Pending Verification</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="todayOrdersStat">0</div>
+            <div class="stat-label">Today's Orders</div>
+        </div>
+    </div>
+    
+    <div class="admin-search">
+        <input type="text" id="adminSearch" placeholder="Search orders by ID, customer name, email..." onkeyup="searchOrders()">
+        <button onclick="clearSearch()"><i class="fas fa-times"></i> Clear</button>
     </div>
 </div>
 
@@ -1192,7 +973,7 @@ header {
 
 <script>
 // ============================================
-// ENHANCED FIREBASE CONFIGURATION
+// FIREBASE CONFIGURATION
 // ============================================
 
 const firebaseConfig = {
@@ -1215,15 +996,15 @@ let isAdmin = false;
 let adminId = null;
 
 // ============================================
-// ENHANCED AUTHENTICATION SYSTEM
+// AUTHENTICATION SYSTEM
 // ============================================
 
-class EnhancedAuthSystem {
+class OrdersAuthSystem {
     constructor() {
         this.currentUser = null;
         this.authKey = 'irya_stone_auth_user';
         this.guestIdKey = 'irya_guest_id';
-        this.adminKey = 'irya_admin_user';
+        this.adminKey = 'irya_admin_status';
     }
     
     async init() {
@@ -1232,7 +1013,10 @@ class EnhancedAuthSystem {
             
             return new Promise((resolve) => {
                 firebaseAuth.onAuthStateChanged(async (user) => {
+                    console.log("📱 Auth State Changed:", user ? user.uid : "No user");
+                    
                     if (user) {
+                        // Firebase authenticated user
                         this.currentUser = {
                             uid: user.uid,
                             displayName: user.displayName || 'User',
@@ -1244,10 +1028,11 @@ class EnhancedAuthSystem {
                         
                         localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
                         
-                        // Check if user is admin
+                        // Check admin status
                         await this.checkAdminStatus(user.uid);
                         
                     } else {
+                        // No Firebase user, check localStorage
                         const storedUser = this.getUserFromStorage();
                         
                         if (storedUser && storedUser.isFirebaseUser) {
@@ -1264,7 +1049,7 @@ class EnhancedAuthSystem {
             });
             
         } catch (error) {
-            console.error('Auth init error:', error);
+            console.error('❌ Auth init error:', error);
             this.currentUser = this.getUserFromStorage() || this.createGuestUser();
             return this.currentUser;
         }
@@ -1285,9 +1070,10 @@ class EnhancedAuthSystem {
             firebaseDB = firebase.firestore();
             firebaseAuth = firebase.auth();
             
+            console.log('✅ Firebase initialized successfully');
             return true;
         } catch (error) {
-            console.error('Firebase initialization error:', error);
+            console.error('❌ Firebase initialization error:', error);
             throw error;
         }
     }
@@ -1296,15 +1082,18 @@ class EnhancedAuthSystem {
         try {
             if (!firebaseDB) return false;
             
+            // Check if user is in admins collection
             const adminDoc = await firebaseDB.collection('admins').doc(userId).get();
+            
             if (adminDoc.exists) {
                 isAdmin = true;
                 adminId = userId;
                 localStorage.setItem(this.adminKey, 'true');
+                console.log('✅ User is Admin');
                 return true;
             }
         } catch (error) {
-            console.error('Error checking admin status:', error);
+            console.error('❌ Error checking admin status:', error);
         }
         
         isAdmin = false;
@@ -1318,7 +1107,7 @@ class EnhancedAuthSystem {
             try {
                 return JSON.parse(userData);
             } catch (e) {
-                console.error('Error parsing user data:', e);
+                console.error('❌ Error parsing user data:', e);
                 return null;
             }
         }
@@ -1364,14 +1153,14 @@ class EnhancedAuthSystem {
 }
 
 // ============================================
-// ENHANCED INITIALIZATION
+// INITIALIZATION
 // ============================================
 
 document.addEventListener('DOMContentLoaded', async function() {
     console.log("📱 Orders page loaded");
     
     // Initialize Auth System
-    authSystem = new EnhancedAuthSystem();
+    authSystem = new OrdersAuthSystem();
     await authSystem.init();
     
     const userId = authSystem.getUserId();
@@ -1380,27 +1169,102 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Show admin controls if admin
     if (isAdmin) {
         document.getElementById('adminControls').style.display = 'block';
-        await loadAllOrders(); // Load all orders for admin
+        await loadAllOrdersForAdmin();
         setupAdminRealtimeUpdates();
     } else {
         await loadUserOrders();
+        setupRealtimeUpdates();
     }
     
-    // Setup real-time updates
-    setupRealtimeUpdates();
+    // Show real-time indicator
+    document.getElementById('realtimeIndicator').style.display = 'flex';
     
     // Update cart badge
     updateCartBadge();
-    
-    // Setup search functionality
-    setupSearch();
 });
+
+// ============================================
+// LOAD USER ORDERS FROM FIREBASE
+// ============================================
+
+async function loadUserOrders() {
+    try {
+        showLoading(true);
+        
+        const userId = authSystem.getUserId();
+        console.log("🔄 Loading orders for user:", userId);
+        
+        // Initialize Firebase if not already
+        if (!firebaseDB) {
+            await authSystem.initializeFirebase();
+        }
+        
+        // Try users/{userId}/orders collection first
+        try {
+            const userOrdersRef = firebaseDB.collection('users').doc(userId).collection('orders');
+            const userOrdersSnapshot = await userOrdersRef.orderBy('createdAt', 'desc').get();
+            
+            if (!userOrdersSnapshot.empty) {
+                userOrders = [];
+                userOrdersSnapshot.forEach(doc => {
+                    const orderData = doc.data();
+                    userOrders.push({
+                        id: doc.id,
+                        ...orderData,
+                        orderNumber: orderData.orderNumber || `IRYA-${doc.id.substring(0, 8).toUpperCase()}`
+                    });
+                });
+                
+                console.log(`✅ ${userOrders.length} orders loaded from users/{userId}/orders`);
+                displayOrders();
+                return;
+            }
+        } catch (error) {
+            console.log("❌ Could not load from users collection:", error.message);
+        }
+        
+        // Try main orders collection
+        try {
+            const ordersSnapshot = await firebaseDB.collection('orders')
+                .where('userId', '==', userId)
+                .orderBy('createdAt', 'desc')
+                .get();
+            
+            if (!ordersSnapshot.empty) {
+                userOrders = [];
+                ordersSnapshot.forEach(doc => {
+                    const orderData = doc.data();
+                    userOrders.push({
+                        id: doc.id,
+                        ...orderData
+                    });
+                });
+                
+                console.log(`✅ ${userOrders.length} orders loaded from main collection`);
+                displayOrders();
+                return;
+            }
+        } catch (error) {
+            console.log("❌ Could not load from main orders:", error.message);
+        }
+        
+        // If no orders found
+        showNoOrders();
+        
+    } catch (error) {
+        console.error('❌ Error loading orders:', error);
+        showNoOrders();
+        showError('Failed to load orders: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
 
 // ============================================
 // ADMIN FUNCTIONS
 // ============================================
 
-async function loadAllOrders() {
+async function loadAllOrdersForAdmin() {
     try {
         showLoading(true);
         
@@ -1411,20 +1275,21 @@ async function loadAllOrders() {
         // Load from main orders collection
         const ordersSnapshot = await firebaseDB.collection('orders')
             .orderBy('createdAt', 'desc')
-            .limit(100)
+            .limit(200)
             .get();
         
         allOrders = [];
         ordersSnapshot.forEach(doc => {
+            const orderData = doc.data();
             allOrders.push({
                 id: doc.id,
-                ...doc.data()
+                ...orderData
             });
         });
         
         console.log(`✅ Admin: Loaded ${allOrders.length} orders`);
         displayOrders();
-        updateStats();
+        updateAdminStats();
         
     } catch (error) {
         console.error('❌ Error loading all orders:', error);
@@ -1438,200 +1303,428 @@ function setupAdminRealtimeUpdates() {
     
     realtimeUnsubscribe = firebaseDB.collection('orders')
         .orderBy('createdAt', 'desc')
+        .limit(200)
         .onSnapshot((snapshot) => {
             allOrders = [];
             snapshot.forEach(doc => {
+                const orderData = doc.data();
                 allOrders.push({
                     id: doc.id,
-                    ...doc.data()
+                    ...orderData
                 });
             });
             
             displayOrders();
-            updateStats();
+            updateAdminStats();
             
-            // Show notification for new orders
+            // Check for new orders
             const changes = snapshot.docChanges();
             changes.forEach(change => {
                 if (change.type === 'added') {
                     const order = change.doc.data();
-                    showRealtimeUpdate(`New order #${order.orderNumber} received`);
+                    showNotification(`📦 New Order #${order.orderNumber || order.id} received`);
                 }
             });
+        }, (error) => {
+            console.error("❌ Admin real-time error:", error);
         });
 }
 
-function updateStats() {
+function updateAdminStats() {
+    if (!isAdmin) return;
+    
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
     const totalOrders = allOrders.length;
     const pendingPayments = allOrders.filter(o => 
-        o.paymentStatus === 'pending_bank_transfer' || 
-        o.paymentStatus === 'payment_submitted'
+        o.paymentStatus === 'pending_bank_transfer'
     ).length;
     const pendingVerification = allOrders.filter(o => 
         o.paymentStatus === 'payment_submitted'
     ).length;
-    const todaysOrders = allOrders.filter(o => 
-        new Date(o.createdAt) >= today
-    ).length;
+    const todaysOrders = allOrders.filter(o => {
+        const orderDate = new Date(o.createdAt);
+        return orderDate >= today;
+    }).length;
     
-    document.getElementById('totalOrders').textContent = totalOrders;
-    document.getElementById('pendingPayments').textContent = pendingPayments;
-    document.getElementById('pendingVerification').textContent = pendingVerification;
-    document.getElementById('todaysOrders').textContent = todaysOrders;
+    document.getElementById('totalOrdersStat').textContent = totalOrders;
+    document.getElementById('pendingPaymentStat').textContent = pendingPayments;
+    document.getElementById('pendingVerificationStat').textContent = pendingVerification;
+    document.getElementById('todayOrdersStat').textContent = todaysOrders;
 }
 
 function searchOrders() {
-    const searchTerm = document.getElementById('searchOrders').value.toLowerCase();
+    const searchTerm = document.getElementById('adminSearch').value.toLowerCase();
     
-    if (searchTerm === '') {
+    if (!searchTerm) {
         displayOrders();
         return;
     }
     
-    let filteredOrders = isAdmin ? allOrders : userOrders;
-    
-    filteredOrders = filteredOrders.filter(order => 
-        order.orderNumber?.toLowerCase().includes(searchTerm) ||
-        order.userName?.toLowerCase().includes(searchTerm) ||
-        order.userEmail?.toLowerCase().includes(searchTerm) ||
-        order.id?.toLowerCase().includes(searchTerm) ||
-        order.shippingAddress?.fullName?.toLowerCase().includes(searchTerm)
+    const ordersToSearch = isAdmin ? allOrders : userOrders;
+    const filteredOrders = ordersToSearch.filter(order => 
+        (order.orderNumber && order.orderNumber.toLowerCase().includes(searchTerm)) ||
+        (order.userName && order.userName.toLowerCase().includes(searchTerm)) ||
+        (order.userEmail && order.userEmail.toLowerCase().includes(searchTerm)) ||
+        (order.id && order.id.toLowerCase().includes(searchTerm)) ||
+        (order.shippingAddress && order.shippingAddress.fullName && 
+         order.shippingAddress.fullName.toLowerCase().includes(searchTerm))
     );
     
     displayFilteredOrders(filteredOrders);
 }
 
-function filterAdminOrders() {
-    const filter = document.getElementById('adminFilter').value;
-    currentFilter = filter;
+function clearSearch() {
+    document.getElementById('adminSearch').value = '';
     displayOrders();
 }
 
 // ============================================
-// PAYMENT VERIFICATION FUNCTIONS
+// DISPLAY ORDERS
 // ============================================
 
-function openVerificationModal(orderId) {
-    const order = (isAdmin ? allOrders : userOrders).find(o => o.id === orderId);
-    if (!order) return;
+function displayOrders() {
+    const ordersToDisplay = isAdmin ? allOrders : userOrders;
+    displayFilteredOrders(ordersToDisplay);
+}
+
+function displayFilteredOrders(orders) {
+    const ordersList = document.getElementById('ordersList');
+    const noOrdersMessage = document.getElementById('noOrdersMessage');
     
-    const modal = document.getElementById('adminModal');
-    const content = document.getElementById('verificationContent');
-    const actions = document.getElementById('adminActions');
+    // Filter based on current tab
+    const filteredOrders = orders.filter(order => {
+        if (currentFilter === 'all') return true;
+        
+        // For admin, check both status and paymentStatus
+        if (isAdmin) {
+            return order.status === currentFilter || 
+                   order.paymentStatus === currentFilter ||
+                   (currentFilter === 'pending' && 
+                    (order.status === 'pending' || 
+                     order.paymentStatus === 'pending_bank_transfer' ||
+                     order.paymentStatus === 'payment_submitted'));
+        }
+        
+        // For regular users
+        if (currentFilter === 'pending') {
+            return order.status === 'pending' || 
+                   order.paymentStatus === 'pending_bank_transfer' ||
+                   order.paymentStatus === 'payment_submitted';
+        }
+        
+        return order.status === currentFilter;
+    });
     
-    // Content HTML
-    content.innerHTML = `
-        <div class="payment-details-display">
-            <h4 style="margin-bottom: 15px; color: var(--stone-dark);">
-                <i class="fas fa-file-invoice-dollar"></i> Order Details
-            </h4>
-            <div class="payment-row">
-                <span class="payment-label">Order Number:</span>
-                <span class="payment-value">${order.orderNumber}</span>
+    if (filteredOrders.length === 0) {
+        showNoOrders();
+        return;
+    }
+    
+    noOrdersMessage.style.display = 'none';
+    
+    // Sort by date (newest first)
+    filteredOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    const ordersHTML = filteredOrders.map(order => {
+        // Generate HTML for the order
+        return generateOrderHTML(order);
+    }).join('');
+    
+    ordersList.innerHTML = ordersHTML;
+}
+
+function generateOrderHTML(order) {
+    const isEditable = isAdmin || 
+        (order.status === 'pending' || 
+         order.paymentStatus === 'pending_bank_transfer' ||
+         order.paymentStatus === 'payment_submitted');
+    
+    const adminControls = isAdmin ? `
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+            <div style="font-size: 12px; color: var(--text-light); margin-bottom: 10px;">
+                <strong>Admin Controls:</strong>
             </div>
-            <div class="payment-row">
-                <span class="payment-label">Customer:</span>
-                <span class="payment-value">${order.userName}</span>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="order-action-btn" onclick="openPaymentVerification('${order.id}')" 
+                        style="background: #17a2b8; color: white; border-color: #17a2b8;">
+                    <i class="fas fa-user-shield"></i>
+                    Verify Payment
+                </button>
+                <button class="order-action-btn" onclick="editOrderAdmin('${order.id}')">
+                    <i class="fas fa-edit"></i>
+                    Edit Order
+                </button>
+                <button class="order-action-btn" onclick="updateOrderStatusAdmin('${order.id}')">
+                    <i class="fas fa-sync"></i>
+                    Update Status
+                </button>
+                <button class="order-action-btn" onclick="deleteOrder('${order.id}')" 
+                        style="color: #ff4757; border-color: #ff4757;">
+                    <i class="fas fa-trash"></i>
+                    Delete
+                </button>
             </div>
-            <div class="payment-row">
-                <span class="payment-label">Email:</span>
-                <span class="payment-value">${order.userEmail}</span>
+        </div>
+    ` : '';
+    
+    return `
+    <div class="order-card">
+        ${isAdmin ? `
+            <div style="background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark)); 
+                        color: white; padding: 10px 15px; border-radius: 8px 8px 0 0; 
+                        margin: -25px -25px 15px -25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong><i class="fas fa-user"></i> Customer:</strong> ${order.userName || 'Guest'}
+                        <span style="margin-left: 15px;">
+                            <strong><i class="fas fa-envelope"></i> Email:</strong> ${order.userEmail || 'N/A'}
+                        </span>
+                    </div>
+                    <div style="font-size: 12px;">
+                        User ID: ${order.userId.substring(0, 8)}...
+                    </div>
+                </div>
             </div>
-            <div class="payment-row">
-                <span class="payment-label">Total Amount:</span>
-                <span class="payment-value">£${order.total?.toFixed(2)}</span>
+        ` : ''}
+        
+        <div class="order-header">
+            <div class="order-info">
+                <h3>Order #${order.orderNumber || order.id.substring(0, 8).toUpperCase()}</h3>
+                <div class="order-date">
+                    <i class="far fa-calendar"></i> ${formatDate(order.createdAt)}
+                </div>
+                <div class="order-number">Order ID: ${order.id}</div>
+                ${order.updatedAt ? `
+                    <div style="font-size: 11px; color: var(--text-light); margin-top: 5px;">
+                        <i class="fas fa-sync-alt"></i> Last updated: ${formatDate(order.updatedAt)}
+                    </div>
+                ` : ''}
             </div>
-            <div class="payment-row">
-                <span class="payment-label">Payment Type:</span>
-                <span class="payment-value">${order.paymentType === 'advance' ? '30% Advance' : 'Full Payment'}</span>
-            </div>
-            <div class="payment-row">
-                <span class="payment-label">Amount to Verify:</span>
-                <span class="payment-value">£${order.amountToPay?.toFixed(2)}</span>
-            </div>
-            <div class="payment-row">
-                <span class="payment-label">Current Status:</span>
-                <span class="payment-value">
-                    <span class="status-badge ${getStatusClass(order.paymentStatus)}">
-                        ${getStatusText(order.paymentStatus)}
-                    </span>
-                </span>
+            <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-end;">
+                <div class="order-status status-${order.status || 'pending'}">
+                    ${getStatusText(order.status || 'pending')}
+                </div>
+                <div class="order-status ${getPaymentStatusClass(order.paymentStatus)}">
+                    ${getPaymentStatusText(order.paymentStatus)}
+                </div>
             </div>
         </div>
         
-        <div class="verification-form">
-            <div class="form-group">
-                <label>Verification Notes</label>
-                <textarea id="verificationNotes" placeholder="Enter verification details..."></textarea>
+        <!-- Order Items -->
+        <div class="order-items">
+            ${(order.items || []).slice(0, 3).map(item => `
+                <div class="order-item">
+                    <div class="order-item-image">
+                        <img src="${item.image || getDefaultImage(item.category)}" 
+                             alt="${item.name}" 
+                             onerror="this.src='${getDefaultImage(item.category)}'">
+                    </div>
+                    <div class="order-item-details">
+                        <div class="order-item-name">${item.name || 'Product'}</div>
+                        <div class="order-item-info">${item.category || 'General'}</div>
+                        ${item.calculationData ? `
+                            <div class="order-item-info">
+                                ${getCalculationInfo(item)}
+                            </div>
+                        ` : `
+                            <div class="order-item-info">Quantity: ${item.quantity || 1} ${item.priceUnit || 'pieces'}</div>
+                        `}
+                        <div class="order-item-price">£${item.calculatedPrice ? parseFloat(item.calculatedPrice).toFixed(2) : ((item.price || 0) * (item.quantity || 1)).toFixed(2)}</div>
+                    </div>
+                </div>
+            `).join('')}
+            
+            ${(order.items || []).length > 3 ? `
+                <div style="text-align: center; padding: 10px; color: var(--text-light); font-size: 13px;">
+                    <i class="fas fa-ellipsis-h"></i> + ${(order.items || []).length - 3} more items
+                </div>
+            ` : ''}
+        </div>
+        
+        <!-- Admin Updates -->
+        ${order.adminNotes ? `
+            <div class="payment-info" style="border-left-color: #17a2b8; background: #e7f7fc;">
+                <h5><i class="fas fa-user-shield"></i> Admin Notes</h5>
+                <div class="payment-details">
+                    ${order.adminNotes}
+                    ${order.updatedByAdmin ? `<div style="margin-top: 5px; font-size: 11px; color: var(--text-light);">- ${order.updatedByAdmin}</div>` : ''}
+                </div>
+            </div>
+        ` : ''}
+        
+        <!-- Payment Status -->
+        ${getPaymentInfoHTML(order)}
+        
+        <!-- Bank Transfer Details -->
+        ${order.paymentMethod === 'bank' && order.paymentStatus === 'pending_bank_transfer' ? getBankTransferHTML(order) : ''}
+        
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <div class="summary-item">
+                <div class="summary-label">Subtotal</div>
+                <div class="summary-value">£${order.subtotal?.toFixed(2) || '0.00'}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Shipping</div>
+                <div class="summary-value">${order.shipping === 0 ? 'FREE' : `£${order.shipping?.toFixed(2) || '0.00'}`}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Tax</div>
+                <div class="summary-value">£${order.tax?.toFixed(2) || '0.00'}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Total</div>
+                <div class="summary-value">£${order.total?.toFixed(2) || '0.00'}</div>
+            </div>
+        </div>
+        
+        <!-- Tracking Timeline -->
+        ${getTrackingTimelineHTML(order)}
+        
+        <!-- Order Actions -->
+        <div class="order-actions">
+            <button class="order-action-btn primary" onclick="viewOrderDetails('${order.id}')">
+                <i class="fas fa-eye"></i>
+                View Details
+            </button>
+            
+            ${order.tracking?.url ? `
+                <button class="order-action-btn" onclick="trackOrder('${order.id}')">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Track Order
+                </button>
+            ` : ''}
+            
+            ${order.status === 'delivered' || order.status === 'shipped' ? `
+                <button class="order-action-btn" onclick="downloadInvoice('${order.id}')">
+                    <i class="fas fa-file-invoice"></i>
+                    Invoice
+                </button>
+            ` : ''}
+            
+            ${isEditable && !isAdmin ? `
+                <button class="order-action-btn" onclick="cancelOrder('${order.id}')" 
+                        style="color: #ff4757; border-color: #ff4757;">
+                    <i class="fas fa-times"></i>
+                    Cancel Order
+                </button>
+            ` : ''}
+            
+            ${order.paymentMethod === 'bank' && order.paymentStatus === 'pending_bank_transfer' && !isAdmin ? `
+                <button class="order-action-btn primary" onclick="markPaymentComplete('${order.id}')">
+                    <i class="fas fa-check-circle"></i>
+                    Mark Payment Sent
+                </button>
+            ` : ''}
+        </div>
+        
+        ${adminControls}
+    </div>
+    `;
+}
+
+// ============================================
+// PAYMENT VERIFICATION SYSTEM
+// ============================================
+
+function openPaymentVerification(orderId) {
+    if (!isAdmin) return;
+    
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    const modalContent = document.getElementById('paymentModalContent');
+    const modal = document.getElementById('paymentModal');
+    
+    modalContent.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <h4 style="color: var(--stone-dark); margin-bottom: 10px;">Order Details</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div><strong>Order #:</strong> ${order.orderNumber}</div>
+                    <div><strong>Customer:</strong> ${order.userName}</div>
+                    <div><strong>Email:</strong> ${order.userEmail}</div>
+                    <div><strong>Phone:</strong> ${order.shippingAddress?.phone || 'N/A'}</div>
+                    <div><strong>Total Amount:</strong> £${order.total?.toFixed(2)}</div>
+                    <div><strong>Payment Type:</strong> ${order.paymentType === 'advance' ? '30% Advance' : 'Full Payment'}</div>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label>Transaction Reference</label>
-                <input type="text" id="transactionRef" placeholder="Bank transaction reference">
+            <div style="background: #fff3cd; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <h4 style="color: #856404; margin-bottom: 10px;">Payment Verification</h4>
+                <div class="form-group">
+                    <label>Verification Status</label>
+                    <select id="verificationStatus" class="form-control" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #e0e0e0;">
+                        <option value="pending_bank_transfer" ${order.paymentStatus === 'pending_bank_transfer' ? 'selected' : ''}>Awaiting Bank Transfer</option>
+                        <option value="payment_submitted" ${order.paymentStatus === 'payment_submitted' ? 'selected' : ''}>Payment Submitted</option>
+                        <option value="payment_verified" ${order.paymentStatus === 'payment_verified' ? 'selected' : ''}>Payment Verified</option>
+                        <option value="cancelled" ${order.paymentStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" style="margin-top: 10px;">
+                    <label>Transaction Reference</label>
+                    <input type="text" id="transactionRef" placeholder="Enter bank transaction reference" 
+                           style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #e0e0e0;"
+                           value="${order.transactionReference || ''}">
+                </div>
+                
+                <div class="form-group" style="margin-top: 10px;">
+                    <label>Verified Amount (£)</label>
+                    <input type="number" id="verifiedAmount" step="0.01" 
+                           style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #e0e0e0;"
+                           value="${order.verifiedAmount || order.amountToPay || order.total || 0}">
+                </div>
+                
+                <div class="form-group" style="margin-top: 10px;">
+                    <label>Admin Notes</label>
+                    <textarea id="adminNotes" rows="3" placeholder="Add verification notes..." 
+                              style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #e0e0e0;">${order.adminNotes || ''}</textarea>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label>Verified Amount (GBP)</label>
-                <input type="number" id="verifiedAmount" value="${order.amountToPay}" step="0.01">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="verifyPayment('${orderId}')" 
+                        style="flex: 1; padding: 12px; background: var(--primary-gold); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    <i class="fas fa-check-circle"></i> Update Verification
+                </button>
+                <button onclick="closePaymentModal()" 
+                        style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
             </div>
         </div>
     `;
     
-    // Actions HTML based on current status
-    if (order.paymentStatus === 'payment_submitted') {
-        actions.innerHTML = `
-            <button class="admin-btn admin-btn-primary" onclick="verifyPayment('${orderId}', 'verified')">
-                <i class="fas fa-check-circle"></i> Verify Payment
-            </button>
-            <button class="admin-btn admin-btn-danger" onclick="verifyPayment('${orderId}', 'rejected')">
-                <i class="fas fa-times-circle"></i> Reject Payment
-            </button>
-        `;
-    } else if (order.paymentStatus === 'pending_bank_transfer') {
-        actions.innerHTML = `
-            <button class="admin-btn admin-btn-primary" onclick="updatePaymentStatus('${orderId}', 'payment_submitted')">
-                <i class="fas fa-clock"></i> Mark as Submitted
-            </button>
-            <button class="admin-btn admin-btn-secondary" onclick="sendReminder('${orderId}')">
-                <i class="fas fa-bell"></i> Send Reminder
-            </button>
-        `;
-    } else {
-        actions.innerHTML = `
-            <button class="admin-btn admin-btn-secondary" onclick="updateOrderStatus('${orderId}')">
-                <i class="fas fa-edit"></i> Update Status
-            </button>
-        `;
-    }
-    
     modal.style.display = 'flex';
 }
 
-function closeAdminModal() {
-    document.getElementById('adminModal').style.display = 'none';
+function closePaymentModal() {
+    document.getElementById('paymentModal').style.display = 'none';
 }
 
-async function verifyPayment(orderId, status) {
+async function verifyPayment(orderId) {
     try {
-        const order = (isAdmin ? allOrders : userOrders).find(o => o.id === orderId);
+        if (!isAdmin) return;
+        
+        const order = allOrders.find(o => o.id === orderId);
         if (!order) return;
         
-        const verificationNotes = document.getElementById('verificationNotes').value;
+        const paymentStatus = document.getElementById('verificationStatus').value;
         const transactionRef = document.getElementById('transactionRef').value;
-        const verifiedAmount = parseFloat(document.getElementById('verifiedAmount').value) || order.amountToPay;
+        const verifiedAmount = parseFloat(document.getElementById('verifiedAmount').value) || order.total;
+        const adminNotes = document.getElementById('adminNotes').value;
         
         const updateData = {
-            paymentStatus: status === 'verified' ? 'payment_verified' : 'cancelled',
-            paymentVerifiedAt: new Date().toISOString(),
-            paymentVerifiedBy: authSystem.getUserName(),
-            verificationNotes: verificationNotes,
+            paymentStatus: paymentStatus,
             transactionReference: transactionRef,
             verifiedAmount: verifiedAmount,
+            adminNotes: adminNotes,
+            updatedByAdmin: authSystem.getUserName(),
             updatedAt: new Date().toISOString(),
-            adminNotes: verificationNotes
+            paymentVerifiedAt: paymentStatus === 'payment_verified' ? new Date().toISOString() : null
         };
         
         // Update in Firebase
@@ -1648,31 +1741,57 @@ async function verifyPayment(orderId, status) {
         // Send notification to user
         await sendNotificationToUser(order.userId, {
             type: 'payment_verification',
-            title: status === 'verified' ? 'Payment Verified!' : 'Payment Rejected',
-            message: status === 'verified' 
-                ? `Your payment for order #${order.orderNumber} has been verified. Your order is now being processed.`
-                : `Your payment for order #${order.orderNumber} was rejected. Please contact support.`,
+            title: 'Payment Status Updated',
+            message: `Your payment for order #${order.orderNumber} has been updated to: ${getPaymentStatusText(paymentStatus)}`,
             orderId: orderId
         });
         
-        closeAdminModal();
-        showNotification(`Payment ${status === 'verified' ? 'verified' : 'rejected'} successfully`);
+        closePaymentModal();
+        showNotification('✅ Payment verification updated successfully');
         
     } catch (error) {
-        console.error('Error verifying payment:', error);
-        showError('Failed to verify payment: ' + error.message);
+        console.error('❌ Error verifying payment:', error);
+        showError('Failed to update payment verification: ' + error.message);
     }
 }
 
-async function updatePaymentStatus(orderId, status) {
+// ============================================
+// ORDER MANAGEMENT FUNCTIONS
+// ============================================
+
+async function editOrderAdmin(orderId) {
+    if (!isAdmin) return;
+    
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    const newStatus = prompt('Enter new order status (pending, processing, shipped, delivered, cancelled):', order.status);
+    if (!newStatus) return;
+    
+    const newPaymentStatus = prompt('Enter new payment status (pending_bank_transfer, payment_submitted, payment_verified, paid, cancelled):', order.paymentStatus);
+    if (!newPaymentStatus) return;
+    
+    const adminNotes = prompt('Add admin notes:', order.adminNotes || '');
+    
     try {
         const updateData = {
-            paymentStatus: status,
-            updatedAt: new Date().toISOString(),
-            updatedByAdmin: authSystem.getUserName()
+            status: newStatus,
+            paymentStatus: newPaymentStatus,
+            adminNotes: adminNotes || order.adminNotes,
+            updatedByAdmin: authSystem.getUserName(),
+            updatedAt: new Date().toISOString()
         };
         
-        const order = (isAdmin ? allOrders : userOrders).find(o => o.id === orderId);
+        // Add timestamps for specific statuses
+        if (newStatus === 'shipped' && !order.shippedAt) {
+            updateData.shippedAt = new Date().toISOString();
+        }
+        if (newStatus === 'delivered' && !order.deliveredAt) {
+            updateData.deliveredAt = new Date().toISOString();
+        }
+        if (newPaymentStatus === 'payment_verified' && !order.paymentVerifiedAt) {
+            updateData.paymentVerifiedAt = new Date().toISOString();
+        }
         
         await firebaseDB.collection('orders').doc(orderId).update(updateData);
         
@@ -1684,37 +1803,40 @@ async function updatePaymentStatus(orderId, status) {
             console.log("Note: Could not update user's order");
         }
         
-        closeAdminModal();
-        showNotification(`Payment status updated to ${getStatusText(status)}`);
+        showNotification('✅ Order updated successfully');
         
     } catch (error) {
-        console.error('Error updating payment status:', error);
-        showError('Failed to update status: ' + error.message);
+        console.error('❌ Error editing order:', error);
+        showError('Failed to update order: ' + error.message);
     }
 }
 
-async function updateOrderStatus(orderId) {
+async function updateOrderStatusAdmin(orderId) {
+    if (!isAdmin) return;
+    
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    const newStatus = prompt('Enter new status (pending, processing, shipped, delivered, cancelled):', order.status);
+    if (!newStatus) return;
+    
     try {
-        const order = (isAdmin ? allOrders : userOrders).find(o => o.id === orderId);
-        const newStatus = prompt('Enter new status (processing, shipped, delivered, cancelled):', order.status);
-        
-        if (!newStatus || !['processing', 'shipped', 'delivered', 'cancelled'].includes(newStatus)) {
-            return;
-        }
-        
         const updateData = {
             status: newStatus,
-            updatedAt: new Date().toISOString(),
-            updatedByAdmin: authSystem.getUserName()
+            updatedByAdmin: authSystem.getUserName(),
+            updatedAt: new Date().toISOString()
         };
         
         // Add timestamps for specific statuses
-        if (newStatus === 'shipped') {
+        if (newStatus === 'shipped' && !order.shippedAt) {
             updateData.shippedAt = new Date().toISOString();
-        } else if (newStatus === 'delivered') {
+        }
+        if (newStatus === 'delivered' && !order.deliveredAt) {
             updateData.deliveredAt = new Date().toISOString();
-        } else if (newStatus === 'cancelled') {
+        }
+        if (newStatus === 'cancelled' && !order.cancelledAt) {
             updateData.cancelledAt = new Date().toISOString();
+            updateData.paymentStatus = 'cancelled';
         }
         
         await firebaseDB.collection('orders').doc(orderId).update(updateData);
@@ -1731,48 +1853,48 @@ async function updateOrderStatus(orderId) {
         await sendNotificationToUser(order.userId, {
             type: 'order_status_update',
             title: 'Order Status Updated',
-            message: `Your order #${order.orderNumber} status has been updated to ${getStatusText(newStatus)}`,
+            message: `Your order #${order.orderNumber} status has been updated to: ${getStatusText(newStatus)}`,
             orderId: orderId
         });
         
-        closeAdminModal();
-        showNotification(`Order status updated to ${getStatusText(newStatus)}`);
+        showNotification('✅ Order status updated successfully');
         
     } catch (error) {
-        console.error('Error updating order status:', error);
+        console.error('❌ Error updating order status:', error);
         showError('Failed to update order status: ' + error.message);
     }
 }
 
-async function sendReminder(orderId) {
+async function deleteOrder(orderId) {
+    if (!isAdmin) return;
+    
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
+    
     try {
-        const order = (isAdmin ? allOrders : userOrders).find(o => o.id === orderId);
+        const order = allOrders.find(o => o.id === orderId);
         
-        // Send email reminder (you would implement this with your email service)
-        // For now, we'll just update the order with a reminder sent timestamp
+        // Delete from main orders collection
+        await firebaseDB.collection('orders').doc(orderId).delete();
         
-        const updateData = {
-            reminderSentAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            updatedByAdmin: authSystem.getUserName()
-        };
+        // Delete from user's orders collection if user exists
+        if (order && order.userId) {
+            try {
+                await firebaseDB.collection('users').doc(order.userId)
+                    .collection('orders').doc(orderId).delete();
+            } catch (error) {
+                console.log("Note: Could not delete from user's collection");
+            }
+        }
         
-        await firebaseDB.collection('orders').doc(orderId).update(updateData);
+        // Remove from local arrays
+        allOrders = allOrders.filter(o => o.id !== orderId);
         
-        // Send notification to user
-        await sendNotificationToUser(order.userId, {
-            type: 'payment_reminder',
-            title: 'Payment Reminder',
-            message: `Please complete payment for order #${order.orderNumber} to confirm your order.`,
-            orderId: orderId
-        });
-        
-        closeAdminModal();
-        showNotification('Reminder sent to customer');
+        displayOrders();
+        showNotification('✅ Order deleted successfully');
         
     } catch (error) {
-        console.error('Error sending reminder:', error);
-        showError('Failed to send reminder: ' + error.message);
+        console.error('❌ Error deleting order:', error);
+        showError('Failed to delete order: ' + error.message);
     }
 }
 
@@ -1784,6 +1906,7 @@ async function sendNotificationToUser(userId, notification) {
     try {
         if (!firebaseDB) return;
         
+        // Create notification in user's collection
         const notificationRef = firebaseDB.collection('users').doc(userId)
             .collection('notifications').doc();
         
@@ -1804,202 +1927,8 @@ async function sendNotificationToUser(userId, notification) {
 }
 
 // ============================================
-// ENHANCED DISPLAY FUNCTIONS
+// HELPER FUNCTIONS
 // ============================================
-
-function displayOrders() {
-    const ordersToDisplay = isAdmin ? allOrders : userOrders;
-    const filteredOrders = filterOrdersByStatus(ordersToDisplay, currentFilter);
-    
-    if (filteredOrders.length === 0) {
-        showNoOrders();
-        return;
-    }
-    
-    displayFilteredOrders(filteredOrders);
-}
-
-function displayFilteredOrders(orders) {
-    const ordersList = document.getElementById('ordersList');
-    const noOrdersMessage = document.getElementById('noOrdersMessage');
-    
-    noOrdersMessage.style.display = 'none';
-    
-    const ordersHTML = orders.map(order => {
-        const isEditable = isAdmin || 
-            (order.status === 'pending' || 
-             order.paymentStatus === 'pending_bank_transfer' ||
-             order.paymentStatus === 'payment_submitted');
-        
-        const adminButtons = isAdmin ? `
-            <button class="order-action-btn" onclick="openVerificationModal('${order.id}')" style="background: #17a2b8; color: white; border-color: #17a2b8;">
-                <i class="fas fa-user-shield"></i>
-                Verify Payment
-            </button>
-            <button class="order-action-btn" onclick="editOrder('${order.id}')">
-                <i class="fas fa-edit"></i>
-                Edit Order
-            </button>
-            <button class="order-action-btn" onclick="deleteOrder('${order.id}')" style="color: #ff4757; border-color: #ff4757;">
-                <i class="fas fa-trash"></i>
-                Delete
-            </button>
-        ` : '';
-        
-        return `
-        <div class="order-card">
-            ${isAdmin ? `
-                <div style="background: var(--primary-gold); color: white; padding: 10px 15px; border-radius: 8px 8px 0 0; margin: -25px -25px 15px -25px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong>Customer:</strong> ${order.userName}
-                            <span style="margin-left: 15px;">
-                                <strong>Email:</strong> ${order.userEmail}
-                            </span>
-                        </div>
-                        <button class="action-btn" style="width: 30px; height: 30px; background: rgba(255,255,255,0.2);" 
-                                onclick="openCustomerDetails('${order.userId}')">
-                            <i class="fas fa-user"></i>
-                        </button>
-                    </div>
-                </div>
-            ` : ''}
-            
-            <div class="order-header">
-                <div class="order-info">
-                    <h3>Order #${order.orderNumber || order.id.substring(0, 8)}</h3>
-                    <div class="order-date">Placed on ${formatDate(order.createdAt)}</div>
-                    <div class="order-number">Order ID: ${order.id}</div>
-                    ${isAdmin ? `<div style="font-size: 12px; color: var(--text-light);">User ID: ${order.userId}</div>` : ''}
-                </div>
-                <div style="display: flex; gap: 10px; align-items: flex-start;">
-                    <div class="order-status status-${order.status || 'pending'}">
-                        ${getStatusText(order.status || 'pending')}
-                    </div>
-                    <div class="order-status ${getPaymentStatusClass(order.paymentStatus)}">
-                        ${getStatusText(order.paymentStatus || 'pending')}
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Order Items -->
-            <div class="order-items">
-                ${(order.items || []).slice(0, 3).map(item => `
-                    <div class="order-item">
-                        <div class="order-item-image">
-                            <img src="${item.image || getDefaultImage(item.category)}" 
-                                 alt="${item.name}" 
-                                 onerror="this.src='${getDefaultImage(item.category)}'">
-                        </div>
-                        <div class="order-item-details">
-                            <div class="order-item-name">${item.name || 'Product'}</div>
-                            <div class="order-item-info">${item.category || 'General'}</div>
-                            ${item.calculationData ? `
-                                <div class="order-item-info">
-                                    ${getCalculationInfo(item)}
-                                </div>
-                            ` : `
-                                <div class="order-item-info">Quantity: ${item.quantity || 1} ${item.priceUnit || 'pieces'}</div>
-                            `}
-                            <div class="order-item-price">£${item.calculatedPrice?.toFixed(2) || '0.00'}</div>
-                        </div>
-                    </div>
-                `).join('')}
-                
-                ${(order.items || []).length > 3 ? `
-                    <div style="text-align: center; padding: 10px; color: var(--text-light); font-size: 13px;">
-                        + ${(order.items || []).length - 3} more items
-                    </div>
-                ` : ''}
-            </div>
-            
-            <!-- Payment and Tracking Information -->
-            ${getPaymentInfoHTML(order)}
-            ${getTrackingHTML(order)}
-            
-            <!-- Order Summary -->
-            <div class="order-summary">
-                <div class="summary-item">
-                    <div class="summary-label">Subtotal</div>
-                    <div class="summary-value">£${order.subtotal?.toFixed(2) || '0.00'}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Shipping</div>
-                    <div class="summary-value">${order.shipping === 0 ? 'FREE' : `£${order.shipping?.toFixed(2) || '0.00'}`}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Tax</div>
-                    <div class="summary-value">£${order.tax?.toFixed(2) || '0.00'}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Total</div>
-                    <div class="summary-value">£${order.total?.toFixed(2) || '0.00'}</div>
-                </div>
-            </div>
-            
-            <!-- Order Actions -->
-            <div class="order-actions">
-                <button class="order-action-btn primary" onclick="viewOrderDetails('${order.id}')">
-                    <i class="fas fa-eye"></i>
-                    View Details
-                </button>
-                
-                ${isEditable ? `
-                    <button class="order-action-btn" onclick="editOrder('${order.id}')">
-                        <i class="fas fa-edit"></i>
-                        Edit Order
-                    </button>
-                ` : ''}
-                
-                ${order.tracking?.url ? `
-                    <button class="order-action-btn" onclick="trackOrder('${order.id}')">
-                        <i class="fas fa-map-marker-alt"></i>
-                        Track Order
-                    </button>
-                ` : ''}
-                
-                ${order.status === 'delivered' || order.status === 'shipped' ? `
-                    <button class="order-action-btn" onclick="downloadInvoice('${order.id}')">
-                        <i class="fas fa-file-invoice"></i>
-                        Download Invoice
-                    </button>
-                ` : ''}
-                
-                ${isEditable ? `
-                    <button class="order-action-btn" onclick="cancelOrder('${order.id}')" style="color: #ff4757; border-color: #ff4757;">
-                        <i class="fas fa-times"></i>
-                        Cancel Order
-                    </button>
-                ` : ''}
-                
-                ${order.paymentMethod === 'bank' && order.paymentStatus === 'pending_bank_transfer' && !isAdmin ? `
-                    <button class="order-action-btn primary" onclick="markPaymentComplete('${order.id}')">
-                        <i class="fas fa-check-circle"></i>
-                        Mark Payment Sent
-                    </button>
-                ` : ''}
-                
-                ${adminButtons}
-            </div>
-        </div>
-        `;
-    }).join('');
-    
-    ordersList.innerHTML = ordersHTML;
-}
-
-function filterOrdersByStatus(orders, filter) {
-    if (filter === 'all') return orders;
-    
-    return orders.filter(order => {
-        if (filter === 'pending') {
-            return order.status === 'pending' || 
-                   order.paymentStatus === 'pending_bank_transfer' ||
-                   order.paymentStatus === 'payment_submitted';
-        }
-        return order.status === filter || order.paymentStatus === filter;
-    });
-}
 
 function getPaymentStatusClass(status) {
     const classMap = {
@@ -2012,252 +1941,455 @@ function getPaymentStatusClass(status) {
     return classMap[status] || 'status-pending';
 }
 
-// ============================================
-// ORDER MANAGEMENT FUNCTIONS
-// ============================================
-
-async function editOrder(orderId) {
-    const order = (isAdmin ? allOrders : userOrders).find(o => o.id === orderId);
-    if (!order) return;
-    
-    // For admin, show advanced edit modal
-    if (isAdmin) {
-        openAdminEditModal(order);
-        return;
-    }
-    
-    // For users, only allow editing certain fields if order is in editable state
-    if (order.status !== 'pending' && order.paymentStatus !== 'pending_bank_transfer') {
-        showError('This order can no longer be edited');
-        return;
-    }
-    
-    // Simple edit for users - could be expanded
-    const newRequirements = prompt('Update your custom requirements:', order.customRequirements || '');
-    if (newRequirements === null) return;
-    
-    try {
-        const updateData = {
-            customRequirements: newRequirements,
-            updatedAt: new Date().toISOString()
-        };
-        
-        await firebaseDB.collection('orders').doc(orderId).update(updateData);
-        
-        if (order.userId) {
-            await firebaseDB.collection('users').doc(order.userId)
-                .collection('orders').doc(orderId).update(updateData);
-        }
-        
-        showNotification('Order updated successfully');
-        
-    } catch (error) {
-        console.error('Error editing order:', error);
-        showError('Failed to update order');
-    }
+function getPaymentStatusText(status) {
+    const statusMap = {
+        'pending_bank_transfer': 'Awaiting Payment',
+        'payment_submitted': 'Payment Submitted',
+        'payment_verified': 'Payment Verified',
+        'paid': 'Paid',
+        'cancelled': 'Cancelled'
+    };
+    return statusMap[status] || 'Pending';
 }
 
-function openAdminEditModal(order) {
-    // Create a comprehensive edit modal for admin
-    const modalContent = `
-        <h3>Edit Order #${order.orderNumber}</h3>
-        <form id="editOrderForm">
-            <div class="form-group">
-                <label>Status</label>
-                <select id="editStatus" class="form-control">
-                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
-                    <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
-                    <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
-                    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Payment Status</label>
-                <select id="editPaymentStatus" class="form-control">
-                    <option value="pending_bank_transfer" ${order.paymentStatus === 'pending_bank_transfer' ? 'selected' : ''}>Awaiting Bank Transfer</option>
-                    <option value="payment_submitted" ${order.paymentStatus === 'payment_submitted' ? 'selected' : ''}>Payment Submitted</option>
-                    <option value="payment_verified" ${order.paymentStatus === 'payment_verified' ? 'selected' : ''}>Payment Verified</option>
-                    <option value="paid" ${order.paymentStatus === 'paid' ? 'selected' : ''}>Paid</option>
-                    <option value="cancelled" ${order.paymentStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Total Amount</label>
-                <input type="number" id="editTotal" value="${order.total}" step="0.01" class="form-control">
-            </div>
-            
-            <div class="form-group">
-                <label>Shipping Cost</label>
-                <input type="number" id="editShipping" value="${order.shipping}" step="0.01" class="form-control">
-            </div>
-            
-            <div class="form-group">
-                <label>Admin Notes</label>
-                <textarea id="editAdminNotes" class="form-control">${order.adminNotes || ''}</textarea>
-            </div>
-            
-            <div class="form-group">
-                <label>Tracking Info (JSON)</label>
-                <textarea id="editTracking" class="form-control">${JSON.stringify(order.tracking || {}, null, 2)}</textarea>
-            </div>
-        </form>
-    `;
+function getPaymentInfoHTML(order) {
+    if (!order.paymentStatus && !order.paymentMethod) return '';
     
-    // You would implement a modal to show this content
-    // For now, we'll use confirm and prompt
-    const newStatus = prompt('Enter new status:', order.status);
-    if (newStatus) {
-        updateOrderStatus(order.id, newStatus);
+    let paymentStatusClass = '';
+    let paymentStatusText = '';
+    let paymentIcon = '';
+    let paymentDetails = '';
+    
+    switch(order.paymentStatus) {
+        case 'pending_bank_transfer':
+            paymentStatusClass = 'status-pending_bank_transfer';
+            paymentStatusText = 'Awaiting Bank Transfer';
+            paymentIcon = 'fa-clock';
+            paymentDetails = 'Please complete bank transfer to confirm order';
+            break;
+        case 'payment_submitted':
+            paymentStatusClass = 'status-processing';
+            paymentStatusText = 'Payment Submitted';
+            paymentIcon = 'fa-clock';
+            paymentDetails = 'Payment details submitted. Admin verification in progress';
+            break;
+        case 'payment_verified':
+            paymentStatusClass = 'status-shipped';
+            paymentStatusText = 'Payment Verified';
+            paymentIcon = 'fa-check-circle';
+            paymentDetails = 'Payment verified by admin. Order is now being processed';
+            break;
+        case 'paid':
+            paymentStatusClass = 'status-delivered';
+            paymentStatusText = 'Paid';
+            paymentIcon = 'fa-check-circle';
+            paymentDetails = 'Payment completed';
+            break;
+        case 'cancelled':
+            paymentStatusClass = 'status-cancelled';
+            paymentStatusText = 'Payment Cancelled';
+            paymentIcon = 'fa-times-circle';
+            paymentDetails = 'Payment was cancelled';
+            break;
+        default:
+            if (order.paymentMethod) {
+                paymentStatusClass = 'status-pending';
+                paymentStatusText = `Pending (${order.paymentMethod})`;
+                paymentIcon = 'fa-clock';
+                paymentDetails = 'Waiting for payment confirmation';
+            }
     }
-}
-
-async function deleteOrder(orderId) {
-    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
     
-    try {
-        const order = (isAdmin ? allOrders : userOrders).find(o => o.id === orderId);
-        
-        // Only admin can delete, users can only cancel
-        if (!isAdmin) {
-            showError('You do not have permission to delete orders');
-            return;
-        }
-        
-        // Delete from main orders collection
-        await firebaseDB.collection('orders').doc(orderId).delete();
-        
-        // Delete from user's orders collection
-        if (order.userId) {
-            await firebaseDB.collection('users').doc(order.userId)
-                .collection('orders').doc(orderId).delete();
-        }
-        
-        // Remove from local arrays
-        if (isAdmin) {
-            allOrders = allOrders.filter(o => o.id !== orderId);
-        } else {
-            userOrders = userOrders.filter(o => o.id !== orderId);
-        }
-        
-        displayOrders();
-        showNotification('Order deleted successfully');
-        
-    } catch (error) {
-        console.error('Error deleting order:', error);
-        showError('Failed to delete order: ' + error.message);
-    }
-}
-
-async function openCustomerDetails(userId) {
-    if (!isAdmin) return;
+    if (!paymentStatusText) return '';
     
-    try {
-        // Get user details
-        const userDoc = await firebaseDB.collection('users').doc(userId).get();
-        const userData = userDoc.data();
-        
-        // Get user's orders
-        const ordersSnapshot = await firebaseDB.collection('orders')
-            .where('userId', '==', userId)
-            .get();
-        
-        const userOrders = [];
-        ordersSnapshot.forEach(doc => {
-            userOrders.push(doc.data());
-        });
-        
-        // Show user details modal
-        const modalContent = `
-            <div class="modal-header">
-                <h3><i class="fas fa-user"></i> Customer Details</h3>
-            </div>
-            <div style="padding: 20px;">
-                <h4>User Information</h4>
-                <p><strong>Name:</strong> ${userData?.displayName || 'N/A'}</p>
-                <p><strong>Email:</strong> ${userData?.email || 'N/A'}</p>
-                <p><strong>User ID:</strong> ${userId}</p>
-                
-                <h4 style="margin-top: 20px;">Order History</h4>
-                <p><strong>Total Orders:</strong> ${userOrders.length}</p>
-                <p><strong>Total Spent:</strong> £${userOrders.reduce((sum, order) => sum + (order.total || 0), 0).toFixed(2)}</p>
-                
-                <div style="margin-top: 20px;">
-                    <button onclick="sendMessageToCustomer('${userId}')" class="admin-btn admin-btn-primary">
-                        <i class="fas fa-envelope"></i> Send Message
-                    </button>
+    return `
+        <div class="payment-info">
+            <h5><i class="fas ${paymentIcon}"></i> Payment Status</h5>
+            <div class="payment-details">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <div><strong>Status:</strong></div>
+                        <span class="order-status ${paymentStatusClass}" style="display: inline-block; margin-top: 5px;">
+                            ${paymentStatusText}
+                        </span>
+                    </div>
+                    <div>
+                        <div><strong>Method:</strong> ${order.paymentMethod || 'N/A'}</div>
+                        <div><strong>Type:</strong> ${order.paymentType === 'advance' ? '30% Advance' : 'Full Payment'}</div>
+                    </div>
+                    ${order.paymentType === 'advance' ? `
+                        <div>
+                            <div><strong>Advance Paid:</strong> £${order.advancePayment?.toFixed(2) || '0.00'}</div>
+                            <div><strong>Remaining:</strong> £${order.remainingPayment?.toFixed(2) || '0.00'}</div>
+                        </div>
+                        <div>
+                            <div><strong>Total Order:</strong> £${order.total?.toFixed(2) || '0.00'}</div>
+                            <div style="font-size: 11px; color: var(--text-light);">70% payable after shipping</div>
+                        </div>
+                    ` : `
+                        <div>
+                            <div><strong>Amount Paid:</strong> £${order.total?.toFixed(2) || '0.00'}</div>
+                            <div style="font-size: 11px; color: var(--primary-gold);">5% discount applied</div>
+                        </div>
+                    `}
+                </div>
+                <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 5px; font-size: 12px;">
+                    <i class="fas fa-info-circle"></i> ${paymentDetails}
+                    ${order.paymentVerifiedBy ? `<br><small>Verified by: ${order.paymentVerifiedBy}</small>` : ''}
                 </div>
             </div>
-        `;
-        
-        // You would implement a modal to show this content
-        alert(`Customer: ${userData?.displayName || 'N/A'}\nEmail: ${userData?.email || 'N/A'}\nTotal Orders: ${userOrders.length}`);
-        
-    } catch (error) {
-        console.error('Error getting customer details:', error);
-    }
+        </div>
+    `;
 }
 
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
-
-function setupSearch() {
-    const searchInput = document.getElementById('searchOrders');
-    if (searchInput) {
-        searchInput.addEventListener('keyup', debounce(searchOrders, 300));
-    }
-}
-
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+function getBankTransferHTML(order) {
+    const bankDetails = order.bankTransferDetails || {
+        accountName: 'IRYA STONE LTD',
+        accountNumber: '12345678',
+        sortCode: '04-00-04',
+        iban: 'GB29NWBK60161331926819',
+        swift: 'NWBKGB2L',
+        reference: order.orderNumber || order.id.substring(0, 8).toUpperCase(),
+        amount: order.amountToPay || order.advancePayment || order.total || 0
     };
+    
+    return `
+        <div class="payment-info" style="border-left-color: #ffc107;">
+            <h5><i class="fas fa-university"></i> Bank Transfer Instructions</h5>
+            <div class="payment-details">
+                <div style="margin-bottom: 15px;">
+                    <div style="font-weight: 600; color: #856404; margin-bottom: 10px;">
+                        <i class="fas fa-exclamation-triangle"></i> Please complete payment to confirm your order
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <div><strong>Account Name:</strong></div>
+                    <div>${bankDetails.accountName}</div>
+                    
+                    <div><strong>Account Number:</strong></div>
+                    <div>${bankDetails.accountNumber}</div>
+                    
+                    <div><strong>Sort Code:</strong></div>
+                    <div>${bankDetails.sortCode}</div>
+                    
+                    <div><strong>IBAN:</strong></div>
+                    <div style="font-family: monospace; font-size: 12px;">${bankDetails.iban}</div>
+                    
+                    <div><strong>SWIFT/BIC:</strong></div>
+                    <div>${bankDetails.swift}</div>
+                    
+                    <div><strong>Reference:</strong></div>
+                    <div style="font-weight: 600; color: var(--primary-gold);">${bankDetails.reference}</div>
+                    
+                    <div><strong>Amount to Pay:</strong></div>
+                    <div style="font-weight: 600; color: var(--primary-gold); font-size: 16px;">
+                        £${bankDetails.amount.toFixed(2)}
+                    </div>
+                </div>
+                
+                <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 6px; font-size: 12px;">
+                    <div style="display: flex; align-items: flex-start; gap: 10px;">
+                        <i class="fas fa-info-circle" style="color: #856404; margin-top: 2px;"></i>
+                        <div>
+                            <div style="font-weight: 600; color: #856404; margin-bottom: 5px;">Important:</div>
+                            <ul style="margin: 0; padding-left: 15px; color: #856404;">
+                                <li>Use the reference number when making the transfer</li>
+                                <li>Order will be processed once payment is confirmed</li>
+                                <li>Payment confirmation may take 1-2 business days</li>
+                                <li>Keep your transfer receipt for reference</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
-function showRealtimeUpdate(message) {
-    const updateDiv = document.getElementById('realtimeUpdates');
-    const messageSpan = document.getElementById('updateMessage');
+function getTrackingTimelineHTML(order) {
+    if (!order.status && !order.createdAt) return '';
     
-    if (!updateDiv || !messageSpan) return;
+    return `
+        <div class="tracking-timeline">
+            <div class="timeline-header">
+                <h4><i class="fas fa-shipping-fast"></i> Order Tracking</h4>
+                ${order.tracking?.id ? `<div class="tracking-id">Tracking ID: ${order.tracking.id}</div>` : ''}
+            </div>
+            ${getTrackingStepsHTML(order)}
+            
+            ${order.shippingAddress ? `
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                    <div style="font-size: 13px; color: var(--text-light); margin-bottom: 5px;">Shipping to:</div>
+                    <div style="font-size: 14px; color: var(--text-dark);">
+                        ${order.shippingAddress.fullName || 'Customer'}<br>
+                        ${order.shippingAddress.address1 || ''}<br>
+                        ${order.shippingAddress.address2 ? order.shippingAddress.address2 + '<br>' : ''}
+                        ${order.shippingAddress.city || ''}, ${order.shippingAddress.state || ''} ${order.shippingAddress.postalCode || ''}<br>
+                        ${order.shippingAddress.country || ''}
+                    </div>
+                </div>
+            ` : ''}
+            
+            ${order.tracking ? `
+                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <div style="font-size: 13px; color: var(--text-light); margin-bottom: 5px;">Tracking Information:</div>
+                    <div style="font-size: 14px; color: var(--text-dark);">
+                        <strong>Carrier:</strong> ${order.tracking.carrier || 'Not specified'}<br>
+                        <strong>Tracking ID:</strong> ${order.tracking.id || 'Not available'}<br>
+                        ${order.tracking.url ? `
+                            <a href="${order.tracking.url}" target="_blank" style="color: var(--primary-gold); text-decoration: none; font-weight: 600;">
+                                <i class="fas fa-external-link-alt"></i> Track Package
+                            </a>
+                        ` : ''}
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+function getTrackingStepsHTML(order) {
+    const statuses = [
+        { 
+            id: 'pending_bank_transfer', 
+            label: 'Awaiting Payment', 
+            icon: 'fa-clock',
+            date: order.paymentStatus === 'pending_bank_transfer' ? order.createdAt : null
+        },
+        { 
+            id: 'ordered', 
+            label: 'Order Placed', 
+            icon: 'fa-shopping-cart',
+            date: order.createdAt
+        },
+        { 
+            id: 'confirmed', 
+            label: 'Order Confirmed', 
+            icon: 'fa-check-circle',
+            date: order.confirmedAt || order.paymentVerifiedAt || order.updatedAt
+        },
+        { 
+            id: 'processing', 
+            label: 'Processing', 
+            icon: 'fa-cogs',
+            date: order.processingAt || order.updatedAt
+        },
+        { 
+            id: 'shipped', 
+            label: 'Shipped', 
+            icon: 'fa-shipping-fast',
+            date: order.shippedAt
+        },
+        { 
+            id: 'delivered', 
+            label: 'Delivered', 
+            icon: 'fa-home',
+            date: order.deliveredAt
+        }
+    ];
     
-    messageSpan.textContent = message;
-    updateDiv.style.display = 'block';
+    const currentStatus = order.paymentStatus === 'pending_bank_transfer' ? 'pending_bank_transfer' : order.status;
+    
+    return `
+        <div class="timeline-steps">
+            ${statuses.map((status, index) => {
+                let isCompleted = false;
+                let isActive = false;
+                
+                if (status.id === currentStatus) {
+                    isActive = true;
+                } else if (status.date) {
+                    isCompleted = true;
+                }
+                
+                return `
+                    <div class="timeline-step">
+                        <div class="step-icon ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}">
+                            <i class="fas ${status.icon}"></i>
+                        </div>
+                        <div class="step-label">${status.label}</div>
+                        ${status.date ? `<div class="step-date">${formatDate(status.date)}</div>` : ''}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+function filterOrders(status) {
+    currentFilter = status;
+    
+    // Update active tab
+    document.querySelectorAll('.order-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Display filtered orders
+    displayOrders();
+}
+
+function showNoOrders() {
+    const ordersList = document.getElementById('ordersList');
+    const noOrdersMessage = document.getElementById('noOrdersMessage');
+    
+    ordersList.innerHTML = '';
+    noOrdersMessage.style.display = 'block';
+}
+
+function getStatusText(status) {
+    const statusMap = {
+        'pending': 'Pending',
+        'pending_bank_transfer': 'Awaiting Payment',
+        'payment_submitted': 'Payment Submitted',
+        'payment_verified': 'Payment Verified',
+        'processing': 'Processing',
+        'shipped': 'Shipped',
+        'delivered': 'Delivered',
+        'cancelled': 'Cancelled'
+    };
+    return statusMap[status] || status;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        }) + ' ' + date.toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (error) {
+        return dateString;
+    }
+}
+
+function getCalculationInfo(item) {
+    if (!item.calculationData) return `Quantity: ${item.quantity || 1} pieces`;
+    
+    const unit = item.calculationData.unit || 'piece';
+    
+    if (unit === 'sqft') {
+        return `Area: ${item.calculationData.length || 1}ft × ${item.calculationData.width || 1}ft`;
+    } else if (unit === 'sqm') {
+        return `Area: ${item.calculationData.length || 1}m × ${item.calculationData.width || 1}m`;
+    } else if (unit === 'weight') {
+        return `Weight: ${item.calculationData.weight || 1}kg`;
+    } else {
+        return `Quantity: ${item.quantity || 1} pieces`;
+    }
+}
+
+function getDefaultImage(category) {
+    const categoryLower = (category || '').toLowerCase();
+    
+    if (categoryLower.includes('sand')) {
+        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('kota')) {
+        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('granite')) {
+        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800';
+    }
+    
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+}
+
+function showLoading(show) {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = show ? 'block' : 'none';
+    }
+}
+
+function showNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--primary-gold);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: var(--shadow-lg);
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+        max-width: 300px;
+        font-size: 14px;
+    `;
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-check-circle"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
     
     setTimeout(() => {
-        updateDiv.style.display = 'none';
-    }, 5000);
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
 }
 
-// ============================================
-// INITIALIZE WHEN READY
-// ============================================
+function showError(message) {
+    alert('❌ ' + message);
+}
 
-// Keep existing functions from your original code, but enhance them with admin features
-// The functions above integrate with your existing system
+function updateCartBadge() {
+    try {
+        const userId = authSystem.getUserId();
+        const cartKey = 'irya_local_cart_' + userId;
+        const cartData = localStorage.getItem(cartKey);
+        const cartItems = cartData ? JSON.parse(cartData) : [];
+        const count = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
+        
+        const cartBadge = document.getElementById('cartBadge');
+        if (cartBadge) {
+            cartBadge.textContent = count;
+            cartBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    } catch (error) {
+        console.error('Error updating cart badge:', error);
+    }
+}
 
-// Make sure to add these functions to your global scope
-window.openVerificationModal = openVerificationModal;
-window.closeAdminModal = closeAdminModal;
+// Keep your existing functions for:
+// viewOrderDetails, trackOrder, cancelOrder, markPaymentComplete, downloadInvoice
+// Add them here if they're missing
+
+window.filterOrders = filterOrders;
+window.openPaymentVerification = openPaymentVerification;
+window.closePaymentModal = closePaymentModal;
 window.verifyPayment = verifyPayment;
-window.updatePaymentStatus = updatePaymentStatus;
-window.updateOrderStatus = updateOrderStatus;
-window.sendReminder = sendReminder;
-window.editOrder = editOrder;
+window.editOrderAdmin = editOrderAdmin;
+window.updateOrderStatusAdmin = updateOrderStatusAdmin;
 window.deleteOrder = deleteOrder;
-window.openCustomerDetails = openCustomerDetails;
 window.searchOrders = searchOrders;
-window.filterAdminOrders = filterAdminOrders;
+window.clearSearch = clearSearch;
 
-// Your existing functions remain the same...
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
 </script>
 </body>
 </html>
