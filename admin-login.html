@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRYA STONE - Admin Login</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gold: #c9a227;
+            --gold-light: #f0d77c;
+            --gold-dark: #9c7c1f;
+            --stone-dark: #1a1a1a;
+            --stone-light: #f4f6f4;
+            --bg-light: #f7f9fc;
+            --text-dark: #222222;
+            --text-light: #666666;
+            --white: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --border-radius-lg: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: var(--stone-dark);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .login-logo i {
+            color: var(--primary-gold);
+            font-size: 32px;
+        }
+
+        .login-logo h1 {
+            font-family: 'Roboto Slab', serif;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .login-subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .login-body {
+            padding: 40px 30px;
+        }
+
+        .login-message {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary-gold);
+        }
+
+        .login-message i {
+            color: var(--primary-gold);
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .login-message h3 {
+            color: var(--stone-dark);
+            margin-bottom: 5px;
+        }
+
+        .login-message p {
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        .google-login-btn {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            border: 2px solid #4285F4;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #4285F4;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .google-login-btn:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .google-login-btn i {
+            font-size: 20px;
+        }
+
+        .admin-restricted {
+            margin-top: 25px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: var(--border-radius);
+            text-align: center;
+            border: 1px solid #ffeaa7;
+        }
+
+        .admin-restricted i {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .admin-restricted p {
+            color: #856404;
+            font-size: 12px;
+        }
+
+        .admin-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+            text-align: center;
+        }
+
+        .admin-info h4 {
+            color: var(--stone-dark);
+            margin-bottom: 10px;
+        }
+
+        .admin-info p {
+            color: var(--text-light);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(201, 162, 39, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-gold);
+            animation: spin 1s ease-in-out infinite;
+            z-index: 9999;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loadingSpinner"></div>
+
+<!-- Login Container -->
+<div class="login-container">
+    <div class="login-header">
+        <div class="login-logo">
+            <i class="fa-solid fa-gem"></i>
+            <h1>IRYA STONE</h1>
+        </div>
+        <div class="login-subtitle">Admin Control Panel</div>
+    </div>
+    
+    <div class="login-body">
+        <div class="login-message">
+            <i class="fas fa-lock"></i>
+            <h3>Admin Access Required</h3>
+            <p>Only authorized administrators can access this panel</p>
+        </div>
+        
+        <button class="google-login-btn" onclick="signInWithGoogle()">
+            <i class="fab fa-google"></i>
+            Sign in with Google
+        </button>
+        
+        <div class="admin-restricted">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p><strong>Access Restricted:</strong> This panel is only accessible to registered administrators with authorized Google accounts.</p>
+        </div>
+        
+        <div class="admin-info">
+            <h4>Admin Support</h4>
+            <p>If you are an authorized administrator but cannot access the panel, please contact system administrator or email: admin@iryastone.com</p>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+    authDomain: "iryastone-uk.firebaseapp.com",
+    projectId: "iryastone-uk",
+    storageBucket: "iryastone-uk.firebasestorage.app",
+    messagingSenderId: "110940910896",
+    appId: "1:110940910896:web:b25e92127118665e5c84f5",
+    measurementId: "G-6YM1FLYN48"
+};
+
+// ============================================
+// ALLOWED ADMIN EMAILS (YOUR EMAILS HERE)
+// ============================================
+
+const ALLOWED_ADMIN_EMAILS = [
+    "ravijain236129@gmail.com",           // Add your email here
+    "michael.lee@example.com",          // Add another email if needed
+    "ravijain236129@gmail.com",                   // Your Gmail
+    "admin@iryastone.com"              // Admin email
+];
+
+// ============================================
+// ADMIN AUTH SYSTEM
+// ============================================
+
+let firebaseApp, firebaseAuth, firebaseDB;
+
+class AdminAuthSystem {
+    constructor() {
+        this.currentAdmin = null;
+        this.adminKey = 'irya_admin_auth';
+    }
+    
+    async initializeFirebase() {
+        try {
+            if (typeof firebase === 'undefined') {
+                throw new Error('Firebase SDK not loaded');
+            }
+            
+            if (!firebase.apps.length) {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+            } else {
+                firebaseApp = firebase.app();
+            }
+            
+            firebaseAuth = firebase.auth();
+            firebaseDB = firebase.firestore();
+            
+            console.log('✅ Firebase initialized for admin');
+            return true;
+        } catch (error) {
+            console.error('❌ Firebase initialization error:', error);
+            throw error;
+        }
+    }
+    
+    async checkAdminStatus(userEmail) {
+        // First check if email is in allowed list
+        if (!ALLOWED_ADMIN_EMAILS.includes(userEmail)) {
+            console.log('❌ Email not in allowed list:', userEmail);
+            return false;
+        }
+        
+        // Check if user exists in admins collection
+        try {
+            const adminSnapshot = await firebaseDB.collection('admins')
+                .where('email', '==', userEmail)
+                .where('isActive', '==', true)
+                .limit(1)
+                .get();
+            
+            if (!adminSnapshot.empty) {
+                console.log('✅ User found in admins collection');
+                return true;
+            }
+            
+            // If not in admins collection but email is allowed, create admin entry
+            console.log('⚠️ Creating new admin entry for:', userEmail);
+            await this.createAdminEntry(userEmail);
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Error checking admin status:', error);
+            return false;
+        }
+    }
+    
+    async createAdminEntry(email) {
+        try {
+            const adminData = {
+                email: email,
+                name: email.split('@')[0], // Extract name from email
+                role: 'super_admin',
+                permissions: ['all'],
+                isActive: true,
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+            };
+            
+            // Add to admins collection
+            await firebaseDB.collection('admins').add(adminData);
+            console.log('✅ Admin entry created for:', email);
+        } catch (error) {
+            console.error('❌ Error creating admin entry:', error);
+        }
+    }
+    
+    async signInWithGoogle() {
+        try {
+            showLoading(true);
+            
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope('email');
+            provider.addScope('profile');
+            
+            const result = await firebaseAuth.signInWithPopup(provider);
+            const user = result.user;
+            
+            console.log('Google sign-in successful:', user.email);
+            
+            // Check if user is authorized admin
+            const isAdmin = await this.checkAdminStatus(user.email);
+            
+            if (!isAdmin) {
+                // Sign out if not admin
+                await firebaseAuth.signOut();
+                showError('❌ Access Denied: You are not authorized to access the admin panel.');
+                return;
+            }
+            
+            // Save admin session
+            this.currentAdmin = {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL
+            };
+            
+            localStorage.setItem(this.adminKey, JSON.stringify(this.currentAdmin));
+            
+            // Update last login time
+            await this.updateLastLogin(user.email);
+            
+            // Redirect to admin dashboard
+            window.location.href = 'admin-dashboard.html';
+            
+        } catch (error) {
+            console.error('Google sign-in error:', error);
+            
+            if (error.code === 'auth/popup-blocked') {
+                showError('Popup blocked! Please allow popups for this site.');
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                showError('Sign-in cancelled by user.');
+            } else {
+                showError('Sign-in failed: ' + error.message);
+            }
+        } finally {
+            showLoading(false);
+        }
+    }
+    
+    async updateLastLogin(email) {
+        try {
+            const adminSnapshot = await firebaseDB.collection('admins')
+                .where('email', '==', email)
+                .limit(1)
+                .get();
+            
+            if (!adminSnapshot.empty) {
+                const adminDoc = adminSnapshot.docs[0];
+                await adminDoc.ref.update({
+                    lastLogin: new Date().toISOString()
+                });
+            }
+        } catch (error) {
+            console.error('Error updating last login:', error);
+        }
+    }
+    
+    checkExistingSession() {
+        const adminData = localStorage.getItem(this.adminKey);
+        if (adminData) {
+            try {
+                this.currentAdmin = JSON.parse(adminData);
+                return this.currentAdmin;
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    }
+    
+    async signOut() {
+        try {
+            await firebaseAuth.signOut();
+            localStorage.removeItem(this.adminKey);
+            this.currentAdmin = null;
+            return true;
+        } catch (error) {
+            console.error('Sign-out error:', error);
+            return false;
+        }
+    }
+}
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
+let adminAuth;
+
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Admin login page loaded');
+    
+    // Initialize Firebase
+    try {
+        adminAuth = new AdminAuthSystem();
+        await adminAuth.initializeFirebase();
+        
+        // Check for existing session
+        const existingAdmin = adminAuth.checkExistingSession();
+        if (existingAdmin) {
+            // Verify session with Firebase
+            firebaseAuth.onAuthStateChanged(async (user) => {
+                if (user && user.email === existingAdmin.email) {
+                    // User is still signed in, check admin status
+                    const isAdmin = await adminAuth.checkAdminStatus(user.email);
+                    if (isAdmin) {
+                        // Redirect to dashboard
+                        window.location.href = 'admin-dashboard.html';
+                    } else {
+                        // Not admin anymore, sign out
+                        await adminAuth.signOut();
+                    }
+                } else {
+                    // Not signed in with Firebase, clear local session
+                    localStorage.removeItem('irya_admin_auth');
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Initialization error:', error);
+        showError('Failed to initialize. Please refresh the page.');
+    }
+});
+
+// ============================================
+// GLOBAL FUNCTIONS
+// ============================================
+
+async function signInWithGoogle() {
+    if (adminAuth) {
+        await adminAuth.signInWithGoogle();
+    } else {
+        showError('System not initialized. Please refresh the page.');
+    }
+}
+
+function showLoading(show) {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = show ? 'block' : 'none';
+    }
+}
+
+function showError(message) {
+    alert(message);
+}
+
+// ============================================
+// FIREBASE AUTH STATE LISTENER
+// ============================================
+
+// Listen for auth state changes
+firebaseAuth?.onAuthStateChanged(async (user) => {
+    console.log('Auth state changed:', user ? user.email : 'No user');
+    
+    if (user && window.location.pathname.includes('admin-login.html')) {
+        // Check if user is admin
+        if (adminAuth) {
+            const isAdmin = await adminAuth.checkAdminStatus(user.email);
+            if (isAdmin) {
+                window.location.href = 'admin-dashboard.html';
+            }
+        }
+    }
+});
+
+// ============================================
+// ADMIN SESSION SECURITY
+// ============================================
+
+// Clear sensitive data on page unload
+window.addEventListener('beforeunload', () => {
+    // Don't clear session, just log
+    console.log('Admin page closing...');
+});
+
+// Check session every 5 minutes
+setInterval(() => {
+    const adminData = localStorage.getItem('irya_admin_auth');
+    if (!adminData) {
+        // Session expired, redirect to login
+        window.location.href = 'admin-login.html';
+    }
+}, 5 * 60 * 1000);
+
+</script>
+</body>
+</html>
