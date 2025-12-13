@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+/* All your CSS remains same */
 :root {
     --primary-gold: #c9a227;
     --gold-light: #f0d77c;
@@ -960,7 +961,7 @@ class AuthSystem {
 }
 
 // ============================================
-// CART SYSTEM - UPDATED FOR BUY NOW
+// CART SYSTEM - COMPLETELY REWRITTEN
 // ============================================
 
 class CartSystem {
@@ -968,6 +969,7 @@ class CartSystem {
         this.localCartKey = 'irya_local_cart_';
         this.buyNowCartKey = 'irya_buynow_cart_';
         this.cartItems = [];
+        this.buyNowItems = [];
         this.isBuyNowMode = false;
     }
     
@@ -986,142 +988,73 @@ class CartSystem {
         try {
             const userId = this.getUserId();
             
-            if (window.authSystem && window.authSystem.isLoggedIn() && firebaseDB) {
-                await this.loadFromFirebase(userId);
-            } else {
-                this.loadFromLocalStorage(userId);
-            }
+            // Load regular cart
+            const cartKey = this.localCartKey + userId;
+            const cartData = localStorage.getItem(cartKey);
+            this.cartItems = cartData ? JSON.parse(cartData) : [];
             
-            return this.cartItems;
+            // Load buy now cart
+            const buyNowKey = this.buyNowCartKey + userId;
+            const buyNowData = localStorage.getItem(buyNowKey);
+            this.buyNowItems = buyNowData ? JSON.parse(buyNowData) : [];
+            
+            return { cartItems: this.cartItems, buyNowItems: this.buyNowItems };
         } catch (error) {
             console.error('Error loading cart:', error);
             this.cartItems = [];
-            return [];
-        }
-    }
-    
-    async loadFromFirebase(userId) {
-        try {
-            const cartDoc = await firebaseDB.collection('userCarts').doc(userId).get();
-            
-            if (cartDoc.exists) {
-                this.cartItems = cartDoc.data().items || [];
-                this.saveToLocalStorage(userId);
-            } else {
-                this.loadFromLocalStorage(userId);
-                
-                if (this.cartItems.length > 0) {
-                    await this.saveToFirebase(userId);
-                }
-            }
-        } catch (error) {
-            console.error('Error loading cart from Firebase:', error);
-            this.loadFromLocalStorage(userId);
-        }
-    }
-    
-    loadFromLocalStorage(userId) {
-        const cartKey = this.localCartKey + userId;
-        const cartData = localStorage.getItem(cartKey);
-        this.cartItems = cartData ? JSON.parse(cartData) : [];
-    }
-    
-    async saveCart() {
-        const userId = this.getUserId();
-        
-        this.saveToLocalStorage(userId);
-        
-        if (window.authSystem && window.authSystem.isLoggedIn() && firebaseDB) {
-            await this.saveToFirebase(userId);
-        }
-        
-        this.updateCartBadge();
-        return this.cartItems;
-    }
-    
-    saveToLocalStorage(userId) {
-        const cartKey = this.localCartKey + userId;
-        localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
-    }
-    
-    async saveToFirebase(userId) {
-        try {
-            await firebaseDB.collection('userCarts').doc(userId).set({
-                userId: userId,
-                items: this.cartItems,
-                updatedAt: new Date().toISOString(),
-                itemCount: this.cartItems.reduce((sum, item) => sum + item.quantity, 0),
-                totalAmount: this.cartItems.reduce((sum, item) => sum + (item.calculatedPrice || item.price * item.quantity), 0)
-            }, { merge: true });
-        } catch (error) {
-            console.error('Error saving cart to Firebase:', error);
+            this.buyNowItems = [];
+            return { cartItems: [], buyNowItems: [] };
         }
     }
     
     async addToCart(product, quantity = 1, calculationData = null, customRequirements = '') {
         try {
-            // Generate unique ID for item with custom requirements
+            // Generate unique ID
             const itemId = calculationData ? 
-                `${product.id}_${JSON.stringify(calculationData)}` : 
-                `${product.id}_${quantity}`;
+                `${product.id}_${JSON.stringify(calculationData)}_${Date.now()}` : 
+                `${product.id}_${quantity}_${Date.now()}`;
             
-            const existingItemIndex = this.cartItems.findIndex(item => 
-                item.uniqueId === itemId
-            );
+            // Create cart item
+            const cartItem = {
+                id: product.id,
+                uniqueId: itemId,
+                name: product.stone_name,
+                stoneName: product.stone_name,
+                price: product.price,
+                priceUnit: product.price_unit || 'piece',
+                image: product.images?.[0] || product.image || getDefaultImage(product.category),
+                category: product.category,
+                description: product.description,
+                quantity: quantity,
+                addedAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                userId: this.getUserId(),
+                calculationData: calculationData,
+                customRequirements: customRequirements || '',
+                isBuyNow: false
+            };
             
-            if (existingItemIndex !== -1) {
-                // Update existing item
-                this.cartItems[existingItemIndex].quantity += quantity;
-                this.cartItems[existingItemIndex].updatedAt = new Date().toISOString();
-                if (customRequirements) {
-                    this.cartItems[existingItemIndex].customRequirements = customRequirements;
-                }
+            // Calculate price
+            if (calculationData) {
+                cartItem.calculatedPrice = this.calculatePrice(product, calculationData);
+                cartItem.calculationType = calculationData.mode || 'standard';
             } else {
-                // Create new cart item
-                const cartItem = {
-                    id: product.id,
-                    uniqueId: itemId,
-                    name: product.stone_name,
-                    stoneName: product.stone_name,
-                    price: product.price,
-                    priceUnit: product.price_unit || 'piece',
-                    image: product.images?.[0] || product.image,
-                    category: product.category,
-                    description: product.description,
-                    quantity: quantity,
-                    addedAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    userId: this.getUserId(),
-                    calculationData: calculationData,
-                    customRequirements: customRequirements || '',
-                    isBuyNow: this.isBuyNowMode,
-                    buyNowTimestamp: this.isBuyNowMode ? Date.now() : null
-                };
-                
-                // Calculate price
-                if (calculationData) {
-                    cartItem.calculatedPrice = calculatePrice(product, calculationData);
-                    cartItem.calculationType = calculationData.mode || 'standard';
-                } else {
-                    cartItem.calculatedPrice = product.price * quantity;
-                }
-                
-                // Calculate advance and remaining payments (30% advance, 70% after shipping)
-                const totalPrice = cartItem.calculatedPrice;
-                cartItem.advancePayment = totalPrice * 0.3; // 30% advance
-                cartItem.remainingPayment = totalPrice * 0.7; // 70% after shipping
-                cartItem.totalPrice = totalPrice;
-                
-                this.cartItems.push(cartItem);
+                cartItem.calculatedPrice = product.price * quantity;
             }
             
+            // Calculate payments
+            const totalPrice = cartItem.calculatedPrice;
+            cartItem.advancePayment = totalPrice * 0.3;
+            cartItem.remainingPayment = totalPrice * 0.7;
+            cartItem.totalPrice = totalPrice;
+            
+            // Add to cart
+            this.cartItems.push(cartItem);
             await this.saveCart();
             
-            if (!this.isBuyNowMode) {
-                showNotification(`${product.stone_name} added to cart!`);
-            }
-            
+            showNotification(`${product.stone_name} added to cart!`);
             return true;
+            
         } catch (error) {
             console.error('Error adding to cart:', error);
             showError('Failed to add to cart. Please try again.');
@@ -1129,16 +1062,12 @@ class CartSystem {
         }
     }
     
-    // Method for Buy Now - SEPARATE FROM REGULAR CART
-    async buyNow(product, quantity = 1, calculationData = null, customRequirements = '') {
+    async processBuyNow(product, quantity = 1, calculationData = null, customRequirements = '') {
         try {
-            this.isBuyNowMode = true;
+            // Generate unique ID for buy now
+            const itemId = `BUYNOW_${product.id}_${Date.now()}`;
             
             // Create buy now item
-            const itemId = calculationData ? 
-                `${product.id}_${JSON.stringify(calculationData)}_BUYNOW_${Date.now()}` : 
-                `${product.id}_${quantity}_BUYNOW_${Date.now()}`;
-            
             const buyNowItem = {
                 id: product.id,
                 uniqueId: itemId,
@@ -1146,7 +1075,7 @@ class CartSystem {
                 stoneName: product.stone_name,
                 price: product.price,
                 priceUnit: product.price_unit || 'piece',
-                image: product.images?.[0] || product.image,
+                image: product.images?.[0] || product.image || getDefaultImage(product.category),
                 category: product.category,
                 description: product.description,
                 quantity: quantity,
@@ -1156,51 +1085,175 @@ class CartSystem {
                 calculationData: calculationData,
                 customRequirements: customRequirements || '',
                 isBuyNow: true,
-                buyNowTimestamp: Date.now(),
-                isBuyNowOnly: true
+                buyNowTimestamp: Date.now()
             };
             
             // Calculate price
             if (calculationData) {
-                buyNowItem.calculatedPrice = calculatePrice(product, calculationData);
+                buyNowItem.calculatedPrice = this.calculatePrice(product, calculationData);
                 buyNowItem.calculationType = calculationData.mode || 'standard';
             } else {
                 buyNowItem.calculatedPrice = product.price * quantity;
             }
             
-            // Calculate advance and remaining payments
+            // Calculate payments
             const totalPrice = buyNowItem.calculatedPrice;
             buyNowItem.advancePayment = totalPrice * 0.3;
             buyNowItem.remainingPayment = totalPrice * 0.7;
             buyNowItem.totalPrice = totalPrice;
             
-            // Save buy now item to SEPARATE storage
+            // Save to buy now storage
             const userId = this.getUserId();
             const buyNowKey = this.buyNowCartKey + userId;
             
-            // Save only this buy now item
-            const buyNowItems = [buyNowItem];
-            localStorage.setItem(buyNowKey, JSON.stringify(buyNowItems));
+            // Clear any previous buy now items
+            this.buyNowItems = [buyNowItem];
+            localStorage.setItem(buyNowKey, JSON.stringify(this.buyNowItems));
             
-            // Also save for immediate access
-            localStorage.setItem('irya_current_buynow_item', JSON.stringify(buyNowItem));
-            localStorage.setItem('irya_is_buynow_flow', 'true');
-            localStorage.setItem('irya_buynow_product_id', product.id);
-            localStorage.setItem('irya_buynow_timestamp', Date.now().toString());
+            // Also save to session for immediate access
+            sessionStorage.setItem('irya_current_buynow', JSON.stringify(buyNowItem));
             
-            this.isBuyNowMode = false;
+            // Save to Firebase for persistence
+            await this.saveBuyNowToFirebase(buyNowItem);
             
             return true;
+            
         } catch (error) {
             console.error('Buy Now error:', error);
-            this.isBuyNowMode = false;
             showError('Failed to process Buy Now. Please try again.');
             return false;
         }
     }
     
+    calculatePrice(product, calculationData) {
+        const mode = calculationData.mode || 'standard';
+        const unit = calculationData.unit || product.price_unit || 'piece';
+        const quantity = parseFloat(calculationData.quantity) || 1;
+        
+        let price = parseFloat(product.price);
+        let totalPrice = 0;
+        
+        switch(mode) {
+            case 'standard':
+                switch(unit) {
+                    case 'sqft':
+                        const lengthFt = parseFloat(calculationData.length) || 1;
+                        const widthFt = parseFloat(calculationData.width) || 1;
+                        const areaSqft = lengthFt * widthFt;
+                        totalPrice = price * areaSqft * quantity;
+                        break;
+                        
+                    case 'sqm':
+                        const lengthM = parseFloat(calculationData.length) || 1;
+                        const widthM = parseFloat(calculationData.width) || 1;
+                        const areaSqm = lengthM * widthM;
+                        totalPrice = price * areaSqm * quantity;
+                        break;
+                        
+                    case 'weight':
+                        const weight = parseFloat(calculationData.weight) || 1;
+                        totalPrice = price * weight * quantity;
+                        break;
+                        
+                    case 'piece':
+                    default:
+                        totalPrice = price * quantity;
+                        break;
+                }
+                break;
+                
+            default:
+                totalPrice = price * quantity;
+        }
+        
+        return parseFloat(totalPrice.toFixed(2));
+    }
+    
+    async saveCart() {
+        try {
+            const userId = this.getUserId();
+            const cartKey = this.localCartKey + userId;
+            
+            localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
+            this.updateCartBadge();
+            
+            // Save to Firebase if logged in
+            if (firebaseDB && window.authSystem && window.authSystem.isLoggedIn()) {
+                await this.saveToFirebase(userId);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error saving cart:', error);
+            return false;
+        }
+    }
+    
+    async saveToFirebase(userId) {
+        try {
+            if (!firebaseDB) return;
+            
+            await firebaseDB.collection('userCarts').doc(userId).set({
+                userId: userId,
+                items: this.cartItems,
+                updatedAt: new Date().toISOString(),
+                itemCount: this.cartItems.length,
+                totalAmount: this.cartItems.reduce((sum, item) => sum + (item.calculatedPrice || 0), 0)
+            }, { merge: true });
+        } catch (error) {
+            console.error('Error saving to Firebase:', error);
+        }
+    }
+    
+    async saveBuyNowToFirebase(buyNowItem) {
+        try {
+            if (!firebaseDB) return;
+            
+            const userId = this.getUserId();
+            const buyNowDocId = `buynow_${userId}_${Date.now()}`;
+            
+            await firebaseDB.collection('buyNowItems').doc(buyNowDocId).set({
+                userId: userId,
+                item: buyNowItem,
+                createdAt: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+            });
+            
+            return buyNowDocId;
+        } catch (error) {
+            console.error('Error saving buy now to Firebase:', error);
+            return null;
+        }
+    }
+    
+    async getBuyNowFromFirebase() {
+        try {
+            if (!firebaseDB) return null;
+            
+            const userId = this.getUserId();
+            const snapshot = await firebaseDB.collection('buyNowItems')
+                .where('userId', '==', userId)
+                .orderBy('createdAt', 'desc')
+                .limit(1)
+                .get();
+            
+            if (!snapshot.empty) {
+                const doc = snapshot.docs[0];
+                const data = doc.data();
+                return data.item;
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('Error getting buy now from Firebase:', error);
+            return null;
+        }
+    }
+    
     getCartCount() {
-        return this.cartItems.reduce((total, item) => total + item.quantity, 0);
+        const regularCount = this.cartItems.reduce((total, item) => total + item.quantity, 0);
+        const buyNowCount = this.buyNowItems.reduce((total, item) => total + item.quantity, 0);
+        return regularCount + buyNowCount;
     }
     
     updateCartBadge() {
@@ -1211,54 +1264,6 @@ class CartSystem {
             cartBadge.style.display = count > 0 ? 'flex' : 'none';
         }
     }
-}
-
-// ============================================
-// PRICE CALCULATION FUNCTIONS
-// ============================================
-
-function calculatePrice(product, calculationData) {
-    const mode = calculationData.mode || 'standard';
-    const unit = calculationData.unit || product.price_unit || 'piece';
-    const quantity = parseFloat(calculationData.quantity) || 1;
-    
-    let price = parseFloat(product.price);
-    let totalPrice = 0;
-    
-    switch(mode) {
-        case 'standard':
-            switch(unit) {
-                case 'sqft':
-                    const lengthFt = parseFloat(calculationData.length) || 1;
-                    const widthFt = parseFloat(calculationData.width) || 1;
-                    const areaSqft = lengthFt * widthFt;
-                    totalPrice = price * areaSqft * quantity;
-                    break;
-                    
-                case 'sqm':
-                    const lengthM = parseFloat(calculationData.length) || 1;
-                    const widthM = parseFloat(calculationData.width) || 1;
-                    const areaSqm = lengthM * widthM;
-                    totalPrice = price * areaSqm * quantity;
-                    break;
-                    
-                case 'weight':
-                    const weight = parseFloat(calculationData.weight) || 1;
-                    totalPrice = price * weight * quantity;
-                    break;
-                    
-                case 'piece':
-                default:
-                    totalPrice = price * quantity;
-                    break;
-            }
-            break;
-            
-        default:
-            totalPrice = price * quantity;
-    }
-    
-    return parseFloat(totalPrice.toFixed(2));
 }
 
 // ============================================
@@ -1548,7 +1553,7 @@ function displayProductDetails() {
                     <i class="fas fa-cart-plus"></i>
                     Add to Cart
                 </button>
-                <button class="action-btn-large btn-secondary" onclick="buyNowProduct()">
+                <button class="action-btn-large btn-secondary" onclick="processBuyNow()">
                     <i class="fas fa-bolt"></i>
                     Buy Now
                 </button>
@@ -1723,15 +1728,23 @@ async function addToCart() {
     const quantity = parseInt(document.getElementById('quantityInput').value) || currentProduct.min_order;
     const customRequirements = document.getElementById('customRequirements').value;
     
-    await cartSystem.addToCart(
-        currentProduct, 
-        quantity, 
-        window.currentCalculationData, 
-        customRequirements
-    );
+    try {
+        showLoading(true);
+        await cartSystem.addToCart(
+            currentProduct, 
+            quantity, 
+            window.currentCalculationData, 
+            customRequirements
+        );
+    } catch (error) {
+        console.error('Add to cart error:', error);
+        showError('Failed to add to cart');
+    } finally {
+        showLoading(false);
+    }
 }
 
-async function buyNowProduct() {
+async function processBuyNow() {
     if (!currentProduct) return;
     
     const quantity = parseInt(document.getElementById('quantityInput').value) || currentProduct.min_order;
@@ -1740,7 +1753,7 @@ async function buyNowProduct() {
     try {
         showLoading(true);
         
-        const success = await cartSystem.buyNow(
+        const success = await cartSystem.processBuyNow(
             currentProduct, 
             quantity, 
             window.currentCalculationData, 
@@ -1748,14 +1761,24 @@ async function buyNowProduct() {
         );
         
         if (success) {
-            window.location.href = `checkout.html?buynow=true&product=${currentProduct.id}&source=product_details`;
+            // Save product ID for checkout
+            sessionStorage.setItem('irya_buynow_product_id', currentProduct.id);
+            sessionStorage.setItem('irya_buynow_quantity', quantity);
+            sessionStorage.setItem('irya_buynow_calc_data', JSON.stringify(window.currentCalculationData));
+            sessionStorage.setItem('irya_buynow_custom_req', customRequirements);
+            
+            // Set buy now flag
+            localStorage.setItem('irya_is_buynow_flow', 'true');
+            
+            // Redirect to checkout
+            window.location.href = `checkout.html?buynow=true&product=${currentProduct.id}&source=product_details&t=${Date.now()}`;
         } else {
-            showError('Failed to process Buy Now. Please try again.');
+            showError('Failed to process Buy Now');
         }
         
     } catch (error) {
         console.error('Buy Now error:', error);
-        showError('Failed to process Buy Now. Please try again.');
+        showError('Failed to process Buy Now');
     } finally {
         showLoading(false);
     }
@@ -1891,7 +1914,7 @@ window.changeMainImage = changeMainImage;
 window.updateCalculatorInputs = updateCalculatorInputs;
 window.calculatePrice = calculatePrice;
 window.addToCart = addToCart;
-window.buyNowProduct = buyNowProduct;
+window.processBuyNow = processBuyNow;
 </script>
 </body>
 </html>
