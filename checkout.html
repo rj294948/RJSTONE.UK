@@ -1164,75 +1164,253 @@ let isBuyNowFlow = false;
 let currentPaymentType = 'advance';
 let selectedPaymentMethod = 'bank';
 let currentOrderData = null;
+let authSystem = null;
 
 // ============================================
-// INITIALIZATION
+// AUTHENTICATION SYSTEM FOR CHECKOUT
 // ============================================
 
-document.addEventListener('DOMContentLoaded', async function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    isBuyNowFlow = urlParams.get('buynow') === 'true';
-    const buyNowProductId = urlParams.get('product');
-    
-    if (isBuyNowFlow) {
-        document.title = 'Buy Now Checkout | IRYA STONE';
-        document.getElementById('breadcrumbTitle').textContent = 'Buy Now Checkout';
-        document.getElementById('orderSummaryTitle').textContent = 'Buy Now Summary';
-        document.getElementById('payButtonText').textContent = 'Buy Now & Pay';
-        document.getElementById('backButtonText').textContent = 'Back to Product';
+class CheckoutAuthSystem {
+    constructor() {
+        this.currentUser = null;
+        this.authKey = 'irya_stone_auth_user';
+        this.guestIdKey = 'irya_guest_id';
     }
     
-    await initializeFirebase();
-    await loadOrderItems();
+    async init() {
+        try {
+            await this.initializeFirebase();
+            
+            return new Promise((resolve) => {
+                firebaseAuth.onAuthStateChanged((user) => {
+                    console.log("Auth State Changed:", user ? user.uid : "No user");
+                    
+                    if (user) {
+                        // Firebase authenticated user
+                        this.currentUser = {
+                            uid: user.uid,
+                            displayName: user.displayName || 'User',
+                            email: user.email,
+                            photoURL: user.photoURL,
+                            providerId: user.providerId,
+                            isFirebaseUser: true
+                        };
+                        
+                        localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
+                        console.log("Firebase user saved:", user.uid);
+                        
+                    } else {
+                        // No Firebase user, check localStorage
+                        const storedUser = this.getUserFromStorage();
+                        
+                        if (storedUser && storedUser.isFirebaseUser) {
+                            // Previously logged in user (now logged out)
+                            this.currentUser = storedUser;
+                            console.log("Using stored user from localStorage:", storedUser.uid);
+                        } else {
+                            // Create guest user
+                            this.currentUser = this.createGuestUser();
+                            localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
+                            console.log("Guest user created:", this.currentUser.uid);
+                        }
+                    }
+                    
+                    resolve(this.currentUser);
+                });
+            });
+            
+        } catch (error) {
+            console.error('Auth init error:', error);
+            this.currentUser = this.getUserFromStorage() || this.createGuestUser();
+            return this.currentUser;
+        }
+    }
     
-    initializePaymentOptions();
-    updateCartBadge();
-});
-
-// ============================================
-// FIREBASE INITIALIZATION
-// ============================================
-
-async function initializeFirebase() {
-    try {
-        if (typeof firebase === 'undefined') {
-            console.warn('Firebase not loaded');
+    async initializeFirebase() {
+        try {
+            if (typeof firebase === 'undefined') {
+                throw new Error('Firebase SDK not loaded');
+            }
+            
+            if (!firebase.apps.length) {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+            } else {
+                firebaseApp = firebase.app();
+            }
+            
+            firebaseDB = firebase.firestore();
+            firebaseAuth = firebase.auth();
+            
+            console.log('Firebase initialized successfully');
+            return true;
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            throw error;
+        }
+    }
+    
+    getUserFromStorage() {
+        const userData = localStorage.getItem(this.authKey);
+        if (userData) {
+            try {
+                return JSON.parse(userData);
+            } catch (e) {
+                console.error('Error parsing user data:', e);
+                return null;
+            }
+        }
+        return null;
+    }
+    
+    createGuestUser() {
+        let guestId = localStorage.getItem(this.guestIdKey);
+        if (!guestId) {
+            guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem(this.guestIdKey, guestId);
+        }
+        
+        return {
+            uid: guestId,
+            displayName: 'Guest',
+            email: '',
+            photoURL: '',
+            providerId: 'guest',
+            isFirebaseUser: false,
+            isGuest: true
+        };
+    }
+    
+    isLoggedIn() {
+        return this.currentUser && this.currentUser.isFirebaseUser === true;
+    }
+    
+    getUserId() {
+        if (!this.currentUser) {
+            return this.createGuestUser().uid;
+        }
+        return this.currentUser.uid;
+    }
+    
+    getUserEmail() {
+        return this.currentUser ? this.currentUser.email : '';
+    }
+    
+    getUserName() {
+        return this.currentUser ? this.currentUser.displayName : 'Guest';
+    }
+    
+    async migrateCartData(oldUserId, newUserId) {
+        try {
+            if (oldUserId === newUserId) return;
+            
+            console.log("Migrating cart data from", oldUserId, "to", newUserId);
+            
+            // Migrate regular cart
+            const oldCartKey = 'irya_local_cart_' + oldUserId;
+            const newCartKey = 'irya_local_cart_' + newUserId;
+            
+            const oldCartData = localStorage.getItem(oldCartKey);
+            if (oldCartData) {
+                localStorage.setItem(newCartKey, oldCartData);
+                localStorage.removeItem(oldCartKey);
+                console.log("Regular cart migrated");
+            }
+            
+            // Migrate buy now cart
+            const oldBuyNowKey = 'irya_buynow_cart_' + oldUserId;
+            const newBuyNowKey = 'irya_buynow_cart_' + newUserId;
+            
+            const oldBuyNowData = localStorage.getItem(oldBuyNowKey);
+            if (oldBuyNowData) {
+                localStorage.setItem(newBuyNowKey, oldBuyNowData);
+                localStorage.removeItem(oldBuyNowKey);
+                console.log("Buy Now cart migrated");
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Cart migration error:', error);
             return false;
         }
-        
-        if (!firebase.apps.length) {
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-        } else {
-            firebaseApp = firebase.app();
-        }
-        
-        firebaseDB = firebase.firestore();
-        firebaseAuth = firebase.auth();
-        
-        console.log('Firebase initialized successfully');
-        return true;
-    } catch (error) {
-        console.error('Firebase initialization error:', error);
-        return false;
     }
 }
 
 // ============================================
-// LOAD ORDER ITEMS - COMPLETELY REWRITTEN
+// CHECKOUT INITIALIZATION
+// ============================================
+
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log("Checkout page loaded");
+    
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    isBuyNowFlow = urlParams.get('buynow') === 'true';
+    const buyNowProductId = urlParams.get('product');
+    const source = urlParams.get('source');
+    
+    console.log("URL Parameters:", {
+        isBuyNowFlow: isBuyNowFlow,
+        productId: buyNowProductId,
+        source: source
+    });
+    
+    // Update UI for Buy Now flow
+    if (isBuyNowFlow) {
+        document.title = 'Buy Now Checkout | IRYA STONE';
+        
+        const breadcrumbTitle = document.getElementById('breadcrumbTitle');
+        if (breadcrumbTitle) breadcrumbTitle.textContent = 'Buy Now Checkout';
+        
+        const orderSummaryTitle = document.getElementById('orderSummaryTitle');
+        if (orderSummaryTitle) orderSummaryTitle.textContent = 'Buy Now Summary';
+        
+        const payButtonText = document.getElementById('payButtonText');
+        if (payButtonText) payButtonText.textContent = 'Buy Now & Pay';
+        
+        const backButtonText = document.getElementById('backButtonText');
+        if (backButtonText) backButtonText.textContent = 'Back to Product';
+    }
+    
+    // Initialize Auth System FIRST
+    authSystem = new CheckoutAuthSystem();
+    await authSystem.init();
+    
+    console.log("Auth initialized. User ID:", authSystem.getUserId(), "Logged in:", authSystem.isLoggedIn());
+    
+    // Load order items
+    await loadOrderItems();
+    
+    // Initialize payment options
+    initializePaymentOptions();
+    
+    // Update cart badge
+    updateCartBadge();
+    
+    // Initialize form validation
+    initializeFormValidation();
+});
+
+// ============================================
+// LOAD ORDER ITEMS
 // ============================================
 
 async function loadOrderItems() {
     try {
         showLoading(true);
         
+        const userId = authSystem.getUserId();
+        console.log("Loading order items for user:", userId);
+        
         if (isBuyNowFlow) {
-            await loadBuyNowItems();
+            await loadBuyNowItems(userId);
         } else {
-            await loadRegularCartItems();
+            await loadRegularCartItems(userId);
         }
         
+        console.log("Cart items loaded:", cartItems.length);
+        
         if (cartItems.length === 0) {
-            showError('No items found');
+            showError('Your cart is empty');
             window.location.href = isBuyNowFlow ? 'products.html' : 'cart.html';
             return;
         }
@@ -1242,111 +1420,82 @@ async function loadOrderItems() {
         
     } catch (error) {
         console.error('Error loading order items:', error);
-        showError('Failed to load order items');
+        showError('Failed to load order items. Please try again.');
         window.location.href = isBuyNowFlow ? 'products.html' : 'cart.html';
     } finally {
         showLoading(false);
     }
 }
 
-async function loadBuyNowItems() {
+async function loadBuyNowItems(userId) {
     try {
-        const userId = getUserId();
+        console.log("Loading Buy Now items for user:", userId);
+        
         let buyNowItem = null;
         
-        // First try to get from session storage
-        const sessionItem = sessionStorage.getItem('irya_current_buynow');
-        if (sessionItem) {
-            buyNowItem = JSON.parse(sessionItem);
-        }
+        // Check multiple sources for buy now item
+        const sources = [
+            { name: 'sessionStorage', getter: () => getBuyNowFromSession() },
+            { name: 'localStorage', getter: () => getBuyNowFromLocalStorage(userId) },
+            { name: 'Firebase', getter: () => getBuyNowFromFirebase(userId) },
+            { name: 'URL params', getter: () => createBuyNowFromURL(userId) }
+        ];
         
-        // If not in session, try localStorage
-        if (!buyNowItem) {
-            const buyNowKey = 'irya_buynow_cart_' + userId;
-            const buyNowData = localStorage.getItem(buyNowKey);
-            if (buyNowData) {
-                const items = JSON.parse(buyNowData);
-                if (items.length > 0) {
-                    buyNowItem = items[0];
+        for (const source of sources) {
+            try {
+                buyNowItem = await source.getter();
+                if (buyNowItem) {
+                    console.log("Buy Now item found in", source.name);
+                    break;
                 }
-            }
-        }
-        
-        // If still not found, try Firebase
-        if (!buyNowItem) {
-            buyNowItem = await getBuyNowFromFirebase();
-        }
-        
-        // If still not found, use URL parameters to create item
-        if (!buyNowItem) {
-            const urlParams = new URLSearchParams(window.location.search);
-            const productId = urlParams.get('product');
-            
-            if (productId) {
-                // Load product from Firebase
-                const productDoc = await firebaseDB.collection('products').doc(productId).get();
-                if (productDoc.exists) {
-                    const product = productDoc.data();
-                    
-                    // Get calculation data from session
-                    const calcDataStr = sessionStorage.getItem('irya_buynow_calc_data');
-                    const calcData = calcDataStr ? JSON.parse(calcDataStr) : null;
-                    const quantity = parseInt(sessionStorage.getItem('irya_buynow_quantity')) || 1;
-                    const customReq = sessionStorage.getItem('irya_buynow_custom_req') || '';
-                    
-                    // Create buy now item
-                    buyNowItem = {
-                        id: productId,
-                        uniqueId: `BUYNOW_${productId}_${Date.now()}`,
-                        name: product.stone_name || product.name || 'Product',
-                        stoneName: product.stone_name || product.name || 'Product',
-                        price: parseFloat(product.price) || 0,
-                        priceUnit: product.price_unit || 'piece',
-                        image: product.images?.[0] || product.image || getDefaultImage(product.category),
-                        category: product.category || 'General',
-                        description: product.description || '',
-                        quantity: quantity,
-                        calculationData: calcData,
-                        customRequirements: customReq,
-                        isBuyNow: true,
-                        buyNowTimestamp: Date.now()
-                    };
-                    
-                    // Calculate price
-                    if (calcData) {
-                        buyNowItem.calculatedPrice = calculateItemPrice(buyNowItem, calcData);
-                    } else {
-                        buyNowItem.calculatedPrice = buyNowItem.price * quantity;
-                    }
-                    
-                    // Calculate payments
-                    const totalPrice = buyNowItem.calculatedPrice;
-                    buyNowItem.advancePayment = totalPrice * 0.3;
-                    buyNowItem.remainingPayment = totalPrice * 0.7;
-                    buyNowItem.totalPrice = totalPrice;
-                }
+            } catch (err) {
+                console.warn(`Error getting from ${source.name}:`, err);
             }
         }
         
         if (buyNowItem) {
+            // Ensure item has all required properties
+            buyNowItem = validateBuyNowItem(buyNowItem, userId);
             cartItems = [buyNowItem];
-            // Save to session for persistence
+            
+            // Save to session for future use
             sessionStorage.setItem('irya_current_buynow', JSON.stringify(buyNowItem));
+            
         } else {
+            console.error("No Buy Now item found in any source");
             cartItems = [];
         }
         
     } catch (error) {
         console.error('Error loading buy now items:', error);
         cartItems = [];
+        throw error;
     }
 }
 
-async function getBuyNowFromFirebase() {
+async function getBuyNowFromSession() {
+    const sessionItem = sessionStorage.getItem('irya_current_buynow');
+    if (sessionItem) {
+        return JSON.parse(sessionItem);
+    }
+    return null;
+}
+
+async function getBuyNowFromLocalStorage(userId) {
+    const buyNowKey = 'irya_buynow_cart_' + userId;
+    const buyNowData = localStorage.getItem(buyNowKey);
+    
+    if (buyNowData) {
+        const items = JSON.parse(buyNowData);
+        return items.length > 0 ? items[0] : null;
+    }
+    return null;
+}
+
+async function getBuyNowFromFirebase(userId) {
+    if (!firebaseDB) return null;
+    
     try {
-        if (!firebaseDB) return null;
-        
-        const userId = getUserId();
         const snapshot = await firebaseDB.collection('buyNowItems')
             .where('userId', '==', userId)
             .orderBy('createdAt', 'desc')
@@ -1358,17 +1507,101 @@ async function getBuyNowFromFirebase() {
             const data = doc.data();
             return data.item;
         }
-        
-        return null;
     } catch (error) {
-        console.error('Error getting buy now from Firebase:', error);
+        console.error('Firebase get error:', error);
+    }
+    
+    return null;
+}
+
+async function createBuyNowFromURL(userId) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('product');
+    
+    if (!productId || !firebaseDB) return null;
+    
+    try {
+        const productDoc = await firebaseDB.collection('products').doc(productId).get();
+        
+        if (!productDoc.exists) {
+            console.error("Product not found in Firebase:", productId);
+            return null;
+        }
+        
+        const product = productDoc.data();
+        
+        // Get calculation data from session or defaults
+        const calcDataStr = sessionStorage.getItem('irya_buynow_calc_data');
+        const calcData = calcDataStr ? JSON.parse(calcDataStr) : {
+            mode: 'standard',
+            unit: product.price_unit || 'piece',
+            quantity: parseInt(sessionStorage.getItem('irya_buynow_quantity')) || 1
+        };
+        
+        const quantity = calcData.quantity || 1;
+        const customReq = sessionStorage.getItem('irya_buynow_custom_req') || '';
+        
+        // Create buy now item
+        const buyNowItem = {
+            id: productId,
+            uniqueId: `BUYNOW_${productId}_${Date.now()}`,
+            name: product.stone_name || product.name || 'Product',
+            stoneName: product.stone_name || product.name || 'Product',
+            price: parseFloat(product.price) || 0,
+            priceUnit: product.price_unit || 'piece',
+            image: product.images?.[0] || product.image || getDefaultImage(product.category),
+            category: product.category || 'General',
+            description: product.description || '',
+            quantity: quantity,
+            calculationData: calcData,
+            customRequirements: customReq,
+            isBuyNow: true,
+            buyNowTimestamp: Date.now(),
+            userId: userId
+        };
+        
+        // Calculate price
+        buyNowItem.calculatedPrice = calculateItemPrice(buyNowItem, calcData);
+        
+        // Calculate payments
+        const totalPrice = buyNowItem.calculatedPrice;
+        buyNowItem.advancePayment = totalPrice * 0.3;
+        buyNowItem.remainingPayment = totalPrice * 0.7;
+        buyNowItem.totalPrice = totalPrice;
+        
+        return buyNowItem;
+        
+    } catch (error) {
+        console.error('Error creating from URL:', error);
         return null;
     }
 }
 
-async function loadRegularCartItems() {
+function validateBuyNowItem(item, userId) {
+    // Ensure required properties exist
+    if (!item.userId) item.userId = userId;
+    if (!item.uniqueId) item.uniqueId = `BUYNOW_${item.id}_${Date.now()}`;
+    if (!item.isBuyNow) item.isBuyNow = true;
+    if (!item.buyNowTimestamp) item.buyNowTimestamp = Date.now();
+    
+    // Ensure price calculations
+    if (!item.calculatedPrice) {
+        item.calculatedPrice = calculateItemPrice(item, item.calculationData);
+    }
+    
+    // Ensure payment calculations
+    if (!item.advancePayment || !item.remainingPayment || !item.totalPrice) {
+        const totalPrice = item.calculatedPrice || (item.price * item.quantity);
+        item.advancePayment = totalPrice * 0.3;
+        item.remainingPayment = totalPrice * 0.7;
+        item.totalPrice = totalPrice;
+    }
+    
+    return item;
+}
+
+async function loadRegularCartItems(userId) {
     try {
-        const userId = getUserId();
         const cartKey = 'irya_local_cart_' + userId;
         const cartData = localStorage.getItem(cartKey);
         
@@ -1377,45 +1610,84 @@ async function loadRegularCartItems() {
         } else {
             cartItems = [];
         }
+        
+        // Validate cart items
+        cartItems = cartItems.map(item => validateCartItem(item, userId));
+        
     } catch (error) {
         console.error('Error loading regular cart:', error);
         cartItems = [];
     }
 }
 
+function validateCartItem(item, userId) {
+    if (!item.userId) item.userId = userId;
+    
+    if (!item.calculatedPrice) {
+        item.calculatedPrice = calculateItemPrice(item, item.calculationData);
+    }
+    
+    if (!item.advancePayment || !item.remainingPayment || !item.totalPrice) {
+        const totalPrice = item.calculatedPrice || (item.price * item.quantity);
+        item.advancePayment = totalPrice * 0.3;
+        item.remainingPayment = totalPrice * 0.7;
+        item.totalPrice = totalPrice;
+    }
+    
+    return item;
+}
+
 function calculateItemPrice(item, calculationData) {
-    if (!calculationData) return item.price * item.quantity;
+    if (!calculationData) {
+        return item.price * item.quantity;
+    }
     
     const unit = calculationData.unit || item.priceUnit || 'piece';
-    const quantity = calculationData.quantity || item.quantity;
+    const quantity = calculationData.quantity || item.quantity || 1;
+    const price = item.price || 0;
     
-    let totalPrice = item.price * quantity;
+    let totalPrice = price * quantity;
     
     if (unit === 'sqft' || unit === 'sqm') {
         const length = calculationData.length || 1;
         const width = calculationData.width || 1;
         const area = length * width;
-        totalPrice = item.price * area * quantity;
+        totalPrice = price * area * quantity;
     } else if (unit === 'weight') {
         const weight = calculationData.weight || 1;
-        totalPrice = item.price * weight * quantity;
+        totalPrice = price * weight * quantity;
     }
     
     return parseFloat(totalPrice.toFixed(2));
 }
 
+// ============================================
+// DISPLAY ORDER ITEMS
+// ============================================
+
 function displayOrderItems() {
     const orderItemsDiv = document.getElementById('orderItems');
     const customRequirementsContainer = document.getElementById('customRequirementsContainer');
     
+    if (!orderItemsDiv) {
+        console.error("Order items container not found");
+        return;
+    }
+    
     if (cartItems.length === 0) {
-        orderItemsDiv.innerHTML = '<p style="text-align: center; color: var(--text-light);">No items found</p>';
+        orderItemsDiv.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+                <i class="fas fa-shopping-cart" style="font-size: 48px; color: var(--text-light); margin-bottom: 20px;"></i>
+                <p style="color: var(--text-light); font-size: 16px;">Your cart is empty</p>
+            </div>
+        `;
         return;
     }
     
     customRequirementsContainer.innerHTML = '';
     
     const itemsHTML = cartItems.map(item => {
+        // Add custom requirements if exists
         if (item.customRequirements && item.customRequirements.trim() !== '') {
             const customReqHTML = `
                 <div class="custom-requirements-box">
@@ -1426,6 +1698,7 @@ function displayOrderItems() {
             customRequirementsContainer.innerHTML += customReqHTML;
         }
         
+        // Calculate display info
         let calculationInfo = '';
         if (item.calculationData) {
             if (item.calculationData.unit === 'sqft') {
@@ -1442,11 +1715,12 @@ function displayOrderItems() {
         }
         
         const itemPrice = item.calculatedPrice || (item.price * item.quantity);
+        const imageUrl = item.image || getDefaultImage(item.category);
         
         return `
             <div class="order-item">
                 <div class="order-item-image">
-                    <img src="${item.image || getDefaultImage(item.category)}" 
+                    <img src="${imageUrl}" 
                          alt="${item.name}" 
                          onerror="this.src='${getDefaultImage(item.category)}'">
                 </div>
@@ -1485,29 +1759,12 @@ function calculateTotals() {
         }
     });
     
-    const tax = subtotal * 0.2;
-    const shipping = calculateShippingCost();
+    const tax = subtotal * 0.2; // 20% VAT
+    const shipping = calculateShippingCost(subtotal);
     const total = subtotal + tax + shipping;
     
-    // Update item payments if not already set
-    cartItems.forEach(item => {
-        const itemTotal = item.calculatedPrice || (item.price * item.quantity);
-        if (!item.advancePayment) {
-            item.advancePayment = itemTotal * 0.3;
-        }
-        if (!item.remainingPayment) {
-            item.remainingPayment = itemTotal * 0.7;
-        }
-        if (!item.totalPrice) {
-            item.totalPrice = itemTotal;
-        }
-    });
-    
-    document.getElementById('subtotal').textContent = `£${subtotal.toFixed(2)}`;
-    document.getElementById('tax').textContent = `£${tax.toFixed(2)}`;
-    document.getElementById('shipping').textContent = shipping === 0 ? 'FREE' : `£${shipping.toFixed(2)}`;
-    document.getElementById('total').textContent = `£${total.toFixed(2)}`;
-    
+    // Update display
+    updatePriceDisplay(subtotal, tax, shipping, total);
     updatePaymentBreakdown(total, advanceTotal, remainingTotal);
     
     return { 
@@ -1520,6 +1777,28 @@ function calculateTotals() {
     };
 }
 
+function updatePriceDisplay(subtotal, tax, shipping, total) {
+    const subtotalEl = document.getElementById('subtotal');
+    const taxEl = document.getElementById('tax');
+    const shippingEl = document.getElementById('shipping');
+    const totalEl = document.getElementById('total');
+    
+    if (subtotalEl) subtotalEl.textContent = `£${subtotal.toFixed(2)}`;
+    if (taxEl) taxEl.textContent = `£${tax.toFixed(2)}`;
+    if (shippingEl) shippingEl.textContent = shipping === 0 ? 'FREE' : `£${shipping.toFixed(2)}`;
+    if (totalEl) totalEl.textContent = `£${total.toFixed(2)}`;
+}
+
+function calculateShippingCost(subtotal) {
+    if (subtotal > 500) {
+        return 0;
+    } else if (subtotal > 200) {
+        return 25;
+    } else {
+        return 35;
+    }
+}
+
 function updatePaymentBreakdown(total, advanceTotal, remainingTotal) {
     const totalOrderValue = document.getElementById('totalOrderValue');
     const advanceAmount = document.getElementById('advanceAmount');
@@ -1529,15 +1808,17 @@ function updatePaymentBreakdown(total, advanceTotal, remainingTotal) {
     const remainingLabel = document.getElementById('remainingLabel');
     const payNowLabel = document.getElementById('payNowLabel');
     
+    if (!totalOrderValue || !advanceAmount || !remainingAmount || !payNowAmount) return;
+    
     if (currentPaymentType === 'advance') {
         totalOrderValue.textContent = `£${total.toFixed(2)}`;
         advanceAmount.textContent = `£${advanceTotal.toFixed(2)}`;
         remainingAmount.textContent = `£${remainingTotal.toFixed(2)}`;
         payNowAmount.textContent = `£${advanceTotal.toFixed(2)}`;
         
-        advanceLabel.textContent = '30% Advance:';
-        remainingLabel.textContent = '70% After Shipping:';
-        payNowLabel.textContent = 'Amount to Pay Now:';
+        if (advanceLabel) advanceLabel.textContent = '30% Advance:';
+        if (remainingLabel) remainingLabel.textContent = '70% After Shipping:';
+        if (payNowLabel) payNowLabel.textContent = 'Amount to Pay Now:';
     } else {
         const discountedTotal = total * 0.95;
         const discountAmount = total * 0.05;
@@ -1547,21 +1828,9 @@ function updatePaymentBreakdown(total, advanceTotal, remainingTotal) {
         remainingAmount.textContent = `£${discountedTotal.toFixed(2)}`;
         payNowAmount.textContent = `£${discountedTotal.toFixed(2)}`;
         
-        advanceLabel.textContent = 'Discount (5%):';
-        remainingLabel.textContent = 'Discounted Total:';
-        payNowLabel.textContent = 'Amount to Pay Now:';
-    }
-}
-
-function calculateShippingCost() {
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.calculatedPrice || (item.price * item.quantity)), 0);
-    
-    if (subtotal > 500) {
-        return 0;
-    } else if (subtotal > 200) {
-        return 25;
-    } else {
-        return 35;
+        if (advanceLabel) advanceLabel.textContent = 'Discount (5%):';
+        if (remainingLabel) remainingLabel.textContent = 'Discounted Total:';
+        if (payNowLabel) payNowLabel.textContent = 'Amount to Pay Now:';
     }
 }
 
@@ -1595,11 +1864,11 @@ function selectPaymentOption(paymentType) {
     
     if (paymentType === 'advance') {
         advanceOption.classList.add('selected');
+        document.getElementById('advancePayment').checked = true;
     } else {
         fullOption.classList.add('selected');
+        document.getElementById('fullPayment').checked = true;
     }
-    
-    document.getElementById(`${paymentType}Payment`).checked = true;
     
     const totals = calculateTotals();
     updatePaymentBreakdown(totals.total, totals.advanceTotal, totals.remainingTotal);
@@ -1610,17 +1879,183 @@ function selectPaymentMethod(method) {
     
     document.querySelectorAll('.payment-method').forEach(el => {
         el.classList.remove('active');
-        el.querySelector('.fa-check-circle').style.color = '';
+        const checkIcon = el.querySelector('.fa-check-circle');
+        if (checkIcon) {
+            checkIcon.style.color = '';
+        }
     });
     
-    event.currentTarget.classList.add('active');
-    event.currentTarget.querySelector('.fa-check-circle').style.color = 'var(--primary-gold)';
+    const clickedElement = event.currentTarget;
+    clickedElement.classList.add('active');
     
+    const checkIcon = clickedElement.querySelector('.fa-check-circle');
+    if (checkIcon) {
+        checkIcon.style.color = 'var(--primary-gold)';
+    }
+    
+    // Show/hide payment method sections
     const stripeCardElement = document.getElementById('stripeCardElement');
-    stripeCardElement.style.display = method === 'stripe' ? 'block' : 'none';
-    
     const paypalButtonsContainer = document.getElementById('paypalButtonsContainer');
-    paypalButtonsContainer.style.display = method === 'paypal' ? 'block' : 'none';
+    
+    if (stripeCardElement) {
+        stripeCardElement.style.display = method === 'stripe' ? 'block' : 'none';
+    }
+    
+    if (paypalButtonsContainer) {
+        paypalButtonsContainer.style.display = method === 'paypal' ? 'block' : 'none';
+        
+        if (method === 'paypal') {
+            initializePayPalButtons();
+        }
+    }
+}
+
+function initializePayPalButtons() {
+    const paypalButtonsContainer = document.getElementById('paypalButtonsContainer');
+    if (!paypalButtonsContainer) return;
+    
+    paypalButtonsContainer.innerHTML = `
+        <div style="padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+            <i class="fab fa-cc-paypal" style="font-size: 32px; color: #003087; margin-bottom: 10px;"></i>
+            <p style="color: var(--text-light); font-size: 14px; margin-bottom: 10px;">
+                PayPal integration coming soon. Please use Bank Transfer for now.
+            </p>
+        </div>
+    `;
+}
+
+// ============================================
+// FORM VALIDATION
+// ============================================
+
+function initializeFormValidation() {
+    // Add required indicator to form labels
+    const requiredFields = ['fullName', 'email', 'phone', 'country', 'address1', 'city', 'state', 'postalCode'];
+    
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            const label = field.previousElementSibling;
+            if (label && label.tagName === 'LABEL') {
+                if (!label.classList.contains('required')) {
+                    label.classList.add('required');
+                }
+            }
+        }
+    });
+    
+    // Real-time validation
+    const emailField = document.getElementById('email');
+    if (emailField) {
+        emailField.addEventListener('blur', validateEmail);
+    }
+    
+    const phoneField = document.getElementById('phone');
+    if (phoneField) {
+        phoneField.addEventListener('blur', validatePhone);
+    }
+}
+
+function validateEmail() {
+    const email = document.getElementById('email').value;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (email && !emailRegex.test(email)) {
+        showFieldError('email', 'Please enter a valid email address');
+        return false;
+    } else {
+        clearFieldError('email');
+        return true;
+    }
+}
+
+function validatePhone() {
+    const phone = document.getElementById('phone').value;
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    const cleanedPhone = phone.replace(/[\s\-\(\)]/g, '');
+    
+    if (phone && !phoneRegex.test(cleanedPhone)) {
+        showFieldError('phone', 'Please enter a valid phone number');
+        return false;
+    } else {
+        clearFieldError('phone');
+        return true;
+    }
+}
+
+function showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    
+    let errorDiv = field.parentElement.querySelector('.field-error');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'field-error';
+        errorDiv.style.cssText = 'color: #ff4757; font-size: 12px; margin-top: 5px;';
+        field.parentElement.appendChild(errorDiv);
+    }
+    
+    errorDiv.textContent = message;
+    field.style.borderColor = '#ff4757';
+}
+
+function clearFieldError(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    
+    const errorDiv = field.parentElement.querySelector('.field-error');
+    if (errorDiv) {
+        errorDiv.remove();
+    }
+    field.style.borderColor = '';
+}
+
+function validateForm() {
+    const requiredFields = [
+        { id: 'fullName', label: 'Full Name' },
+        { id: 'email', label: 'Email Address' },
+        { id: 'phone', label: 'Phone Number' },
+        { id: 'country', label: 'Country' },
+        { id: 'address1', label: 'Address Line 1' },
+        { id: 'city', label: 'City' },
+        { id: 'state', label: 'State/Province' },
+        { id: 'postalCode', label: 'Postal Code' }
+    ];
+    
+    let isValid = true;
+    
+    // Check required fields
+    for (const field of requiredFields) {
+        const element = document.getElementById(field.id);
+        if (!element || !element.value.trim()) {
+            showFieldError(field.id, `${field.label} is required`);
+            if (isValid) {
+                element?.focus();
+                isValid = false;
+            }
+        } else {
+            clearFieldError(field.id);
+        }
+    }
+    
+    // Validate email
+    if (isValid && !validateEmail()) {
+        isValid = false;
+    }
+    
+    // Validate phone
+    if (isValid && !validatePhone()) {
+        isValid = false;
+    }
+    
+    // Check terms agreement
+    const agreeTerms = document.getElementById('agreeTerms');
+    if (!agreeTerms || !agreeTerms.checked) {
+        showError('Please agree to the terms and conditions');
+        isValid = false;
+    }
+    
+    return isValid;
 }
 
 // ============================================
@@ -1629,13 +2064,17 @@ function selectPaymentMethod(method) {
 
 async function validateAndProcessPayment() {
     try {
-        if (!validateForm()) return;
+        console.log("Starting payment processing...");
         
-        if (!document.getElementById('agreeTerms').checked) {
-            showError('Please agree to the terms and conditions');
+        // Validate form
+        if (!validateForm()) {
+            console.log("Form validation failed");
             return;
         }
         
+        showLoading(true);
+        
+        // Get address data
         const addressData = {
             fullName: document.getElementById('fullName').value.trim(),
             email: document.getElementById('email').value.trim(),
@@ -1647,15 +2086,28 @@ async function validateAndProcessPayment() {
             state: document.getElementById('state').value.trim(),
             postalCode: document.getElementById('postalCode').value.trim(),
             instructions: document.getElementById('instructions').value.trim(),
-            saveAddress: document.getElementById('saveAddress').checked
+            saveAddress: document.getElementById('saveAddress')?.checked || false
         };
         
+        console.log("Address data collected");
+        
+        // Calculate totals
         const totals = calculateTotals();
         const paymentType = currentPaymentType;
         const paymentAmount = paymentType === 'advance' ? totals.advanceTotal : totals.total * 0.95;
         
+        console.log("Payment calculation:", {
+            paymentType: paymentType,
+            amount: paymentAmount,
+            method: selectedPaymentMethod
+        });
+        
+        // Create order data
         currentOrderData = {
-            userId: getUserId(),
+            userId: authSystem.getUserId(),
+            userEmail: authSystem.getUserEmail(),
+            userName: authSystem.getUserName(),
+            isLoggedIn: authSystem.isLoggedIn(),
             items: cartItems.map(item => ({
                 id: item.id || '',
                 uniqueId: item.uniqueId || '',
@@ -1691,15 +2143,59 @@ async function validateAndProcessPayment() {
             isBuyNowOrder: isBuyNowFlow
         };
         
+        console.log("Order data created:", currentOrderData.orderNumber);
+        
+        // Process based on payment method
         if (selectedPaymentMethod === 'bank') {
             await processBankTransfer(currentOrderData);
+        } else if (selectedPaymentMethod === 'stripe') {
+            showError('Credit card payment coming soon. Please use Bank Transfer.');
+        } else if (selectedPaymentMethod === 'paypal') {
+            showError('PayPal payment coming soon. Please use Bank Transfer.');
         } else {
-            showError('Please select Bank Transfer as payment method. Other methods coming soon.');
+            showError('Please select a payment method');
         }
         
     } catch (error) {
-        console.error('Payment validation error:', error);
+        console.error('Payment processing error:', error);
         showError('Payment processing failed: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function processBankTransfer(orderData) {
+    try {
+        showPaymentProcessing('Preparing Bank Transfer Details...');
+        
+        // Update order with bank transfer info
+        orderData.paymentStatus = 'pending_bank_transfer';
+        orderData.bankTransferDetails = {
+            accountName: 'IRYA STONE LTD',
+            accountNumber: '12345678',
+            sortCode: '04-00-04',
+            iban: 'GB29NWBK60161331926819',
+            swift: 'NWBKGB2L',
+            reference: orderData.orderNumber,
+            amount: orderData.amountToPay,
+            currency: 'GBP',
+            bankName: 'NatWest Bank',
+            bankAddress: 'NatWest Bank PLC, 135 Bishopsgate, London EC2M 3UR, United Kingdom'
+        };
+        
+        // Save order to Firebase
+        const orderId = await saveOrderToFirebase(orderData);
+        
+        // Hide processing modal
+        hidePaymentProcessing();
+        
+        // Show bank transfer details
+        showBankTransferDetails(orderData);
+        
+    } catch (error) {
+        console.error('Bank transfer error:', error);
+        hidePaymentProcessing();
+        showError('Failed to process bank transfer: ' + error.message);
     }
 }
 
