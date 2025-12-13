@@ -12,7 +12,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* All CSS remains same as before until the JavaScript section */
 :root {
     --primary-gold: #c9a227;
     --gold-light: #f0d77c;
@@ -771,7 +770,7 @@ header {
 
 <script>
 // ============================================
-// FIREBASE CONFIGURATION (Checkout ke saath match)
+// FIREBASE CONFIGURATION
 // ============================================
 
 const firebaseConfig = {
@@ -790,7 +789,7 @@ let currentFilter = 'all';
 let authSystem = null;
 
 // ============================================
-// AUTHENTICATION SYSTEM (Checkout ke saath match)
+// AUTHENTICATION SYSTEM
 // ============================================
 
 class OrdersAuthSystem {
@@ -806,7 +805,7 @@ class OrdersAuthSystem {
             
             return new Promise((resolve) => {
                 firebaseAuth.onAuthStateChanged((user) => {
-                    console.log("Auth State Changed:", user ? user.uid : "No user");
+                    console.log("📱 Auth State Changed:", user ? user.uid : "No user");
                     
                     if (user) {
                         // Firebase authenticated user
@@ -820,6 +819,7 @@ class OrdersAuthSystem {
                         };
                         
                         localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
+                        console.log("✅ Firebase user saved:", user.uid);
                         
                     } else {
                         // No Firebase user, check localStorage
@@ -827,10 +827,12 @@ class OrdersAuthSystem {
                         
                         if (storedUser && storedUser.isFirebaseUser) {
                             this.currentUser = storedUser;
+                            console.log("✅ Using stored user from localStorage:", storedUser.uid);
                         } else {
                             // Create guest user
                             this.currentUser = this.createGuestUser();
                             localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
+                            console.log("✅ Guest user created:", this.currentUser.uid);
                         }
                     }
                     
@@ -839,7 +841,7 @@ class OrdersAuthSystem {
             });
             
         } catch (error) {
-            console.error('Auth init error:', error);
+            console.error('❌ Auth init error:', error);
             this.currentUser = this.getUserFromStorage() || this.createGuestUser();
             return this.currentUser;
         }
@@ -860,10 +862,10 @@ class OrdersAuthSystem {
             firebaseDB = firebase.firestore();
             firebaseAuth = firebase.auth();
             
-            console.log('Firebase initialized for orders');
+            console.log('✅ Firebase initialized successfully');
             return true;
         } catch (error) {
-            console.error('Firebase initialization error:', error);
+            console.error('❌ Firebase initialization error:', error);
             throw error;
         }
     }
@@ -874,7 +876,7 @@ class OrdersAuthSystem {
             try {
                 return JSON.parse(userData);
             } catch (e) {
-                console.error('Error parsing user data:', e);
+                console.error('❌ Error parsing user data:', e);
                 return null;
             }
         }
@@ -909,6 +911,14 @@ class OrdersAuthSystem {
         }
         return this.currentUser.uid;
     }
+    
+    getUserEmail() {
+        return this.currentUser ? this.currentUser.email : '';
+    }
+    
+    getUserName() {
+        return this.currentUser ? this.currentUser.displayName : 'Guest';
+    }
 }
 
 // ============================================
@@ -916,13 +926,14 @@ class OrdersAuthSystem {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log("Orders page loaded");
+    console.log("📱 Orders page loaded");
     
     // Initialize Auth System
     authSystem = new OrdersAuthSystem();
     await authSystem.init();
     
-    console.log("Auth initialized. User ID:", authSystem.getUserId());
+    const userId = authSystem.getUserId();
+    console.log("✅ Auth initialized. User ID:", userId, "Logged in:", authSystem.isLoggedIn());
     
     // Load user orders
     await loadUserOrders();
@@ -932,108 +943,151 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ============================================
-// LOAD USER ORDERS (Checkout se compatible)
+// LOAD USER ORDERS FROM FIREBASE
 // ============================================
 
 async function loadUserOrders() {
     try {
         showLoading(true);
         
+        const userId = authSystem.getUserId();
+        console.log("🔄 Loading orders for user:", userId);
+        
+        // Initialize Firebase if not already
         if (!firebaseDB) {
-            await initializeFirebase();
+            console.log("🔄 Initializing Firebase...");
+            await authSystem.initializeFirebase();
         }
         
-        const userId = authSystem.getUserId();
-        
         if (!firebaseDB) {
+            console.error("❌ Firebase DB not available");
             showError('Database not available');
             return;
         }
         
-        console.log("Loading orders for user:", userId);
+        console.log("🔍 Checking Firebase collections...");
         
-        // Try main orders collection (checkout se same structure)
-        const ordersSnapshot = await firebaseDB.collection('orders')
-            .where('userId', '==', userId)
-            .orderBy('createdAt', 'desc')
-            .get();
-        
-        if (!ordersSnapshot.empty) {
-            userOrders = [];
+        // METHOD 1: Try "users/{userId}/orders" collection (MAIN METHOD)
+        console.log("1️⃣ Trying users/{userId}/orders collection...");
+        try {
+            const userOrdersRef = firebaseDB.collection('users').doc(userId).collection('orders');
+            const userOrdersSnapshot = await userOrdersRef.orderBy('createdAt', 'desc').get();
             
-            ordersSnapshot.forEach(doc => {
-                const orderData = doc.data();
-                userOrders.push({
-                    id: doc.id,
-                    ...orderData
-                });
-            });
+            console.log(`📊 Users collection query complete. Found: ${userOrdersSnapshot.size} documents`);
             
-            console.log("Orders loaded from main collection:", userOrders.length);
-            displayOrders();
-        } else {
-            // Check user's orders collection
-            try {
-                const userOrdersRef = firebaseDB.collection('userOrders').doc(userId);
-                const userOrdersSnapshot = await userOrdersRef.collection('orders')
-                    .orderBy('createdAt', 'desc')
-                    .get();
+            if (!userOrdersSnapshot.empty) {
+                userOrders = [];
                 
-                if (!userOrdersSnapshot.empty) {
-                    userOrders = [];
-                    
-                    userOrdersSnapshot.forEach(doc => {
-                        const orderData = doc.data();
-                        userOrders.push({
-                            id: doc.id,
-                            ...orderData
-                        });
+                userOrdersSnapshot.forEach(doc => {
+                    const orderData = doc.data();
+                    console.log(`📦 Order found: ${doc.id}`, {
+                        orderNumber: orderData.orderNumber,
+                        status: orderData.status,
+                        paymentStatus: orderData.paymentStatus,
+                        itemsCount: orderData.items ? orderData.items.length : 0
                     });
                     
-                    console.log("Orders loaded from user collection:", userOrders.length);
-                    displayOrders();
-                } else {
-                    showNoOrders();
-                }
-            } catch (error) {
-                console.log("User collection error, showing no orders");
-                showNoOrders();
+                    userOrders.push({
+                        id: doc.id,
+                        ...orderData,
+                        // Ensure we have orderNumber
+                        orderNumber: orderData.orderNumber || `IRYA-${doc.id.substring(0, 8).toUpperCase()}`
+                    });
+                });
+                
+                console.log(`✅ SUCCESS: ${userOrders.length} orders loaded from users/{userId}/orders`);
+                displayOrders();
+                return;
+            } else {
+                console.log("❌ No orders found in users/{userId}/orders collection");
             }
+        } catch (error) {
+            console.error("❌ Error fetching from users/{userId}/orders:", error.message);
         }
         
-    } catch (error) {
-        console.error('Error loading orders:', error);
+        // METHOD 2: Try main "orders" collection with userId filter
+        console.log("2️⃣ Trying main orders collection...");
+        try {
+            const ordersSnapshot = await firebaseDB.collection('orders')
+                .where('userId', '==', userId)
+                .orderBy('createdAt', 'desc')
+                .get();
+            
+            console.log(`📊 Main orders query complete. Found: ${ordersSnapshot.size} documents`);
+            
+            if (!ordersSnapshot.empty) {
+                userOrders = [];
+                
+                ordersSnapshot.forEach(doc => {
+                    const orderData = doc.data();
+                    console.log(`📦 Order found: ${doc.id}`, {
+                        orderNumber: orderData.orderNumber,
+                        status: orderData.status,
+                        paymentStatus: orderData.paymentStatus
+                    });
+                    
+                    userOrders.push({
+                        id: doc.id,
+                        ...orderData
+                    });
+                });
+                
+                console.log(`✅ SUCCESS: ${userOrders.length} orders loaded from main collection`);
+                displayOrders();
+                return;
+            } else {
+                console.log("❌ No orders found in main orders collection");
+            }
+        } catch (error) {
+            console.error("❌ Error fetching from main orders:", error.message);
+        }
+        
+        // METHOD 3: Try "userOrders" collection
+        console.log("3️⃣ Trying userOrders collection...");
+        try {
+            const userOrdersRef = firebaseDB.collection('userOrders').doc(userId);
+            const userOrdersSnapshot = await userOrdersRef.collection('orders').orderBy('createdAt', 'desc').get();
+            
+            console.log(`📊 UserOrders query complete. Found: ${userOrdersSnapshot.size} documents`);
+            
+            if (!userOrdersSnapshot.empty) {
+                userOrders = [];
+                
+                userOrdersSnapshot.forEach(doc => {
+                    const orderData = doc.data();
+                    console.log(`📦 Order found: ${doc.id}`);
+                    
+                    userOrders.push({
+                        id: doc.id,
+                        ...orderData
+                    });
+                });
+                
+                console.log(`✅ SUCCESS: ${userOrders.length} orders loaded from userOrders`);
+                displayOrders();
+                return;
+            } else {
+                console.log("❌ No orders found in userOrders collection");
+            }
+        } catch (error) {
+            console.error("❌ Error fetching from userOrders:", error.message);
+        }
+        
+        // If no orders found in any collection
+        console.log("❌ No orders found in any collection for user:", userId);
         showNoOrders();
+        
+    } catch (error) {
+        console.error('❌ Error loading orders:', error);
+        showNoOrders();
+        showError('Failed to load orders: ' + error.message);
     } finally {
         showLoading(false);
     }
 }
 
-async function initializeFirebase() {
-    try {
-        if (typeof firebase === 'undefined') {
-            showError('Firebase not loaded');
-            return false;
-        }
-        
-        if (!firebase.apps.length) {
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-        } else {
-            firebaseApp = firebase.app();
-        }
-        
-        firebaseDB = firebase.firestore();
-        firebaseAuth = firebase.auth();
-        
-        return true;
-    } catch (error) {
-        console.error('Firebase initialization error:', error);
-        return false;
-    }
-}
-
 // ============================================
-// DISPLAY ORDERS (Checkout ke order structure ke saath match)
+// DISPLAY ORDERS WITH TRACKING & PAYMENT STATUS
 // ============================================
 
 function displayOrders() {
@@ -1043,7 +1097,7 @@ function displayOrders() {
     // Filter orders
     const filteredOrders = userOrders.filter(order => {
         if (currentFilter === 'all') return true;
-        if (order.status === 'pending_bank_transfer' && currentFilter === 'pending') return true;
+        if (order.paymentStatus === 'pending_bank_transfer' && currentFilter === 'pending') return true;
         return order.status === currentFilter;
     });
     
@@ -1054,11 +1108,24 @@ function displayOrders() {
     
     noOrdersMessage.style.display = 'none';
     
-    const ordersHTML = filteredOrders.map(order => `
+    // Debug info
+    console.log(`📊 Displaying ${filteredOrders.length} filtered orders`);
+    
+    const ordersHTML = filteredOrders.map(order => {
+        // Get payment status HTML
+        const paymentStatusHTML = getPaymentStatusHTML(order);
+        
+        // Get bank transfer HTML if applicable
+        const bankTransferHTML = getBankTransferHTML(order);
+        
+        // Get tracking timeline HTML
+        const timelineHTML = getTrackingTimeline(order);
+        
+        return `
         <div class="order-card">
             <div class="order-header">
                 <div class="order-info">
-                    <h3>Order #${order.orderNumber || order.id}</h3>
+                    <h3>Order #${order.orderNumber || order.id.substring(0, 8)}</h3>
                     <div class="order-date">Placed on ${formatDate(order.createdAt)}</div>
                     <div class="order-number">Order ID: ${order.id}</div>
                 </div>
@@ -1067,6 +1134,7 @@ function displayOrders() {
                 </div>
             </div>
             
+            <!-- Order Items -->
             <div class="order-items">
                 ${(order.items || []).slice(0, 2).map(item => `
                     <div class="order-item">
@@ -1097,26 +1165,13 @@ function displayOrders() {
                 ` : ''}
             </div>
             
-            <!-- Payment Information (Checkout se same) -->
-            ${order.paymentMethod === 'bank' && order.paymentStatus === 'pending_bank_transfer' ? `
-                <div class="payment-info">
-                    <h5><i class="fas fa-university"></i> Bank Transfer Details</h5>
-                    <div class="payment-details">
-                        <p><strong>Account Name:</strong> ${order.bankTransferDetails?.accountName || 'IRYA STONE LTD'}</p>
-                        <p><strong>Account Number:</strong> ${order.bankTransferDetails?.accountNumber || '12345678'}</p>
-                        <p><strong>Sort Code:</strong> ${order.bankTransferDetails?.sortCode || '04-00-04'}</p>
-                        <p><strong>Reference:</strong> ${order.bankTransferDetails?.reference || order.orderNumber}</p>
-                        <p><strong>Amount:</strong> £${order.amountToPay?.toFixed(2) || order.advancePayment?.toFixed(2) || '0.00'}</p>
-                        ${order.paymentType === 'advance' ? `
-                            <p><strong>Payment Type:</strong> 30% Advance Payment</p>
-                            <p><strong>Remaining Payment:</strong> £${order.remainingPayment?.toFixed(2) || '0.00'} (70% after shipping)</p>
-                        ` : `
-                            <p><strong>Payment Type:</strong> Full Payment (5% discount applied)</p>
-                        `}
-                    </div>
-                </div>
-            ` : ''}
+            <!-- Payment Status -->
+            ${paymentStatusHTML}
             
+            <!-- Bank Transfer Details -->
+            ${bankTransferHTML}
+            
+            <!-- Order Summary -->
             <div class="order-summary">
                 <div class="summary-item">
                     <div class="summary-label">Subtotal</div>
@@ -1136,16 +1191,10 @@ function displayOrders() {
                 </div>
             </div>
             
-            ${order.tracking || order.shippingAddress ? `
-                <div class="tracking-timeline">
-                    <div class="timeline-header">
-                        <h4><i class="fas fa-shipping-fast"></i> Shipping Information</h4>
-                        ${order.tracking?.id ? `<div class="tracking-id">Tracking ID: ${order.tracking.id}</div>` : ''}
-                    </div>
-                    ${getTrackingTimeline(order)}
-                </div>
-            ` : ''}
+            <!-- Tracking Timeline -->
+            ${timelineHTML}
             
+            <!-- Order Actions -->
             <div class="order-actions">
                 <button class="order-action-btn primary" onclick="viewOrderDetails('${order.id}')">
                     <i class="fas fa-eye"></i>
@@ -1163,7 +1212,7 @@ function displayOrders() {
                         Download Invoice
                     </button>
                 ` : ''}
-                ${order.status === 'pending' || order.status === 'pending_bank_transfer' ? `
+                ${order.status === 'pending' || order.paymentStatus === 'pending_bank_transfer' ? `
                     <button class="order-action-btn" onclick="cancelOrder('${order.id}')" style="color: #ff4757; border-color: #ff4757;">
                         <i class="fas fa-times"></i>
                         Cancel Order
@@ -1177,83 +1226,286 @@ function displayOrders() {
                 ` : ''}
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
     
     ordersList.innerHTML = ordersHTML;
 }
 
-function getCalculationInfo(item) {
-    if (!item.calculationData) return `Quantity: ${item.quantity || 1} pieces`;
-    
-    const unit = item.calculationData.unit || 'piece';
-    
-    if (unit === 'sqft') {
-        return `Area: ${item.calculationData.length || 1}ft × ${item.calculationData.width || 1}ft`;
-    } else if (unit === 'sqm') {
-        return `Area: ${item.calculationData.length || 1}m × ${item.calculationData.width || 1}m`;
-    } else if (unit === 'weight') {
-        return `Weight: ${item.calculationData.weight || 1}kg`;
-    } else {
-        return `Quantity: ${item.quantity || 1} pieces`;
-    }
-}
+// ============================================
+// PAYMENT STATUS HTML GENERATOR
+// ============================================
 
-function getTrackingTimeline(order) {
-    const statuses = [
-        { id: 'pending', label: 'Order Placed', icon: 'fa-shopping-cart', date: order.createdAt },
-        { id: 'processing', label: 'Processing', icon: 'fa-cogs', date: order.processingAt || order.confirmedAt },
-        { id: 'shipped', label: 'Shipped', icon: 'fa-shipping-fast', date: order.shippedAt },
-        { id: 'delivered', label: 'Delivered', icon: 'fa-home', date: order.deliveredAt }
-    ];
+function getPaymentStatusHTML(order) {
+    if (!order.paymentStatus && !order.paymentMethod) return '';
     
-    // For bank transfer orders
-    if (order.paymentStatus === 'pending_bank_transfer') {
-        statuses.unshift({ 
-            id: 'pending_bank_transfer', 
-            label: 'Awaiting Payment', 
-            icon: 'fa-clock', 
-            date: order.createdAt 
-        });
+    let paymentStatusClass = '';
+    let paymentStatusText = '';
+    let paymentIcon = '';
+    let paymentDetails = '';
+    
+    switch(order.paymentStatus) {
+        case 'pending_bank_transfer':
+            paymentStatusClass = 'status-pending_bank_transfer';
+            paymentStatusText = 'Awaiting Bank Transfer';
+            paymentIcon = 'fa-clock';
+            paymentDetails = 'Please complete bank transfer to confirm order';
+            break;
+        case 'payment_received':
+            paymentStatusClass = 'status-processing';
+            paymentStatusText = 'Payment Received';
+            paymentIcon = 'fa-check-circle';
+            paymentDetails = 'Payment confirmed. Processing order...';
+            break;
+        case 'paid':
+            paymentStatusClass = 'status-delivered';
+            paymentStatusText = 'Paid';
+            paymentIcon = 'fa-check-circle';
+            paymentDetails = 'Payment completed';
+            break;
+        case 'cancelled':
+            paymentStatusClass = 'status-cancelled';
+            paymentStatusText = 'Payment Cancelled';
+            paymentIcon = 'fa-times-circle';
+            paymentDetails = 'Payment was cancelled';
+            break;
+        default:
+            if (order.paymentMethod) {
+                paymentStatusClass = 'status-pending';
+                paymentStatusText = `Pending (${order.paymentMethod})`;
+                paymentIcon = 'fa-clock';
+                paymentDetails = 'Waiting for payment confirmation';
+            }
     }
     
-    // Get current status index
-    const currentStatus = order.paymentStatus === 'pending_bank_transfer' ? 'pending_bank_transfer' : order.status;
-    const statusIndex = statuses.findIndex(s => s.id === currentStatus);
+    if (!paymentStatusText) return '';
+    
+    // Payment amount calculation
+    let paidAmount = '0.00';
+    let remainingAmount = '0.00';
+    
+    if (order.paymentType === 'advance') {
+        paidAmount = order.advancePayment?.toFixed(2) || '0.00';
+        remainingAmount = order.remainingPayment?.toFixed(2) || '0.00';
+    } else {
+        paidAmount = order.total?.toFixed(2) || '0.00';
+    }
     
     return `
-        <div class="timeline-steps">
-            ${statuses.map((status, index) => {
-                const isCompleted = index <= statusIndex;
-                const isActive = index === statusIndex;
-                
-                return `
-                    <div class="timeline-step">
-                        <div class="step-icon ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}">
-                            <i class="fas ${status.icon}"></i>
-                        </div>
-                        <div class="step-label">${status.label}</div>
-                        ${status.date ? `<div class="step-date">${formatDate(status.date)}</div>` : ''}
+        <div class="payment-info">
+            <h5><i class="fas ${paymentIcon}"></i> Payment Status</h5>
+            <div class="payment-details">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <div><strong>Status:</strong></div>
+                        <span class="order-status ${paymentStatusClass}" style="display: inline-block; margin-top: 5px;">
+                            ${paymentStatusText}
+                        </span>
                     </div>
-                `;
-            }).join('')}
-        </div>
-        
-        ${order.shippingAddress ? `
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
-                <div style="font-size: 13px; color: var(--text-light); margin-bottom: 5px;">Shipping to:</div>
-                <div style="font-size: 14px; color: var(--text-dark);">
-                    ${order.shippingAddress.fullName}<br>
-                    ${order.shippingAddress.address1}<br>
-                    ${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.postalCode}<br>
-                    ${order.shippingAddress.country}
+                    <div>
+                        <div><strong>Method:</strong> ${order.paymentMethod || 'N/A'}</div>
+                        <div><strong>Type:</strong> ${order.paymentType === 'advance' ? '30% Advance' : 'Full Payment'}</div>
+                    </div>
+                    ${order.paymentType === 'advance' ? `
+                        <div>
+                            <div><strong>Advance Paid:</strong> £${paidAmount}</div>
+                            <div><strong>Remaining:</strong> £${remainingAmount}</div>
+                        </div>
+                        <div>
+                            <div><strong>Total Order:</strong> £${order.total?.toFixed(2) || '0.00'}</div>
+                            <div style="font-size: 11px; color: var(--text-light);">70% payable after shipping</div>
+                        </div>
+                    ` : `
+                        <div>
+                            <div><strong>Amount Paid:</strong> £${paidAmount}</div>
+                            <div style="font-size: 11px; color: var(--primary-gold);">5% discount applied</div>
+                        </div>
+                    `}
+                </div>
+                <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 5px; font-size: 12px;">
+                    <i class="fas fa-info-circle"></i> ${paymentDetails}
                 </div>
             </div>
-        ` : ''}
+        </div>
     `;
 }
 
 // ============================================
-// ORDER ACTIONS (Checkout se compatible)
+// BANK TRANSFER DETAILS HTML GENERATOR
+// ============================================
+
+function getBankTransferHTML(order) {
+    if (order.paymentMethod !== 'bank' || order.paymentStatus !== 'pending_bank_transfer') return '';
+    
+    const bankDetails = order.bankTransferDetails || {
+        accountName: 'IRYA STONE LTD',
+        accountNumber: '12345678',
+        sortCode: '04-00-04',
+        iban: 'GB29NWBK60161331926819',
+        swift: 'NWBKGB2L',
+        reference: order.orderNumber || order.id.substring(0, 8).toUpperCase(),
+        amount: order.amountToPay || order.advancePayment || order.total || 0
+    };
+    
+    return `
+        <div class="payment-info" style="border-left-color: #ffc107;">
+            <h5><i class="fas fa-university"></i> Bank Transfer Instructions</h5>
+            <div class="payment-details">
+                <div style="margin-bottom: 15px;">
+                    <div style="font-weight: 600; color: #856404; margin-bottom: 10px;">
+                        <i class="fas fa-exclamation-triangle"></i> Please complete payment to confirm your order
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <div><strong>Account Name:</strong></div>
+                    <div>${bankDetails.accountName}</div>
+                    
+                    <div><strong>Account Number:</strong></div>
+                    <div>${bankDetails.accountNumber}</div>
+                    
+                    <div><strong>Sort Code:</strong></div>
+                    <div>${bankDetails.sortCode}</div>
+                    
+                    <div><strong>IBAN:</strong></div>
+                    <div style="font-family: monospace; font-size: 12px;">${bankDetails.iban}</div>
+                    
+                    <div><strong>SWIFT/BIC:</strong></div>
+                    <div>${bankDetails.swift}</div>
+                    
+                    <div><strong>Reference:</strong></div>
+                    <div style="font-weight: 600; color: var(--primary-gold);">${bankDetails.reference}</div>
+                    
+                    <div><strong>Amount to Pay:</strong></div>
+                    <div style="font-weight: 600; color: var(--primary-gold); font-size: 16px;">
+                        £${bankDetails.amount.toFixed(2)}
+                    </div>
+                </div>
+                
+                <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 6px; font-size: 12px;">
+                    <div style="display: flex; align-items: flex-start; gap: 10px;">
+                        <i class="fas fa-info-circle" style="color: #856404; margin-top: 2px;"></i>
+                        <div>
+                            <div style="font-weight: 600; color: #856404; margin-bottom: 5px;">Important:</div>
+                            <ul style="margin: 0; padding-left: 15px; color: #856404;">
+                                <li>Use the reference number when making the transfer</li>
+                                <li>Order will be processed once payment is confirmed</li>
+                                <li>Payment confirmation may take 1-2 business days</li>
+                                <li>Keep your transfer receipt for reference</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================
+// TRACKING TIMELINE GENERATOR
+// ============================================
+
+function getTrackingTimeline(order) {
+    if (!order.status && !order.createdAt) return '';
+    
+    const statuses = [
+        { 
+            id: 'pending_bank_transfer', 
+            label: 'Awaiting Payment', 
+            icon: 'fa-clock',
+            showForStatus: ['pending_bank_transfer'],
+            date: order.paymentStatus === 'pending_bank_transfer' ? order.createdAt : null
+        },
+        { 
+            id: 'ordered', 
+            label: 'Order Placed', 
+            icon: 'fa-shopping-cart',
+            showForStatus: ['pending', 'pending_bank_transfer', 'processing', 'shipped', 'delivered'],
+            date: order.createdAt
+        },
+        { 
+            id: 'confirmed', 
+            label: 'Order Confirmed', 
+            icon: 'fa-check-circle',
+            showForStatus: ['processing', 'shipped', 'delivered'],
+            date: order.confirmedAt || order.updatedAt
+        },
+        { 
+            id: 'processing', 
+            label: 'Processing', 
+            icon: 'fa-cogs',
+            showForStatus: ['processing', 'shipped', 'delivered'],
+            date: order.processingAt || order.updatedAt
+        },
+        { 
+            id: 'shipped', 
+            label: 'Shipped', 
+            icon: 'fa-shipping-fast',
+            showForStatus: ['shipped', 'delivered'],
+            date: order.shippedAt
+        },
+        { 
+            id: 'delivered', 
+            label: 'Delivered', 
+            icon: 'fa-home',
+            showForStatus: ['delivered'],
+            date: order.deliveredAt
+        }
+    ];
+    
+    // Filter statuses based on current order status
+    const currentStatus = order.paymentStatus === 'pending_bank_transfer' ? 'pending_bank_transfer' : order.status;
+    const applicableStatuses = statuses.filter(status => 
+        status.showForStatus.includes(currentStatus) || 
+        (status.date && status.showForStatus.some(s => 
+            ['pending', 'processing', 'shipped', 'delivered'].includes(s)
+        ))
+    );
+    
+    // Get current status index
+    const currentStatusIndex = applicableStatuses.findIndex(s => s.id === currentStatus);
+    
+    return `
+        <div class="tracking-timeline">
+            <div class="timeline-header">
+                <h4><i class="fas fa-shipping-fast"></i> Order Tracking</h4>
+                ${order.tracking?.id ? `<div class="tracking-id">Tracking ID: ${order.tracking.id}</div>` : ''}
+            </div>
+            <div class="timeline-steps">
+                ${applicableStatuses.map((status, index) => {
+                    const isCompleted = index <= currentStatusIndex;
+                    const isActive = index === currentStatusIndex;
+                    
+                    return `
+                        <div class="timeline-step">
+                            <div class="step-icon ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}">
+                                <i class="fas ${status.icon}"></i>
+                            </div>
+                            <div class="step-label">${status.label}</div>
+                            ${status.date ? `<div class="step-date">${formatDate(status.date)}</div>` : ''}
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+            
+            ${order.shippingAddress ? `
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                    <div style="font-size: 13px; color: var(--text-light); margin-bottom: 5px;">Shipping to:</div>
+                    <div style="font-size: 14px; color: var(--text-dark);">
+                        ${order.shippingAddress.fullName || 'Customer'}<br>
+                        ${order.shippingAddress.address1 || ''}<br>
+                        ${order.shippingAddress.address2 ? order.shippingAddress.address2 + '<br>' : ''}
+                        ${order.shippingAddress.city || ''}, ${order.shippingAddress.state || ''} ${order.shippingAddress.postalCode || ''}<br>
+                        ${order.shippingAddress.country || ''}
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+// ============================================
+// ORDER ACTIONS
 // ============================================
 
 function filterOrders(status) {
@@ -1290,24 +1542,39 @@ async function cancelOrder(orderId) {
     try {
         showLoading(true);
         
-        // Update order status in Firebase
-        await firebaseDB.collection('orders').doc(orderId).update({
-            status: 'cancelled',
-            paymentStatus: 'cancelled',
-            cancelledAt: new Date().toISOString()
-        });
+        const userId = authSystem.getUserId();
+        const order = userOrders.find(o => o.id === orderId);
         
-        // Also update in user's orders collection if exists
+        if (!order) {
+            showError('Order not found');
+            return;
+        }
+        
+        console.log(`Cancelling order ${orderId} for user ${userId}`);
+        
+        // Update in users/{userId}/orders collection
         try {
-            const userId = authSystem.getUserId();
-            await firebaseDB.collection('userOrders').doc(userId)
-                .collection('orders').doc(orderId).update({
-                    status: 'cancelled',
-                    paymentStatus: 'cancelled',
-                    cancelledAt: new Date().toISOString()
-                });
+            await firebaseDB.collection('users').doc(userId).collection('orders').doc(orderId).update({
+                status: 'cancelled',
+                paymentStatus: 'cancelled',
+                cancelledAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            });
+            console.log(`✅ Order cancelled in users/{userId}/orders`);
         } catch (error) {
-            console.log("User collection update skipped:", error.message);
+            console.log("❌ Could not update in users collection:", error.message);
+        }
+        
+        // Also update in main orders collection if exists
+        try {
+            await firebaseDB.collection('orders').doc(orderId).update({
+                status: 'cancelled',
+                paymentStatus: 'cancelled',
+                cancelledAt: new Date().toISOString()
+            });
+            console.log(`✅ Order cancelled in main orders collection`);
+        } catch (error) {
+            console.log("❌ Could not update in main orders:", error.message);
         }
         
         // Update local data
@@ -1325,7 +1592,7 @@ async function cancelOrder(orderId) {
         
     } catch (error) {
         console.error('Error cancelling order:', error);
-        showError('Failed to cancel order');
+        showError('Failed to cancel order: ' + error.message);
     } finally {
         showLoading(false);
     }
@@ -1337,33 +1604,55 @@ async function markPaymentComplete(orderId) {
     try {
         showLoading(true);
         
+        const userId = authSystem.getUserId();
         const order = userOrders.find(o => o.id === orderId);
+        
         if (!order) {
             showError('Order not found');
             return;
         }
         
-        // Update order status
-        await firebaseDB.collection('orders').doc(orderId).update({
+        console.log(`Marking payment complete for order ${orderId}`);
+        
+        // Update payment status
+        const updateData = {
             paymentStatus: 'payment_received',
-            updatedAt: new Date().toISOString()
-        });
+            updatedAt: new Date().toISOString(),
+            paymentConfirmedAt: new Date().toISOString()
+        };
+        
+        // Update in users/{userId}/orders collection
+        try {
+            await firebaseDB.collection('users').doc(userId).collection('orders').doc(orderId).update(updateData);
+            console.log(`✅ Payment marked complete in users/{userId}/orders`);
+        } catch (error) {
+            console.log("❌ Could not update in users collection:", error.message);
+        }
+        
+        // Also update in main orders collection if exists
+        try {
+            await firebaseDB.collection('orders').doc(orderId).update(updateData);
+            console.log(`✅ Payment marked complete in main orders`);
+        } catch (error) {
+            console.log("❌ Could not update in main orders:", error.message);
+        }
         
         // Update local data
         const orderIndex = userOrders.findIndex(o => o.id === orderId);
         if (orderIndex !== -1) {
             userOrders[orderIndex].paymentStatus = 'payment_received';
             userOrders[orderIndex].updatedAt = new Date().toISOString();
+            userOrders[orderIndex].paymentConfirmedAt = new Date().toISOString();
         }
         
         // Refresh display
         displayOrders();
         
-        showNotification('Payment status updated. Admin will now process your order.');
+        showNotification('✅ Payment status updated. Admin will now process your order.');
         
     } catch (error) {
         console.error('Error updating payment status:', error);
-        showError('Failed to update payment status');
+        showError('Failed to update payment status: ' + error.message);
     } finally {
         showLoading(false);
     }
@@ -1441,7 +1730,7 @@ function downloadInvoice(orderId) {
 }
 
 // ============================================
-// UTILITY FUNCTIONS (Checkout se same)
+// UTILITY FUNCTIONS
 // ============================================
 
 function getStatusText(status) {
@@ -1460,15 +1749,35 @@ function getStatusText(status) {
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-    }) + ' ' + date.toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        }) + ' ' + date.toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (error) {
+        return dateString;
+    }
+}
+
+function getCalculationInfo(item) {
+    if (!item.calculationData) return `Quantity: ${item.quantity || 1} pieces`;
+    
+    const unit = item.calculationData.unit || 'piece';
+    
+    if (unit === 'sqft') {
+        return `Area: ${item.calculationData.length || 1}ft × ${item.calculationData.width || 1}ft`;
+    } else if (unit === 'sqm') {
+        return `Area: ${item.calculationData.length || 1}m × ${item.calculationData.width || 1}m`;
+    } else if (unit === 'weight') {
+        return `Weight: ${item.calculationData.weight || 1}kg`;
+    } else {
+        return `Quantity: ${item.quantity || 1} pieces`;
+    }
 }
 
 function getDefaultImage(category) {
@@ -1501,7 +1810,6 @@ function showLoading(show) {
 }
 
 function showNotification(message) {
-    // Create notification element
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
@@ -1541,21 +1849,24 @@ function showNotification(message) {
 }
 
 function showError(message) {
-    alert(message);
+    alert('❌ ' + message);
 }
 
 function updateCartBadge() {
-    const userId = authSystem.getUserId();
-    
-    const cartKey = 'irya_local_cart_' + userId;
-    const cartData = localStorage.getItem(cartKey);
-    const cartItems = cartData ? JSON.parse(cartData) : [];
-    const count = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
-    
-    const cartBadge = document.getElementById('cartBadge');
-    if (cartBadge) {
-        cartBadge.textContent = count;
-        cartBadge.style.display = count > 0 ? 'flex' : 'none';
+    try {
+        const userId = authSystem.getUserId();
+        const cartKey = 'irya_local_cart_' + userId;
+        const cartData = localStorage.getItem(cartKey);
+        const cartItems = cartData ? JSON.parse(cartData) : [];
+        const count = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
+        
+        const cartBadge = document.getElementById('cartBadge');
+        if (cartBadge) {
+            cartBadge.textContent = count;
+            cartBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    } catch (error) {
+        console.error('Error updating cart badge:', error);
     }
 }
 
