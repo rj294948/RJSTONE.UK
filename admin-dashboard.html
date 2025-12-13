@@ -1,0 +1,2597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRYA STONE - Admin Dashboard</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-gold: #c9a227;
+            --gold-light: #f0d77c;
+            --gold-dark: #9c7c1f;
+            --stone-dark: #1a1a1a;
+            --stone-light: #f4f6f4;
+            --bg-light: #f7f9fc;
+            --text-dark: #222222;
+            --text-light: #666666;
+            --white: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --border-radius-lg: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        /* Admin Layout */
+        .admin-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .admin-sidebar {
+            width: 250px;
+            background: var(--stone-dark);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-md);
+            z-index: 100;
+        }
+
+        .admin-logo {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-logo i {
+            color: var(--primary-gold);
+            font-size: 24px;
+        }
+
+        .admin-logo h2 {
+            font-family: 'Roboto Slab', serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .admin-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0 15px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: var(--primary-gold);
+            color: white;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .admin-main {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .admin-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--stone-dark);
+        }
+
+        .admin-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background: var(--primary-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-gold);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-gold);
+            font-size: 20px;
+        }
+
+        .stat-trend {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+
+        .trend-down {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--stone-dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--stone-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Table Styles */
+        .admin-table-container {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            padding: 20px;
+            background: var(--bg-light);
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--stone-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .table-search {
+            position: relative;
+        }
+
+        .table-search input {
+            padding: 8px 15px 8px 35px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            width: 200px;
+            font-size: 13px;
+        }
+
+        .table-search i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .filter-select {
+            padding: 8px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 13px;
+            color: var(--text-dark);
+            cursor: pointer;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .admin-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--stone-dark);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .admin-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            color: var(--text-dark);
+        }
+
+        .admin-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-shipped {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-delivered {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .payment-pending {
+            background: #ffeaa7;
+            color: #856404;
+        }
+
+        .payment-verified {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .payment-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: white;
+        }
+
+        .btn-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-view {
+            background: var(--info);
+        }
+
+        .btn-edit {
+            background: var(--warning);
+        }
+
+        .btn-delete {
+            background: var(--danger);
+        }
+
+        .btn-verify {
+            background: var(--success);
+        }
+
+        .btn-ship {
+            background: #17a2b8;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--stone-dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--stone-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-gold);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--gold-dark);
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        /* Tabs */
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-gold);
+            color: white;
+            border-color: var(--primary-gold);
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(201, 162, 39, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-gold);
+            animation: spin 1s ease-in-out infinite;
+            z-index: 9999;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .admin-sidebar {
+                width: 200px;
+            }
+            .admin-main {
+                margin-left: 200px;
+            }
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                display: none;
+            }
+            .admin-main {
+                margin-left: 0;
+            }
+            .admin-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            .table-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .table-search input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loadingSpinner"></div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content" id="modalContent">
+        <!-- Modal content will be loaded here -->
+    </div>
+</div>
+
+<!-- Admin Wrapper -->
+<div class="admin-wrapper">
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+        <div class="admin-logo">
+            <i class="fa-solid fa-gem"></i>
+            <h2>IRYA ADMIN</h2>
+        </div>
+        
+        <div class="admin-nav">
+            <div class="nav-item active" onclick="showSection('dashboard')">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </div>
+            
+            <div class="nav-item" onclick="showSection('orders')">
+                <i class="fas fa-box"></i>
+                <span>Orders</span>
+                <span class="nav-badge" id="pendingOrdersBadge">0</span>
+            </div>
+            
+            <div class="nav-item" onclick="showSection('payments')">
+                <i class="fas fa-money-check"></i>
+                <span>Payments</span>
+                <span class="nav-badge" id="pendingPaymentsBadge">0</span>
+            </div>
+            
+            <div class="nav-item" onclick="showSection('shipping')">
+                <i class="fas fa-shipping-fast"></i>
+                <span>Shipping</span>
+                <span class="nav-badge" id="readyToShipBadge">0</span>
+            </div>
+            
+            <div class="nav-item" onclick="showSection('customers')">
+                <i class="fas fa-users"></i>
+                <span>Customers</span>
+            </div>
+            
+            <div class="nav-item" onclick="showSection('products')">
+                <i class="fas fa-gem"></i>
+                <span>Products</span>
+            </div>
+            
+            <div class="nav-item" onclick="showSection('analytics')">
+                <i class="fas fa-chart-bar"></i>
+                <span>Analytics</span>
+            </div>
+            
+            <div class="nav-item" onclick="showSection('settings')">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+            
+            <div style="margin-top: 30px; padding: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div class="nav-item" onclick="adminSignOut()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="admin-main">
+        <!-- Header -->
+        <div class="admin-header">
+            <h1>Admin Dashboard</h1>
+            <div class="admin-actions">
+                <div class="admin-user" id="adminUserInfo">
+                    <!-- Admin info will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Section -->
+        <div id="dashboardSection">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <span class="stat-trend trend-up" id="revenueTrend">+12%</span>
+                    </div>
+                    <div class="stat-number" id="totalRevenue">£0.00</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <span class="stat-trend trend-up" id="ordersTrend">+8%</span>
+                    </div>
+                    <div class="stat-number" id="totalOrders">0</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <span class="stat-trend trend-up" id="customersTrend">+5%</span>
+                    </div>
+                    <div class="stat-number" id="totalCustomers">0</div>
+                    <div class="stat-label">Total Customers</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <span class="stat-trend trend-down" id="pendingTrend">-3%</span>
+                    </div>
+                    <div class="stat-number" id="pendingPayments">0</div>
+                    <div class="stat-label">Pending Payments</div>
+                </div>
+            </div>
+            
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-line"></i> Revenue Overview</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-pie"></i> Order Status</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Orders Table -->
+            <div class="admin-table-container">
+                <div class="table-header">
+                    <h3><i class="fas fa-history"></i> Recent Orders</h3>
+                    <div class="table-filters">
+                        <div class="table-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="orderSearch" placeholder="Search orders...">
+                        </div>
+                        <select class="filter-select" id="orderFilter">
+                            <option value="all">All Orders</option>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                        </select>
+                    </div>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentOrdersTable">
+                        <!-- Orders will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Orders Section (Hidden by default) -->
+        <div id="ordersSection" style="display: none;">
+            <div class="table-header">
+                <h3><i class="fas fa-box"></i> All Orders</h3>
+                <div class="table-filters">
+                    <div class="table-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="allOrdersSearch" placeholder="Search all orders...">
+                    </div>
+                    <select class="filter-select" id="allOrdersFilter">
+                        <option value="all">All Orders</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <input type="date" class="filter-select" id="ordersDateFilter">
+                </div>
+            </div>
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Amount</th>
+                            <th>Payment Type</th>
+                            <th>Status</th>
+                            <th>Payment Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allOrdersTable">
+                        <!-- All orders will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Payments Section (Hidden by default) -->
+        <div id="paymentsSection" style="display: none;">
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="showPaymentTab('pending')">Pending Verification</button>
+                <button class="tab-btn" onclick="showPaymentTab('verified')">Verified</button>
+                <button class="tab-btn" onclick="showPaymentTab('rejected')">Rejected</button>
+                <button class="tab-btn" onclick="showPaymentTab('remaining')">Remaining Payments</button>
+            </div>
+            
+            <div class="admin-table-container">
+                <div class="table-header">
+                    <h3><i class="fas fa-money-check"></i> Payment Verifications</h3>
+                    <div class="table-filters">
+                        <div class="table-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="paymentsSearch" placeholder="Search payments...">
+                        </div>
+                        <select class="filter-select" id="paymentsFilter">
+                            <option value="all">All Payments</option>
+                            <option value="advance">Advance (30%)</option>
+                            <option value="remaining">Remaining (70%)</option>
+                            <option value="full">Full Payment</option>
+                        </select>
+                    </div>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Payment Type</th>
+                            <th>Submitted On</th>
+                            <th>Reference</th>
+                            <th>Status</th>
+                            <th>Receipt</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentsTable">
+                        <!-- Payments will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Shipping Section (Hidden by default) -->
+        <div id="shippingSection" style="display: none;">
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="showShippingTab('ready')">Ready to Ship</button>
+                <button class="tab-btn" onclick="showShippingTab('shipped')">Shipped</button>
+                <button class="tab-btn" onclick="showShippingTab('delivered')">Delivered</button>
+            </div>
+            
+            <div class="admin-table-container">
+                <div class="table-header">
+                    <h3><i class="fas fa-shipping-fast"></i> Shipping Management</h3>
+                    <button class="btn btn-primary" onclick="bulkShippingUpdate()">
+                        <i class="fas fa-truck"></i> Bulk Update
+                    </button>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAllShipping"></th>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Shipping Address</th>
+                            <th>Items</th>
+                            <th>Weight/Dimensions</th>
+                            <th>Status</th>
+                            <th>Estimated Delivery</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shippingTable">
+                        <!-- Shipping orders will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Customers Section (Hidden by default) -->
+        <div id="customersSection" style="display: none;">
+            <div class="admin-table-container">
+                <div class="table-header">
+                    <h3><i class="fas fa-users"></i> Customers</h3>
+                    <div class="table-filters">
+                        <div class="table-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="customersSearch" placeholder="Search customers...">
+                        </div>
+                        <button class="btn btn-primary" onclick="exportCustomers()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Customer ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Total Orders</th>
+                            <th>Total Spent</th>
+                            <th>Last Order</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTable">
+                        <!-- Customers will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Products Section (Hidden by default) -->
+        <div id="productsSection" style="display: none;">
+            <div class="admin-table-container">
+                <div class="table-header">
+                    <h3><i class="fas fa-gem"></i> Products</h3>
+                    <div class="table-filters">
+                        <div class="table-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="productsSearch" placeholder="Search products...">
+                        </div>
+                        <select class="filter-select" id="categoryFilter">
+                            <option value="all">All Categories</option>
+                            <option value="kota">Kota Stone</option>
+                            <option value="sandstone">Sandstone</option>
+                            <option value="granite">Granite</option>
+                            <option value="marble">Marble</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showAddProductModal()">
+                            <i class="fas fa-plus"></i> Add Product
+                        </button>
+                    </div>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Orders</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTable">
+                        <!-- Products will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Analytics Section (Hidden by default) -->
+        <div id="analyticsSection" style="display: none;">
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-bar"></i> Monthly Sales</h3>
+                        <select class="filter-select" id="analyticsYear">
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="monthlySalesChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-pie"></i> Product Categories</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-map-marker-alt"></i> Customer Locations</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="locationChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-line"></i> Payment Methods</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="paymentMethodChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Section (Hidden by default) -->
+        <div id="settingsSection" style="display: none;">
+            <div class="admin-table-container">
+                <div class="table-header">
+                    <h3><i class="fas fa-cog"></i> Admin Settings</h3>
+                </div>
+                <div style="padding: 30px;">
+                    <h4 style="margin-bottom: 20px;">System Settings</h4>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Allowed Admin Emails</label>
+                        <div id="adminEmailsList">
+                            <!-- Admin emails will be loaded here -->
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <input type="email" id="newAdminEmail" placeholder="Enter email address" class="form-control">
+                            <button class="btn btn-primary" onclick="addAdminEmail()">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Payment Terms</label>
+                        <div class="form-row">
+                            <div>
+                                <label>Advance Payment Percentage</label>
+                                <input type="number" id="advancePercent" value="30" class="form-control">
+                            </div>
+                            <div>
+                                <label>Discount for Full Payment (%)</label>
+                                <input type="number" id="discountPercent" value="5" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Bank Account Details</label>
+                        <div class="form-row">
+                            <div>
+                                <label>Account Name</label>
+                                <input type="text" id="bankAccountName" value="IRYA STONE LTD" class="form-control">
+                            </div>
+                            <div>
+                                <label>Account Number</label>
+                                <input type="text" id="bankAccountNumber" value="12345678" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-row" style="margin-top: 10px;">
+                            <div>
+                                <label>Sort Code</label>
+                                <input type="text" id="bankSortCode" value="04-00-04" class="form-control">
+                            </div>
+                            <div>
+                                <label>IBAN</label>
+                                <input type="text" id="bankIban" value="GB29NWBK60161331926819" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="saveSettings()">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+    authDomain: "iryastone-uk.firebaseapp.com",
+    projectId: "iryastone-uk",
+    storageBucket: "iryastone-uk.firebasestorage.app",
+    messagingSenderId: "110940910896",
+    appId: "1:110940910896:web:b25e92127118665e5c84f5",
+    measurementId: "G-6YM1FLYN48"
+};
+
+// ============================================
+// ALLOWED ADMIN EMAILS (YOUR EMAILS)
+// ============================================
+
+const ALLOWED_ADMIN_EMAILS = [
+    "ravijain236129@gmail.com",           // REPLACE WITH YOUR EMAIL
+    "ravijain236129@gmail.com",             // REPLACE WITH YOUR EMAIL
+    "admin@iryastone.com"              // Keep this one
+];
+
+// ============================================
+// ADMIN SYSTEM INITIALIZATION
+// ============================================
+
+let firebaseApp, firebaseAuth, firebaseDB;
+let currentAdmin = null;
+let charts = {};
+let currentSection = 'dashboard';
+
+class AdminSystem {
+    constructor() {
+        this.adminKey = 'irya_admin_auth';
+        this.settingsKey = 'irya_admin_settings';
+    }
+    
+    async initialize() {
+        try {
+            // Check existing session
+            const adminData = localStorage.getItem(this.adminKey);
+            if (!adminData) {
+                this.redirectToLogin();
+                return;
+            }
+            
+            this.currentAdmin = JSON.parse(adminData);
+            
+            // Initialize Firebase
+            await this.initializeFirebase();
+            
+            // Verify admin status
+            const isAdmin = await this.verifyAdminStatus();
+            if (!isAdmin) {
+                this.redirectToLogin();
+                return;
+            }
+            
+            // Initialize dashboard
+            this.loadAdminInfo();
+            this.loadDashboardData();
+            this.setupEventListeners();
+            
+            // Start real-time updates
+            this.startRealtimeUpdates();
+            
+        } catch (error) {
+            console.error('Admin system initialization error:', error);
+            this.redirectToLogin();
+        }
+    }
+    
+    async initializeFirebase() {
+        if (typeof firebase === 'undefined') {
+            throw new Error('Firebase SDK not loaded');
+        }
+        
+        if (!firebase.apps.length) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+        } else {
+            firebaseApp = firebase.app();
+        }
+        
+        firebaseAuth = firebase.auth();
+        firebaseDB = firebase.firestore();
+        
+        console.log('✅ Firebase initialized for admin dashboard');
+    }
+    
+    async verifyAdminStatus() {
+        try {
+            // Check if user is authenticated with Firebase
+            const user = firebaseAuth.currentUser;
+            if (!user) {
+                console.log('❌ No Firebase user found');
+                return false;
+            }
+            
+            // Verify email is in allowed list
+            if (!ALLOWED_ADMIN_EMAILS.includes(user.email)) {
+                console.log('❌ Email not authorized:', user.email);
+                await this.signOut();
+                return false;
+            }
+            
+            // Check admin collection
+            const adminSnapshot = await firebaseDB.collection('admins')
+                .where('email', '==', user.email)
+                .where('isActive', '==', true)
+                .limit(1)
+                .get();
+            
+            if (adminSnapshot.empty) {
+                // Create admin entry if not exists
+                await this.createAdminEntry(user);
+            }
+            
+            return true;
+            
+        } catch (error) {
+            console.error('Admin verification error:', error);
+            return false;
+        }
+    }
+    
+    async createAdminEntry(user) {
+        try {
+            const adminData = {
+                email: user.email,
+                name: user.displayName || user.email.split('@')[0],
+                role: 'super_admin',
+                permissions: ['all'],
+                isActive: true,
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+            };
+            
+            await firebaseDB.collection('admins').add(adminData);
+            console.log('✅ Admin entry created for:', user.email);
+        } catch (error) {
+            console.error('Error creating admin entry:', error);
+        }
+    }
+    
+    loadAdminInfo() {
+        const adminUserInfo = document.getElementById('adminUserInfo');
+        if (adminUserInfo && this.currentAdmin) {
+            adminUserInfo.innerHTML = `
+                <div class="user-avatar">
+                    ${this.currentAdmin.displayName?.charAt(0).toUpperCase() || 'A'}
+                </div>
+                <div>
+                    <div style="font-weight: 500;">${this.currentAdmin.displayName || 'Admin'}</div>
+                    <div style="font-size: 11px; color: var(--text-light);">Super Admin</div>
+                </div>
+            `;
+        }
+    }
+    
+    async loadDashboardData() {
+        try {
+            showLoading(true);
+            
+            // Load stats
+            await this.loadStats();
+            
+            // Load recent orders
+            await this.loadRecentOrders();
+            
+            // Initialize charts
+            this.initializeCharts();
+            
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+        } finally {
+            showLoading(false);
+        }
+    }
+    
+    async loadStats() {
+        try {
+            // Get today's date
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            // Total orders
+            const ordersSnapshot = await firebaseDB.collection('orders').get();
+            const totalOrders = ordersSnapshot.size;
+            document.getElementById('totalOrders').textContent = totalOrders;
+            
+            // Total revenue
+            let totalRevenue = 0;
+            let yesterdayRevenue = 0;
+            ordersSnapshot.forEach(doc => {
+                const order = doc.data();
+                totalRevenue += order.total || 0;
+                
+                // Calculate yesterday's revenue
+                const orderDate = new Date(order.createdAt);
+                if (orderDate >= yesterday && orderDate < today) {
+                    yesterdayRevenue += order.total || 0;
+                }
+            });
+            document.getElementById('totalRevenue').textContent = '£' + totalRevenue.toFixed(2);
+            
+            // Revenue trend
+            const revenueTrend = yesterdayRevenue > 0 ? 
+                (((totalRevenue - yesterdayRevenue) / yesterdayRevenue) * 100).toFixed(1) : '0';
+            const revenueTrendElement = document.getElementById('revenueTrend');
+            revenueTrendElement.textContent = `${parseFloat(revenueTrend) > 0 ? '+' : ''}${revenueTrend}%`;
+            revenueTrendElement.className = `stat-trend ${parseFloat(revenueTrend) >= 0 ? 'trend-up' : 'trend-down'}`;
+            
+            // Total customers
+            const customersSnapshot = await firebaseDB.collection('users').get();
+            const totalCustomers = customersSnapshot.size;
+            document.getElementById('totalCustomers').textContent = totalCustomers;
+            
+            // Pending payments
+            const pendingPayments = await this.getPendingPaymentsCount();
+            document.getElementById('pendingPayments').textContent = pendingPayments;
+            
+            // Update badges
+            document.getElementById('pendingOrdersBadge').textContent = this.getPendingOrdersCount(ordersSnapshot);
+            document.getElementById('pendingPaymentsBadge').textContent = pendingPayments;
+            document.getElementById('readyToShipBadge').textContent = this.getReadyToShipCount(ordersSnapshot);
+            
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+    
+    async getPendingPaymentsCount() {
+        try {
+            const paymentsSnapshot = await firebaseDB.collection('payment_confirmations')
+                .where('status', '==', 'pending')
+                .get();
+            return paymentsSnapshot.size;
+        } catch (error) {
+            return 0;
+        }
+    }
+    
+    getPendingOrdersCount(ordersSnapshot) {
+        let count = 0;
+        ordersSnapshot.forEach(doc => {
+            const order = doc.data();
+            if (order.status === 'pending' || order.paymentStatus === 'pending_bank_transfer') {
+                count++;
+            }
+        });
+        return count;
+    }
+    
+    getReadyToShipCount(ordersSnapshot) {
+        let count = 0;
+        ordersSnapshot.forEach(doc => {
+            const order = doc.data();
+            if (order.status === 'processing' && 
+                (order.paymentStatus === 'payment_verified' || order.paymentStatus === 'paid')) {
+                count++;
+            }
+        });
+        return count;
+    }
+    
+    async loadRecentOrders() {
+        try {
+            const ordersSnapshot = await firebaseDB.collection('orders')
+                .orderBy('createdAt', 'desc')
+                .limit(10)
+                .get();
+            
+            const tableBody = document.getElementById('recentOrdersTable');
+            tableBody.innerHTML = '';
+            
+            if (ordersSnapshot.empty) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-light);">
+                            <i class="fas fa-box-open" style="font-size: 32px; margin-bottom: 10px;"></i>
+                            <div>No orders found</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            ordersSnapshot.forEach(doc => {
+                const order = doc.data();
+                const row = this.createOrderTableRow(doc.id, order);
+                tableBody.appendChild(row);
+            });
+            
+        } catch (error) {
+            console.error('Error loading recent orders:', error);
+        }
+    }
+    
+    createOrderTableRow(orderId, order) {
+        const row = document.createElement('tr');
+        
+        // Status badge
+        const statusBadge = `<span class="status-badge status-${order.status || 'pending'}">${this.getStatusText(order.status || 'pending')}</span>`;
+        
+        // Payment status badge
+        let paymentStatus = order.paymentStatus || 'pending';
+        let paymentBadge = `<span class="status-badge payment-${paymentStatus.includes('pending') ? 'pending' : paymentStatus}">${this.getPaymentStatusText(paymentStatus)}</span>`;
+        
+        // Format date
+        const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A';
+        
+        // Customer name
+        const customerName = order.userName || order.shippingAddress?.fullName || 'Customer';
+        
+        row.innerHTML = `
+            <td><strong>${order.orderNumber || orderId.substring(0, 8)}</strong></td>
+            <td>${customerName}</td>
+            <td>${orderDate}</td>
+            <td>£${order.total?.toFixed(2) || '0.00'}</td>
+            <td>${statusBadge}</td>
+            <td>${paymentBadge}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn-icon btn-view" onclick="viewOrderDetails('${orderId}')" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    ${(order.status === 'pending' || order.paymentStatus === 'pending_bank_transfer') ? `
+                        <button class="btn-icon btn-verify" onclick="verifyPayment('${orderId}')" title="Verify Payment">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    ` : ''}
+                    ${order.status === 'processing' ? `
+                        <button class="btn-icon btn-ship" onclick="updateShipping('${orderId}')" title="Update Shipping">
+                            <i class="fas fa-shipping-fast"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            </td>
+        `;
+        
+        return row;
+    }
+    
+    initializeCharts() {
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        charts.revenue = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Revenue (£)',
+                    data: [12000, 19000, 15000, 25000, 22000, 30000],
+                    borderColor: '#c9a227',
+                    backgroundColor: 'rgba(201, 162, 39, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        
+        // Order Status Chart
+        const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+        charts.orderStatus = new Chart(orderStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+                datasets: [{
+                    data: [5, 12, 8, 25, 2],
+                    backgroundColor: [
+                        '#fff3cd',
+                        '#cce5ff',
+                        '#d4edda',
+                        '#d1ecf1',
+                        '#f8d7da'
+                    ],
+                    borderColor: [
+                        '#856404',
+                        '#004085',
+                        '#155724',
+                        '#0c5460',
+                        '#721c24'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    }
+    
+    setupEventListeners() {
+        // Search functionality
+        document.getElementById('orderSearch')?.addEventListener('input', (e) => {
+            this.filterTable('recentOrdersTable', e.target.value);
+        });
+        
+        // Filter functionality
+        document.getElementById('orderFilter')?.addEventListener('change', (e) => {
+            this.filterOrdersByStatus(e.target.value);
+        });
+    }
+    
+    filterTable(tableId, searchText) {
+        const table = document.getElementById(tableId);
+        const rows = table.getElementsByTagName('tr');
+        const searchLower = searchText.toLowerCase();
+        
+        for (let row of rows) {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchLower) ? '' : 'none';
+        }
+    }
+    
+    filterOrdersByStatus(status) {
+        const table = document.getElementById('recentOrdersTable');
+        const rows = table.getElementsByTagName('tr');
+        
+        for (let row of rows) {
+            if (status === 'all') {
+                row.style.display = '';
+                continue;
+            }
+            
+            const statusText = row.cells[4]?.textContent.toLowerCase();
+            row.style.display = statusText.includes(status) ? '' : 'none';
+        }
+    }
+    
+    async startRealtimeUpdates() {
+        // Listen for new orders
+        firebaseDB.collection('orders')
+            .orderBy('createdAt', 'desc')
+            .limit(1)
+            .onSnapshot((snapshot) => {
+                if (!snapshot.empty) {
+                    this.loadStats();
+                    this.loadRecentOrders();
+                }
+            });
+        
+        // Listen for payment updates
+        firebaseDB.collection('payment_confirmations')
+            .where('status', '==', 'pending')
+            .onSnapshot((snapshot) => {
+                this.updatePaymentBadges(snapshot.size);
+            });
+    }
+    
+    updatePaymentBadges(count) {
+        const badge = document.getElementById('pendingPaymentsBadge');
+        if (badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+    
+    getStatusText(status) {
+        const statusMap = {
+            'pending': 'Pending',
+            'pending_bank_transfer': 'Awaiting Payment',
+            'processing': 'Processing',
+            'shipped': 'Shipped',
+            'delivered': 'Delivered',
+            'cancelled': 'Cancelled'
+        };
+        return statusMap[status] || status;
+    }
+    
+    getPaymentStatusText(status) {
+        const statusMap = {
+            'pending': 'Pending',
+            'pending_bank_transfer': 'Awaiting',
+            'payment_submitted': 'Submitted',
+            'payment_verified': 'Verified',
+            'paid': 'Paid',
+            'cancelled': 'Cancelled'
+        };
+        return statusMap[status] || status;
+    }
+    
+    redirectToLogin() {
+        window.location.href = 'admin-login.html';
+    }
+    
+    async signOut() {
+        try {
+            await firebaseAuth.signOut();
+            localStorage.removeItem(this.adminKey);
+            this.redirectToLogin();
+        } catch (error) {
+            console.error('Sign out error:', error);
+        }
+    }
+}
+
+// ============================================
+// GLOBAL FUNCTIONS
+// ============================================
+
+let adminSystem;
+
+async function initializeAdminDashboard() {
+    try {
+        adminSystem = new AdminSystem();
+        await adminSystem.initialize();
+    } catch (error) {
+        console.error('Dashboard initialization error:', error);
+        window.location.href = 'admin-login.html';
+    }
+}
+
+function showSection(section) {
+    // Hide all sections
+    document.querySelectorAll('[id$="Section"]').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    // Show selected section
+    document.getElementById(section + 'Section').style.display = 'block';
+    
+    // Update active nav item
+    document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+    
+    // Load section data
+    currentSection = section;
+    loadSectionData(section);
+}
+
+function loadSectionData(section) {
+    switch(section) {
+        case 'orders':
+            loadAllOrders();
+            break;
+        case 'payments':
+            loadPayments();
+            break;
+        case 'shipping':
+            loadShipping();
+            break;
+        case 'customers':
+            loadCustomers();
+            break;
+        case 'products':
+            loadProducts();
+            break;
+        case 'analytics':
+            loadAnalytics();
+            break;
+        case 'settings':
+            loadSettings();
+            break;
+    }
+}
+
+async function loadAllOrders() {
+    try {
+        showLoading(true);
+        
+        const ordersSnapshot = await firebaseDB.collection('orders')
+            .orderBy('createdAt', 'desc')
+            .get();
+        
+        const tableBody = document.getElementById('allOrdersTable');
+        tableBody.innerHTML = '';
+        
+        if (ordersSnapshot.empty) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-light);">
+                        <i class="fas fa-box-open" style="font-size: 32px; margin-bottom: 10px;"></i>
+                        <div>No orders found</div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        ordersSnapshot.forEach(doc => {
+            const order = doc.data();
+            const row = createAllOrdersTableRow(doc.id, order);
+            tableBody.appendChild(row);
+        });
+        
+    } catch (error) {
+        console.error('Error loading all orders:', error);
+    } finally {
+        showLoading(false);
+    }
+}
+
+function createAllOrdersTableRow(orderId, order) {
+    const row = document.createElement('tr');
+    
+    // Status badge
+    const status = order.status || 'pending';
+    const statusBadge = `<span class="status-badge status-${status}">${adminSystem.getStatusText(status)}</span>`;
+    
+    // Payment status badge
+    let paymentStatus = order.paymentStatus || 'pending';
+    let paymentClass = paymentStatus.includes('pending') ? 'pending' : 
+                      paymentStatus.includes('verified') ? 'verified' : 
+                      paymentStatus.includes('rejected') ? 'rejected' : paymentStatus;
+    let paymentBadge = `<span class="status-badge payment-${paymentClass}">${adminSystem.getPaymentStatusText(paymentStatus)}</span>`;
+    
+    // Format date
+    const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A';
+    
+    // Customer name
+    const customerName = order.userName || order.shippingAddress?.fullName || 'Customer';
+    
+    // Payment type
+    const paymentType = order.paymentType === 'advance' ? '30% Advance' : 'Full Payment';
+    
+    // Items count
+    const itemsCount = order.items?.length || 0;
+    
+    row.innerHTML = `
+        <td><strong>${order.orderNumber || orderId.substring(0, 8)}</strong></td>
+        <td>${customerName}</td>
+        <td>${orderDate}</td>
+        <td>${itemsCount} items</td>
+        <td>£${order.total?.toFixed(2) || '0.00'}</td>
+        <td>${paymentType}</td>
+        <td>${statusBadge}</td>
+        <td>${paymentBadge}</td>
+        <td>
+            <div class="action-buttons">
+                <button class="btn-icon btn-view" onclick="viewOrderDetails('${orderId}')" title="View Details">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn-icon btn-edit" onclick="editOrder('${orderId}')" title="Edit Order">
+                    <i class="fas fa-edit"></i>
+                </button>
+                ${status === 'pending' ? `
+                    <button class="btn-icon btn-delete" onclick="cancelOrder('${orderId}')" title="Cancel Order">
+                        <i class="fas fa-times"></i>
+                    </button>
+                ` : ''}
+            </div>
+        </td>
+    `;
+    
+    return row;
+}
+
+async function viewOrderDetails(orderId) {
+    try {
+        showLoading(true);
+        
+        const orderDoc = await firebaseDB.collection('orders').doc(orderId).get();
+        if (!orderDoc.exists) {
+            showError('Order not found');
+            return;
+        }
+        
+        const order = orderDoc.data();
+        const modalContent = createOrderDetailsModal(orderId, order);
+        
+        showModal('Order Details', modalContent);
+        
+    } catch (error) {
+        console.error('Error viewing order:', error);
+        showError('Failed to load order details');
+    } finally {
+        showLoading(false);
+    }
+}
+
+function createOrderDetailsModal(orderId, order) {
+    const itemsHTML = (order.items || []).map(item => `
+        <div style="display: flex; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;">
+            <img src="${item.image || 'https://via.placeholder.com/80'}" 
+                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 5px;">${item.name || 'Product'}</div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${item.category || 'General'}</div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Quantity: ${item.quantity || 1}</div>
+                <div style="font-weight: 600; color: #c9a227;">£${item.calculatedPrice?.toFixed(2) || '0.00'}</div>
+            </div>
+        </div>
+    `).join('');
+    
+    const address = order.shippingAddress || {};
+    
+    return `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h4 style="margin-bottom: 15px; color: var(--stone-dark);">
+                    <i class="fas fa-info-circle"></i> Order Information
+                </h4>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <div style="margin-bottom: 10px;">
+                        <strong>Order Number:</strong> ${order.orderNumber || orderId}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Customer:</strong> ${order.userName || address.fullName || 'Customer'}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Email:</strong> ${order.userEmail || address.email || 'N/A'}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Phone:</strong> ${address.phone || 'N/A'}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Order Date:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h4 style="margin-bottom: 15px; color: var(--stone-dark);">
+                    <i class="fas fa-money-bill-wave"></i> Payment Information
+                </h4>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <div style="margin-bottom: 10px;">
+                        <strong>Total Amount:</strong> £${order.total?.toFixed(2) || '0.00'}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Payment Method:</strong> ${order.paymentMethod || 'Bank Transfer'}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Payment Type:</strong> ${order.paymentType === 'advance' ? '30% Advance' : 'Full Payment'}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Payment Status:</strong> 
+                        <span class="status-badge payment-${order.paymentStatus?.includes('pending') ? 'pending' : order.paymentStatus}" 
+                              style="margin-left: 10px;">
+                            ${adminSystem.getPaymentStatusText(order.paymentStatus || 'pending')}
+                        </span>
+                    </div>
+                    ${order.paymentType === 'advance' ? `
+                        <div style="margin-bottom: 10px;">
+                            <strong>Advance Paid:</strong> £${order.advancePayment?.toFixed(2) || '0.00'}
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong>Remaining:</strong> £${order.remainingPayment?.toFixed(2) || '0.00'}
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h4 style="margin-bottom: 15px; color: var(--stone-dark);">
+                <i class="fas fa-box"></i> Order Items
+            </h4>
+            ${itemsHTML}
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h4 style="margin-bottom: 15px; color: var(--stone-dark);">
+                <i class="fas fa-map-marker-alt"></i> Shipping Address
+            </h4>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                <div>${address.fullName || ''}</div>
+                <div>${address.address1 || ''}</div>
+                <div>${address.address2 || ''}</div>
+                <div>${address.city || ''}, ${address.state || ''} ${address.postalCode || ''}</div>
+                <div>${address.country || ''}</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button class="btn btn-primary" onclick="printOrder('${orderId}')">
+                <i class="fas fa-print"></i> Print Order
+            </button>
+            <button class="btn btn-secondary" onclick="closeModal()">
+                Close
+            </button>
+        </div>
+    `;
+}
+
+async function verifyPayment(orderId) {
+    try {
+        const orderDoc = await firebaseDB.collection('orders').doc(orderId).get();
+        if (!orderDoc.exists) {
+            showError('Order not found');
+            return;
+        }
+        
+        const order = orderDoc.data();
+        const modalContent = `
+            <h4 style="margin-bottom: 20px;">Verify Payment for Order #${order.orderNumber}</h4>
+            
+            <div class="form-group">
+                <label class="form-label">Payment Amount (£)</label>
+                <input type="number" id="paymentAmount" class="form-control" 
+                       value="${order.paymentType === 'advance' ? order.advancePayment : order.total}" 
+                       step="0.01">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Reference Number</label>
+                <input type="text" id="referenceNumber" class="form-control" placeholder="Enter transaction reference">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Payment Date</label>
+                <input type="date" id="paymentDate" class="form-control" value="${new Date().toISOString().split('T')[0]}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea id="paymentNotes" class="form-control" rows="3" placeholder="Add any notes..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="confirmPaymentVerification('${orderId}')">
+                    <i class="fas fa-check"></i> Verify Payment
+                </button>
+                <button class="btn btn-secondary" onclick="rejectPayment('${orderId}')">
+                    <i class="fas fa-times"></i> Reject Payment
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal()">
+                    Cancel
+                </button>
+            </div>
+        `;
+        
+        showModal('Verify Payment', modalContent);
+        
+    } catch (error) {
+        console.error('Error verifying payment:', error);
+        showError('Failed to load payment details');
+    }
+}
+
+async function confirmPaymentVerification(orderId) {
+    try {
+        showLoading(true);
+        
+        const amount = document.getElementById('paymentAmount').value;
+        const reference = document.getElementById('referenceNumber').value;
+        const date = document.getElementById('paymentDate').value;
+        const notes = document.getElementById('paymentNotes').value;
+        
+        if (!amount || !reference) {
+            showError('Please fill in all required fields');
+            return;
+        }
+        
+        // Update order payment status
+        await firebaseDB.collection('orders').doc(orderId).update({
+            paymentStatus: 'payment_verified',
+            paymentVerifiedAt: new Date().toISOString(),
+            status: 'processing',
+            paymentReference: reference,
+            updatedAt: new Date().toISOString()
+        });
+        
+        // Send notification to customer
+        const orderDoc = await firebaseDB.collection('orders').doc(orderId).get();
+        const order = orderDoc.data();
+        
+        if (order.userId) {
+            await sendNotificationToUser(order.userId, {
+                type: 'payment_verified',
+                title: 'Payment Verified',
+                message: `Your payment for order #${order.orderNumber} has been verified. Order is now being processed.`,
+                orderId: orderId,
+                orderNumber: order.orderNumber
+            });
+        }
+        
+        closeModal();
+        showNotification('✅ Payment verified successfully!');
+        
+        // Reload data
+        if (currentSection === 'dashboard') {
+            adminSystem.loadStats();
+            adminSystem.loadRecentOrders();
+        } else if (currentSection === 'orders') {
+            loadAllOrders();
+        }
+        
+    } catch (error) {
+        console.error('Error confirming payment:', error);
+        showError('Failed to verify payment');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function updateShipping(orderId) {
+    try {
+        const orderDoc = await firebaseDB.collection('orders').doc(orderId).get();
+        if (!orderDoc.exists) {
+            showError('Order not found');
+            return;
+        }
+        
+        const order = orderDoc.data();
+        const modalContent = `
+            <h4 style="margin-bottom: 20px;">Update Shipping for Order #${order.orderNumber}</h4>
+            
+            <div class="form-group">
+                <label class="form-label">Shipping Status</label>
+                <select id="shippingStatus" class="form-control">
+                    <option value="processing">Processing</option>
+                    <option value="ready_to_ship">Ready to Ship</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Tracking Number</label>
+                <input type="text" id="trackingNumber" class="form-control" placeholder="Enter tracking number">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Carrier</label>
+                <select id="carrier" class="form-control">
+                    <option value="DHL">DHL</option>
+                    <option value="FedEx">FedEx</option>
+                    <option value="UPS">UPS</option>
+                    <option value="Royal Mail">Royal Mail</option>
+                    <option value="DPD">DPD</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Shipping Date</label>
+                <input type="date" id="shippingDate" class="form-control" value="${new Date().toISOString().split('T')[0]}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Estimated Delivery</label>
+                <input type="date" id="estimatedDelivery" class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Shipping Cost (£)</label>
+                <input type="number" id="shippingCost" class="form-control" value="${order.shipping || 0}" step="0.01">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea id="shippingNotes" class="form-control" rows="3" placeholder="Add shipping notes..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="saveShippingUpdate('${orderId}')">
+                    <i class="fas fa-save"></i> Update Shipping
+                </button>
+                ${order.paymentType === 'advance' && order.paymentStatus === 'payment_verified' ? `
+                    <button class="btn btn-secondary" onclick="sendRemainingPaymentRequest('${orderId}')">
+                        <i class="fas fa-money-bill-wave"></i> Request Remaining Payment
+                    </button>
+                ` : ''}
+                <button class="btn btn-secondary" onclick="closeModal()">
+                    Cancel
+                </button>
+            </div>
+        `;
+        
+        showModal('Update Shipping', modalContent);
+        
+    } catch (error) {
+        console.error('Error updating shipping:', error);
+        showError('Failed to load shipping details');
+    }
+}
+
+async function saveShippingUpdate(orderId) {
+    try {
+        showLoading(true);
+        
+        const status = document.getElementById('shippingStatus').value;
+        const trackingNumber = document.getElementById('trackingNumber').value;
+        const carrier = document.getElementById('carrier').value;
+        const shippingDate = document.getElementById('shippingDate').value;
+        const estimatedDelivery = document.getElementById('estimatedDelivery').value;
+        const shippingCost = document.getElementById('shippingCost').value;
+        const notes = document.getElementById('shippingNotes').value;
+        
+        // Update order
+        const updateData = {
+            status: status === 'ready_to_ship' ? 'processing' : status,
+            shipping: parseFloat(shippingCost) || 0,
+            updatedAt: new Date().toISOString()
+        };
+        
+        if (trackingNumber) {
+            updateData.tracking = {
+                id: trackingNumber,
+                carrier: carrier,
+                url: getTrackingUrl(carrier, trackingNumber)
+            };
+        }
+        
+        if (status === 'shipped') {
+            updateData.shippedAt = new Date().toISOString();
+        } else if (status === 'delivered') {
+            updateData.deliveredAt = new Date().toISOString();
+        }
+        
+        await firebaseDB.collection('orders').doc(orderId).update(updateData);
+        
+        // Save shipping confirmation
+        const shippingData = {
+            orderId: orderId,
+            shippingDate: shippingDate,
+            estimatedDelivery: estimatedDelivery,
+            trackingNumber: trackingNumber,
+            carrier: carrier,
+            shippingCost: parseFloat(shippingCost) || 0,
+            notes: notes,
+            status: status,
+            updatedBy: adminSystem.currentAdmin.email,
+            updatedAt: new Date().toISOString()
+        };
+        
+        await firebaseDB.collection('shipping_updates').add(shippingData);
+        
+        // Send notification to customer if shipped
+        if (status === 'shipped') {
+            const orderDoc = await firebaseDB.collection('orders').doc(orderId).get();
+            const order = orderDoc.data();
+            
+            if (order.userId) {
+                await sendNotificationToUser(order.userId, {
+                    type: 'order_shipped',
+                    title: 'Order Shipped',
+                    message: `Your order #${order.orderNumber} has been shipped. Tracking: ${trackingNumber}`,
+                    orderId: orderId,
+                    orderNumber: order.orderNumber,
+                    trackingNumber: trackingNumber
+                });
+            }
+        }
+        
+        closeModal();
+        showNotification('✅ Shipping updated successfully!');
+        
+        // Reload data
+        if (currentSection === 'dashboard') {
+            adminSystem.loadStats();
+            adminSystem.loadRecentOrders();
+        } else if (currentSection === 'orders') {
+            loadAllOrders();
+        } else if (currentSection === 'shipping') {
+            loadShipping();
+        }
+        
+    } catch (error) {
+        console.error('Error saving shipping update:', error);
+        showError('Failed to update shipping');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function sendRemainingPaymentRequest(orderId) {
+    try {
+        showLoading(true);
+        
+        const orderDoc = await firebaseDB.collection('orders').doc(orderId).get();
+        if (!orderDoc.exists) {
+            showError('Order not found');
+            return;
+        }
+        
+        const order = orderDoc.data();
+        
+        if (order.paymentType !== 'advance' || order.paymentStatus !== 'payment_verified') {
+            showError('This order is not eligible for remaining payment request');
+            return;
+        }
+        
+        const remainingAmount = order.remainingPayment || (order.total * 0.7);
+        
+        // Create payment request
+        const paymentRequest = {
+            orderId: orderId,
+            userId: order.userId,
+            orderNumber: order.orderNumber,
+            amount: remainingAmount,
+            paymentType: 'remaining',
+            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            notes: `Remaining 70% payment for order #${order.orderNumber}`
+        };
+        
+        await firebaseDB.collection('payment_requests').add(paymentRequest);
+        
+        // Send notification to customer
+        if (order.userId) {
+            await sendNotificationToUser(order.userId, {
+                type: 'remaining_payment',
+                title: 'Remaining Payment Request',
+                message: `Your order #${order.orderNumber} is ready to ship. Please pay the remaining £${remainingAmount.toFixed(2)}`,
+                orderId: orderId,
+                orderNumber: order.orderNumber,
+                amount: remainingAmount,
+                dueDate: paymentRequest.dueDate
+            });
+        }
+        
+        closeModal();
+        showNotification('✅ Remaining payment request sent to customer!');
+        
+    } catch (error) {
+        console.error('Error sending payment request:', error);
+        showError('Failed to send payment request');
+    } finally {
+        showLoading(false);
+    }
+}
+
+function getTrackingUrl(carrier, trackingNumber) {
+    const carriers = {
+        'DHL': `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`,
+        'FedEx': `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`,
+        'UPS': `https://www.ups.com/track?tracknum=${trackingNumber}`,
+        'Royal Mail': `https://www.royalmail.com/track-your-item#/tracking-results/${trackingNumber}`,
+        'DPD': `https://www.dpd.co.uk/tracking/trackingSearch.do?search.searchType=0&search.parcelNumber=${trackingNumber}`
+    };
+    return carriers[carrier] || `#`;
+}
+
+async function sendNotificationToUser(userId, notification) {
+    try {
+        await firebaseDB.collection('users').doc(userId)
+            .collection('notifications').add({
+                ...notification,
+                isRead: false,
+                createdAt: new Date().toISOString()
+            });
+        console.log('✅ Notification sent to user:', userId);
+    } catch (error) {
+        console.error('Error sending notification:', error);
+    }
+}
+
+function showModal(title, content) {
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
+        <div class="modal-header">
+            <h3>${title}</h3>
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div>${content}</div>
+    `;
+    
+    document.getElementById('modalOverlay').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').style.display = 'none';
+}
+
+function showLoading(show) {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = show ? 'block' : 'none';
+    }
+}
+
+function showNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--primary-gold);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: var(--shadow-lg);
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+        max-width: 300px;
+    `;
+    
+    notification.innerHTML = `
+        <style>
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        </style>
+        <div>${message}</div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+function showError(message) {
+    alert('❌ ' + message);
+}
+
+function adminSignOut() {
+    if (confirm('Are you sure you want to sign out?')) {
+        adminSystem.signOut();
+    }
+}
+
+// ============================================
+// INITIALIZE ADMIN DASHBOARD
+// ============================================
+
+document.addEventListener('DOMContentLoaded', initializeAdminDashboard);
+
+// ============================================
+// ADDITIONAL SECTION LOADERS
+// ============================================
+
+async function loadPayments() {
+    try {
+        showLoading(true);
+        
+        const paymentsSnapshot = await firebaseDB.collection('payment_confirmations')
+            .orderBy('createdAt', 'desc')
+            .get();
+        
+        const tableBody = document.getElementById('paymentsTable');
+        tableBody.innerHTML = '';
+        
+        if (paymentsSnapshot.empty) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-light);">
+                        <i class="fas fa-money-bill-wave" style="font-size: 32px; margin-bottom: 10px;"></i>
+                        <div>No payment submissions found</div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        paymentsSnapshot.forEach(async (doc) => {
+            const payment = doc.data();
+            const row = await createPaymentTableRow(doc.id, payment);
+            tableBody.appendChild(row);
+        });
+        
+    } catch (error) {
+        console.error('Error loading payments:', error);
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function createPaymentTableRow(paymentId, payment) {
+    const row = document.createElement('tr');
+    
+    // Get order details
+    let orderNumber = 'N/A';
+    let customerName = 'Customer';
+    
+    try {
+        const orderDoc = await firebaseDB.collection('orders').doc(payment.orderId).get();
+        if (orderDoc.exists) {
+            const order = orderDoc.data();
+            orderNumber = order.orderNumber || payment.orderId.substring(0, 8);
+            customerName = order.userName || order.shippingAddress?.fullName || 'Customer';
+        }
+    } catch (error) {
+        console.error('Error getting order details:', error);
+    }
+    
+    // Status badge
+    let statusClass = 'pending';
+    if (payment.status === 'verified') statusClass = 'verified';
+    if (payment.status === 'rejected') statusClass = 'rejected';
+    
+    const statusBadge = `<span class="status-badge payment-${statusClass}">${payment.status || 'pending'}</span>`;
+    
+    // Format date
+    const submittedDate = payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : 'N/A';
+    
+    // Payment type
+    const paymentType = payment.paymentType === 'advance' ? 'Advance (30%)' : 
+                       payment.paymentType === 'remaining' ? 'Remaining (70%)' : 'Full Payment';
+    
+    // Receipt button
+    const receiptButton = payment.screenshotUrl ? `
+        <button class="btn-icon btn-view" onclick="viewReceipt('${payment.screenshotUrl}')" title="View Receipt">
+            <i class="fas fa-receipt"></i>
+        </button>
+    ` : 'No receipt';
+    
+    row.innerHTML = `
+        <td><strong>${orderNumber}</strong></td>
+        <td>${customerName}</td>
+        <td>£${payment.amountPaid?.toFixed(2) || '0.00'}</td>
+        <td>${paymentType}</td>
+        <td>${submittedDate}</td>
+        <td>${payment.referenceNumber || 'N/A'}</td>
+        <td>${statusBadge}</td>
+        <td>${receiptButton}</td>
+        <td>
+            <div class="action-buttons">
+                ${payment.status === 'pending' ? `
+                    <button class="btn-icon btn-verify" onclick="verifyPaymentSubmission('${paymentId}')" title="Verify">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn-icon btn-delete" onclick="rejectPaymentSubmission('${paymentId}')" title="Reject">
+                        <i class="fas fa-times"></i>
+                    </button>
+                ` : ''}
+                <button class="btn-icon btn-view" onclick="viewPaymentDetails('${paymentId}')" title="View Details">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+        </td>
+    `;
+    
+    return row;
+}
+
+function viewReceipt(url) {
+    window.open(url, '_blank');
+}
+
+async function verifyPaymentSubmission(paymentId) {
+    if (confirm('Verify this payment submission?')) {
+        try {
+            showLoading(true);
+            
+            await firebaseDB.collection('payment_confirmations').doc(paymentId).update({
+                status: 'verified',
+                verifiedAt: new Date().toISOString(),
+                verifiedBy: adminSystem.currentAdmin.email
+            });
+            
+            showNotification('✅ Payment verified!');
+            loadPayments();
+            
+        } catch (error) {
+            console.error('Error verifying payment:', error);
+            showError('Failed to verify payment');
+        } finally {
+            showLoading(false);
+        }
+    }
+}
+
+// ============================================
+// SECURITY: CHECK ADMIN ACCESS EVERY 5 MINUTES
+// ============================================
+
+setInterval(async () => {
+    try {
+        const adminData = localStorage.getItem('irya_admin_auth');
+        if (!adminData) {
+            adminSystem.redirectToLogin();
+            return;
+        }
+        
+        const admin = JSON.parse(adminData);
+        const user = firebaseAuth.currentUser;
+        
+        if (!user || user.email !== admin.email) {
+            adminSystem.redirectToLogin();
+        }
+    } catch (error) {
+        console.error('Security check error:', error);
+    }
+}, 5 * 60 * 1000); // Check every 5 minutes
+
+</script>
+</body>
+</html>
