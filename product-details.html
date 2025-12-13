@@ -849,6 +849,12 @@ header {
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
+
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+
+<!-- Previous HTML code remains same -->
 <script>
 // ============================================
 // FIREBASE CONFIGURATION
@@ -866,111 +872,255 @@ const firebaseConfig = {
 
 let firebaseApp, firebaseDB, firebaseAuth;
 let currentProduct = null;
-let currentCalculationMode = 'standard';
-let customRequirementsText = '';
 
 // ============================================
-// AUTHENTICATION SYSTEM
+// AUTHENTICATION SYSTEM - COMPLETELY FIXED
 // ============================================
 
 class AuthSystem {
     constructor() {
         this.currentUser = null;
-        this.authKey = 'irya_stone_user';
+        this.authKey = 'irya_stone_auth_user';
+        this.isInitialized = false;
     }
     
     async init() {
-        this.checkLocalStorage();
-        await this.checkFirebaseAuth();
-        return this;
-    }
-    
-    async checkFirebaseAuth() {
         try {
-            if (!firebaseAuth) return;
+            // First initialize Firebase
+            if (!firebaseApp) {
+                await this.initializeFirebase();
+            }
             
+            // Listen for auth state changes
             return new Promise((resolve) => {
-                firebaseAuth.onAuthStateChanged((user) => {
+                firebaseAuth.onAuthStateChanged(async (user) => {
                     if (user) {
+                        console.log("Firebase User Authenticated:", user.uid);
+                        
+                        // Create user object
                         this.currentUser = {
                             uid: user.uid,
                             displayName: user.displayName || 'User',
                             email: user.email,
                             photoURL: user.photoURL,
-                            provider: user.providerId,
+                            providerId: user.providerId,
+                            emailVerified: user.emailVerified,
+                            isAnonymous: user.isAnonymous,
+                            metadata: user.metadata,
                             isFirebaseUser: true
                         };
                         
-                        this.saveUserToLocalStorage();
+                        // Save to localStorage
+                        this.saveUserToStorage();
+                        
+                        console.log("User saved to storage:", this.currentUser.uid);
+                        
                     } else {
-                        this.currentUser = this.getUserFromLocalStorage();
+                        console.log("No Firebase user, checking localStorage...");
+                        this.currentUser = this.getUserFromStorage();
+                        
+                        if (!this.currentUser) {
+                            console.log("No user found, creating guest...");
+                            this.currentUser = this.createGuestUser();
+                            this.saveUserToStorage();
+                        }
                     }
                     
+                    this.isInitialized = true;
                     resolve(this.currentUser);
                 });
             });
+            
         } catch (error) {
-            console.error('Firebase auth error:', error);
-            this.currentUser = this.getUserFromLocalStorage();
+            console.error('Auth init error:', error);
+            this.currentUser = this.getUserFromStorage() || this.createGuestUser();
+            this.isInitialized = true;
             return this.currentUser;
         }
     }
     
-    checkLocalStorage() {
-        const userData = localStorage.getItem(this.authKey);
-        if (userData) {
-            this.currentUser = JSON.parse(userData);
+    async initializeFirebase() {
+        try {
+            if (typeof firebase === 'undefined') {
+                throw new Error('Firebase SDK not loaded');
+            }
+            
+            if (!firebase.apps.length) {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+            } else {
+                firebaseApp = firebase.app();
+            }
+            
+            firebaseDB = firebase.firestore();
+            firebaseAuth = firebase.auth();
+            
+            console.log('Firebase initialized successfully');
+            return true;
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            throw error;
         }
     }
     
-    saveUserToLocalStorage() {
+    saveUserToStorage() {
         if (this.currentUser) {
             localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
+            console.log("User saved to localStorage:", this.currentUser.uid);
         }
     }
     
-    getUserFromLocalStorage() {
+    getUserFromStorage() {
         const userData = localStorage.getItem(this.authKey);
-        return userData ? JSON.parse(userData) : null;
-    }
-    
-    isLoggedIn() {
-        return this.currentUser !== null;
-    }
-    
-    getUserId() {
-        if (this.isLoggedIn()) {
-            return this.currentUser.uid;
+        if (userData) {
+            const user = JSON.parse(userData);
+            console.log("User loaded from localStorage:", user.uid);
+            return user;
         }
-        
+        return null;
+    }
+    
+    createGuestUser() {
         let guestId = localStorage.getItem('irya_guest_id');
         if (!guestId) {
             guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('irya_guest_id', guestId);
         }
-        return guestId;
+        
+        return {
+            uid: guestId,
+            displayName: 'Guest',
+            email: '',
+            photoURL: '',
+            providerId: 'guest',
+            isFirebaseUser: false,
+            isGuest: true
+        };
+    }
+    
+    isLoggedIn() {
+        if (!this.currentUser) return false;
+        return this.currentUser.isFirebaseUser === true;
+    }
+    
+    isGuest() {
+        if (!this.currentUser) return true;
+        return this.currentUser.isFirebaseUser === false || this.currentUser.isGuest === true;
+    }
+    
+    getUserId() {
+        if (!this.currentUser) {
+            return this.createGuestUser().uid;
+        }
+        return this.currentUser.uid;
+    }
+    
+    getUserEmail() {
+        return this.currentUser ? this.currentUser.email : '';
     }
     
     getUserName() {
         return this.currentUser ? this.currentUser.displayName : 'Guest';
     }
     
-    getUserEmail() {
-        return this.currentUser ? this.currentUser.email : '';
+    async signInWithGoogle() {
+        try {
+            if (!firebaseAuth) {
+                await this.initializeFirebase();
+            }
+            
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope('profile');
+            provider.addScope('email');
+            
+            const result = await firebaseAuth.signInWithPopup(provider);
+            
+            if (result.user) {
+                this.currentUser = {
+                    uid: result.user.uid,
+                    displayName: result.user.displayName,
+                    email: result.user.email,
+                    photoURL: result.user.photoURL,
+                    providerId: result.user.providerId,
+                    isFirebaseUser: true
+                };
+                
+                this.saveUserToStorage();
+                
+                // Update cart from guest to user
+                await this.migrateGuestCartToUser();
+                
+                return this.currentUser;
+            }
+            
+        } catch (error) {
+            console.error('Google sign in error:', error);
+            throw error;
+        }
+    }
+    
+    async migrateGuestCartToUser() {
+        try {
+            const guestId = localStorage.getItem('irya_guest_id');
+            const userId = this.currentUser.uid;
+            
+            if (guestId && userId && guestId !== userId) {
+                // Migrate regular cart
+                const guestCartKey = 'irya_local_cart_' + guestId;
+                const userCartKey = 'irya_local_cart_' + userId;
+                
+                const guestCartData = localStorage.getItem(guestCartKey);
+                if (guestCartData) {
+                    localStorage.setItem(userCartKey, guestCartData);
+                    localStorage.removeItem(guestCartKey);
+                    console.log("Cart migrated from guest to user");
+                }
+                
+                // Migrate buy now cart
+                const guestBuyNowKey = 'irya_buynow_cart_' + guestId;
+                const userBuyNowKey = 'irya_buynow_cart_' + userId;
+                
+                const guestBuyNowData = localStorage.getItem(guestBuyNowKey);
+                if (guestBuyNowData) {
+                    localStorage.setItem(userBuyNowKey, guestBuyNowData);
+                    localStorage.removeItem(guestBuyNowKey);
+                    console.log("Buy Now cart migrated");
+                }
+            }
+        } catch (error) {
+            console.error('Cart migration error:', error);
+        }
+    }
+    
+    async signOut() {
+        try {
+            if (firebaseAuth && this.isLoggedIn()) {
+                await firebaseAuth.signOut();
+            }
+            
+            // Clear user data
+            localStorage.removeItem(this.authKey);
+            this.currentUser = this.createGuestUser();
+            this.saveUserToStorage();
+            
+            return true;
+        } catch (error) {
+            console.error('Sign out error:', error);
+            return false;
+        }
     }
 }
 
 // ============================================
-// CART SYSTEM - COMPLETELY REWRITTEN
+// CART SYSTEM - UPDATED WITH PROPER USER ID
 // ============================================
 
 class CartSystem {
-    constructor() {
+    constructor(authSystem) {
+        this.authSystem = authSystem;
         this.localCartKey = 'irya_local_cart_';
         this.buyNowCartKey = 'irya_buynow_cart_';
         this.cartItems = [];
         this.buyNowItems = [];
-        this.isBuyNowMode = false;
     }
     
     async init() {
@@ -980,13 +1130,26 @@ class CartSystem {
     }
     
     getUserId() {
-        const authSystem = window.authSystem;
-        return authSystem ? authSystem.getUserId() : 'guest';
+        if (!this.authSystem || !this.authSystem.currentUser) {
+            // Fallback to guest ID
+            let guestId = localStorage.getItem('irya_guest_id');
+            if (!guestId) {
+                guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('irya_guest_id', guestId);
+            }
+            return guestId;
+        }
+        return this.authSystem.getUserId();
+    }
+    
+    getCurrentUser() {
+        return this.authSystem ? this.authSystem.currentUser : null;
     }
     
     async loadCart() {
         try {
             const userId = this.getUserId();
+            console.log("Loading cart for user:", userId);
             
             // Load regular cart
             const cartKey = this.localCartKey + userId;
@@ -998,7 +1161,14 @@ class CartSystem {
             const buyNowData = localStorage.getItem(buyNowKey);
             this.buyNowItems = buyNowData ? JSON.parse(buyNowData) : [];
             
+            console.log("Cart loaded:", {
+                regular: this.cartItems.length,
+                buyNow: this.buyNowItems.length,
+                userId: userId
+            });
+            
             return { cartItems: this.cartItems, buyNowItems: this.buyNowItems };
+            
         } catch (error) {
             console.error('Error loading cart:', error);
             this.cartItems = [];
@@ -1007,14 +1177,55 @@ class CartSystem {
         }
     }
     
+    async saveCart() {
+        try {
+            const userId = this.getUserId();
+            console.log("Saving cart for user:", userId);
+            
+            const cartKey = this.localCartKey + userId;
+            localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
+            
+            this.updateCartBadge();
+            
+            // Save to Firebase if user is logged in
+            if (firebaseDB && this.authSystem && this.authSystem.isLoggedIn()) {
+                await this.saveToFirebase(userId);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error saving cart:', error);
+            return false;
+        }
+    }
+    
+    async saveToFirebase(userId) {
+        try {
+            if (!firebaseDB) return;
+            
+            await firebaseDB.collection('userCarts').doc(userId).set({
+                userId: userId,
+                items: this.cartItems,
+                updatedAt: new Date().toISOString(),
+                itemCount: this.cartItems.length,
+                totalAmount: this.cartItems.reduce((sum, item) => sum + (item.calculatedPrice || 0), 0)
+            }, { merge: true });
+            
+            console.log("Cart saved to Firebase for user:", userId);
+        } catch (error) {
+            console.error('Error saving to Firebase:', error);
+        }
+    }
+    
     async addToCart(product, quantity = 1, calculationData = null, customRequirements = '') {
         try {
-            // Generate unique ID
+            const userId = this.getUserId();
+            console.log("Adding to cart for user:", userId);
+            
             const itemId = calculationData ? 
                 `${product.id}_${JSON.stringify(calculationData)}_${Date.now()}` : 
                 `${product.id}_${quantity}_${Date.now()}`;
             
-            // Create cart item
             const cartItem = {
                 id: product.id,
                 uniqueId: itemId,
@@ -1028,13 +1239,12 @@ class CartSystem {
                 quantity: quantity,
                 addedAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
-                userId: this.getUserId(),
+                userId: userId,
                 calculationData: calculationData,
                 customRequirements: customRequirements || '',
                 isBuyNow: false
             };
             
-            // Calculate price
             if (calculationData) {
                 cartItem.calculatedPrice = this.calculatePrice(product, calculationData);
                 cartItem.calculationType = calculationData.mode || 'standard';
@@ -1042,13 +1252,11 @@ class CartSystem {
                 cartItem.calculatedPrice = product.price * quantity;
             }
             
-            // Calculate payments
             const totalPrice = cartItem.calculatedPrice;
             cartItem.advancePayment = totalPrice * 0.3;
             cartItem.remainingPayment = totalPrice * 0.7;
             cartItem.totalPrice = totalPrice;
             
-            // Add to cart
             this.cartItems.push(cartItem);
             await this.saveCart();
             
@@ -1064,10 +1272,11 @@ class CartSystem {
     
     async processBuyNow(product, quantity = 1, calculationData = null, customRequirements = '') {
         try {
-            // Generate unique ID for buy now
+            const userId = this.getUserId();
+            console.log("Processing Buy Now for user:", userId);
+            
             const itemId = `BUYNOW_${product.id}_${Date.now()}`;
             
-            // Create buy now item
             const buyNowItem = {
                 id: product.id,
                 uniqueId: itemId,
@@ -1081,14 +1290,13 @@ class CartSystem {
                 quantity: quantity,
                 addedAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
-                userId: this.getUserId(),
+                userId: userId,
                 calculationData: calculationData,
                 customRequirements: customRequirements || '',
                 isBuyNow: true,
                 buyNowTimestamp: Date.now()
             };
             
-            // Calculate price
             if (calculationData) {
                 buyNowItem.calculatedPrice = this.calculatePrice(product, calculationData);
                 buyNowItem.calculationType = calculationData.mode || 'standard';
@@ -1096,24 +1304,17 @@ class CartSystem {
                 buyNowItem.calculatedPrice = product.price * quantity;
             }
             
-            // Calculate payments
             const totalPrice = buyNowItem.calculatedPrice;
             buyNowItem.advancePayment = totalPrice * 0.3;
             buyNowItem.remainingPayment = totalPrice * 0.7;
             buyNowItem.totalPrice = totalPrice;
             
-            // Save to buy now storage
-            const userId = this.getUserId();
             const buyNowKey = this.buyNowCartKey + userId;
-            
-            // Clear any previous buy now items
             this.buyNowItems = [buyNowItem];
             localStorage.setItem(buyNowKey, JSON.stringify(this.buyNowItems));
             
-            // Also save to session for immediate access
             sessionStorage.setItem('irya_current_buynow', JSON.stringify(buyNowItem));
             
-            // Save to Firebase for persistence
             await this.saveBuyNowToFirebase(buyNowItem);
             
             return true;
@@ -1169,42 +1370,6 @@ class CartSystem {
         return parseFloat(totalPrice.toFixed(2));
     }
     
-    async saveCart() {
-        try {
-            const userId = this.getUserId();
-            const cartKey = this.localCartKey + userId;
-            
-            localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
-            this.updateCartBadge();
-            
-            // Save to Firebase if logged in
-            if (firebaseDB && window.authSystem && window.authSystem.isLoggedIn()) {
-                await this.saveToFirebase(userId);
-            }
-            
-            return true;
-        } catch (error) {
-            console.error('Error saving cart:', error);
-            return false;
-        }
-    }
-    
-    async saveToFirebase(userId) {
-        try {
-            if (!firebaseDB) return;
-            
-            await firebaseDB.collection('userCarts').doc(userId).set({
-                userId: userId,
-                items: this.cartItems,
-                updatedAt: new Date().toISOString(),
-                itemCount: this.cartItems.length,
-                totalAmount: this.cartItems.reduce((sum, item) => sum + (item.calculatedPrice || 0), 0)
-            }, { merge: true });
-        } catch (error) {
-            console.error('Error saving to Firebase:', error);
-        }
-    }
-    
     async saveBuyNowToFirebase(buyNowItem) {
         try {
             if (!firebaseDB) return;
@@ -1216,36 +1381,13 @@ class CartSystem {
                 userId: userId,
                 item: buyNowItem,
                 createdAt: new Date().toISOString(),
-                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
             });
             
+            console.log("Buy Now saved to Firebase for user:", userId);
             return buyNowDocId;
         } catch (error) {
             console.error('Error saving buy now to Firebase:', error);
-            return null;
-        }
-    }
-    
-    async getBuyNowFromFirebase() {
-        try {
-            if (!firebaseDB) return null;
-            
-            const userId = this.getUserId();
-            const snapshot = await firebaseDB.collection('buyNowItems')
-                .where('userId', '==', userId)
-                .orderBy('createdAt', 'desc')
-                .limit(1)
-                .get();
-            
-            if (!snapshot.empty) {
-                const doc = snapshot.docs[0];
-                const data = doc.data();
-                return data.item;
-            }
-            
-            return null;
-        } catch (error) {
-            console.error('Error getting buy now from Firebase:', error);
             return null;
         }
     }
@@ -1281,47 +1423,26 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
     
-    await initializeFirebase();
-    
+    // Initialize Auth System FIRST
     authSystem = new AuthSystem();
     await authSystem.init();
     
-    cartSystem = new CartSystem();
+    console.log("Auth System Initialized. User:", {
+        uid: authSystem.getUserId(),
+        isLoggedIn: authSystem.isLoggedIn(),
+        isGuest: authSystem.isGuest(),
+        email: authSystem.getUserEmail()
+    });
+    
+    // Initialize Cart System with Auth System
+    cartSystem = new CartSystem(authSystem);
     await cartSystem.init();
     
+    // Load product details
     await loadProductDetails(productId);
     
     initEventListeners();
 });
-
-// ============================================
-// FIREBASE INITIALIZATION
-// ============================================
-
-async function initializeFirebase() {
-    try {
-        if (typeof firebase === 'undefined') {
-            showError('Firebase not loaded. Please check your internet connection.');
-            return false;
-        }
-        
-        if (!firebase.apps.length) {
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-        } else {
-            firebaseApp = firebase.app();
-        }
-        
-        firebaseDB = firebase.firestore();
-        firebaseAuth = firebase.auth();
-        
-        console.log('Firebase initialized successfully');
-        return true;
-    } catch (error) {
-        console.error('Firebase initialization error:', error);
-        showError('Firebase initialization failed: ' + error.message);
-        return false;
-    }
-}
 
 // ============================================
 // LOAD PRODUCT DETAILS
@@ -1330,10 +1451,6 @@ async function initializeFirebase() {
 async function loadProductDetails(productId) {
     try {
         showLoading(true);
-        
-        if (!firebaseDB) {
-            await initializeFirebase();
-        }
         
         const doc = await firebaseDB.collection("products").doc(productId).get();
         
@@ -1386,6 +1503,72 @@ async function loadProductDetails(productId) {
     }
 }
 
+// Rest of the code remains same as before...
+
+// ============================================
+// ADD TO CART & BUY NOW FUNCTIONS
+// ============================================
+
+async function addToCart() {
+    if (!currentProduct) return;
+    
+    const quantity = parseInt(document.getElementById('quantityInput').value) || currentProduct.min_order;
+    const customRequirements = document.getElementById('customRequirements').value;
+    
+    try {
+        showLoading(true);
+        await cartSystem.addToCart(
+            currentProduct, 
+            quantity, 
+            window.currentCalculationData, 
+            customRequirements
+        );
+    } catch (error) {
+        console.error('Add to cart error:', error);
+        showError('Failed to add to cart');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function processBuyNow() {
+    if (!currentProduct) return;
+    
+    const quantity = parseInt(document.getElementById('quantityInput').value) || currentProduct.min_order;
+    const customRequirements = document.getElementById('customRequirements').value;
+    
+    try {
+        showLoading(true);
+        
+        const success = await cartSystem.processBuyNow(
+            currentProduct, 
+            quantity, 
+            window.currentCalculationData, 
+            customRequirements
+        );
+        
+        if (success) {
+            sessionStorage.setItem('irya_buynow_product_id', currentProduct.id);
+            sessionStorage.setItem('irya_buynow_quantity', quantity);
+            sessionStorage.setItem('irya_buynow_calc_data', JSON.stringify(window.currentCalculationData));
+            sessionStorage.setItem('irya_buynow_custom_req', customRequirements);
+            
+            localStorage.setItem('irya_is_buynow_flow', 'true');
+            
+            window.location.href = `checkout.html?buynow=true&product=${currentProduct.id}&source=product_details&t=${Date.now()}`;
+        } else {
+            showError('Failed to process Buy Now');
+        }
+        
+    } catch (error) {
+        console.error('Buy Now error:', error);
+        showError('Failed to process Buy Now');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Rest of the utility functions remain same...
 // ============================================
 // DISPLAY PRODUCT DETAILS
 // ============================================
