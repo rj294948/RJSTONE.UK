@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* --- 1. THEME AND LAYOUT CSS --- */
+/* 1. Base Reset & Typography */
 :root {
     --primary-gold: #c19a6b;
     --text-dark: #333;
@@ -23,6 +23,8 @@ body {
     background: var(--bg-light);
     color: var(--text-dark);
 }
+
+/* 2. Header and Layout */
 header {
     background: #131921; 
     color: #fff;
@@ -36,7 +38,7 @@ header {
     padding: 0 15px;
 }
 
-/* --- 2. ORDER CARD STYLES --- */
+/* 3. Order Card */
 .order-card {
     background: #fff;
     border-radius: 10px;
@@ -45,6 +47,8 @@ header {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     border-left: 5px solid var(--primary-gold); 
 }
+
+/* Order Header */
 .order-header {
     display: flex;
     justify-content: space-between;
@@ -79,7 +83,7 @@ header {
 .processing { background: #0dcaf0; color: var(--text-dark); } 
 .cancelled { background: #dc3545; color: #fff; } 
 
-/* Order Body & Summary */
+/* Order Body */
 .order-body {
     display: flex;
     flex-direction: column;
@@ -96,6 +100,8 @@ header {
     color: var(--primary-gold);
     font-size: 1.2em;
 }
+
+/* Price Summary */
 .price-summary {
     display: flex;
     flex-wrap: wrap;
@@ -105,11 +111,20 @@ header {
     padding: 10px 0;
     font-size: 0.95em;
 }
-.price-value { font-weight: 600; color: var(--text-dark); }
-.price-paid { font-weight: 500; color: #198754; }
-.remaining .price-value.gold { color: #dc3545; font-weight: 700; }
+.price-value {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+.price-paid {
+    font-weight: 500;
+    color: #198754;
+}
+.remaining .price-value.gold {
+    color: #dc3545; 
+    font-weight: 700;
+}
 
-/* --- 3. TIMELINE STYLES --- */
+/* 4. Timeline */
 .step-timeline {
     display: flex;
     justify-content: space-between;
@@ -164,7 +179,7 @@ header {
     color: var(--text-light);
 }
 
-/* --- 4. ACTION BUTTONS --- */
+/* 5. Action Buttons */
 .order-actions {
     display: flex;
     gap: 10px;
@@ -203,13 +218,17 @@ header {
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
-    .container { margin: 20px auto; }
+    .container {
+        margin: 20px auto;
+    }
     .order-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
-    .order-actions { flex-direction: column; }
+    .order-actions {
+        flex-direction: column;
+    }
 }
 </style>
 </head>
@@ -243,8 +262,8 @@ header {
     const ordersDiv = document.getElementById("orders");
     const loadingMessage = '<div style="text-align: center; padding: 50px; color: var(--text-light);"><i class="fas fa-spinner fa-spin"></i> Loading your order history...</div>';
     
-    
-    // --- 2. HELPER FUNCTIONS ---
+
+    // --- 2. HELPER FUNCTIONS (Same as before) ---
     
     function formatDate(timestamp) {
         if (!timestamp) return 'N/A';
@@ -277,6 +296,7 @@ header {
             text = 'PROCESSING';
             className = 'processing';
         }
+
         return `<span class="badge ${className}">${text}</span>`;
     }
 
@@ -304,12 +324,11 @@ header {
     }
     
     window.viewDetails = (orderId) => {
-        // Replace with your actual order details page URL if needed
-        window.location.href = `order-details.html?id=${orderId}`; 
+        window.location.href = `order-details.html?id=${orderId}`;
     };
 
     window.downloadInvoice = (orderId) => {
-        alert('Generating invoice for Order: ' + orderId);
+        alert('Generating invoice for Order: ' + orderId + ' (Feature not fully implemented)');
     };
 
     /** * --- 3. CORE FUNCTION: Fetches and displays orders for a given userId */
@@ -381,7 +400,7 @@ header {
                 `;
             });
             
-             if (snap.empty) {
+             if (snap.empty && ordersDiv.innerHTML === loadingMessage) {
                  ordersDiv.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--text-light);">You have no orders yet. Start shopping!</div>';
             }
         });
@@ -390,32 +409,45 @@ header {
     // --- 4. EXECUTION: Get User ID from URL Hash ---
     document.addEventListener('DOMContentLoaded', () => {
         if (!ordersDiv) return;
+        ordersDiv.innerHTML = loadingMessage; 
 
-        // URL Hash से यूजर ID प्राप्त करें
-        let hash = window.location.hash.substring(1).trim(); 
-        
-        // चेक करें कि hash 'orders' है या खाली है, या यह एक वैध ID है
-        // यदि आपकी साइट structure: rj294948.github.io/iryastone-uk/account.html#dCVM344so3VCKQGNdsHm2aUZrKA3
-        // तो 'hash' में 'dCVM344so3VCKQGNdsHm2aUZrKA3' होगा।
-        let userId = hash;
+        // Get the hash part of the URL (e.g., "#orders" or "#dCVM344so3VCKQGNdsHm2aUZrKA3")
+        let hash = window.location.hash;
 
-        // अगर हैश खाली है, या 'orders' जैसा कुछ है, तो हम मानेंगे कि ID उपलब्ध नहीं है
-        if (!userId || userId.length < 10 || userId === 'orders') {
+        // If the hash starts with "#orders", we need to see if the User ID is there.
+        // If your URL structure is actually like: /account.html#USER_ID (e.g., #dCVM344so3VCKQGNdsHm2aUZrKA3)
+        let userId = hash.substring(1).trim(); // Remove the '#' and trim whitespace
+
+        // Fallback or specific logic check
+        if (userId === "orders" || userId === "") {
+            // This suggests the URL might not contain the ID yet, or the ID is passed differently.
+            // If the ID is *always* expected to be in the hash, this is where you'd put the fallback/error.
+            
             ordersDiv.innerHTML = `
                 <div style="text-align: center; padding: 50px;">
-                    <i class="fas fa-user-times" style="font-size: 3em; color: #dc3545;"></i>
-                    <h3>User ID Not Found</h3>
-                    <p>Could not find the User ID in the address bar's hash. Please sign in again.</p>
+                    <i class="fas fa-info-circle" style="font-size: 3em; color: var(--primary-gold)"></i>
+                    <h3>User ID Missing</h3>
+                    <p>Could not find the User ID in the URL hash (e.g., #userid).</p>
+                    <p>Please make sure you are signed in correctly.</p>
                 </div>
             `;
-            console.error("User ID not found in URL hash. Please check your account page URL.");
+            console.error("User ID not found in URL hash. Found hash:", hash);
             return;
             
         } else {
-            // User ID मिल गया, अब ऑर्डर्स लोड करें
+            // User ID found (e.g., dCVM344so3VCKQGNdsHm2aUZrKA3)
             loadUserOrders(userId);
             console.log("Loading orders for User ID from URL Hash:", userId);
         }
+        
+        // Optionally listen for hash changes if the page is a Single Page Application (SPA)
+        window.addEventListener('hashchange', () => {
+             // Reload orders if the hash changes (optional, but good practice for SPAs)
+             const newHash = window.location.hash.substring(1).trim();
+             if(newHash && newHash !== "orders") {
+                 loadUserOrders(newHash);
+             }
+        });
     });
 </script>
 
