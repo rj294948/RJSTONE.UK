@@ -1167,7 +1167,7 @@ let currentOrderData = null;
 let authSystem = null;
 
 // ============================================
-// UPDATED AUTHENTICATION SYSTEM
+// AUTHENTICATION SYSTEM FOR CHECKOUT
 // ============================================
 
 class CheckoutAuthSystem {
@@ -1175,7 +1175,6 @@ class CheckoutAuthSystem {
         this.currentUser = null;
         this.authKey = 'irya_stone_auth_user';
         this.guestIdKey = 'irya_guest_id';
-        this.adminStatus = false;
     }
     
     async init() {
@@ -1183,7 +1182,7 @@ class CheckoutAuthSystem {
             await this.initializeFirebase();
             
             return new Promise((resolve) => {
-                firebaseAuth.onAuthStateChanged(async (user) => {
+                firebaseAuth.onAuthStateChanged((user) => {
                     console.log("Auth State Changed:", user ? user.uid : "No user");
                     
                     if (user) {
@@ -1196,9 +1195,6 @@ class CheckoutAuthSystem {
                             providerId: user.providerId,
                             isFirebaseUser: true
                         };
-                        
-                        // Check admin status
-                        await this.checkAdminStatus(user.uid);
                         
                         localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
                         console.log("Firebase user saved:", user.uid);
@@ -1227,22 +1223,6 @@ class CheckoutAuthSystem {
             console.error('Auth init error:', error);
             this.currentUser = this.getUserFromStorage() || this.createGuestUser();
             return this.currentUser;
-        }
-    }
-    
-    async checkAdminStatus(userId) {
-        try {
-            if (!firebaseDB) return false;
-            
-            const adminDoc = await firebaseDB.collection('admins').doc(userId).get();
-            this.adminStatus = adminDoc.exists;
-            
-            console.log("Admin status:", this.adminStatus);
-            return this.adminStatus;
-        } catch (error) {
-            console.error('Error checking admin status:', error);
-            this.adminStatus = false;
-            return false;
         }
     }
     
@@ -1453,9 +1433,11 @@ async function loadBuyNowItems(userId) {
         
         let buyNowItem = null;
         
+        // Check multiple sources for buy now item
         const sources = [
             { name: 'sessionStorage', getter: () => getBuyNowFromSession() },
             { name: 'localStorage', getter: () => getBuyNowFromLocalStorage(userId) },
+            { name: 'Firebase', getter: () => getBuyNowFromFirebase(userId) },
             { name: 'URL params', getter: () => createBuyNowFromURL(userId) }
         ];
         
@@ -1472,9 +1454,11 @@ async function loadBuyNowItems(userId) {
         }
         
         if (buyNowItem) {
+            // Ensure item has all required properties
             buyNowItem = validateBuyNowItem(buyNowItem, userId);
             cartItems = [buyNowItem];
             
+            // Save to session for future use
             sessionStorage.setItem('irya_current_buynow', JSON.stringify(buyNowItem));
             
         } else {
@@ -1508,18 +1492,49 @@ async function getBuyNowFromLocalStorage(userId) {
     return null;
 }
 
+async function getBuyNowFromFirebase(userId) {
+    if (!firebaseDB) return null;
+    
+    try {
+        const snapshot = await firebaseDB.collection('buyNowItems')
+            .where('userId', '==', userId)
+            .orderBy('createdAt', 'desc')
+            .limit(1)
+            .get();
+        
+        if (!snapshot.empty) {
+            const doc = snapshot.docs[0];
+            const data = doc.data();
+            return data.item;
+        }
+    } catch (error) {
+        console.error('Firebase get error:', error);
+    }
+    
+    return null;
+}
+
 async function createBuyNowFromURL(userId) {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('product');
     
-    if (!productId) return null;
+    if (!productId || !firebaseDB) return null;
     
     try {
-        // Get from localStorage cache or session
+        const productDoc = await firebaseDB.collection('products').doc(productId).get();
+        
+        if (!productDoc.exists) {
+            console.error("Product not found in Firebase:", productId);
+            return null;
+        }
+        
+        const product = productDoc.data();
+        
+        // Get calculation data from session or defaults
         const calcDataStr = sessionStorage.getItem('irya_buynow_calc_data');
         const calcData = calcDataStr ? JSON.parse(calcDataStr) : {
             mode: 'standard',
-            unit: 'piece',
+            unit: product.price_unit || 'piece',
             quantity: parseInt(sessionStorage.getItem('irya_buynow_quantity')) || 1
         };
         
@@ -1530,13 +1545,13 @@ async function createBuyNowFromURL(userId) {
         const buyNowItem = {
             id: productId,
             uniqueId: `BUYNOW_${productId}_${Date.now()}`,
-            name: 'Product ' + productId,
-            stoneName: 'Stone Product',
-            price: 100, // Default price
-            priceUnit: 'piece',
-            image: getDefaultImage('general'),
-            category: 'General',
-            description: '',
+            name: product.stone_name || product.name || 'Product',
+            stoneName: product.stone_name || product.name || 'Product',
+            price: parseFloat(product.price) || 0,
+            priceUnit: product.price_unit || 'piece',
+            image: product.images?.[0] || product.image || getDefaultImage(product.category),
+            category: product.category || 'General',
+            description: product.description || '',
             quantity: quantity,
             calculationData: calcData,
             customRequirements: customReq,
@@ -1563,15 +1578,18 @@ async function createBuyNowFromURL(userId) {
 }
 
 function validateBuyNowItem(item, userId) {
+    // Ensure required properties exist
     if (!item.userId) item.userId = userId;
     if (!item.uniqueId) item.uniqueId = `BUYNOW_${item.id}_${Date.now()}`;
     if (!item.isBuyNow) item.isBuyNow = true;
     if (!item.buyNowTimestamp) item.buyNowTimestamp = Date.now();
     
+    // Ensure price calculations
     if (!item.calculatedPrice) {
         item.calculatedPrice = calculateItemPrice(item, item.calculationData);
     }
     
+    // Ensure payment calculations
     if (!item.advancePayment || !item.remainingPayment || !item.totalPrice) {
         const totalPrice = item.calculatedPrice || (item.price * item.quantity);
         item.advancePayment = totalPrice * 0.3;
@@ -1593,6 +1611,7 @@ async function loadRegularCartItems(userId) {
             cartItems = [];
         }
         
+        // Validate cart items
         cartItems = cartItems.map(item => validateCartItem(item, userId));
         
     } catch (error) {
@@ -1668,6 +1687,7 @@ function displayOrderItems() {
     customRequirementsContainer.innerHTML = '';
     
     const itemsHTML = cartItems.map(item => {
+        // Add custom requirements if exists
         if (item.customRequirements && item.customRequirements.trim() !== '') {
             const customReqHTML = `
                 <div class="custom-requirements-box">
@@ -1678,6 +1698,7 @@ function displayOrderItems() {
             customRequirementsContainer.innerHTML += customReqHTML;
         }
         
+        // Calculate display info
         let calculationInfo = '';
         if (item.calculationData) {
             if (item.calculationData.unit === 'sqft') {
@@ -1738,10 +1759,11 @@ function calculateTotals() {
         }
     });
     
-    const tax = subtotal * 0.2;
+    const tax = subtotal * 0.2; // 20% VAT
     const shipping = calculateShippingCost(subtotal);
     const total = subtotal + tax + shipping;
     
+    // Update display
     updatePriceDisplay(subtotal, tax, shipping, total);
     updatePaymentBreakdown(total, advanceTotal, remainingTotal);
     
@@ -1871,6 +1893,7 @@ function selectPaymentMethod(method) {
         checkIcon.style.color = 'var(--primary-gold)';
     }
     
+    // Show/hide payment method sections
     const stripeCardElement = document.getElementById('stripeCardElement');
     const paypalButtonsContainer = document.getElementById('paypalButtonsContainer');
     
@@ -1906,6 +1929,7 @@ function initializePayPalButtons() {
 // ============================================
 
 function initializeFormValidation() {
+    // Add required indicator to form labels
     const requiredFields = ['fullName', 'email', 'phone', 'country', 'address1', 'city', 'state', 'postalCode'];
     
     requiredFields.forEach(fieldId => {
@@ -1920,6 +1944,7 @@ function initializeFormValidation() {
         }
     });
     
+    // Real-time validation
     const emailField = document.getElementById('email');
     if (emailField) {
         emailField.addEventListener('blur', validateEmail);
@@ -1999,6 +2024,7 @@ function validateForm() {
     
     let isValid = true;
     
+    // Check required fields
     for (const field of requiredFields) {
         const element = document.getElementById(field.id);
         if (!element || !element.value.trim()) {
@@ -2012,14 +2038,17 @@ function validateForm() {
         }
     }
     
+    // Validate email
     if (isValid && !validateEmail()) {
         isValid = false;
     }
     
+    // Validate phone
     if (isValid && !validatePhone()) {
         isValid = false;
     }
     
+    // Check terms agreement
     const agreeTerms = document.getElementById('agreeTerms');
     if (!agreeTerms || !agreeTerms.checked) {
         showError('Please agree to the terms and conditions');
@@ -2030,13 +2059,14 @@ function validateForm() {
 }
 
 // ============================================
-// UPDATED PAYMENT PROCESSING - LOCAL STORAGE SOLUTION
+// PAYMENT PROCESSING
 // ============================================
 
 async function validateAndProcessPayment() {
     try {
         console.log("Starting payment processing...");
         
+        // Validate form
         if (!validateForm()) {
             console.log("Form validation failed");
             return;
@@ -2110,8 +2140,7 @@ async function validateAndProcessPayment() {
             createdAt: new Date().toISOString(),
             orderNumber: generateOrderNumber(),
             paymentStatus: 'pending',
-            isBuyNowOrder: isBuyNowFlow,
-            isGuestOrder: !authSystem.isLoggedIn()
+            isBuyNowOrder: isBuyNowFlow
         };
         
         console.log("Order data created:", currentOrderData.orderNumber);
@@ -2139,6 +2168,7 @@ async function processBankTransfer(orderData) {
     try {
         showPaymentProcessing('Preparing Bank Transfer Details...');
         
+        // Update order with bank transfer info
         orderData.paymentStatus = 'pending_bank_transfer';
         orderData.bankTransferDetails = {
             accountName: 'IRYA STONE LTD',
@@ -2153,14 +2183,14 @@ async function processBankTransfer(orderData) {
             bankAddress: 'NatWest Bank PLC, 135 Bishopsgate, London EC2M 3UR, United Kingdom'
         };
         
-        // Save order to localStorage (Firebase permission bypass)
-        const orderId = saveOrderToLocalStorage(orderData);
-        orderData.id = orderId;
+        // Save order to Firebase
+        const orderId = await saveOrderToFirebase(orderData);
         
+        // Hide processing modal
         hidePaymentProcessing();
         
-        // Show bank transfer modal
-        showBankTransferModal(orderData);
+        // Show bank transfer details
+        showBankTransferDetails(orderData);
         
     } catch (error) {
         console.error('Bank transfer error:', error);
@@ -2169,484 +2199,180 @@ async function processBankTransfer(orderData) {
     }
 }
 
-function saveOrderToLocalStorage(orderData) {
+async function processBankTransfer(orderData) {
     try {
-        const orderId = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        const userId = authSystem.getUserId();
+        showPaymentProcessing('Preparing Bank Transfer Details...');
         
-        const ordersKey = 'irya_local_orders_' + userId;
-        let storedOrders = localStorage.getItem(ordersKey);
-        
-        if (storedOrders) {
-            storedOrders = JSON.parse(storedOrders);
-        } else {
-            storedOrders = [];
-        }
-        
-        const orderToSave = {
-            ...orderData,
-            id: orderId,
-            localSave: true,
-            saveTime: new Date().toISOString(),
-            firestoreId: null,
-            isSyncedToFirestore: false
+        orderData.paymentStatus = 'pending_bank_transfer';
+        orderData.bankTransferDetails = {
+            accountName: 'IRYA STONE LTD',
+            accountNumber: '12345678',
+            sortCode: '04-00-04',
+            iban: 'GB29NWBK60161331926819',
+            swift: 'NWBKGB2L',
+            reference: orderData.orderNumber,
+            amount: orderData.amountToPay,
+            currency: 'GBP'
         };
         
-        storedOrders.push(orderToSave);
-        localStorage.setItem(ordersKey, JSON.stringify(storedOrders));
+        const orderId = await saveOrderToFirebase(orderData);
         
-        console.log('✅ Order saved to localStorage:', orderId);
+        hidePaymentProcessing();
         
-        // Also save to recent orders for quick access
-        const recentOrdersKey = 'irya_recent_orders';
-        let recentOrders = localStorage.getItem(recentOrdersKey);
-        if (recentOrders) {
-            recentOrders = JSON.parse(recentOrders);
-        } else {
-            recentOrders = [];
-        }
+        const bankDetailsHTML = `
+            <div style="background: var(--bg-light); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4 style="color: var(--primary-gold); margin-bottom: 15px;">
+                    <i class="fas fa-university"></i> Bank Transfer Details
+                </h4>
+                <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                    <p><strong>Account Name:</strong> ${orderData.bankTransferDetails.accountName}</p>
+                    <p><strong>Account Number:</strong> ${orderData.bankTransferDetails.accountNumber}</p>
+                    <p><strong>Sort Code:</strong> ${orderData.bankTransferDetails.sortCode}</p>
+                    <p><strong>IBAN:</strong> ${orderData.bankTransferDetails.iban}</p>
+                    <p><strong>SWIFT/BIC:</strong> ${orderData.bankTransferDetails.swift}</p>
+                    <p><strong>Reference:</strong> ${orderData.bankTransferDetails.reference}</p>
+                    <p><strong>Amount:</strong> £${orderData.bankTransferDetails.amount.toFixed(2)}</p>
+                </div>
+                <p style="margin-top: 15px; font-size: 12px; color: var(--text-light);">
+                    <i class="fas fa-info-circle"></i> Please use the reference number when making the transfer. Order will be processed once payment is confirmed.
+                </p>
+                <button onclick="completeOrder()" style="margin-top: 15px; padding: 10px 20px; background: var(--primary-gold); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    Complete Order
+                </button>
+            </div>
+        `;
         
-        recentOrders.unshift({
-            orderNumber: orderData.orderNumber,
-            id: orderId,
-            date: new Date().toISOString(),
-            total: orderData.total,
-            status: orderData.status
-        });
-        
-        // Keep only last 10 orders
-        if (recentOrders.length > 10) {
-            recentOrders = recentOrders.slice(0, 10);
-        }
-        
-        localStorage.setItem(recentOrdersKey, JSON.stringify(recentOrders));
-        
-        return orderId;
+        document.body.insertAdjacentHTML('beforeend', bankDetailsHTML);
         
     } catch (error) {
-        console.error('❌ Error saving to localStorage:', error);
-        throw error;
+        console.error('Bank transfer error:', error);
+        hidePaymentProcessing();
+        showError('Failed to process bank transfer: ' + error.message);
     }
 }
 
-function showBankTransferModal(orderData) {
-    const modalHTML = `
-        <div id="bankTransferModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 20px;">
-            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="color: var(--primary-gold); margin: 0; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-university"></i> Bank Transfer Instructions
-                    </h3>
-                    <button onclick="closeBankTransferModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light); padding: 5px;">
-                        &times;
-                    </button>
-                </div>
-                
-                <div style="margin-bottom: 25px;">
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                        <h4 style="color: var(--stone-dark); margin-bottom: 10px; font-size: 16px;">
-                            <i class="fas fa-receipt"></i> Order Summary
-                        </h4>
-                        <p style="margin: 5px 0;"><strong>Order Number:</strong> ${orderData.orderNumber}</p>
-                        <p style="margin: 5px 0;"><strong>Amount to Pay:</strong> £${orderData.amountToPay.toFixed(2)}</p>
-                        <p style="margin: 5px 0;"><strong>Payment Type:</strong> ${orderData.paymentType === 'advance' ? '30% Advance' : 'Full Payment'}</p>
-                    </div>
-                    
-                    <div style="background: #fff8e1; padding: 20px; border-radius: 10px; border-left: 4px solid var(--primary-gold); margin-bottom: 20px;">
-                        <h4 style="color: var(--stone-dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-info-circle" style="color: var(--primary-gold);"></i> Important Information
-                        </h4>
-                        <ul style="margin-left: 20px; color: var(--text-dark);">
-                            <li>Your order will be processed only after payment confirmation</li>
-                            <li>Use the reference number when making transfer</li>
-                            <li>Keep the transaction receipt for verification</li>
-                            <li>You will receive confirmation email within 24 hours</li>
-                        </ul>
-                    </div>
-                    
-                    <div style="background: var(--bg-light); padding: 20px; border-radius: 10px;">
-                        <h4 style="color: var(--stone-dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-university"></i> Bank Details
-                        </h4>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                                <p style="margin: 0 0 8px 0; color: var(--text-light); font-size: 13px;">Account Name</p>
-                                <p style="margin: 0; font-weight: 600; color: var(--stone-dark);">IRYA STONE LTD</p>
-                            </div>
-                            
-                            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                                <p style="margin: 0 0 8px 0; color: var(--text-light); font-size: 13px;">Account Number</p>
-                                <p style="margin: 0; font-weight: 600; color: var(--stone-dark);">12345678</p>
-                            </div>
-                            
-                            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                                <p style="margin: 0 0 8px 0; color: var(--text-light); font-size: 13px;">Sort Code</p>
-                                <p style="margin: 0; font-weight: 600; color: var(--stone-dark);">04-00-04</p>
-                            </div>
-                            
-                            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                                <p style="margin: 0 0 8px 0; color: var(--text-light); font-size: 13px;">IBAN</p>
-                                <p style="margin: 0; font-weight: 600; color: var(--stone-dark); font-size: 13px;">GB29NWBK60161331926819</p>
-                            </div>
-                            
-                            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                                <p style="margin: 0 0 8px 0; color: var(--text-light); font-size: 13px;">SWIFT/BIC</p>
-                                <p style="margin: 0; font-weight: 600; color: var(--stone-dark);">NWBKGB2L</p>
-                            </div>
-                            
-                            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                                <p style="margin: 0 0 8px 0; color: var(--text-light); font-size: 13px;">Reference</p>
-                                <p style="margin: 0; font-weight: 600; color: var(--primary-gold);">${orderData.orderNumber}</p>
-                            </div>
-                        </div>
-                        
-                        <div style="background: white; padding: 15px; border-radius: 8px; border: 2px solid var(--primary-gold);">
-                            <p style="margin: 0; text-align: center; font-weight: 700; color: var(--primary-gold); font-size: 18px;">
-                                Amount to Transfer: £${orderData.amountToPay.toFixed(2)}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <button onclick="markAsPaidAndComplete('${orderData.id}')" 
-                            style="padding: 15px; background: var(--primary-gold); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <i class="fas fa-check-circle"></i> I have completed the transfer
-                    </button>
-                    
-                    <button onclick="printBankDetails()" 
-                            style="padding: 12px; background: white; color: var(--text-dark); border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <i class="fas fa-print"></i> Print Instructions
-                    </button>
-                    
-                    <button onclick="saveBankDetails()" 
-                            style="padding: 12px; background: white; color: var(--text-dark); border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <i class="fas fa-download"></i> Save Details
-                    </button>
-                </div>
-                
-                <p style="margin-top: 20px; font-size: 12px; color: var(--text-light); text-align: center;">
-                    Need assistance? Email us at <a href="mailto:support@iryastone.com" style="color: var(--primary-gold);">support@iryastone.com</a>
-                </p>
-            </div>
-        </div>
-    `;
-    
-    // Remove existing modal if any
-    const existingModal = document.getElementById('bankTransferModal');
-    if (existingModal) {
-        existingModal.remove();
-    }
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-}
+// ============================================
+// COMPLETE ORDER FUNCTION
+// ============================================
 
-function closeBankTransferModal() {
-    const modal = document.getElementById('bankTransferModal');
-    if (modal) {
-        modal.remove();
-    }
-}
-
-function printBankDetails() {
-    window.print();
-}
-
-function saveBankDetails() {
-    const orderData = currentOrderData;
-    const bankDetails = `
-IRYA STONE - Bank Transfer Details
-===================================
-
-Order Number: ${orderData.orderNumber}
-Amount: £${orderData.amountToPay.toFixed(2)}
-Date: ${new Date().toLocaleDateString()}
-
-Bank Details:
--------------
-Account Name: IRYA STONE LTD
-Account Number: 12345678
-Sort Code: 04-00-04
-IBAN: GB29NWBK60161331926819
-SWIFT/BIC: NWBKGB2L
-Reference: ${orderData.orderNumber}
-
-Bank Information:
------------------
-Bank Name: NatWest Bank
-Bank Address: NatWest Bank PLC, 135 Bishopsgate, London EC2M 3UR, United Kingdom
-
-Important Notes:
-----------------
-1. Use the exact reference number when transferring
-2. Keep transaction receipt for verification
-3. Order will be processed after payment confirmation
-4. Contact support@iryastone.com for assistance
-
-Thank you for your order!
-IRYA STONE Team
-`;
-    
-    const blob = new Blob([bankDetails], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `bank_details_${orderData.orderNumber}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    showNotification('Bank details saved successfully!');
-}
-
-async function markAsPaidAndComplete(orderId) {
+async function completeOrder() {
     try {
         showLoading(true);
         
-        // Update local order status
-        const userId = authSystem.getUserId();
-        const ordersKey = 'irya_local_orders_' + userId;
-        let storedOrders = localStorage.getItem(ordersKey);
-        
-        if (storedOrders) {
-            storedOrders = JSON.parse(storedOrders);
-            const orderIndex = storedOrders.findIndex(order => order.id === orderId);
-            
-            if (orderIndex !== -1) {
-                // Update order status
-                storedOrders[orderIndex].paymentStatus = 'paid_awaiting_confirmation';
-                storedOrders[orderIndex].status = 'processing';
-                storedOrders[orderIndex].markedAsPaidAt = new Date().toISOString();
-                storedOrders[orderIndex].markedAsPaidBy = authSystem.getUserName();
-                
-                localStorage.setItem(ordersKey, JSON.stringify(storedOrders));
-                
-                // Update currentOrderData
-                currentOrderData = storedOrders[orderIndex];
-                
-                // Close modal
-                closeBankTransferModal();
-                
-                // Try to sync with Firestore if user is authenticated
-                if (authSystem.isLoggedIn() && firebaseAuth.currentUser) {
-                    await syncOrderToFirestore(currentOrderData);
-                } else {
-                    // For guest users, create public notification
-                    await createPublicNotification(currentOrderData);
-                }
-                
-                // Show success message
-                showNotification('Payment marked as completed! Your order is now processing.');
-                
-                // Clear cart and redirect
-                setTimeout(() => {
-                    completeOrderAndRedirect();
-                }, 1500);
-                
-                return;
-            }
-        }
-        
-        showError('Order not found');
-        
-    } catch (error) {
-        console.error('Error marking as paid:', error);
-        showError('Failed to mark payment as completed');
-    } finally {
-        showLoading(false);
-    }
-}
-
-async function syncOrderToFirestore(orderData) {
-    try {
-        if (!firebaseDB || !firebaseAuth.currentUser) return false;
-        
-        const userId = firebaseAuth.currentUser.uid;
-        
-        const firestoreOrder = {
-            userId: userId,
-            userEmail: orderData.userEmail || firebaseAuth.currentUser.email,
-            userName: orderData.userName || firebaseAuth.currentUser.displayName,
-            items: orderData.items || [],
-            shippingAddress: orderData.shippingAddress || {},
-            paymentMethod: orderData.paymentMethod || 'bank',
-            paymentType: orderData.paymentType || 'advance',
-            subtotal: orderData.subtotal || 0,
-            tax: orderData.tax || 0,
-            shipping: orderData.shipping || 0,
-            total: orderData.total || 0,
-            advancePayment: orderData.advancePayment || 0,
-            remainingPayment: orderData.remainingPayment || 0,
-            amountToPay: orderData.amountToPay || 0,
-            status: orderData.status || 'processing',
-            createdAt: orderData.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            orderNumber: orderData.orderNumber,
-            paymentStatus: orderData.paymentStatus || 'paid_awaiting_confirmation',
-            isBuyNowOrder: orderData.isBuyNowOrder || false,
-            isGuestOrder: false,
-            bankTransferDetails: orderData.bankTransferDetails || null,
-            localOrderId: orderData.id,
-            markedAsPaidAt: orderData.markedAsPaidAt,
-            markedAsPaidBy: orderData.markedAsPaidBy
-        };
-        
-        // Save to user's orders subcollection (users can write here)
-        const userOrderRef = firebaseDB.collection('users')
-            .doc(userId)
-            .collection('orders')
-            .doc();
-        
-        await userOrderRef.set(firestoreOrder);
-        
-        // Update local order with Firestore ID
-        const ordersKey = 'irya_local_orders_' + userId;
-        let storedOrders = localStorage.getItem(ordersKey);
-        
-        if (storedOrders) {
-            storedOrders = JSON.parse(storedOrders);
-            const orderIndex = storedOrders.findIndex(order => order.id === orderData.id);
-            
-            if (orderIndex !== -1) {
-                storedOrders[orderIndex].firestoreId = userOrderRef.id;
-                storedOrders[orderIndex].isSyncedToFirestore = true;
-                storedOrders[orderIndex].syncedAt = new Date().toISOString();
-                
-                localStorage.setItem(ordersKey, JSON.stringify(storedOrders));
-            }
-        }
-        
-        console.log('✅ Order synced to Firestore:', userOrderRef.id);
-        
-        // Create notification for admin
-        await createAdminNotification(userOrderRef.id, firestoreOrder);
-        
-        return true;
-        
-    } catch (error) {
-        console.warn('⚠️ Could not sync to Firestore:', error.message);
-        return false;
-    }
-}
-
-async function createPublicNotification(orderData) {
-    try {
-        if (!firebaseDB) return;
-        
-        const notificationRef = firebaseDB.collection('publicNotifications').doc();
-        
-        const notification = {
-            type: 'new_order',
-            orderId: orderData.id,
-            orderNumber: orderData.orderNumber,
-            userId: orderData.userId,
-            userName: orderData.userName || 'Guest Customer',
-            message: `New order #${orderData.orderNumber} placed (Guest Order)`,
-            createdAt: new Date().toISOString(),
-            isRead: false,
-            requiresAction: true,
-            isPublic: true,
-            isGuestOrder: true,
-            orderTotal: orderData.total,
-            paymentMethod: orderData.paymentMethod,
-            paymentStatus: orderData.paymentStatus
-        };
-        
-        await notificationRef.set(notification);
-        console.log('✅ Public notification created');
-        
-    } catch (error) {
-        console.warn('⚠️ Could not create public notification:', error);
-    }
-}
-
-async function createAdminNotification(orderId, orderData) {
-    try {
-        if (!firebaseDB) return;
-        
-        // Create in adminNotifications if possible
-        try {
-            const notificationRef = firebaseDB.collection('adminNotifications').doc();
-            
-            const notification = {
-                type: 'new_order',
-                orderId: orderId,
-                orderNumber: orderData.orderNumber,
-                userId: orderData.userId,
-                userName: orderData.userName || 'Customer',
-                title: 'New Order Placed',
-                message: `New order #${orderData.orderNumber} has been placed by ${orderData.userName || 'Customer'}`,
-                isRead: false,
-                requiresAction: true,
-                createdAt: new Date().toISOString(),
-                orderData: {
-                    total: orderData.total,
-                    paymentMethod: orderData.paymentMethod,
-                    paymentStatus: orderData.paymentStatus,
-                    itemsCount: orderData.items.length,
-                    isGuestOrder: false
-                }
-            };
-            
-            await notificationRef.set(notification);
-            console.log('✅ Admin notification created');
-        } catch (adminError) {
-            console.warn('⚠️ Could not create admin notification:', adminError);
-            
-            // Fallback to public notifications
-            await createPublicNotification(orderData);
-        }
-        
-    } catch (error) {
-        console.error('❌ Error creating notification:', error);
-    }
-}
-
-function completeOrderAndRedirect() {
-    try {
-        // Clear cart items
-        const userId = authSystem.getUserId();
-        
+        // Clear cart items based on flow type
         if (isBuyNowFlow) {
+            // Clear buy now storage
+            const userId = authSystem.getUserId();
             const buyNowKey = 'irya_buynow_cart_' + userId;
             localStorage.removeItem(buyNowKey);
             
+            // Clear session storage
             sessionStorage.removeItem('irya_current_buynow');
             sessionStorage.removeItem('irya_buynow_product_id');
             sessionStorage.removeItem('irya_buynow_quantity');
             sessionStorage.removeItem('irya_buynow_calc_data');
             sessionStorage.removeItem('irya_buynow_custom_req');
+            
             localStorage.removeItem('irya_is_buynow_flow');
         } else {
+            // Clear regular cart
+            const userId = authSystem.getUserId();
             const cartKey = 'irya_local_cart_' + userId;
             localStorage.removeItem(cartKey);
         }
         
         updateCartBadge();
         
-        // Create order summary for confirmation page
-        const orderSummary = {
-            orderNumber: currentOrderData.orderNumber,
-            total: currentOrderData.total,
-            paymentMethod: currentOrderData.paymentMethod,
-            paymentStatus: currentOrderData.paymentStatus,
-            status: currentOrderData.status,
-            items: currentOrderData.items,
-            shippingAddress: currentOrderData.shippingAddress,
-            createdAt: currentOrderData.createdAt
-        };
+        // Send notification to admin
+        await sendNewOrderNotification(currentOrderData);
         
-        // Save to session for confirmation page
-        sessionStorage.setItem('irya_last_order', JSON.stringify(orderSummary));
-        
-        // Redirect to confirmation page
-        window.location.href = `order-confirmation.html?order=${currentOrderData.orderNumber}&status=${currentOrderData.status}`;
+        // Redirect to confirmation
+        window.location.href = `order-confirmation.html?order=${currentOrderData.orderNumber}&payment=${currentOrderData.paymentMethod}`;
         
     } catch (error) {
         console.error('Error completing order:', error);
         showError('Failed to complete order');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
+// SEND NEW ORDER NOTIFICATION FUNCTION
+// ============================================
+
+async function sendNewOrderNotification(orderData) {
+    try {
+        if (!firebaseDB) return;
+        
+        const notification = {
+            type: 'new_order',
+            orderId: orderData.id,
+            orderNumber: orderData.orderNumber,
+            userId: orderData.userId,
+            userName: orderData.userName || 'Customer',
+            title: 'New Order Placed',
+            message: `New order #${orderData.orderNumber} has been placed by ${orderData.userName || 'Customer'}`,
+            isRead: false,
+            requiresAction: true,
+            createdAt: new Date().toISOString(),
+            orderData: {
+                total: orderData.total,
+                paymentMethod: orderData.paymentMethod,
+                paymentStatus: orderData.paymentStatus,
+                itemsCount: orderData.items.length
+            }
+        };
+        
+        // Get all admins
+        const adminSnapshot = await firebaseDB.collection('admins').get();
+        
+        if (!adminSnapshot.empty) {
+            const batch = firebaseDB.batch();
+            
+            adminSnapshot.forEach(doc => {
+                const adminId = doc.id;
+                const adminNotificationRef = firebaseDB.collection('users').doc(adminId)
+                    .collection('adminNotifications').doc();
+                batch.set(adminNotificationRef, notification);
+            });
+            
+            await batch.commit();
+            console.log('✅ New order notification sent to all admins');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error sending new order notification:', error);
+    }
+}
+
+// ============================================
+// FIREBASE ORDER MANAGEMENT
+// ============================================
+
+async function saveOrderToFirebase(order) {
+    try {
+        if (!firebaseDB) {
+            throw new Error('Firebase not initialized');
+        }
+        
+        const orderId = firebaseDB.collection('orders').doc().id;
+        
+        const finalOrder = {
+            id: orderId,
+            ...order,
+            updatedAt: new Date().toISOString()
+        };
+        
+        await firebaseDB.collection('orders').doc(orderId).set(finalOrder);
+        
+        const userOrderRef = firebaseDB.collection('users').doc(order.userId).collection('orders').doc(orderId);
+        await userOrderRef.set(finalOrder);
+        
+        return orderId;
+    } catch (error) {
+        console.error('Error saving order to Firebase:', error);
+        throw error;
     }
 }
 
@@ -2659,23 +2385,20 @@ function showPaymentProcessing(message = 'Processing Payment...') {
     const paymentSpinner = document.getElementById('paymentSpinner');
     const paymentMessage = document.getElementById('paymentMessage');
     
-    if (modal && paymentSpinner && paymentMessage) {
-        paymentMessage.textContent = message;
-        paymentSpinner.style.display = 'block';
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
+    paymentMessage.textContent = message;
+    paymentSpinner.style.display = 'block';
+    
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 }
 
 function hidePaymentProcessing() {
     const modal = document.getElementById('paymentModal');
     const paymentSpinner = document.getElementById('paymentSpinner');
     
-    if (modal && paymentSpinner) {
-        paymentSpinner.style.display = 'none';
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
+    paymentSpinner.style.display = 'none';
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
 }
 
 function cancelPayment() {
@@ -2686,6 +2409,15 @@ function cancelPayment() {
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
+
+function getUserId() {
+    let userId = localStorage.getItem('irya_guest_id');
+    if (!userId) {
+        userId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('irya_guest_id', userId);
+    }
+    return userId;
+}
 
 function getDefaultImage(category) {
     const categoryLower = (category || '').toLowerCase();
@@ -2702,7 +2434,7 @@ function getDefaultImage(category) {
 }
 
 function updateCartBadge() {
-    const userId = authSystem.getUserId();
+    const userId = getUserId();
     
     const cartKey = 'irya_local_cart_' + userId;
     const buyNowKey = 'irya_buynow_cart_' + userId;
@@ -2735,6 +2467,43 @@ function generateOrderNumber() {
     return `IRYA-${timestamp}-${random}`;
 }
 
+function validateForm() {
+    const requiredFields = ['fullName', 'email', 'phone', 'country', 'address1', 'city', 'state', 'postalCode'];
+    
+    for (const fieldId of requiredFields) {
+        const field = document.getElementById(fieldId);
+        if (!field.value.trim()) {
+            showError(`Please fill in ${field.placeholder || fieldId}`);
+            field.focus();
+            return false;
+        }
+    }
+    
+    const email = document.getElementById('email').value;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showError('Please enter a valid email address');
+        return false;
+    }
+    
+    const phone = document.getElementById('phone').value;
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+        showError('Please enter a valid phone number');
+        return false;
+    }
+    
+    return true;
+}
+
+function goBack() {
+    if (isBuyNowFlow) {
+        window.history.back();
+    } else {
+        window.location.href = 'cart.html';
+    }
+}
+
 function showLoading(show) {
     const spinner = document.getElementById('loadingSpinner');
     if (spinner) {
@@ -2758,66 +2527,13 @@ function showError(message) {
     alert(message);
 }
 
-function goBack() {
-    if (isBuyNowFlow) {
-        window.history.back();
-    } else {
-        window.location.href = 'cart.html';
-    }
-}
-
-// ============================================
-// FIREBASE SYNC FUNCTION FOR LOGGED IN USERS
-// ============================================
-
-async function syncLocalOrdersToFirebase(userId) {
-    try {
-        if (!firebaseAuth.currentUser || firebaseAuth.currentUser.uid !== userId) {
-            return;
-        }
-        
-        const localOrdersKey = 'irya_local_orders_' + userId;
-        const localOrders = localStorage.getItem(localOrdersKey);
-        
-        if (!localOrders) return;
-        
-        const orders = JSON.parse(localOrders);
-        const unsyncedOrders = orders.filter(order => !order.isSyncedToFirestore);
-        
-        for (const order of unsyncedOrders) {
-            try {
-                await syncOrderToFirestore(order);
-                
-                // Update local storage to mark as synced
-                const updatedOrders = orders.map(o => 
-                    o.id === order.id ? { ...o, isSyncedToFirestore: true } : o
-                );
-                localStorage.setItem(localOrdersKey, JSON.stringify(updatedOrders));
-                
-            } catch (error) {
-                console.error('❌ Error syncing order:', error);
-            }
-        }
-        
-    } catch (error) {
-        console.error('❌ Error syncing local orders:', error);
-    }
-}
-
-// Call this when user logs in
-async function onUserLogin(userId) {
-    await syncLocalOrdersToFirebase(userId);
-}
-
 // Make functions available globally
 window.selectPaymentOption = selectPaymentOption;
 window.selectPaymentMethod = selectPaymentMethod;
 window.validateAndProcessPayment = validateAndProcessPayment;
 window.cancelPayment = cancelPayment;
 window.goBack = goBack;
-window.markAsPaidAndComplete = markAsPaidAndComplete;
-window.closeBankTransferModal = closeBankTransferModal;
-window.printBankDetails = printBankDetails;
-window.saveBankDetails = saveBankDetails;
+window.completeOrder = completeOrder;
+</script>
 </body>
 </html>
