@@ -2,39 +2,24 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>IRYA STONE – Admin Panel</title>
+<title>Admin – IRYA STONE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body { font-family: Arial; background:#f4f6f8; padding:15px; }
-.order {
-  background:#fff;
-  padding:15px;
-  margin-bottom:15px;
-  border-radius:8px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
+.order { background:#fff; padding:15px; margin-bottom:15px; border-radius:8px; }
+button { padding:6px 10px; margin-top:6px; }
+input, select { width:100%; padding:6px; margin-top:5px; }
 .badge { padding:4px 8px; border-radius:4px; font-size:12px; }
 .advance { background:#ffc107; }
 .full { background:#28a745; color:#fff; }
-.pending { background:#dc3545; color:#fff; }
-button {
-  padding:7px 10px;
-  margin-top:6px;
-  border:none;
-  border-radius:4px;
-  cursor:pointer;
-}
-.confirm { background:#198754; color:#fff; }
-.ship { background:#0d6efd; color:#fff; }
-input { width:100%; padding:6px; margin-top:5px; }
 </style>
 </head>
 
 <body>
 
-<h2>Admin Orders – IRYA STONE</h2>
-<div id="orders">Loading…</div>
+<h2>Admin Orders Panel</h2>
+<div id="orders"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
@@ -52,9 +37,6 @@ const firebaseConfig = {
   apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
   authDomain: "iryastone-uk.firebaseapp.com",
   projectId: "iryastone-uk",
-  storageBucket: "iryastone-uk.firebasestorage.app",
-  messagingSenderId: "110940910896",
-  appId: "1:110940910896:web:b25e92127118665e5c84f5"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -68,37 +50,33 @@ async function loadOrders() {
 
   snap.forEach(d => {
     const o = d.data();
-    const userId = d.ref.parent.parent.id;
-    const orderId = d.id;
+    if (!o.userId) return;
 
     const isFull = o.submittedAmount >= o.total;
-    const badge = isFull
-      ? `<span class="badge full">FULL PAID</span>`
-      : `<span class="badge advance">ADVANCE PAID</span>`;
 
     ordersDiv.innerHTML += `
       <div class="order">
-        <b>${o.orderNumber}</b> ${badge}
-        <p><b>User:</b> ${o.userName} (${o.userEmail})</p>
+        <b>${o.orderNumber}</b>
+        <span class="badge ${isFull ? "full":"advance"}">
+          ${isFull ? "FULL PAID" : "ADVANCE PAID"}
+        </span>
 
-        <p><b>Payment Method:</b> ${o.paymentMethod}</p>
-        <p><b>Reference:</b> ${o.transactionReference}</p>
-        <p><b>Date:</b> ${o.transactionDate}</p>
+        <p>User: ${o.userName}</p>
+        <p>Paid: £${o.submittedAmount} | Remaining: £${o.remainingPayment}</p>
 
-        <p><b>Paid:</b> £${o.submittedAmount}</p>
-        <p><b>Remaining:</b> £${o.remainingPayment}</p>
+        <select id="pay-${d.id}">
+          <option value="">-- Payment Status --</option>
+          <option value="advance_confirmed">Advance Confirmed</option>
+          <option value="fully_paid">Fully Paid</option>
+        </select>
 
-        <button class="confirm"
-          onclick="confirmPayment('${userId}','${orderId}',${o.submittedAmount},${o.total})">
-          Confirm Payment
+        <button onclick="updatePayment('${o.userId}','${d.id}','${o.orderNumber}')">
+          Update Payment
         </button>
 
-        <input placeholder="Tracking Number"
-          id="track-${orderId}"
-          value="${o.trackingNumber || ""}">
+        <input id="track-${d.id}" placeholder="Tracking Number">
 
-        <button class="ship"
-          onclick="updateShipping('${userId}','${orderId}')">
+        <button onclick="updateShipping('${o.userId}','${d.id}','${o.orderNumber}')">
           Update Shipping
         </button>
       </div>
@@ -106,61 +84,53 @@ async function loadOrders() {
   });
 }
 
-/* ================= PAYMENT CONFIRM ================= */
-window.confirmPayment = async (userId, orderId, paid, total) => {
-  let paymentStatus = paid >= total ? "fully_paid" : "advance_confirmed";
+/* ================= PAYMENT UPDATE ================= */
+window.updatePayment = async (userId, orderId, orderNumber) => {
+  const status = document.getElementById(`pay-${orderId}`).value;
+  if (!status) return alert("Select payment status");
 
-  await updateDoc(
-    doc(db,"users",userId,"orders",orderId),
-    {
-      paymentStatus,
-      status: "payment_confirmed",
-      remainingPayment: Math.max(total - paid, 0),
-      updatedAt: new Date().toISOString()
-    }
-  );
+  await updateDoc(doc(db,"users",userId,"orders",orderId), {
+    paymentStatus: status,
+    updatedAt: new Date().toISOString()
+  });
 
-  await addDoc(
-    collection(db,"users",userId,"notifications"),
-    {
-      title:"Payment Confirmed",
-      message: paymentStatus === "fully_paid"
-        ? "Your full payment has been confirmed."
-        : "Advance payment confirmed. Remaining payment pending.",
-      createdAt:new Date().toISOString(),
-      read:false
-    }
-  );
+  await addDoc(collection(db,"users",userId,"notifications"), {
+    type:"payment",
+    orderId,
+    orderNumber,
+    title:"Payment Update",
+    message: status === "fully_paid"
+      ? "Your full payment has been confirmed."
+      : "Your advance payment has been confirmed.",
+    createdAt:new Date().toISOString(),
+    read:false
+  });
 
   alert("Payment updated");
-  loadOrders();
 };
 
 /* ================= SHIPPING UPDATE ================= */
-window.updateShipping = async (userId, orderId) => {
+window.updateShipping = async (userId, orderId, orderNumber) => {
   const track = document.getElementById(`track-${orderId}`).value;
+  if (!track) return alert("Enter tracking number");
 
-  await updateDoc(
-    doc(db,"users",userId,"orders",orderId),
-    {
-      shippingStatus:"shipped",
-      trackingNumber: track,
-      shippedAt:new Date().toISOString()
-    }
-  );
+  await updateDoc(doc(db,"users",userId,"orders",orderId), {
+    shippingStatus:"shipped",
+    trackingNumber:track,
+    shippedAt:new Date().toISOString()
+  });
 
-  await addDoc(
-    collection(db,"users",userId,"notifications"),
-    {
-      title:"Order Shipped",
-      message:`Your order has been shipped. Tracking: ${track}`,
-      createdAt:new Date().toISOString(),
-      read:false
-    }
-  );
+  await addDoc(collection(db,"users",userId,"notifications"), {
+    type:"shipping",
+    orderId,
+    orderNumber,
+    title:"Order Shipped",
+    message:`Your order has been shipped. Tracking No: ${track}`,
+    createdAt:new Date().toISOString(),
+    read:false
+  });
 
   alert("Shipping updated");
-  loadOrders();
 };
 
 loadOrders();
