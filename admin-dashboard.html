@@ -1,170 +1,2428 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin – IRYA STONE</title>
+<title>IRYA STONE (UK) - Order Management</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-body { font-family: Arial; background:#f4f6f8; padding:15px; }
-.order { background:#fff; padding:15px; margin-bottom:15px; border-radius:8px; border:1px solid #ddd; }
-button { padding:6px 10px; margin-top:6px; cursor:pointer; }
-input, select { width:100%; padding:6px; margin-top:5px; }
-.badge { padding:4px 8px; border-radius:4px; font-size:12px; margin-right:5px; }
-.advance { background:#ffc107; color:#000; }
-.full { background:#28a745; color:#fff; }
-.shipped { background:#17a2b8; color:#fff; }
-.pending { background:#6c757d; color:#fff; }
-.product-img { width:60px; height:60px; object-fit:cover; margin-right:10px; border-radius:4px; }
-.flex { display:flex; align-items:center; margin-top:5px; }
+/* ===== VARIABLES ===== */
+:root {
+    /* Amazon Color Palette */
+    --amazon-blue: #131921;
+    --amazon-light-blue: #232f3e;
+    --amazon-orange: #ff9900;
+    --amazon-yellow: #ffd814;
+    --amazon-dark-yellow: #f7ca00;
+    --amazon-gray: #eaeded;
+    --amazon-light-gray: #f7f7f7;
+    --amazon-border: #d5d9d9;
+    --amazon-text: #0f1111;
+    --amazon-text-light: #565959;
+    --amazon-white: #ffffff;
+    
+    /* Status Colors */
+    --status-placed: #007185;
+    --status-processing: #ff9900;
+    --status-shipped: #b12704;
+    --status-delivered: #007600;
+    --status-cancelled: #d50000;
+    --status-payment-pending: #ff6b6b;
+    --status-payment-confirmed: #00a65c;
+    
+    /* Alert Colors */
+    --alert-warning: #fef3e9;
+    --alert-warning-border: #ffa41c;
+    --alert-danger: #ffe6e6;
+    --alert-danger-border: #ff6b6b;
+    --alert-success: #e6f4ea;
+    --alert-success-border: #00a65c;
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 5px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 10px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 20px rgba(0,0,0,0.15);
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 300ms ease;
+}
+
+/* ===== RESET & BASE STYLES ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background-color: var(--amazon-gray);
+    color: var(--amazon-text);
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+/* ===== UTILITY CLASSES ===== */
+.hidden {
+    display: none !important;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--amazon-text);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--amazon-border);
+}
+
+.card {
+    background: var(--amazon-white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--amazon-border);
+    overflow: hidden;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: var(--amazon-yellow);
+    color: var(--amazon-text);
+    border-color: var(--amazon-dark-yellow);
+}
+
+.btn-primary:hover {
+    background: var(--amazon-dark-yellow);
+}
+
+.btn-secondary {
+    background: var(--amazon-white);
+    color: var(--amazon-text);
+    border-color: var(--amazon-border);
+}
+
+.btn-secondary:hover {
+    background: var(--amazon-light-gray);
+    border-color: var(--amazon-text-light);
+}
+
+.btn-danger {
+    background: var(--status-cancelled);
+    color: var(--amazon-white);
+    border-color: var(--status-cancelled);
+}
+
+.btn-danger:hover {
+    opacity: 0.9;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-success {
+    background: var(--alert-success);
+    color: var(--status-payment-confirmed);
+    border: 1px solid var(--alert-success-border);
+}
+
+.badge-warning {
+    background: var(--alert-warning);
+    color: var(--status-processing);
+    border: 1px solid var(--alert-warning-border);
+}
+
+.badge-danger {
+    background: var(--alert-danger);
+    color: var(--status-cancelled);
+    border: 1px solid var(--alert-danger-border);
+}
+
+.badge-info {
+    background: #e6f3ff;
+    color: var(--status-placed);
+    border: 1px solid #0073e6;
+}
+
+.alert {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    border: 1px solid;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.alert-warning {
+    background: var(--alert-warning);
+    border-color: var(--alert-warning-border);
+    color: #856404;
+}
+
+.alert-danger {
+    background: var(--alert-danger);
+    border-color: var(--alert-danger-border);
+    color: #721c24;
+}
+
+.alert-success {
+    background: var(--alert-success);
+    border-color: var(--alert-success-border);
+    color: #155724;
+}
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    color: var(--amazon-text-light);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--amazon-border);
+    border-top-color: var(--amazon-orange);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--amazon-text-light);
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: var(--spacing-md);
+    color: var(--amazon-border);
+}
+
+/* ===== LAYOUT ===== */
+.app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== HEADER ===== */
+.header {
+    background: var(--amazon-blue);
+    color: var(--amazon-white);
+    padding: var(--spacing-md) 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    text-decoration: none;
+    color: var(--amazon-white);
+}
+
+.logo-icon {
+    font-size: 24px;
+    color: var(--amazon-orange);
+}
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.logo-country {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: -4px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.switch-view-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--amazon-white);
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.switch-view-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+    flex: 1;
+    padding: var(--spacing-lg) 0;
+}
+
+/* ===== USER DASHBOARD ===== */
+.user-dashboard {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--spacing-lg);
+}
+
+.user-sidebar {
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+
+.user-info-card {
+    padding: var(--spacing-lg);
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-label {
+    font-size: 12px;
+    color: var(--amazon-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-weight: 500;
+}
+
+.payment-summary {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--amazon-border);
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.summary-item.total {
+    font-weight: 600;
+    border-top: 2px solid var(--amazon-border);
+    margin-top: 8px;
+    padding-top: 12px;
+}
+
+.user-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-lg);
+}
+
+/* ===== ORDERS GRID ===== */
+.orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+@media (max-width: 1200px) {
+    .orders-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== ORDER CARD ===== */
+.order-card {
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.order-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.order-header {
+    padding: var(--spacing-md);
+    background: linear-gradient(to right, var(--amazon-light-gray), var(--amazon-white));
+    border-bottom: 1px solid var(--amazon-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.order-info h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.order-date {
+    font-size: 12px;
+    color: var(--amazon-text-light);
+}
+
+.order-body {
+    padding: var(--spacing-md);
+}
+
+.order-item {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--amazon-border);
+}
+
+.item-image {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--amazon-light-gray);
+    flex-shrink: 0;
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-details {
+    flex: 1;
+}
+
+.item-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.item-meta {
+    font-size: 12px;
+    color: var(--amazon-text-light);
+    margin-bottom: 4px;
+}
+
+.item-price {
+    font-weight: 600;
+}
+
+.order-summary {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.summary-label {
+    font-size: 12px;
+    color: var(--amazon-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary-value {
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.summary-value.total {
+    color: var(--amazon-orange);
+    font-size: 16px;
+}
+
+.summary-value.paid {
+    color: var(--status-payment-confirmed);
+}
+
+.summary-value.pending {
+    color: var(--status-cancelled);
+}
+
+/* ===== TIMELINE ===== */
+.timeline {
+    margin: var(--spacing-md) 0;
+    position: relative;
+}
+
+.timeline-track {
+    height: 4px;
+    background: var(--amazon-border);
+    border-radius: 2px;
+    margin: 0 20px;
+    position: relative;
+}
+
+.timeline-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--amazon-orange);
+    border-radius: 2px;
+    transition: width var(--transition-normal);
+}
+
+.timeline-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--spacing-md);
+}
+
+.timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+}
+
+.step-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--amazon-white);
+    border: 2px solid var(--amazon-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--amazon-text-light);
+    margin-bottom: 4px;
+    z-index: 2;
+}
+
+.timeline-step.active .step-icon {
+    background: var(--amazon-orange);
+    border-color: var(--amazon-orange);
+    color: var(--amazon-white);
+}
+
+.timeline-step.completed .step-icon {
+    background: var(--status-delivered);
+    border-color: var(--status-delivered);
+    color: var(--amazon-white);
+}
+
+.step-label {
+    font-size: 11px;
+    text-align: center;
+    color: var(--amazon-text-light);
+    max-width: 80px;
+}
+
+.timeline-step.active .step-label {
+    color: var(--amazon-text);
+    font-weight: 500;
+}
+
+.timeline-step.completed .step-label {
+    color: var(--status-delivered);
+}
+
+.order-footer {
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--amazon-border);
+    background: var(--amazon-light-gray);
+}
+
+.order-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+/* ===== ADMIN DASHBOARD ===== */
+.admin-dashboard {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: var(--spacing-lg);
+}
+
+.admin-sidebar {
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+
+.admin-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    text-decoration: none;
+    color: var(--amazon-text);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.nav-item:hover {
+    background: var(--amazon-light-gray);
+}
+
+.nav-item.active {
+    background: var(--amazon-light-blue);
+    color: var(--amazon-white);
+}
+
+.nav-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.admin-content {
+    flex: 1;
+}
+
+/* ===== ADMIN STATS ===== */
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.stat-card {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--amazon-text);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--amazon-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-change {
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-change.positive {
+    color: var(--status-delivered);
+}
+
+.stat-change.negative {
+    color: var(--status-cancelled);
+}
+
+/* ===== ADMIN ORDERS TABLE ===== */
+.admin-orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--amazon-white);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-orders-table thead {
+    background: var(--amazon-light-blue);
+    color: var(--amazon-white);
+}
+
+.admin-orders-table th {
+    padding: var(--spacing-md);
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-orders-table tbody tr {
+    border-bottom: 1px solid var(--amazon-border);
+    transition: background var(--transition-fast);
+}
+
+.admin-orders-table tbody tr:hover {
+    background: var(--amazon-light-gray);
+}
+
+.admin-orders-table td {
+    padding: var(--spacing-md);
+    font-size: 13px;
+    vertical-align: top;
+}
+
+.order-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.order-number {
+    font-weight: 600;
+    color: var(--amazon-text);
+}
+
+.order-date {
+    font-size: 11px;
+    color: var(--amazon-text-light);
+}
+
+.customer-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.customer-name {
+    font-weight: 500;
+}
+
+.customer-email {
+    font-size: 11px;
+    color: var(--amazon-text-light);
+}
+
+.amount-cell {
+    font-weight: 600;
+}
+
+.status-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 4px;
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: var(--spacing-md);
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal {
+    background: var(--amazon-white);
+    border-radius: var(--radius-md);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--amazon-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--amazon-text-light);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+}
+
+.modal-close:hover {
+    background: var(--amazon-light-gray);
+}
+
+.modal-body {
+    padding: var(--spacing-lg);
+}
+
+.modal-footer {
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--amazon-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+}
+
+/* ===== FORM STYLES ===== */
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--amazon-text);
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--amazon-border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    transition: border-color var(--transition-fast);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--amazon-orange);
+    box-shadow: 0 0 0 3px rgba(255,153,0,0.1);
+}
+
+.form-control.error {
+    border-color: var(--status-cancelled);
+}
+
+.form-text {
+    font-size: 11px;
+    color: var(--amazon-text-light);
+    margin-top: 4px;
+}
+
+.form-text.error {
+    color: var(--status-cancelled);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 var(--spacing-sm);
+    }
+    
+    .user-dashboard,
+    .admin-dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    .orders-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .header-container {
+        flex-wrap: wrap;
+    }
+    
+    .admin-orders-table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .order-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .timeline-steps {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+    
+    .timeline-step {
+        flex: 0 0 calc(50% - 8px);
+    }
+}
 </style>
 </head>
+
 <body>
+<div class="app">
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-container">
+            <a href="#" class="logo">
+                <i class="fas fa-gem logo-icon"></i>
+                <div>
+                    <div class="logo-text">IRYA STONE</div>
+                    <div class="logo-country">United Kingdom</div>
+                </div>
+            </a>
+            
+            <div class="header-actions">
+                <!-- Switch View Button -->
+                <button class="switch-view-btn" id="switchViewBtn">
+                    <i class="fas fa-eye"></i>
+                    <span>Switch to Admin View</span>
+                </button>
+            </div>
+        </div>
+    </header>
 
-<h2>Admin Orders Panel</h2>
-<div id="orders"></div>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- User Dashboard -->
+            <div id="userDashboard">
+                <div class="user-dashboard">
+                    <!-- Sidebar -->
+                    <aside class="user-sidebar">
+                        <div class="card user-info-card">
+                            <h3 class="section-title">Order Summary</h3>
+                            <div class="user-details" id="userDetails">
+                                <!-- User details will be loaded here -->
+                            </div>
+                            
+                            <div class="payment-summary">
+                                <h4 style="margin-bottom: var(--spacing-md); font-weight: 600;">Payment Summary</h4>
+                                <div class="summary-item">
+                                    <span>Total Orders:</span>
+                                    <span id="totalOrders">0</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Amount Paid:</span>
+                                    <span id="amountPaid">£0.00</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Pending Balance:</span>
+                                    <span id="pendingBalance">£0.00</span>
+                                </div>
+                                <div class="summary-item total">
+                                    <span>Total Value:</span>
+                                    <span id="totalSpent">£0.00</span>
+                                </div>
+                            </div>
+                            
+                            <div class="user-actions">
+                                <button class="btn btn-primary" onclick="window.location.href='products.html'">
+                                    <i class="fas fa-shopping-cart"></i> Continue Shopping
+                                </button>
+                                <button class="btn btn-secondary" onclick="refreshOrders()">
+                                    <i class="fas fa-redo"></i> Refresh Orders
+                                </button>
+                            </div>
+                        </div>
+                    </aside>
+                    
+                    <!-- Orders Section -->
+                    <section class="orders-section">
+                        <h2 class="section-title">My Orders</h2>
+                        
+                        <!-- Payment Warning -->
+                        <div class="alert alert-warning" id="paymentWarning" style="display: none;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <strong>Pending Payment Warning</strong>
+                                <p>Complete payment within 24 hours or order will be automatically cancelled.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Orders Grid -->
+                        <div class="orders-grid" id="ordersGrid">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading your orders...</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            
+            <!-- Admin Dashboard -->
+            <div id="adminDashboard" class="hidden">
+                <div class="admin-dashboard">
+                    <!-- Admin Sidebar -->
+                    <aside class="admin-sidebar">
+                        <div class="card">
+                            <div class="admin-nav">
+                                <a href="#" class="nav-item active" onclick="filterOrders('all')">
+                                    <i class="fas fa-list"></i>
+                                    <span>All Orders</span>
+                                </a>
+                                <a href="#" class="nav-item" onclick="filterOrders('advance_paid')">
+                                    <i class="fas fa-pound-sign"></i>
+                                    <span>Advance Paid</span>
+                                </a>
+                                <a href="#" class="nav-item" onclick="filterOrders('fully_paid')">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Fully Paid</span>
+                                </a>
+                                <a href="#" class="nav-item" onclick="filterOrders('cancelled')">
+                                    <i class="fas fa-times-circle"></i>
+                                    <span>Cancelled</span>
+                                </a>
+                                <a href="#" class="nav-item" onclick="filterOrders('pending_payment')">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Pending Payment</span>
+                                </a>
+                            </div>
+                        </div>
+                    </aside>
+                    
+                    <!-- Admin Content -->
+                    <section class="admin-content">
+                        <!-- Stats -->
+                        <div class="admin-stats">
+                            <div class="card stat-card">
+                                <div class="stat-value" id="totalOrdersCount">0</div>
+                                <div class="stat-label">Total Orders</div>
+                            </div>
+                            <div class="card stat-card">
+                                <div class="stat-value" id="advancePaidCount">0</div>
+                                <div class="stat-label">Advance Paid</div>
+                            </div>
+                            <div class="card stat-card">
+                                <div class="stat-value" id="fullyPaidCount">0</div>
+                                <div class="stat-label">Fully Paid</div>
+                            </div>
+                            <div class="card stat-card">
+                                <div class="stat-value" id="pendingPaymentCount">0</div>
+                                <div class="stat-label">Pending Payment</div>
+                            </div>
+                            <div class="card stat-card">
+                                <div class="stat-value" id="totalRevenue">£0</div>
+                                <div class="stat-label">Total Revenue</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Orders Table -->
+                        <div class="card">
+                            <table class="admin-orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order Details</th>
+                                        <th>Customer</th>
+                                        <th>Amount</th>
+                                        <th>Payment</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminOrdersTable">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; padding: var(--spacing-xl);">
+                                            <div class="loading">
+                                                <div class="loading-spinner"></div>
+                                                <p>Loading orders...</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getFirestore, collectionGroup, getDocs, doc, updateDoc, addDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+<!-- Order Details Modal -->
+<div class="modal-overlay" id="orderModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Order Details</h3>
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="orderModalContent">
+            <!-- Order details will be loaded here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-  authDomain: "iryastone-uk.firebaseapp.com",
-  projectId: "iryastone-uk",
+<!-- Edit Order Modal -->
+<div class="modal-overlay" id="editOrderModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Update Order</h3>
+            <button class="modal-close" onclick="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="editOrderForm">
+                <div class="form-group">
+                    <label class="form-label">Payment Status</label>
+                    <select class="form-control" id="editPaymentStatus">
+                        <option value="pending">Pending</option>
+                        <option value="advance_paid">Advance Paid</option>
+                        <option value="fully_paid">Fully Paid</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Order Status</label>
+                    <select class="form-control" id="editOrderStatus">
+                        <option value="placed">Order Placed</option>
+                        <option value="processing">Processing</option>
+                        <option value="ready_to_ship">Ready to Ship</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="out_for_delivery">Out for Delivery</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Tracking Number</label>
+                    <input type="text" class="form-control" id="editTrackingNumber">
+                    <div class="form-text">Enter courier tracking number</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Delivery Date & Time</label>
+                    <input type="datetime-local" class="form-control" id="editDeliveryDateTime">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Remaining Payment</label>
+                    <input type="number" class="form-control" id="editRemainingPayment" step="0.01" min="0">
+                    <div class="form-text">Update remaining payment amount</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Admin Notes</label>
+                    <textarea class="form-control" id="editAdminNotes" rows="3"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveOrderUpdates()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-overlay" id="paymentModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Complete Payment</h3>
+            <button class="modal-close" onclick="closePaymentModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="paymentModalContent">
+                <!-- Payment details will be loaded here -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closePaymentModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="processPayment()">Confirm Payment</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// GLOBAL VARIABLES AND STATE MANAGEMENT
+// ============================================
+
+let currentView = 'user'; // 'user' or 'admin'
+let allOrders = [];
+let filteredOrders = [];
+let currentFilter = 'all';
+let currentEditingOrder = null;
+let currentPaymentOrder = null;
+
+// Sample data - In real application, this would come from an API or database
+const sampleOrders = [
+    {
+        id: 'ORD001',
+        orderNumber: 'IRYA-2024-001',
+        createdAt: new Date('2024-01-15T10:30:00'),
+        status: 'processing',
+        paymentStatus: 'advance_paid',
+        total: 249.99,
+        advancePayment: 100.00,
+        remainingPayment: 149.99,
+        paymentMethod: 'Bank Transfer',
+        items: [
+            {
+                id: 'item1',
+                name: 'Diamond Earrings',
+                image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400',
+                price: 249.99,
+                quantity: 1,
+                totalPrice: 249.99
+            }
+        ],
+        shippingAddress: {
+            fullName: 'John Doe',
+            address1: '123 Main Street',
+            city: 'London',
+            state: 'Greater London',
+            postalCode: 'SW1A 1AA',
+            country: 'United Kingdom',
+            phone: '+44 1234 567890',
+            email: 'john.doe@example.com'
+        },
+        deliveryDateTime: '2024-01-20T14:00:00',
+        trackingNumber: 'TRK123456789'
+    },
+    {
+        id: 'ORD002',
+        orderNumber: 'IRYA-2024-002',
+        createdAt: new Date('2024-01-10T14:20:00'),
+        status: 'shipped',
+        paymentStatus: 'fully_paid',
+        total: 499.99,
+        advancePayment: 250.00,
+        remainingPayment: 249.99,
+        paymentMethod: 'Credit Card',
+        items: [
+            {
+                id: 'item2',
+                name: 'Gold Necklace',
+                image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w-400',
+                price: 499.99,
+                quantity: 1,
+                totalPrice: 499.99
+            }
+        ],
+        shippingAddress: {
+            fullName: 'Sarah Smith',
+            address1: '456 Park Avenue',
+            city: 'Manchester',
+            state: 'Greater Manchester',
+            postalCode: 'M1 1AA',
+            country: 'United Kingdom',
+            phone: '+44 9876 543210',
+            email: 'sarah.smith@example.com'
+        },
+        deliveryDateTime: '2024-01-18T11:00:00',
+        trackingNumber: 'TRK987654321'
+    },
+    {
+        id: 'ORD003',
+        orderNumber: 'IRYA-2024-003',
+        createdAt: new Date('2024-01-05T09:15:00'),
+        status: 'delivered',
+        paymentStatus: 'fully_paid',
+        total: 99.99,
+        advancePayment: 50.00,
+        remainingPayment: 49.99,
+        paymentMethod: 'PayPal',
+        items: [
+            {
+                id: 'item3',
+                name: 'Silver Bracelet',
+                image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400',
+                price: 99.99,
+                quantity: 1,
+                totalPrice: 99.99
+            }
+        ],
+        shippingAddress: {
+            fullName: 'Robert Johnson',
+            address1: '789 Oxford Street',
+            city: 'Birmingham',
+            state: 'West Midlands',
+            postalCode: 'B1 1AA',
+            country: 'United Kingdom',
+            phone: '+44 5555 123456',
+            email: 'robert.j@example.com'
+        },
+        deliveryDateTime: '2024-01-12T15:30:00',
+        trackingNumber: 'TRK456789123'
+    },
+    {
+        id: 'ORD004',
+        orderNumber: 'IRYA-2024-004',
+        createdAt: new Date(),
+        status: 'placed',
+        paymentStatus: 'pending',
+        total: 199.99,
+        advancePayment: 0,
+        remainingPayment: 199.99,
+        paymentMethod: 'Bank Transfer',
+        items: [
+            {
+                id: 'item4',
+                name: 'Pearl Earrings',
+                image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400',
+                price: 199.99,
+                quantity: 1,
+                totalPrice: 199.99
+            }
+        ],
+        shippingAddress: {
+            fullName: 'Emily Brown',
+            address1: '321 Baker Street',
+            city: 'London',
+            state: 'Greater London',
+            postalCode: 'NW1 6XE',
+            country: 'United Kingdom',
+            phone: '+44 7777 888888',
+            email: 'emily.brown@example.com'
+        },
+        deliveryDateTime: null,
+        trackingNumber: null
+    }
+];
+
+// Mock user data
+const userData = {
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    phone: '+44 1234 567890',
+    address: '123 Main Street, London, SW1A 1AA, United Kingdom',
+    joinDate: 'January 1, 2024'
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const ordersDiv = document.getElementById("orders");
+// ============================================
+// INITIALIZATION
+// ============================================
 
-// Load orders
-async function loadOrders() {
-  ordersDiv.innerHTML = "";
-  const snap = await getDocs(collectionGroup(db, "orders"));
-  let orderList = [];
-  
-  snap.forEach(d => {
-    let o = d.data();
-    o.docId = d.id;
-    orderList.push(o);
-  });
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 IRYA STONE Order Management System Initializing...');
+    
+    // Initialize the app
+    initApp();
+    
+    // Setup event listeners
+    setupEventListeners();
+});
 
-  // Sort by latest
-  orderList.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+function initApp() {
+    // Load sample data
+    allOrders = [...sampleOrders];
+    
+    // Update user details
+    updateUserDetails();
+    
+    // Show user dashboard by default
+    showUserDashboard();
+    
+    // Update switch view button text
+    updateSwitchViewButton();
+}
 
-  for(const o of orderList){
-    // Avoid duplicate orders
-    if(!o.items || o.items.length===0) continue;
+function setupEventListeners() {
+    // Switch view button
+    document.getElementById('switchViewBtn').addEventListener('click', toggleView);
+    
+    // Close modals on outside click
+    document.addEventListener('click', function(event) {
+        const orderModal = document.getElementById('orderModal');
+        const editModal = document.getElementById('editOrderModal');
+        const paymentModal = document.getElementById('paymentModal');
+        
+        if (orderModal && event.target === orderModal) {
+            closeModal();
+        }
+        
+        if (editModal && event.target === editModal) {
+            closeEditModal();
+        }
+        
+        if (paymentModal && event.target === paymentModal) {
+            closePaymentModal();
+        }
+    });
+}
 
-    const totalPaid = o.advancePayment || 0;
-    const remaining = (o.total || 0) - totalPaid;
-    const isFull = remaining <= 0;
-    const statusBadge = isFull ? "full" : "advance";
-    const shippedBadge = o.shippingStatus==="shipped" ? "shipped" : "pending";
+// ============================================
+// VIEW MANAGEMENT
+// ============================================
 
-    // Products HTML
-    let productsHTML = "";
-    for(const item of o.items){
-      // Fetch product info by id
-      let productSnap = await getDoc(doc(db,"products",item.id));
-      let product = productSnap.exists() ? productSnap.data() : {};
-      let img = product.images?.[0] || 'https://via.placeholder.com/60';
-      let name = product.title || product.name || item.name;
-      productsHTML += `
-        <div class="flex">
-          <img src="${img}" class="product-img" />
-          <div>
-            <b>${name}</b><br/>
-            Qty: ${item.quantity} | Price: £${item.price} | Remaining: £${item.remainingPayment || remaining}
-          </div>
-        </div>
-      `;
+function toggleView() {
+    if (currentView === 'user') {
+        currentView = 'admin';
+        showAdminDashboard();
+    } else {
+        currentView = 'user';
+        showUserDashboard();
     }
+    
+    updateSwitchViewButton();
+}
 
-    ordersDiv.innerHTML += `
-      <div class="order">
-        <b>Order #: ${o.orderNumber}</b>
-        <span class="badge ${statusBadge}">${isFull ? "FULL PAID" : "ADVANCE PAID"}</span>
-        <span class="badge ${shippedBadge}">${o.shippingStatus || "PENDING"}</span>
-        <p>User: ${o.userName} | Email: ${o.userEmail}</p>
-        <p>Phone: ${o.shippingAddress?.phone || o.billingAddress?.phone}</p>
-        <p>Total: £${o.total} | Paid: £${totalPaid} | Remaining: £${remaining}</p>
-        ${productsHTML}
+function updateSwitchViewButton() {
+    const button = document.getElementById('switchViewBtn');
+    const icon = button.querySelector('i');
+    const text = button.querySelector('span');
+    
+    if (currentView === 'user') {
+        icon.className = 'fas fa-eye';
+        text.textContent = 'Switch to Admin View';
+    } else {
+        icon.className = 'fas fa-user';
+        text.textContent = 'Switch to User View';
+    }
+}
 
-        <select id="pay-${o.docId}">
-          <option value="">-- Update Payment --</option>
-          <option value="advance_confirmed">Advance Confirmed</option>
-          <option value="fully_paid">Fully Paid</option>
-        </select>
-        <button onclick="updatePayment('${o.userId}','${o.docId}','${o.orderNumber}', ${o.total})">Update Payment</button>
+function showUserDashboard() {
+    document.getElementById('userDashboard').classList.remove('hidden');
+    document.getElementById('adminDashboard').classList.add('hidden');
+    loadUserOrders();
+}
 
-        <input id="track-${o.docId}" placeholder="Tracking Number">
-        <input type="datetime-local" id="delivery-${o.docId}" placeholder="Delivery Date & Time">
-        <button onclick="updateShipping('${o.userId}','${o.docId}','${o.orderNumber}')">Update Shipping</button>
-      </div>
+function showAdminDashboard() {
+    document.getElementById('userDashboard').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.remove('hidden');
+    loadAdminOrders();
+}
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+function formatDate(date) {
+    if (!date) return 'N/A';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+function formatDateTime(date) {
+    if (!date) return 'N/A';
+    const d = new Date(date);
+    return d.toLocaleString('en-GB', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function getTimeAgo(date) {
+    if (!date) return 'Just now';
+    
+    const now = new Date();
+    const past = new Date(date);
+    const diffMs = now - past;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    
+    return formatDate(date);
+}
+
+function getOrderStatusClass(status) {
+    switch (status) {
+        case 'placed': return 'badge-info';
+        case 'processing': return 'badge-warning';
+        case 'ready_to_ship': return 'badge-warning';
+        case 'shipped': return 'badge-info';
+        case 'out_for_delivery': return 'badge-info';
+        case 'delivered': return 'badge-success';
+        case 'cancelled': return 'badge-danger';
+        default: return 'badge-info';
+    }
+}
+
+function getOrderStatusText(status) {
+    const statusMap = {
+        'placed': 'Order Placed',
+        'processing': 'Processing',
+        'ready_to_ship': 'Ready to Ship',
+        'shipped': 'Shipped',
+        'out_for_delivery': 'Out for Delivery',
+        'delivered': 'Delivered',
+        'cancelled': 'Cancelled'
+    };
+    return statusMap[status] || status;
+}
+
+function getPaymentStatusClass(status) {
+    switch (status) {
+        case 'pending': return 'badge-danger';
+        case 'advance_paid': return 'badge-warning';
+        case 'fully_paid': return 'badge-success';
+        case 'cancelled': return 'badge-danger';
+        default: return 'badge-danger';
+    }
+}
+
+function getPaymentStatusText(status) {
+    const statusMap = {
+        'pending': 'Payment Pending',
+        'advance_paid': 'Advance Paid',
+        'fully_paid': 'Fully Paid',
+        'cancelled': 'Cancelled'
+    };
+    return statusMap[status] || status;
+}
+
+function getPaymentStatusIcon(status) {
+    switch (status) {
+        case 'pending': return 'fa-clock';
+        case 'advance_paid': return 'fa-check-circle';
+        case 'fully_paid': return 'fa-check-double';
+        case 'cancelled': return 'fa-times-circle';
+        default: return 'fa-clock';
+    }
+}
+
+function showToast(message, type = 'info') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#339af0'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        z-index: 3000;
+        animation: slideIn 0.3s ease;
     `;
-  }
+    
+    toast.innerHTML = `
+        <style>
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        </style>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                document.body.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
 }
 
-// Update Payment
-window.updatePayment = async (userId, orderId, orderNumber, total) => {
-  const status = document.getElementById(`pay-${orderId}`).value;
-  if(!status) return alert("Select payment status");
-
-  const paidAmount = status==="fully_paid" ? total : total*0.3;
-
-  await updateDoc(doc(db,"users",userId,"orders",orderId),{
-    paymentStatus: status,
-    advancePayment: paidAmount,
-    remainingPayment: total - paidAmount,
-    updatedAt: new Date().toISOString()
-  });
-
-  await addDoc(collection(db,"users",userId,"notifications"),{
-    type:"payment",
-    orderId,
-    orderNumber,
-    title:"Payment Update",
-    message: status==="fully_paid"
-      ? `Your full payment of £${total} has been confirmed.`
-      : `Advance payment of £${paidAmount} received. Remaining £${total-paidAmount}. Please complete payment within 24 hours or order will auto-cancel. Advance is non-refundable.`,
-    createdAt:new Date().toISOString(),
-    read:false
-  });
-
-  alert("Payment updated");
-  loadOrders();
+function showError(message) {
+    showToast(message, 'error');
 }
 
-// Update Shipping
-window.updateShipping = async (userId, orderId, orderNumber) => {
-  const track = document.getElementById(`track-${orderId}`).value;
-  const delivery = document.getElementById(`delivery-${orderId}`).value;
-  if(!track) return alert("Enter tracking number");
-  if(!delivery) return alert("Set delivery date & time");
-
-  await updateDoc(doc(db,"users",userId,"orders",orderId),{
-    shippingStatus:"shipped",
-    trackingNumber: track,
-    shippedAt: new Date().toISOString(),
-    deliveryDateTime: delivery
-  });
-
-  await addDoc(collection(db,"users",userId,"notifications"),{
-    type:"shipping",
-    orderId,
-    orderNumber,
-    title:"Order Shipped",
-    message: `Your order has been shipped. Tracking No: ${track}. Expected Delivery: ${delivery}`,
-    createdAt:new Date().toISOString(),
-    read:false
-  });
-
-  alert("Shipping updated");
-  loadOrders();
+function showSuccess(message) {
+    showToast(message, 'success');
 }
 
-loadOrders();
+// ============================================
+// USER DASHBOARD FUNCTIONS
+// ============================================
+
+function updateUserDetails() {
+    const userDetails = document.getElementById('userDetails');
+    
+    userDetails.innerHTML = `
+        <div class="detail-item">
+            <div class="detail-label">Name</div>
+            <div class="detail-value">${userData.name}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Email</div>
+            <div class="detail-value">${userData.email}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Phone</div>
+            <div class="detail-value">${userData.phone}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Address</div>
+            <div class="detail-value">${userData.address}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Member Since</div>
+            <div class="detail-value">${userData.joinDate}</div>
+        </div>
+    `;
+}
+
+function loadUserOrders() {
+    // Filter orders for user view (in real app, would filter by user ID)
+    const userOrders = allOrders; // All orders for demo
+    
+    // Update payment summary
+    updatePaymentSummary(userOrders);
+    
+    // Check for pending payments
+    checkPendingPayments(userOrders);
+    
+    // Display orders
+    displayUserOrders(userOrders);
+}
+
+function updatePaymentSummary(orders) {
+    const totalOrders = orders.length;
+    const totalPaid = orders.reduce((sum, order) => sum + (order.advancePayment || 0), 0);
+    const totalPending = orders
+        .filter(order => order.paymentStatus === 'pending')
+        .reduce((sum, order) => sum + (order.remainingPayment || 0), 0);
+    const totalSpent = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+    
+    document.getElementById('totalOrders').textContent = totalOrders;
+    document.getElementById('amountPaid').textContent = `£${totalPaid.toFixed(2)}`;
+    document.getElementById('pendingBalance').textContent = `£${totalPending.toFixed(2)}`;
+    document.getElementById('totalSpent').textContent = `£${totalSpent.toFixed(2)}`;
+}
+
+function checkPendingPayments(orders) {
+    const hasPendingPayment = orders.some(order => 
+        order.paymentStatus === 'pending' && 
+        order.status !== 'cancelled'
+    );
+    
+    const warning = document.getElementById('paymentWarning');
+    if (hasPendingPayment) {
+        warning.style.display = 'flex';
+    } else {
+        warning.style.display = 'none';
+    }
+}
+
+function displayUserOrders(orders) {
+    const ordersGrid = document.getElementById('ordersGrid');
+    
+    if (orders.length === 0) {
+        ordersGrid.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h3>No Orders Yet</h3>
+                <p>Start shopping to see your orders here</p>
+                <button class="btn btn-primary" onclick="window.location.href='products.html'" style="margin-top: var(--spacing-md);">
+                    <i class="fas fa-shopping-cart"></i> Shop Now
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    let ordersHTML = '';
+    
+    orders.forEach(order => {
+        const orderDate = formatDateTime(order.createdAt);
+        const total = order.total || 0;
+        const advance = order.advancePayment || 0;
+        const remaining = order.remainingPayment || (total - advance);
+        const isFullyPaid = order.paymentStatus === 'fully_paid';
+        const isCancelled = order.status === 'cancelled';
+        
+        // Get first item for display
+        const firstItem = order.items?.[0] || {};
+        
+        // Calculate timeline progress
+        const timelineProgress = calculateTimelineProgress(order.status);
+        
+        ordersHTML += `
+            <div class="card order-card">
+                <div class="order-header">
+                    <div class="order-info">
+                        <h3>${order.orderNumber || 'Order #' + order.id.substring(0, 8)}</h3>
+                        <div class="order-date">Placed on ${orderDate}</div>
+                    </div>
+                    <div class="status-badge ${getPaymentStatusClass(order.paymentStatus)}">
+                        <i class="fas ${getPaymentStatusIcon(order.paymentStatus)}"></i>
+                        ${getPaymentStatusText(order.paymentStatus)}
+                    </div>
+                </div>
+                
+                <div class="order-body">
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img src="${firstItem.image || 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?w=400'}" 
+                                 alt="${firstItem.name || 'Product'}">
+                        </div>
+                        <div class="item-details">
+                            <div class="item-name">${firstItem.name || 'Product'}</div>
+                            <div class="item-meta">
+                                ${order.items?.length || 1} item${order.items?.length !== 1 ? 's' : ''} 
+                                • ${order.paymentMethod || 'Bank Transfer'}
+                            </div>
+                            <div class="item-price">£${total.toFixed(2)}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-summary">
+                        <div>
+                            <div class="summary-label">Total Amount</div>
+                            <div class="summary-value total">£${total.toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div class="summary-label">Advance Paid</div>
+                            <div class="summary-value paid">£${advance.toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div class="summary-label">Remaining</div>
+                            <div class="summary-value pending">£${remaining.toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div class="summary-label">Status</div>
+                            <div class="summary-value">
+                                <span class="badge ${getOrderStatusClass(order.status)}">
+                                    ${getOrderStatusText(order.status)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${!isCancelled ? `
+                    <div class="timeline">
+                        <div class="timeline-track">
+                            <div class="timeline-progress" style="width: ${timelineProgress}%"></div>
+                        </div>
+                        <div class="timeline-steps">
+                            ${getTimelineSteps(order.status)}
+                        </div>
+                    </div>
+                    
+                    ${order.deliveryDateTime ? `
+                    <div class="alert alert-info" style="margin-top: var(--spacing-md); padding: var(--spacing-sm);">
+                        <i class="fas fa-truck"></i>
+                        <div>
+                            <strong>Expected Delivery:</strong>
+                            <div>${formatDateTime(order.deliveryDateTime)}</div>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${!isFullyPaid && order.paymentStatus === 'pending' ? `
+                    <div class="alert alert-warning" style="margin-top: var(--spacing-md);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            <strong>Complete Payment to Continue</strong>
+                            <p>Pay remaining £${remaining.toFixed(2)} to proceed with shipping and delivery.</p>
+                        </div>
+                    </div>
+                    ` : ''}
+                    ` : ''}
+                </div>
+                
+                <div class="order-footer">
+                    <div class="order-actions">
+                        <button class="btn btn-primary btn-sm" onclick="viewOrderDetails('${order.id}', 'user')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        ${order.trackingNumber ? `
+                        <button class="btn btn-secondary btn-sm" onclick="trackOrder('${order.trackingNumber}')">
+                            <i class="fas fa-truck"></i> Track Order
+                        </button>
+                        ` : ''}
+                        ${order.paymentStatus === 'pending' && !isCancelled ? `
+                        <button class="btn btn-primary btn-sm" onclick="openPaymentModal('${order.id}')">
+                            <i class="fas fa-credit-card"></i> Complete Payment
+                        </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    ordersGrid.innerHTML = ordersHTML;
+}
+
+function calculateTimelineProgress(status) {
+    const steps = {
+        'placed': 14,
+        'processing': 28,
+        'ready_to_ship': 42,
+        'shipped': 57,
+        'out_for_delivery': 71,
+        'delivered': 100,
+        'cancelled': 0
+    };
+    
+    return steps[status] || 14;
+}
+
+function getTimelineSteps(currentStatus) {
+    const steps = [
+        { status: 'placed', icon: 'fa-shopping-cart', label: 'Order Placed' },
+        { status: 'processing', icon: 'fa-cog', label: 'Processing' },
+        { status: 'ready_to_ship', icon: 'fa-box', label: 'Ready to Ship' },
+        { status: 'shipped', icon: 'fa-shipping-fast', label: 'Shipped' },
+        { status: 'out_for_delivery', icon: 'fa-truck', label: 'Out for Delivery' },
+        { status: 'delivered', icon: 'fa-check-circle', label: 'Delivered' }
+    ];
+    
+    let stepsHTML = '';
+    let foundCurrent = false;
+    
+    steps.forEach(step => {
+        let stepClass = '';
+        
+        if (step.status === currentStatus) {
+            stepClass = 'active';
+            foundCurrent = true;
+        } else if (!foundCurrent) {
+            stepClass = 'completed';
+        }
+        
+        stepsHTML += `
+            <div class="timeline-step ${stepClass}">
+                <div class="step-icon">
+                    <i class="fas ${step.icon}"></i>
+                </div>
+                <div class="step-label">${step.label}</div>
+            </div>
+        `;
+    });
+    
+    return stepsHTML;
+}
+
+// ============================================
+// ADMIN DASHBOARD FUNCTIONS
+// ============================================
+
+function loadAdminOrders() {
+    filteredOrders = [...allOrders];
+    updateAdminStats();
+    displayAdminOrders();
+}
+
+function updateAdminStats() {
+    const totalOrders = allOrders.length;
+    const advancePaid = allOrders.filter(o => o.paymentStatus === 'advance_paid').length;
+    const fullyPaid = allOrders.filter(o => o.paymentStatus === 'fully_paid').length;
+    const pendingPayment = allOrders.filter(o => o.paymentStatus === 'pending').length;
+    
+    const totalRevenue = allOrders
+        .filter(o => o.paymentStatus !== 'cancelled')
+        .reduce((sum, order) => sum + (order.advancePayment || 0), 0);
+    
+    document.getElementById('totalOrdersCount').textContent = totalOrders;
+    document.getElementById('advancePaidCount').textContent = advancePaid;
+    document.getElementById('fullyPaidCount').textContent = fullyPaid;
+    document.getElementById('pendingPaymentCount').textContent = pendingPayment;
+    document.getElementById('totalRevenue').textContent = `£${totalRevenue.toFixed(2)}`;
+}
+
+function filterOrders(filterType) {
+    currentFilter = filterType;
+    
+    // Update active nav item
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+    
+    switch (filterType) {
+        case 'all':
+            filteredOrders = [...allOrders];
+            break;
+        case 'advance_paid':
+            filteredOrders = allOrders.filter(o => o.paymentStatus === 'advance_paid');
+            break;
+        case 'fully_paid':
+            filteredOrders = allOrders.filter(o => o.paymentStatus === 'fully_paid');
+            break;
+        case 'cancelled':
+            filteredOrders = allOrders.filter(o => o.status === 'cancelled');
+            break;
+        case 'pending_payment':
+            filteredOrders = allOrders.filter(o => o.paymentStatus === 'pending');
+            break;
+        default:
+            filteredOrders = [...allOrders];
+    }
+    
+    displayAdminOrders();
+}
+
+function displayAdminOrders() {
+    const tableBody = document.getElementById('adminOrdersTable');
+    
+    if (filteredOrders.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: var(--spacing-xl);">
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <p>No orders found</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    let tableHTML = '';
+    
+    filteredOrders.forEach(order => {
+        const orderDate = formatDate(order.createdAt);
+        const total = order.total || 0;
+        const advance = order.advancePayment || 0;
+        const remaining = order.remainingPayment || (total - advance);
+        const firstItem = order.items?.[0] || {};
+        
+        tableHTML += `
+            <tr>
+                <td>
+                    <div class="order-cell">
+                        <div class="order-number">${order.orderNumber || 'N/A'}</div>
+                        <div class="order-date">${orderDate}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="customer-cell">
+                        <div class="customer-name">${order.shippingAddress?.fullName || 'Customer'}</div>
+                        <div class="customer-email">${order.shippingAddress?.email || 'N/A'}</div>
+                    </div>
+                </td>
+                <td class="amount-cell">£${total.toFixed(2)}</td>
+                <td>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <span class="badge ${getPaymentStatusClass(order.paymentStatus)}">
+                            ${getPaymentStatusText(order.paymentStatus)}
+                        </span>
+                        <div style="font-size: 11px; color: var(--amazon-text-light);">
+                            Paid: £${advance.toFixed(2)} | Remaining: £${remaining.toFixed(2)}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="status-cell">
+                        <span class="badge ${getOrderStatusClass(order.status)}">
+                            ${getOrderStatusText(order.status)}
+                        </span>
+                    </div>
+                </td>
+                <td>
+                    <div class="actions-cell">
+                        <button class="btn btn-sm btn-primary" onclick="editOrder('${order.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="viewOrderDetails('${order.id}', 'admin')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tableBody.innerHTML = tableHTML;
+}
+
+// ============================================
+// ORDER MANAGEMENT FUNCTIONS
+// ============================================
+
+function editOrder(orderId) {
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) {
+        showError('Order not found');
+        return;
+    }
+    
+    currentEditingOrder = order;
+    
+    // Populate form
+    document.getElementById('editPaymentStatus').value = order.paymentStatus || 'pending';
+    document.getElementById('editOrderStatus').value = order.status || 'placed';
+    document.getElementById('editTrackingNumber').value = order.trackingNumber || '';
+    document.getElementById('editRemainingPayment').value = order.remainingPayment || 
+        (order.total - (order.advancePayment || 0));
+    document.getElementById('editAdminNotes').value = order.adminNotes || '';
+    
+    if (order.deliveryDateTime) {
+        const date = new Date(order.deliveryDateTime);
+        const localDate = date.toISOString().slice(0, 16);
+        document.getElementById('editDeliveryDateTime').value = localDate;
+    } else {
+        document.getElementById('editDeliveryDateTime').value = '';
+    }
+    
+    // Show modal
+    document.getElementById('editOrderModal').classList.add('show');
+}
+
+function saveOrderUpdates() {
+    try {
+        if (!currentEditingOrder) return;
+        
+        const order = currentEditingOrder;
+        
+        // Get updated values
+        const paymentStatus = document.getElementById('editPaymentStatus').value;
+        const status = document.getElementById('editOrderStatus').value;
+        const trackingNumber = document.getElementById('editTrackingNumber').value.trim();
+        const remainingPayment = parseFloat(document.getElementById('editRemainingPayment').value) || 0;
+        const adminNotes = document.getElementById('editAdminNotes').value.trim();
+        const deliveryDateTime = document.getElementById('editDeliveryDateTime').value;
+        
+        // Update order
+        order.paymentStatus = paymentStatus;
+        order.status = status;
+        order.trackingNumber = trackingNumber;
+        order.remainingPayment = remainingPayment;
+        order.adminNotes = adminNotes;
+        
+        if (deliveryDateTime) {
+            order.deliveryDateTime = new Date(deliveryDateTime).toISOString();
+        }
+        
+        // Update total if needed
+        if (paymentStatus === 'fully_paid') {
+            order.advancePayment = order.total;
+            order.remainingPayment = 0;
+        }
+        
+        // Update in array
+        const index = allOrders.findIndex(o => o.id === order.id);
+        if (index !== -1) {
+            allOrders[index] = order;
+        }
+        
+        showSuccess('Order updated successfully!');
+        closeEditModal();
+        
+        // Refresh view
+        if (currentView === 'admin') {
+            filterOrders(currentFilter);
+            updateAdminStats();
+        } else {
+            loadUserOrders();
+        }
+        
+    } catch (error) {
+        console.error('Error updating order:', error);
+        showError('Failed to update order');
+    }
+}
+
+function viewOrderDetails(orderId, source) {
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) {
+        showError('Order not found');
+        return;
+    }
+    
+    // Build order details HTML
+    let detailsHTML = `
+        <div style="display: grid; gap: var(--spacing-lg);">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md);">
+                <div>
+                    <h4 style="margin-bottom: var(--spacing-sm); font-weight: 600;">Order Information</h4>
+                    <div style="display: grid; gap: var(--spacing-sm);">
+                        <div>
+                            <strong>Order Number:</strong> ${order.orderNumber || 'N/A'}
+                        </div>
+                        <div>
+                            <strong>Order Date:</strong> ${formatDateTime(order.createdAt)}
+                        </div>
+                        <div>
+                            <strong>Status:</strong>
+                            <span class="badge ${getOrderStatusClass(order.status)}">
+                                ${getOrderStatusText(order.status)}
+                            </span>
+                        </div>
+                        <div>
+                            <strong>Payment Status:</strong>
+                            <span class="badge ${getPaymentStatusClass(order.paymentStatus)}">
+                                ${getPaymentStatusText(order.paymentStatus)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 style="margin-bottom: var(--spacing-sm); font-weight: 600;">Payment Details</h4>
+                    <div style="display: grid; gap: var(--spacing-sm);">
+                        <div>
+                            <strong>Total Amount:</strong> £${order.total?.toFixed(2) || '0.00'}
+                        </div>
+                        <div>
+                            <strong>Advance Paid:</strong> £${order.advancePayment?.toFixed(2) || '0.00'}
+                        </div>
+                        <div>
+                            <strong>Remaining Payment:</strong> £${order.remainingPayment?.toFixed(2) || '0.00'}
+                        </div>
+                        <div>
+                            <strong>Payment Method:</strong> ${order.paymentMethod || 'Bank Transfer'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h4 style="margin-bottom: var(--spacing-sm); font-weight: 600;">Shipping Information</h4>
+                <div style="display: grid; gap: var(--spacing-sm);">
+    `;
+    
+    if (order.shippingAddress) {
+        const addr = order.shippingAddress;
+        detailsHTML += `
+            <div>
+                <strong>Shipping to:</strong> ${addr.fullName || 'N/A'}
+            </div>
+            <div>
+                <strong>Address:</strong> ${addr.address1 || ''} ${addr.address2 || ''}
+            </div>
+            <div>
+                <strong>City:</strong> ${addr.city || ''}, ${addr.state || ''} ${addr.postalCode || ''}
+            </div>
+            <div>
+                <strong>Country:</strong> ${addr.country || ''}
+            </div>
+            <div>
+                <strong>Phone:</strong> ${addr.phone || ''}
+            </div>
+            <div>
+                <strong>Email:</strong> ${addr.email || ''}
+            </div>
+        `;
+    }
+    
+    if (order.trackingNumber) {
+        detailsHTML += `
+            <div>
+                <strong>Tracking Number:</strong> ${order.trackingNumber}
+            </div>
+        `;
+    }
+    
+    if (order.deliveryDateTime) {
+        detailsHTML += `
+            <div>
+                <strong>Expected Delivery:</strong> ${formatDateTime(order.deliveryDateTime)}
+            </div>
+        `;
+    }
+    
+    detailsHTML += `
+                </div>
+            </div>
+            
+            <div>
+                <h4 style="margin-bottom: var(--spacing-sm); font-weight: 600;">Order Items</h4>
+                <div style="display: grid; gap: var(--spacing-sm);">
+    `;
+    
+    if (order.items && order.items.length > 0) {
+        order.items.forEach(item => {
+            detailsHTML += `
+                <div style="display: flex; gap: var(--spacing-md); padding: var(--spacing-sm); background: var(--amazon-light-gray); border-radius: var(--radius-sm);">
+                    <img src="${item.image || 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?w=200'}" 
+                         alt="${item.name}" 
+                         style="width: 60px; height: 60px; object-fit: cover; border-radius: var(--radius-sm);">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600;">${item.name || 'Product'}</div>
+                        <div style="font-size: 12px; color: var(--amazon-text-light);">
+                            Quantity: ${item.quantity || 1} • Price: £${item.price?.toFixed(2) || '0.00'}
+                        </div>
+                        <div style="font-weight: 600; margin-top: 4px;">
+                            £${item.totalPrice?.toFixed(2) || '0.00'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    detailsHTML += `
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('orderModalContent').innerHTML = detailsHTML;
+    document.getElementById('orderModal').classList.add('show');
+}
+
+function trackOrder(trackingNumber) {
+    // In a real implementation, this would open the courier's tracking page
+    window.open(`https://www.royalmail.com/track-your-item#/tracking-results/${trackingNumber}`, '_blank');
+}
+
+function openPaymentModal(orderId) {
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) {
+        showError('Order not found');
+        return;
+    }
+    
+    currentPaymentOrder = order;
+    
+    const total = order.total || 0;
+    const advance = order.advancePayment || 0;
+    const remaining = order.remainingPayment || (total - advance);
+    
+    document.getElementById('paymentModalContent').innerHTML = `
+        <div style="display: grid; gap: var(--spacing-lg);">
+            <div>
+                <h4 style="margin-bottom: var(--spacing-sm); font-weight: 600;">Payment Details</h4>
+                <div style="display: grid; gap: var(--spacing-sm);">
+                    <div>
+                        <strong>Order Number:</strong> ${order.orderNumber}
+                    </div>
+                    <div>
+                        <strong>Total Amount:</strong> £${total.toFixed(2)}
+                    </div>
+                    <div>
+                        <strong>Advance Paid:</strong> £${advance.toFixed(2)}
+                    </div>
+                    <div>
+                        <strong>Remaining Amount:</strong> £${remaining.toFixed(2)}
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h4 style="margin-bottom: var(--spacing-sm); font-weight: 600;">Payment Methods</h4>
+                <div style="display: grid; gap: var(--spacing-sm);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm); border: 1px solid var(--amazon-border); border-radius: var(--radius-sm);">
+                        <input type="radio" id="bankTransfer" name="paymentMethod" value="bank_transfer" checked>
+                        <label for="bankTransfer">
+                            <strong>Bank Transfer</strong>
+                            <div style="font-size: 12px; color: var(--amazon-text-light);">
+                                Transfer to: IRYA STONE UK Ltd<br>
+                                Account: 12345678<br>
+                                Sort Code: 04-00-75
+                            </div>
+                        </label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm); border: 1px solid var(--amazon-border); border-radius: var(--radius-sm);">
+                        <input type="radio" id="creditCard" name="paymentMethod" value="credit_card">
+                        <label for="creditCard">
+                            <strong>Credit/Debit Card</strong>
+                            <div style="font-size: 12px; color: var(--amazon-text-light);">
+                                Secure payment via Stripe
+                            </div>
+                        </label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm); border: 1px solid var(--amazon-border); border-radius: var(--radius-sm);">
+                        <input type="radio" id="paypal" name="paymentMethod" value="paypal">
+                        <label for="paypal">
+                            <strong>PayPal</strong>
+                            <div style="font-size: 12px; color: var(--amazon-text-light);">
+                                Pay with PayPal account
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>Important:</strong>
+                    <p>After making payment, please email the receipt to payments@iryastone.co.uk</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('paymentModal').classList.add('show');
+}
+
+function processPayment() {
+    if (!currentPaymentOrder) return;
+    
+    // In a real application, this would process the payment
+    // For demo, we'll just update the order status
+    
+    const order = currentPaymentOrder;
+    const total = order.total || 0;
+    
+    // Update payment status
+    order.paymentStatus = 'fully_paid';
+    order.advancePayment = total;
+    order.remainingPayment = 0;
+    
+    showSuccess('Payment processed successfully! Order status updated.');
+    closePaymentModal();
+    
+    // Refresh orders
+    if (currentView === 'user') {
+        loadUserOrders();
+    } else {
+        loadAdminOrders();
+    }
+}
+
+// ============================================
+// MODAL FUNCTIONS
+// ============================================
+
+function closeModal() {
+    document.getElementById('orderModal').classList.remove('show');
+}
+
+function closeEditModal() {
+    document.getElementById('editOrderModal').classList.remove('show');
+    currentEditingOrder = null;
+}
+
+function closePaymentModal() {
+    document.getElementById('paymentModal').classList.remove('show');
+    currentPaymentOrder = null;
+}
+
+// ============================================
+// GLOBAL FUNCTIONS
+// ============================================
+
+function refreshOrders() {
+    if (currentView === 'admin') {
+        loadAdminOrders();
+        showSuccess('Orders refreshed');
+    } else {
+        loadUserOrders();
+        showSuccess('Orders refreshed');
+    }
+}
+
+// Make functions available globally
+window.toggleView = toggleView;
+window.viewOrderDetails = viewOrderDetails;
+window.trackOrder = trackOrder;
+window.openPaymentModal = openPaymentModal;
+window.editOrder = editOrder;
+window.saveOrderUpdates = saveOrderUpdates;
+window.filterOrders = filterOrders;
+window.refreshOrders = refreshOrders;
+window.closeModal = closeModal;
+window.closeEditModal = closeEditModal;
+window.closePaymentModal = closePaymentModal;
+window.processPayment = processPayment;
 </script>
 </body>
 </html>
