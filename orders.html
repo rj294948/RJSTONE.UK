@@ -87,99 +87,6 @@
     color: var(--primary-gold);
 }
 
-/* Status indicators */
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.status-pending { background: #fff3cd; color: #856404; }
-.status-processing { background: #cce5ff; color: #004085; }
-.status-shipped { background: #d4edda; color: #155724; }
-.status-delivered { background: #d1ecf1; color: #0c5460; }
-.status-cancelled { background: #f8d7da; color: #721c24; }
-.status-awaiting-payment { background: #fff3cd; color: #856404; }
-.status-payment-verified { background: #d4edda; color: #155724; }
-
-/* Real-time indicator */
-.real-time-indicator {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 15px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    font-size: 13px;
-}
-
-.real-time-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #28a745;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
-
-/* Notification panel */
-.notification-panel {
-    position: fixed;
-    top: 70px;
-    right: 20px;
-    z-index: 1000;
-    width: 300px;
-    max-height: 400px;
-    overflow-y: auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    display: none;
-}
-
-.notification-header {
-    padding: 15px;
-    border-bottom: 1px solid #e0e0e0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.notification-item {
-    padding: 12px 15px;
-    border-bottom: 1px solid #f0f0f0;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.notification-item:hover {
-    background: #f8f9fa;
-}
-
-.notification-item.unread {
-    background: #f0f7ff;
-}
-
-.notification-time {
-    font-size: 11px;
-    color: #6c757d;
-    margin-top: 5px;
-}
-
 .items-table {
     width: 100%;
     border-collapse: collapse;
@@ -212,285 +119,116 @@
     height: 100%;
     object-fit: cover;
 }
-
-/* Update animation */
-.updating {
-    animation: highlightUpdate 2s ease;
-}
-
-@keyframes highlightUpdate {
-    0% { background-color: rgba(255, 193, 7, 0.1); }
-    100% { background-color: transparent; }
-}
 </style>
 </head>
 <body>
 
-<!-- Real-time indicator -->
-<div class="real-time-indicator" id="realTimeIndicator">
-    <div class="real-time-dot"></div>
-    <span>Live Updates Active</span>
-</div>
-
-<!-- Notification panel -->
-<div class="notification-panel" id="notificationPanel">
-    <div class="notification-header">
-        <h4 style="margin: 0;">Order Updates</h4>
-        <button onclick="clearNotifications()" style="background: none; border: none; color: #6c757d; cursor: pointer;">
-            Clear All
-        </button>
-    </div>
-    <div id="notificationsList"></div>
-</div>
+<!-- Header and Breadcrumb same as orders.html -->
+<!-- Add your header and breadcrumb code here -->
 
 <div class="order-details-container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <a href="orders.html" class="back-btn">
-            <i class="fas fa-arrow-left"></i>
-            Back to Orders
-        </a>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <button onclick="toggleNotifications()" class="back-btn">
-                <i class="fas fa-bell"></i>
-                <span id="notificationCount">0</span>
-            </button>
-            <button onclick="refreshOrder()" class="back-btn">
-                <i class="fas fa-sync-alt"></i>
-                Refresh
-            </button>
-        </div>
-    </div>
+    <a href="orders.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Orders
+    </a>
     
     <div id="orderDetailsContent">
         <!-- Order details will be loaded here -->
     </div>
 </div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-
 <script>
-// Global variables
-let orderId = null;
-let lastOrderData = null;
-let notificationCount = 0;
-let db = null;
-let orderUnsubscribe = null;
+// Get order ID from URL
+const urlParams = new URLSearchParams(window.location.search);
+const orderId = urlParams.get('id');
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Get order ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    orderId = urlParams.get('id');
-    
-    if (!orderId) {
-        window.location.href = 'orders.html';
-        return;
-    }
-    
-    // Initialize Firebase
-    initializeFirebase();
-    
-    // Load order details with real-time updates
-    loadOrderDetails();
-    
-    // Initialize notification system
-    initializeNotificationSystem();
-});
-
-// Firebase configuration
-function initializeFirebase() {
-    const firebaseConfig = {
-        apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-        authDomain: "iryastone-uk.firebaseapp.com",
-        projectId: "iryastone-uk",
-        storageBucket: "iryastone-uk.firebasestorage.app",
-        messagingSenderId: "110940910896",
-        appId: "1:110940910896:web:b25e92127118665e5c84f5",
-        measurementId: "G-6YM1FLYN48"
-    };
-    
-    // Initialize Firebase
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    
-    // Get Firestore instance
-    db = firebase.firestore();
+if (!orderId) {
+    window.location.href = 'orders.html';
 }
 
-// Main function to load order details with real-time updates
+// Load order details
 async function loadOrderDetails() {
     try {
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+            authDomain: "iryastone-uk.firebaseapp.com",
+            projectId: "iryastone-uk",
+            storageBucket: "iryastone-uk.firebasestorage.app",
+            messagingSenderId: "110940910896",
+            appId: "1:110940910896:web:b25e92127118665e5c84f5",
+            measurementId: "G-6YM1FLYN48"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const firebaseDB = firebase.firestore();
+        const firebaseAuth = firebase.auth();
+        
         // Get current user
-        const auth = firebase.auth();
-        const user = auth.currentUser;
+        const user = firebaseAuth.currentUser;
         const userId = user ? user.uid : localStorage.getItem('irya_guest_id');
         
-        if (!userId) {
-            showOrderNotFound();
+        // Try to get order from user's collection
+        let order = null;
+        
+        try {
+            const orderDoc = await firebaseDB.collection('users').doc(userId)
+                .collection('orders').doc(orderId).get();
+            
+            if (orderDoc.exists) {
+                order = orderDoc.data();
+            }
+        } catch (error) {
+            console.log("Could not get from user collection");
+        }
+        
+        // If not found, try main orders collection
+        if (!order) {
+            const orderDoc = await firebaseDB.collection('orders').doc(orderId).get();
+            if (orderDoc.exists) {
+                order = orderDoc.data();
+            }
+        }
+        
+        if (!order) {
+            document.getElementById('orderDetailsContent').innerHTML = `
+                <div style="text-align: center; padding: 50px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ffc107; margin-bottom: 20px;"></i>
+                    <h2>Order Not Found</h2>
+                    <p>This order does not exist or you don't have permission to view it.</p>
+                    <a href="orders.html" class="back-btn" style="margin-top: 20px;">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Orders
+                    </a>
+                </div>
+            `;
             return;
         }
         
-        // Set up real-time listener
-        setupRealtimeListener(userId);
+        // Display order details
+        displayOrderDetails(order);
         
     } catch (error) {
         console.error('Error loading order details:', error);
-        showError(error);
+        document.getElementById('orderDetailsContent').innerHTML = `
+            <div style="text-align: center; padding: 50px;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 20px;"></i>
+                <h2>Error Loading Order</h2>
+                <p>${error.message}</p>
+                <a href="orders.html" class="back-btn" style="margin-top: 20px;">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Orders
+                </a>
+            </div>
+        `;
     }
 }
 
-// Set up real-time Firestore listener
-function setupRealtimeListener(userId) {
-    // First try user's personal orders collection
-    let orderRef = db.collection('users').doc(userId).collection('orders').doc(orderId);
-    
-    // Set up the real-time listener
-    orderUnsubscribe = orderRef.onSnapshot(async (orderDoc) => {
-        try {
-            if (orderDoc.exists) {
-                const orderData = orderDoc.data();
-                orderData.id = orderDoc.id;
-                
-                // Display order details
-                await displayOrderDetails(orderData);
-                
-                // Check for changes and notify
-                checkForChangesAndNotify(orderData);
-                
-                // Update last order data
-                lastOrderData = orderData;
-                
-            } else {
-                // If not found in user collection, try main orders collection
-                tryMainOrdersCollection();
-            }
-        } catch (error) {
-            console.error('Error processing order snapshot:', error);
-        }
-    }, (error) => {
-        console.error('Error in order listener:', error);
-        // Fallback to one-time load
-        loadOrderOnce(userId);
-    });
-}
-
-// Try main orders collection
-function tryMainOrdersCollection() {
-    const mainOrderRef = db.collection('orders').doc(orderId);
-    
-    orderUnsubscribe = mainOrderRef.onSnapshot((orderDoc) => {
-        if (orderDoc.exists) {
-            const orderData = orderDoc.data();
-            orderData.id = orderDoc.id;
-            displayOrderDetails(orderData);
-            checkForChangesAndNotify(orderData);
-            lastOrderData = orderData;
-        } else {
-            showOrderNotFound();
-        }
-    });
-}
-
-// Fallback one-time load
-async function loadOrderOnce(userId) {
-    try {
-        let orderData = null;
-        
-        // Try user collection
-        const userOrderDoc = await db.collection('users').doc(userId)
-            .collection('orders').doc(orderId).get();
-        
-        if (userOrderDoc.exists) {
-            orderData = userOrderDoc.data();
-            orderData.id = userOrderDoc.id;
-        } else {
-            // Try main collection
-            const mainOrderDoc = await db.collection('orders').doc(orderId).get();
-            if (mainOrderDoc.exists) {
-                orderData = mainOrderDoc.data();
-                orderData.id = mainOrderDoc.id;
-            }
-        }
-        
-        if (orderData) {
-            displayOrderDetails(orderData);
-            lastOrderData = orderData;
-        } else {
-            showOrderNotFound();
-        }
-    } catch (error) {
-        console.error('Error in fallback load:', error);
-        showOrderNotFound();
-    }
-}
-
-// Check for changes and show notifications
-function checkForChangesAndNotify(newOrderData) {
-    if (!lastOrderData) return;
-    
-    const changes = [];
-    
-    // Check status changes
-    if (lastOrderData.status !== newOrderData.status) {
-        changes.push({
-            type: 'status',
-            old: lastOrderData.status,
-            new: newOrderData.status,
-            message: `Order status changed from "${getStatusText(lastOrderData.status)}" to "${getStatusText(newOrderData.status)}"`
-        });
-    }
-    
-    // Check payment status changes
-    if (lastOrderData.paymentStatus !== newOrderData.paymentStatus) {
-        changes.push({
-            type: 'payment',
-            old: lastOrderData.paymentStatus,
-            new: newOrderData.paymentStatus,
-            message: `Payment status changed to "${getPaymentStatusText(newOrderData.paymentStatus)}"`
-        });
-    }
-    
-    // Check shipping/tracking updates
-    if (!lastOrderData.tracking && newOrderData.tracking) {
-        changes.push({
-            type: 'tracking',
-            message: 'Tracking information has been added to your order'
-        });
-    }
-    
-    if (lastOrderData.tracking && newOrderData.tracking && 
-        lastOrderData.tracking.number !== newOrderData.tracking.number) {
-        changes.push({
-            type: 'tracking',
-            message: 'Tracking information has been updated'
-        });
-    }
-    
-    // Show notifications for changes
-    changes.forEach(change => {
-        showChangeNotification(change);
-    });
-}
-
-// Display order details with real-time updates
 function displayOrderDetails(order) {
     const content = document.getElementById('orderDetailsContent');
-    
-    // Add updating animation to changed sections
-    if (lastOrderData) {
-        setTimeout(() => {
-            document.querySelectorAll('.detail-section').forEach(section => {
-                section.classList.add('updating');
-                setTimeout(() => {
-                    section.classList.remove('updating');
-                }, 2000);
-            });
-        }, 100);
-    }
     
     content.innerHTML = `
         <!-- Order Summary -->
@@ -507,28 +245,12 @@ function displayOrderDetails(order) {
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Order Status</div>
-                    <div class="detail-value">
-                        <span class="status-badge status-${getStatusClass(order.status)}">
-                            <i class="fas ${getStatusIcon(order.status)}"></i>
-                            ${getStatusText(order.status)}
-                        </span>
-                    </div>
+                    <div class="detail-value">${getStatusText(order.status)}</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Payment Status</div>
-                    <div class="detail-value">
-                        <span class="status-badge status-${getPaymentStatusClass(order.paymentStatus)}">
-                            <i class="fas ${getPaymentStatusIcon(order.paymentStatus)}"></i>
-                            ${getPaymentStatusText(order.paymentStatus)}
-                        </span>
-                    </div>
+                    <div class="detail-value">${getPaymentStatusText(order.paymentStatus)}</div>
                 </div>
-                ${order.updatedAt ? `
-                <div class="detail-item">
-                    <div class="detail-label">Last Updated</div>
-                    <div class="detail-value" id="lastUpdatedTime">${formatDate(order.updatedAt)}</div>
-                </div>
-                ` : ''}
             </div>
         </div>
         
@@ -546,7 +268,7 @@ function displayOrderDetails(order) {
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">User ID</div>
-                    <div class="detail-value">${order.userId ? order.userId.substring(0, 10) + '...' : 'N/A'}</div>
+                    <div class="detail-value">${order.userId.substring(0, 10)}...</div>
                 </div>
             </div>
         </div>
@@ -622,77 +344,31 @@ function displayOrderDetails(order) {
                     <div class="detail-label">Total Amount</div>
                     <div class="detail-value gold">£${order.total?.toFixed(2) || '0.00'}</div>
                 </div>
-                ${order.paymentVerifiedAt ? `
-                <div class="detail-item">
-                    <div class="detail-label">Payment Verified</div>
-                    <div class="detail-value">${formatDate(order.paymentVerifiedAt)}</div>
-                </div>
-                ` : ''}
             </div>
         </div>
         
-        <!-- Shipping & Tracking -->
+        <!-- Shipping Address -->
         <div class="detail-section">
-            <h2><i class="fas fa-shipping-fast"></i> Shipping & Tracking</h2>
-            <div class="detail-grid">
+            <h2><i class="fas fa-map-marker-alt"></i> Shipping Address</h2>
+            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
                 ${order.shippingAddress ? `
-                    <div class="detail-item" style="grid-column: span 2;">
-                        <div class="detail-label">Shipping Address</div>
-                        <div style="padding: 10px; background: #f8f9fa; border-radius: 5px; margin-top: 5px;">
-                            ${order.shippingAddress.fullName}<br>
-                            ${order.shippingAddress.address1}<br>
-                            ${order.shippingAddress.address2 ? order.shippingAddress.address2 + '<br>' : ''}
-                            ${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.postalCode}<br>
-                            ${order.shippingAddress.country}<br>
-                            <strong>Phone:</strong> ${order.shippingAddress.phone || 'N/A'}
+                    <p style="font-weight: 600; margin-bottom: 10px;">${order.shippingAddress.fullName}</p>
+                    <p>${order.shippingAddress.address1}</p>
+                    ${order.shippingAddress.address2 ? `<p>${order.shippingAddress.address2}</p>` : ''}
+                    <p>${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.postalCode}</p>
+                    <p>${order.shippingAddress.country}</p>
+                    <p style="margin-top: 10px;"><strong>Phone:</strong> ${order.shippingAddress.phone || 'N/A'}</p>
+                    ${order.shippingAddress.instructions ? `
+                        <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;">
+                            <strong>Special Instructions:</strong>
+                            <p>${order.shippingAddress.instructions}</p>
                         </div>
-                    </div>
-                ` : ''}
-                
-                ${order.tracking ? `
-                    <div class="detail-item">
-                        <div class="detail-label">Tracking Number</div>
-                        <div class="detail-value gold">${order.tracking.number || 'N/A'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Carrier</div>
-                        <div class="detail-value">${order.tracking.carrier || 'Standard Shipping'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Shipping Date</div>
-                        <div class="detail-value">${order.shippedAt ? formatDate(order.shippedAt) : 'Not shipped yet'}</div>
-                    </div>
-                ` : ''}
-                
-                ${order.estimatedDelivery ? `
-                    <div class="detail-item">
-                        <div class="detail-label">Estimated Delivery</div>
-                        <div class="detail-value">${formatDate(order.estimatedDelivery)}</div>
-                    </div>
-                ` : ''}
-                
-                ${order.deliveredAt ? `
-                    <div class="detail-item">
-                        <div class="detail-label">Delivered On</div>
-                        <div class="detail-value gold">${formatDate(order.deliveredAt)}</div>
-                    </div>
-                ` : ''}
+                    ` : ''}
+                ` : 'No shipping address provided'}
             </div>
-            
-            ${order.tracking?.url ? `
-                <div style="margin-top: 20px;">
-                    <a href="${order.tracking.url}" target="_blank" 
-                       style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 20px; 
-                              background: var(--primary-gold); color: white; text-decoration: none; 
-                              border-radius: 8px; font-weight: 600;">
-                        <i class="fas fa-external-link-alt"></i>
-                        Track Package
-                    </a>
-                </div>
-            ` : ''}
         </div>
         
-        <!-- Bank Transfer Details -->
+        <!-- Bank Transfer Details (if applicable) -->
         ${order.paymentMethod === 'bank' && order.bankTransferDetails ? `
             <div class="detail-section">
                 <h2><i class="fas fa-university"></i> Bank Transfer Details</h2>
@@ -747,22 +423,20 @@ function displayOrderDetails(order) {
                         </div>
                     ` : ''}
                     
-                    ${order.processingStartedAt ? `
-                        <div style="position: relative;">
-                            <div style="position: absolute; left: -36px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--primary-gold);"></div>
-                            <div>
-                                <div style="font-weight: 600; color: var(--stone-dark);">Processing Started</div>
-                                <div style="font-size: 13px; color: var(--text-light);">${formatDate(order.processingStartedAt)}</div>
-                            </div>
-                        </div>
-                    ` : ''}
-                    
                     ${order.shippedAt ? `
                         <div style="position: relative;">
                             <div style="position: absolute; left: -36px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--primary-gold);"></div>
                             <div>
                                 <div style="font-weight: 600; color: var(--stone-dark);">Order Shipped</div>
                                 <div style="font-size: 13px; color: var(--text-light);">${formatDate(order.shippedAt)}</div>
+                                ${order.tracking ? `
+                                    <div style="margin-top: 5px;">
+                                        <a href="${order.tracking.url || '#'}" target="_blank" 
+                                           style="color: var(--primary-gold); text-decoration: none; font-size: 13px;">
+                                            <i class="fas fa-shipping-fast"></i> Track Package
+                                        </a>
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
                     ` : ''}
@@ -776,12 +450,22 @@ function displayOrderDetails(order) {
                             </div>
                         </div>
                     ` : ''}
+                    
+                    ${order.updatedAt ? `
+                        <div style="position: relative;">
+                            <div style="position: absolute; left: -36px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--primary-gold);"></div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--stone-dark);">Last Updated</div>
+                                <div style="font-size: 13px; color: var(--text-light);">${formatDate(order.updatedAt)}</div>
+                            </div>
+                        </div>
+                    ` : ''}
                 </div>
             </div>
         </div>
         
         <!-- Action Buttons -->
-        <div style="display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 15px; margin-top: 30px;">
             <button onclick="downloadInvoice()" 
                     style="padding: 15px 25px; background: var(--primary-gold); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px;">
                 <i class="fas fa-file-pdf"></i>
@@ -796,14 +480,8 @@ function displayOrderDetails(order) {
                 </button>
             ` : ''}
             
-            <button onclick="contactSupport()" 
-                    style="padding: 15px 25px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-headset"></i>
-                Contact Support
-            </button>
-            
             <button onclick="window.print()" 
-                    style="padding: 15px 25px; background: #343a40; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+                    style="padding: 15px 25px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px;">
                 <i class="fas fa-print"></i>
                 Print Details
             </button>
@@ -811,198 +489,7 @@ function displayOrderDetails(order) {
     `;
 }
 
-// Notification System
-function initializeNotificationSystem() {
-    // Request notification permission
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
-    }
-    
-    // Load saved notifications
-    loadSavedNotifications();
-}
-
-function showChangeNotification(change) {
-    // Create notification object
-    const notification = {
-        id: Date.now(),
-        type: change.type,
-        message: change.message,
-        time: new Date().toISOString(),
-        read: false,
-        orderId: orderId
-    };
-    
-    // Save to localStorage
-    saveNotification(notification);
-    
-    // Update notification count
-    updateNotificationCount();
-    
-    // Show browser notification if permitted
-    if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('IRYA STONE - Order Update', {
-            body: change.message,
-            icon: '/favicon.ico',
-            tag: 'order-update'
-        });
-    }
-    
-    // Show in-page notification
-    showInPageNotification(notification);
-}
-
-function saveNotification(notification) {
-    let notifications = JSON.parse(localStorage.getItem('irya_order_notifications') || '[]');
-    
-    // Keep only last 50 notifications
-    notifications.unshift(notification);
-    if (notifications.length > 50) {
-        notifications = notifications.slice(0, 50);
-    }
-    
-    localStorage.setItem('irya_order_notifications', JSON.stringify(notifications));
-}
-
-function loadSavedNotifications() {
-    const notifications = JSON.parse(localStorage.getItem('irya_order_notifications') || '[]');
-    
-    // Filter for this order
-    const orderNotifications = notifications.filter(n => n.orderId === orderId);
-    
-    // Update count
-    notificationCount = orderNotifications.filter(n => !n.read).length;
-    updateNotificationCount();
-    
-    // Display in panel
-    displayNotificationsInPanel(orderNotifications);
-}
-
-function displayNotificationsInPanel(notifications) {
-    const container = document.getElementById('notificationsList');
-    if (!container) return;
-    
-    if (notifications.length === 0) {
-        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #6c757d;">No notifications yet</div>';
-        return;
-    }
-    
-    container.innerHTML = notifications.map(notif => `
-        <div class="notification-item ${notif.read ? '' : 'unread'}" onclick="markNotificationRead(${notif.id})">
-            <div><strong>${getNotificationTitle(notif.type)}</strong></div>
-            <div style="font-size: 13px;">${notif.message}</div>
-            <div class="notification-time">${formatDate(notif.time)}</div>
-        </div>
-    `).join('');
-}
-
-function getNotificationTitle(type) {
-    const titles = {
-        'status': 'Status Update',
-        'payment': 'Payment Update',
-        'tracking': 'Shipping Update'
-    };
-    return titles[type] || 'Order Update';
-}
-
-function updateNotificationCount() {
-    const countElement = document.getElementById('notificationCount');
-    if (countElement) {
-        countElement.textContent = notificationCount;
-        if (notificationCount > 0) {
-            countElement.style.color = '#dc3545';
-            countElement.style.fontWeight = 'bold';
-        }
-    }
-}
-
-function markNotificationRead(notificationId) {
-    let notifications = JSON.parse(localStorage.getItem('irya_order_notifications') || '[]');
-    
-    notifications = notifications.map(notif => {
-        if (notif.id === notificationId) {
-            notif.read = true;
-        }
-        return notif;
-    });
-    
-    localStorage.setItem('irya_order_notifications', JSON.stringify(notifications));
-    
-    // Reload notifications
-    loadSavedNotifications();
-}
-
-function clearNotifications() {
-    let notifications = JSON.parse(localStorage.getItem('irya_order_notifications') || '[]');
-    
-    // Remove only notifications for this order
-    notifications = notifications.filter(n => n.orderId !== orderId);
-    
-    localStorage.setItem('irya_order_notifications', JSON.stringify(notifications));
-    
-    // Reload
-    loadSavedNotifications();
-    
-    // Hide panel
-    document.getElementById('notificationPanel').style.display = 'none';
-}
-
-function toggleNotifications() {
-    const panel = document.getElementById('notificationPanel');
-    if (panel.style.display === 'block') {
-        panel.style.display = 'none';
-    } else {
-        panel.style.display = 'block';
-        // Mark all as read when opening
-        let notifications = JSON.parse(localStorage.getItem('irya_order_notifications') || '[]');
-        notifications = notifications.map(notif => {
-            if (notif.orderId === orderId && !notif.read) {
-                notif.read = true;
-            }
-            return notif;
-        });
-        localStorage.setItem('irya_order_notifications', JSON.stringify(notifications));
-        loadSavedNotifications();
-    }
-}
-
-function showInPageNotification(notification) {
-    // Create temporary notification toast
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: white;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        z-index: 9999;
-        max-width: 300px;
-        border-left: 4px solid var(--primary-gold);
-        animation: slideIn 0.3s ease;
-    `;
-    
-    toast.innerHTML = `
-        <div style="font-weight: 600; margin-bottom: 5px;">${getNotificationTitle(notification.type)}</div>
-        <div style="font-size: 14px;">${notification.message}</div>
-        <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">Just now</div>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    // Remove after 5 seconds
-    setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    }, 5000);
-}
-
-// Helper Functions
+// Helper functions (same as in orders.html)
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     try {
@@ -1033,34 +520,6 @@ function getStatusText(status) {
     return statusMap[status] || status;
 }
 
-function getStatusClass(status) {
-    const classMap = {
-        'pending': 'pending',
-        'pending_bank_transfer': 'awaiting-payment',
-        'payment_submitted': 'processing',
-        'payment_verified': 'payment-verified',
-        'processing': 'processing',
-        'shipped': 'shipped',
-        'delivered': 'delivered',
-        'cancelled': 'cancelled'
-    };
-    return classMap[status] || 'pending';
-}
-
-function getStatusIcon(status) {
-    const iconMap = {
-        'pending': 'fa-clock',
-        'pending_bank_transfer': 'fa-money-bill-wave',
-        'payment_submitted': 'fa-paper-plane',
-        'payment_verified': 'fa-check-circle',
-        'processing': 'fa-cog',
-        'shipped': 'fa-shipping-fast',
-        'delivered': 'fa-check-double',
-        'cancelled': 'fa-times-circle'
-    };
-    return iconMap[status] || 'fa-clock';
-}
-
 function getPaymentStatusText(status) {
     const statusMap = {
         'pending_bank_transfer': 'Awaiting Payment',
@@ -1070,28 +529,6 @@ function getPaymentStatusText(status) {
         'cancelled': 'Cancelled'
     };
     return statusMap[status] || 'Pending';
-}
-
-function getPaymentStatusClass(status) {
-    const classMap = {
-        'pending_bank_transfer': 'awaiting-payment',
-        'payment_submitted': 'processing',
-        'payment_verified': 'payment-verified',
-        'paid': 'delivered',
-        'cancelled': 'cancelled'
-    };
-    return classMap[status] || 'pending';
-}
-
-function getPaymentStatusIcon(status) {
-    const iconMap = {
-        'pending_bank_transfer': 'fa-clock',
-        'payment_submitted': 'fa-paper-plane',
-        'payment_verified': 'fa-check-circle',
-        'paid': 'fa-check-double',
-        'cancelled': 'fa-times-circle'
-    };
-    return iconMap[status] || 'fa-clock';
 }
 
 function getCalculationInfo(item) {
@@ -1110,78 +547,8 @@ function getCalculationInfo(item) {
     }
 }
 
-// Action Functions
-function refreshOrder() {
-    if (orderUnsubscribe) {
-        orderUnsubscribe();
-    }
-    loadOrderDetails();
-    
-    // Show refresh animation
-    const refreshBtn = document.querySelector('button[onclick="refreshOrder()"]');
-    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing';
-    setTimeout(() => {
-        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
-    }, 1000);
-}
-
-function downloadInvoice() {
-    // Implementation for invoice download
-    alert('Invoice download feature would be implemented here');
-}
-
-function contactSupport() {
-    window.location.href = 'mailto:support@iryastone.com?subject=Order Inquiry: ' + orderId;
-}
-
-function showOrderNotFound() {
-    document.getElementById('orderDetailsContent').innerHTML = `
-        <div style="text-align: center; padding: 50px;">
-            <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ffc107; margin-bottom: 20px;"></i>
-            <h2>Order Not Found</h2>
-            <p>This order does not exist or you don't have permission to view it.</p>
-            <a href="orders.html" class="back-btn" style="margin-top: 20px;">
-                <i class="fas fa-arrow-left"></i>
-                Back to Orders
-            </a>
-        </div>
-    `;
-}
-
-function showError(error) {
-    document.getElementById('orderDetailsContent').innerHTML = `
-        <div style="text-align: center; padding: 50px;">
-            <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 20px;"></i>
-            <h2>Error Loading Order</h2>
-            <p>${error.message}</p>
-            <a href="orders.html" class="back-btn" style="margin-top: 20px;">
-                <i class="fas fa-arrow-left"></i>
-                Back to Orders
-            </a>
-        </div>
-    `;
-}
-
-// Clean up when leaving page
-window.addEventListener('beforeunload', function() {
-    if (orderUnsubscribe) {
-        orderUnsubscribe();
-    }
-});
-
-// Add CSS for animations
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
+// Load order details when page loads
+document.addEventListener('DOMContentLoaded', loadOrderDetails);
 </script>
 </body>
-</html>
+</html> 
