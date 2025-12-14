@@ -1,157 +1,157 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>IRYA STONE – Admin Orders</title>
+<title>Admin Orders – IRYA STONE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body{font-family:Segoe UI;background:#f4f6f8;margin:0;padding:15px}
-h2{margin-bottom:10px}
-.order{background:#fff;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-.flex{display:flex;gap:12px;align-items:center}
-.product-img{width:70px;height:70px;border-radius:6px;object-fit:cover}
-.badge{padding:4px 8px;border-radius:6px;font-size:12px;margin-right:5px}
-.paid{background:#28a745;color:#fff}
-.advance{background:#ffc107}
-.pending{background:#6c757d;color:#fff}
-.shipped{background:#17a2b8;color:#fff}
-.delivered{background:#007bff;color:#fff}
-.cancelled{background:#dc3545;color:#fff}
-select,input,button{padding:6px;margin-top:5px;width:100%}
-button{cursor:pointer;background:#000;color:#fff;border:none;border-radius:6px}
-.timeline{font-size:12px;color:#555;margin-top:8px}
+body { font-family: Arial; background:#f4f6f8; padding:15px; }
+.order { background:#fff; padding:15px; margin-bottom:15px; border-radius:8px; border:1px solid #ddd; }
+.badge { padding:4px 8px; border-radius:4px; font-size:12px; margin-left:5px; }
+.processing { background:#ffc107; }
+.shipped { background:#17a2b8; color:#fff; }
+.delivered { background:#28a745; color:#fff; }
+.cancelled { background:#dc3545; color:#fff; }
+.product { display:flex; gap:10px; margin-top:8px; }
+.product img { width:60px; height:60px; object-fit:cover; border-radius:4px; }
+hr { margin:10px 0; }
+select, button, input { padding:6px; margin-top:6px; width:100%; }
+.timeline { font-size:12px; background:#f1f1f1; padding:8px; border-radius:5px; margin-top:8px; }
 </style>
 </head>
 
 <body>
-
 <h2>Admin Orders Panel</h2>
 <div id="orders"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import {
-  getFirestore, collectionGroup, getDocs, doc,
-  getDoc, updateDoc, addDoc, collection
+  getFirestore, collectionGroup, getDocs,
+  doc, updateDoc, arrayUnion
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-const app = initializeApp({
-  apiKey: "AIzaSyDNW...",
+/* 🔐 FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
   authDomain: "iryastone-uk.firebaseapp.com",
-  projectId: "iryastone-uk"
-});
+  projectId: "iryastone-uk",
+};
+
+const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const box = document.getElementById("orders");
+const ordersDiv = document.getElementById("orders");
 
-/* ---------------- LOAD ORDERS ---------------- */
-async function loadOrders(){
-  box.innerHTML="";
-  const snap = await getDocs(collectionGroup(db,"orders"));
-  let orders=[];
+/* ✅ NORMALIZE ORDER (IGNORE DUPLICATES) */
+function normalizeOrder(o) {
+  const paid = o.submittedAmount ?? o.advancePayment ?? 0;
+  const remaining = Math.max((o.total || 0) - paid, 0);
 
-  snap.forEach(d=>{
-    const o=d.data();
-    o._docId=d.id;
-    orders.push(o);
+  let paymentStatus = o.paymentStatus;
+  if (!paymentStatus) {
+    paymentStatus = paid === 0 ? "unpaid" : remaining > 0 ? "advance_paid" : "fully_paid";
+  }
+
+  return {
+    ...o,
+    submittedAmount: paid,
+    remainingAmount: remaining,
+    paymentStatus
+  };
+}
+
+/* ✅ MERGE SAME PRODUCTS */
+function mergeProducts(items = []) {
+  const map = {};
+  items.forEach(i => {
+    const key = i.name + JSON.stringify(i.calculationData || {});
+    if (!map[key]) {
+      map[key] = { ...i };
+    } else {
+      map[key].quantity += i.quantity;
+      map[key].totalPrice += i.totalPrice;
+    }
   });
+  return Object.values(map);
+}
+
+/* 🔄 LOAD ORDERS */
+async function loadOrders() {
+  ordersDiv.innerHTML = "";
+  const snap = await getDocs(collectionGroup(db, "orders"));
+  let orders = [];
+
+  snap.forEach(d => orders.push({ id: d.id, ...normalizeOrder(d.data()) }));
 
   orders.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
 
-  for(const o of orders){
-    if(!o.items?.length) continue;
+  for (const o of orders) {
+    const items = mergeProducts(o.items);
+    const badge = o.status || "processing";
 
-    let badge=o.status==="delivered"?"delivered":
-      o.status==="cancelled"?"cancelled":
-      o.paymentStatus==="fully_paid"?"paid":
-      "advance";
-
-    let productsHTML="";
-    for(const it of o.items){
-      const ps=await getDoc(doc(db,"products",it.id));
-      const p=ps.exists()?ps.data():{};
-      const img=p.images?.[0]||"https://via.placeholder.com/70";
-      const title=p.title||it.name;
-      productsHTML+=`
-        <div class="flex">
-          <img src="${img}" class="product-img">
+    let productsHTML = "";
+    items.forEach(p => {
+      productsHTML += `
+        <div class="product">
+          <img src="https://via.placeholder.com/60">
           <div>
-            <b>${title}</b><br>
-            Qty ${it.quantity} | £${it.totalPrice}
+            <b>${p.name}</b><br>
+            Qty: ${p.quantity} | £${p.totalPrice}
           </div>
         </div>`;
-    }
+    });
 
-    box.innerHTML+=`
-    <div class="order">
-      <b>${o.orderNumber}</b>
-      <span class="badge ${badge}">${o.status}</span>
-      <p>${o.userName} – ${o.userEmail}</p>
-      <p>Total £${o.total} | Paid £${o.submittedAmount||0} | Remaining £${o.remainingPayment||0}</p>
+    let timeline = "";
+    (o.statusHistory || []).forEach(s => {
+      timeline += `✔ ${s.status} – ${new Date(s.at).toLocaleString()}<br>`;
+    });
 
-      ${productsHTML}
+    ordersDiv.innerHTML += `
+      <div class="order">
+        <b>Order #${o.orderNumber}</b>
+        <span class="badge ${badge}">${badge.toUpperCase()}</span>
 
-      <select id="status-${o._docId}">
-        <option value="">Update Status</option>
-        <option value="processing">Processing</option>
-        <option value="shipped">Shipped</option>
-        <option value="out_for_delivery">Out for Delivery</option>
-        <option value="delivered">Delivered</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
+        <p>User: ${o.userName} | ${o.userEmail}</p>
+        <p>Total: £${o.total} | Paid: £${o.submittedAmount} | Remaining: £${o.remainingAmount}</p>
 
-      <input id="track-${o._docId}" placeholder="Tracking Number">
-      <input type="datetime-local" id="delivery-${o._docId}">
+        ${productsHTML}
 
-      <button onclick="updateStatus('${o.userId}','${o._docId}','${o.orderNumber}')">
-        Update Order
-      </button>
+        <hr>
 
-      <div class="timeline">
-        ${(o.statusHistory||[]).map(h=>`• ${h.status} – ${h.at}`).join("<br>")}
+        <select id="status-${o.id}">
+          <option value="">-- Update Status --</option>
+          <option value="processing">Processing</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+
+        <button onclick="updateStatus('${o.userId}','${o.id}')">Update Status</button>
+
+        <div class="timeline">${timeline || "No history yet"}</div>
       </div>
-    </div>`;
+    `;
   }
 }
 
-/* ---------------- UPDATE STATUS ---------------- */
-window.updateStatus=async(userId,orderId,orderNumber)=>{
-  const status=document.getElementById(`status-${orderId}`).value;
-  if(!status) return alert("Select status");
+/* 🛠 UPDATE STATUS */
+window.updateStatus = async (userId, orderId) => {
+  const status = document.getElementById(`status-${orderId}`).value;
+  if (!status) return alert("Select status");
 
-  const ref=doc(db,"users",userId,"orders",orderId);
-  const snap=await getDoc(ref);
-  if(!snap.exists()) return;
-
-  const now=new Date().toISOString();
-  const o=snap.data();
-
-  const update={
+  await updateDoc(doc(db,"users",userId,"orders",orderId),{
     status,
-    updatedAt:now,
-    statusHistory:[...(o.statusHistory||[]),{status,at:now}]
-  };
-
-  if(status==="shipped"){
-    update.shippingStatus="shipped";
-    update.trackingNumber=document.getElementById(`track-${orderId}`).value||"";
-  }
-  if(status==="delivered"){
-    update.deliveredAt=now;
-  }
-  if(status==="cancelled"){
-    update.cancelledAt=now;
-  }
-
-  await updateDoc(ref,update);
-
-  await addDoc(collection(db,"users",userId,"notifications"),{
-    title:"Order Update",
-    message:`Order ${orderNumber} is now ${status.replaceAll("_"," ")}`,
-    createdAt:now,
-    read:false
+    updatedAt: new Date().toISOString(),
+    statusHistory: arrayUnion({
+      status,
+      at: new Date().toISOString()
+    }),
+    ...(status==="shipped" && { shippedAt: new Date().toISOString() }),
+    ...(status==="delivered" && { deliveredAt: new Date().toISOString() })
   });
 
+  alert("Order updated");
   loadOrders();
 };
 
