@@ -11,6 +11,9 @@ body { font-family: Arial; background:#f4f6f8; padding:15px; }
 .badge { padding:4px 8px; border-radius:4px; font-size:12px; font-weight:bold; }
 .advance { background:#ffc107; }
 .full { background:#28a745; color:#fff; }
+.pending { background:#dc3545; color:#fff; }
+img { width:80px; border-radius:6px; margin-right:10px; }
+.row { display:flex; gap:10px; align-items:center; }
 button { padding:6px 10px; margin-top:6px; }
 input, select { width:100%; padding:6px; margin-top:5px; }
 .disabled { opacity:.5; pointer-events:none; }
@@ -30,16 +33,17 @@ import {
   getDocs,
   updateDoc,
   addDoc,
-  collection
+  collection,
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-const firebaseConfig = {
+const app = initializeApp({
   apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
   authDomain: "iryastone-uk.firebaseapp.com",
   projectId: "iryastone-uk",
-};
+});
 
-const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const ordersDiv = document.getElementById("orders");
 
@@ -48,97 +52,122 @@ async function loadOrders() {
   ordersDiv.innerHTML = "";
   const snap = await getDocs(collectionGroup(db, "orders"));
 
-  snap.forEach(d => {
+  for (const d of snap.docs) {
     const o = d.data();
-    if (!o.userId) return;
+    const orderRef = d.ref;
 
-    const isFull = o.paymentStatus === "fully_paid";
+    const pending = Math.max(0, (o.total || 0) - (o.advancePayment || 0));
+    const isFull = pending === 0;
+
+    // product image
+    let image = "";
+    if (o.items?.[0]?.id) {
+      const p = await getDoc(doc(db,"products",o.items[0].id));
+      image = p.exists() ? p.data().imageUrl : "";
+    }
 
     ordersDiv.innerHTML += `
       <div class="order">
-        <b>${o.orderNumber}</b>
-        <span class="badge ${isFull ? "full":"advance"}">
-          ${isFull ? "FULL PAID" : "ADVANCE PAID"}
-        </span>
+        <div class="row">
+          ${image ? `<img src="${image}">` : ""}
+          <div>
+            <b>${o.orderNumber}</b><br>
+            <span class="badge ${isFull ? "full":"advance"}">
+              ${isFull ? "FULL PAID" : "ADVANCE PAID"}
+            </span>
+          </div>
+        </div>
 
-        <p><b>User:</b> ${o.userName} (${o.userEmail})</p>
-        <p><b>Total:</b> £${o.total}</p>
-        <p><b>Remaining:</b> £${o.remainingPayment || 0}</p>
+        <p><b>${o.userName}</b> | ${o.userEmail}</p>
+        <p>${o.shippingAddress?.address1}, ${o.shippingAddress?.city}</p>
+
+        <p>Total: £${o.total}</p>
+        <p>Advance Paid: £${o.advancePayment || 0}</p>
+        <p><b>Pending: £${pending}</b></p>
 
         <select id="pay-${d.id}">
           <option value="">-- Payment Action --</option>
-          <option value="advance_confirmed">Confirm Advance</option>
-          <option value="fully_paid">Confirm Full Payment</option>
-          <option value="payment_reminder">Send Reminder</option>
+          <option value="advance">Confirm Advance</option>
+          <option value="full">Confirm Full Payment</option>
+          <option value="reminder">Send Pending Warning</option>
         </select>
 
-        <button onclick='updatePayment(${JSON.stringify(d.ref.path)}, "${o.userId}", "${o.orderNumber}")'>
-          Update Payment
-        </button>
+        <button onclick="updatePayment('${d.id}')">Update Payment</button>
 
         <div class="${isFull ? "" : "disabled"}">
           <input id="track-${d.id}" placeholder="Tracking Number">
-          <button onclick='updateShipping(${JSON.stringify(d.ref.path)}, "${o.userId}", "${o.orderNumber}", "${d.id}")'>
-            Update Shipping
-          </button>
+          <input id="date-${d.id}" type="date">
+          <button onclick="updateShipping('${d.id}')">Ship Order</button>
         </div>
       </div>
     `;
-  });
+
+    window[`orderRef_${d.id}`] = orderRef;
+    window[`orderData_${d.id}`] = o;
+  }
 }
 
-/* ================= PAYMENT UPDATE ================= */
-window.updatePayment = async (orderPath, userId, orderNumber) => {
-  const orderRef = orderPath;
-  const select = document.querySelector(`[id^="pay-"]:focus`) || document.activeElement.previousElementSibling;
-  const status = select.value;
+/* ================= PAYMENT ================= */
+window.updatePayment = async (id) => {
+  const ref = window[`orderRef_${id}`];
+  const o = window[`orderData_${id}`];
+  const action = document.getElementById(`pay-${id}`).value;
 
-  if (!status) return alert("Select action");
+  if (!action) return alert("Select option");
 
-  await updateDoc(db._delegate._databaseId
-    ? eval(`doc(db, "${orderPath}")`)
-    : null, {
-    paymentStatus: status === "fully_paid" ? "fully_paid" : undefined,
-    updatedAt: new Date().toISOString()
-  });
+  let msg = "";
 
-  await addDoc(collection(db,"users",userId,"notifications"), {
+  if (action === "advance") {
+    msg = `Advance received. Remaining £${o.total - o.advancePayment}. 
+    Pay within 24 hours or order will be cancelled. Advance non-refundable.`;
+  }
+
+  if (action === "full") {
+    await updateDoc(ref,{ paymentStatus:"fully_paid" });
+    msg = "Full payment confirmed. Preparing shipment.";
+  }
+
+  if (action === "reminder") {
+    msg = `£${o.total - o.advancePayment} pending. 
+    Pay within 24 hours. Order may cancel.`;
+  }
+
+  await addDoc(collection(db,"users",o.userId,"notifications"),{
     type:"payment",
-    orderNumber,
-    message:
-      status === "fully_paid"
-        ? "Your full payment has been confirmed."
-        : status === "advance_confirmed"
-          ? "Your advance payment has been confirmed."
-          : "Please complete remaining payment.",
+    orderNumber:o.orderNumber,
+    message:msg,
     createdAt:new Date().toISOString(),
     read:false
   });
 
-  alert("Payment updated");
+  alert("Payment action done");
   loadOrders();
 };
 
-/* ================= SHIPPING UPDATE ================= */
-window.updateShipping = async (orderPath, userId, orderNumber, id) => {
+/* ================= SHIPPING ================= */
+window.updateShipping = async (id) => {
+  const ref = window[`orderRef_${id}`];
+  const o = window[`orderData_${id}`];
   const track = document.getElementById(`track-${id}`).value;
-  if (!track) return alert("Enter tracking number");
+  const date = document.getElementById(`date-${id}`).value;
 
-  await updateDoc(eval(`doc(db, "${orderPath}")`), {
+  if (!track) return alert("Tracking required");
+
+  await updateDoc(ref,{
     shippingStatus:"shipped",
     trackingNumber:track,
-    shippedAt:new Date().toISOString()
+    deliveryDate:date
   });
 
-  await addDoc(collection(db,"users",userId,"notifications"), {
+  await addDoc(collection(db,"users",o.userId,"notifications"),{
     type:"shipping",
-    orderNumber,
-    message:`Order shipped. Tracking No: ${track}`,
+    orderNumber:o.orderNumber,
+    message:`Shipped. Tracking: ${track}`,
     createdAt:new Date().toISOString(),
     read:false
   });
 
-  alert("Shipping updated");
+  alert("Shipped");
   loadOrders();
 };
 
