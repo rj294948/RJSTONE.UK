@@ -1,32 +1,193 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>IRYA STONE – Admin Orders</title>
+<title>IRYA STONE – Admin Orders Panel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-body{font-family:Segoe UI;background:#f4f6f8;margin:0;padding:15px}
-h2{margin-bottom:10px}
-.order{background:#fff;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-.flex{display:flex;gap:12px;align-items:center}
-.product-img{width:70px;height:70px;border-radius:6px;object-fit:cover}
-.badge{padding:4px 8px;border-radius:6px;font-size:12px;margin-right:5px}
-.paid{background:#28a745;color:#fff}
-.advance{background:#ffc107}
-.pending{background:#6c757d;color:#fff}
-.shipped{background:#17a2b8;color:#fff}
-.delivered{background:#007bff;color:#fff}
-.cancelled{background:#dc3545;color:#fff}
-select,input,button{padding:6px;margin-top:5px;width:100%}
-button{cursor:pointer;background:#000;color:#fff;border:none;border-radius:6px}
-.timeline{font-size:12px;color:#555;margin-top:8px}
+/* --- Global Styles & Reset --- */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f7fa; /* Slightly lighter background */
+    margin: 0;
+    padding: 20px; /* Increased padding for better spacing */
+    color: #333;
+}
+h2 {
+    color: #1a202c;
+    margin-bottom: 20px;
+    font-weight: 700;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+}
+/* --- Order Card Styling --- */
+.order {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05); /* Softer, modern shadow */
+    transition: transform 0.2s;
+}
+.order:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+/* --- Flex utilities --- */
+.flex {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 15px;
+}
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dashed #edf2f7;
+    font-size: 0.95em;
+}
+.detail-row:last-child {
+    border-bottom: none;
+}
+.detail-label {
+    font-weight: 600;
+    color: #4a5568;
+}
+.detail-value {
+    color: #2d3748;
+}
+
+/* --- Product Display --- */
+.product-list {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+}
+.product-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f7fafc;
+    border-radius: 8px;
+}
+.product-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #e2e8f0;
+}
+.product-info b {
+    display: block;
+    font-size: 1em;
+    font-weight: 600;
+    color: #2d3748;
+}
+.product-info span {
+    font-size: 0.85em;
+    color: #718096;
+}
+
+/* --- Badge Status --- */
+.badge-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.badge {
+    padding: 6px 10px;
+    border-radius: 20px; /* Pill shape */
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: capitalize;
+    display: inline-block;
+}
+/* Status Colors */
+.delivered { background-color: #48bb78; color: #fff; } /* Green */
+.cancelled { background-color: #f56565; color: #fff; } /* Red */
+.processing { background-color: #4299e1; color: #fff; } /* Blue */
+.shipped, .out_for_delivery { background-color: #f6ad55; color: #fff; } /* Orange */
+.pending { background-color: #a0aec0; color: #fff; } /* Gray */
+
+/* Payment Colors */
+.paid { background-color: #38a169; color: #fff; } /* Darker Green */
+.advance { background-color: #ecc94b; color: #333; } /* Yellow */
+.unpaid { background-color: #e53e3e; color: #fff; } /* Strong Red */
+
+
+/* --- Form Elements --- */
+.action-box {
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+select, input[type="text"], input[type="datetime-local"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+button {
+    cursor: pointer;
+    background: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    width: 100%;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+button:hover {
+    background-color: #333333;
+}
+
+/* --- Timeline History --- */
+.timeline-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+}
+.timeline-title {
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+.timeline-item {
+    font-size: 0.85em;
+    color: #718096;
+    line-height: 1.5;
+    padding-left: 10px;
+    position: relative;
+}
+.timeline-item::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #4299e1;
+    font-weight: bold;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Admin Orders Panel</h2>
+<h2>🛍️ Admin Orders Panel</h2>
 <div id="orders"></div>
 
 <script type="module">
@@ -36,8 +197,9 @@ import {
   getDoc, updateDoc, addDoc, collection
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
+// Ensure your Firebase config is correct
 const app = initializeApp({
-  apiKey: "AIzaSyDNW...",
+  apiKey: "AIzaSyDNW...", // Replace with your actual key
   authDomain: "iryastone-uk.firebaseapp.com",
   projectId: "iryastone-uk"
 });
@@ -46,113 +208,199 @@ const box = document.getElementById("orders");
 
 /* ---------------- LOAD ORDERS ---------------- */
 async function loadOrders(){
-  box.innerHTML="";
-  const snap = await getDocs(collectionGroup(db,"orders"));
-  let orders=[];
+  box.innerHTML = '<div>Loading orders...</div>'; // Loading state
+  try {
+    const snap = await getDocs(collectionGroup(db,"orders"));
+    let orders = [];
 
-  snap.forEach(d=>{
-    const o=d.data();
-    o._docId=d.id;
-    orders.push(o);
-  });
+    snap.forEach(d => {
+      const o = d.data();
+      o._docId = d.id;
+      // Convert Firebase timestamp string to Date object for proper sorting
+      o.createdAtDate = o.createdAt ? new Date(o.createdAt) : new Date(0); 
+      orders.push(o);
+    });
 
-  orders.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    // Sort by creation date (newest first)
+    orders.sort((a, b) => b.createdAtDate - a.createdAtDate); 
 
-  for(const o of orders){
-    if(!o.items?.length) continue;
-
-    let badge=o.status==="delivered"?"delivered":
-      o.status==="cancelled"?"cancelled":
-      o.paymentStatus==="fully_paid"?"paid":
-      "advance";
-
-    let productsHTML="";
-    for(const it of o.items){
-      const ps=await getDoc(doc(db,"products",it.id));
-      const p=ps.exists()?ps.data():{};
-      const img=p.images?.[0]||"https://via.placeholder.com/70";
-      const title=p.title||it.name;
-      productsHTML+=`
-        <div class="flex">
-          <img src="${img}" class="product-img">
-          <div>
-            <b>${title}</b><br>
-            Qty ${it.quantity} | £${it.totalPrice}
-          </div>
-        </div>`;
+    box.innerHTML = ''; // Clear loading state
+    
+    if (orders.length === 0) {
+      box.innerHTML = '<p style="text-align:center; padding: 40px; color: #718096;">No orders found.</p>';
+      return;
     }
 
-    box.innerHTML+=`
-    <div class="order">
-      <b>${o.orderNumber}</b>
-      <span class="badge ${badge}">${o.status}</span>
-      <p>${o.userName} – ${o.userEmail}</p>
-      <p>Total £${o.total} | Paid £${o.submittedAmount||0} | Remaining £${o.remainingPayment||0}</p>
+    // Process and render each order
+    for(const o of orders){
+      // Skip if no items (cleaner data handling)
+      if(!o.items?.length) continue;
 
-      ${productsHTML}
+      // Determine main status badge
+      const statusClass = o.status?.replaceAll("_", "") || "pending";
 
-      <select id="status-${o._docId}">
-        <option value="">Update Status</option>
-        <option value="processing">Processing</option>
-        <option value="shipped">Shipped</option>
-        <option value="out_for_delivery">Out for Delivery</option>
-        <option value="delivered">Delivered</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
+      // Determine payment status badge
+      let paymentStatusClass = "unpaid"; // Default
+      if (o.paymentStatus === "fully_paid") {
+        paymentStatusClass = "paid";
+      } else if (o.submittedAmount > 0 && o.submittedAmount < o.total) {
+        paymentStatusClass = "advance";
+      }
+      
+      // Calculate remaining payment (use 0 if undefined)
+      const totalAmount = parseFloat(o.total || 0).toFixed(2);
+      const submittedAmount = parseFloat(o.submittedAmount || 0).toFixed(2);
+      const remainingPayment = parseFloat(o.remainingPayment || (totalAmount - submittedAmount)).toFixed(2);
+      
+      // Product Details Loading (kept async for product title/image lookup)
+      let productsHTML = await Promise.all(o.items.map(async (it) => {
+        const ps = await getDoc(doc(db,"products", it.id));
+        const p = ps.exists() ? ps.data() : {};
+        const img = p.images?.[0] || "https://via.placeholder.com/60/cccccc/ffffff?text=No+Img"; // Placeholder
+        const title = p.title || it.name || "Unknown Product";
+        const itemTotalPrice = parseFloat(it.totalPrice || 0).toFixed(2);
+        
+        return `
+          <div class="product-item">
+            <img src="${img}" class="product-img" alt="${title}">
+            <div class="product-info">
+              <b>${title}</b>
+              <span>Qty ${it.quantity} | Total £${itemTotalPrice}</span>
+            </div>
+          </div>`;
+      }));
 
-      <input id="track-${o._docId}" placeholder="Tracking Number">
-      <input type="datetime-local" id="delivery-${o._docId}">
+      // Timeline History
+      const timelineHTML = (o.statusHistory || []).map(h => {
+          const date = new Date(h.at).toLocaleString();
+          return `<div class="timeline-item">Status: ${h.status.replaceAll("_", " ")} at ${date}</div>`;
+      }).join('');
+      
+      // Render the card
+      box.innerHTML += `
+      <div class="order">
+          <div class="badge-container">
+              <span class="badge processing ${statusClass}">${o.status.replaceAll("_", " ")}</span>
+              <span class="badge ${paymentStatusClass}">${o.paymentStatus?.replaceAll("_", " ") || (submittedAmount > 0 ? "Advance Paid" : "Unpaid")}</span>
+          </div>
 
-      <button onclick="updateStatus('${o.userId}','${o._docId}','${o.orderNumber}')">
-        Update Order
-      </button>
+          <div class="detail-row">
+              <span class="detail-label">Order #</span>
+              <span class="detail-value"><b>${o.orderNumber || 'N/A'}</b></span>
+          </div>
+          <div class="detail-row">
+              <span class="detail-label">Customer</span>
+              <span class="detail-value">${o.userName || 'N/A'} (${o.userEmail || 'N/A'})</span>
+          </div>
+          <div class="detail-row">
+              <span class="detail-label">Order Date</span>
+              <span class="detail-value">${o.createdAtDate.toLocaleString()}</span>
+          </div>
+          <div class="detail-row">
+              <span class="detail-label">Total Amount</span>
+              <span class="detail-value">£${totalAmount}</span>
+          </div>
+          <div class="detail-row">
+              <span class="detail-label">Amount Paid</span>
+              <span class="detail-value">£${submittedAmount}</span>
+          </div>
+          <div class="detail-row">
+              <span class="detail-label">Remaining Due</span>
+              <span class="detail-value" style="color: ${remainingPayment > 0 ? '#e53e3e' : '#48bb78'}; font-weight: 700;">£${remainingPayment}</span>
+          </div>
 
-      <div class="timeline">
-        ${(o.statusHistory||[]).map(h=>`• ${h.status} – ${h.at}`).join("<br>")}
-      </div>
-    </div>`;
+          <div class="product-list">
+              <div class="detail-label">Ordered Items (${o.items.length})</div>
+              ${productsHTML.join('')}
+          </div>
+
+          <div class="action-box">
+              <div class="grid-2">
+                  <select id="status-${o._docId}">
+                      <option value="" disabled selected>Select New Status</option>
+                      <option value="processing">Processing</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="out_for_delivery">Out for Delivery</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                  </select>
+                  <input type="text" id="track-${o._docId}" placeholder="Tracking Number (If Shipped)">
+              </div>
+              <input type="datetime-local" id="delivery-${o._docId}" placeholder="Expected Delivery Date">
+              
+              <button onclick="updateStatus('${o.userId}','${o._docId}','${o.orderNumber}')">
+                  Update Order Status & Details
+              </button>
+          </div>
+          
+          <div class="timeline-section">
+              <div class="timeline-title">Status History:</div>
+              ${timelineHTML || '<div class="timeline-item">No status history available.</div>'}
+          </div>
+      </div>`;
+    }
+
+  } catch (error) {
+    console.error("Error loading orders: ", error);
+    box.innerHTML = `<p style="color: #e53e3e; text-align:center;">Failed to load orders. Check console for details.</p>`;
   }
 }
 
 /* ---------------- UPDATE STATUS ---------------- */
-window.updateStatus=async(userId,orderId,orderNumber)=>{
-  const status=document.getElementById(`status-${orderId}`).value;
-  if(!status) return alert("Select status");
+window.updateStatus = async(userId, orderId, orderNumber) => {
+  const statusEl = document.getElementById(`status-${orderId}`);
+  const status = statusEl.value;
+  const trackingNumber = document.getElementById(`track-${orderId}`).value;
+  // const deliveryDate = document.getElementById(`delivery-${orderId}`).value; // Future use
 
-  const ref=doc(db,"users",userId,"orders",orderId);
-  const snap=await getDoc(ref);
-  if(!snap.exists()) return;
+  if(!status) return alert("Please select a new status to update the order.");
 
-  const now=new Date().toISOString();
-  const o=snap.data();
+  try {
+    const ref = doc(db,"users", userId, "orders", orderId);
+    const snap = await getDoc(ref);
+    if(!snap.exists()) return alert("Order document not found!");
 
-  const update={
-    status,
-    updatedAt:now,
-    statusHistory:[...(o.statusHistory||[]),{status,at:now}]
-  };
+    const now = new Date().toISOString();
+    const o = snap.data();
+    
+    // Clear the selected value after capturing it
+    statusEl.value = ""; 
 
-  if(status==="shipped"){
-    update.shippingStatus="shipped";
-    update.trackingNumber=document.getElementById(`track-${orderId}`).value||"";
+    const update = {
+      status,
+      updatedAt: now,
+      // Add new status to history
+      statusHistory: [...(o.statusHistory || []), { status: status, at: now }]
+    };
+
+    if(status === "shipped" || status === "out_for_delivery"){
+      update.shippingStatus = status;
+      update.trackingNumber = trackingNumber; // Always update tracking if available
+    }
+    if(status === "delivered"){
+      update.deliveredAt = now;
+      update.paymentStatus = update.paymentStatus || (o.remainingPayment > 0 ? "partially_paid" : "fully_paid"); // Assuming delivered implies payment check
+    }
+    if(status === "cancelled"){
+      update.cancelledAt = now;
+    }
+
+    await updateDoc(ref, update);
+
+    // Send Notification
+    await addDoc(collection(db,"users", userId, "notifications"),{
+      title: "Order Update",
+      message: `Your Order #${orderNumber} is now ${status.replaceAll("_", " ")}`,
+      createdAt: now,
+      read: false
+    });
+
+    alert(`Order #${orderNumber} updated to ${status.replaceAll("_", " ")} successfully!`);
+    loadOrders(); // Reload to show the updated status
+  } catch (error) {
+    console.error("Error updating order: ", error);
+    alert("Failed to update order. Check console for details.");
   }
-  if(status==="delivered"){
-    update.deliveredAt=now;
-  }
-  if(status==="cancelled"){
-    update.cancelledAt=now;
-  }
-
-  await updateDoc(ref,update);
-
-  await addDoc(collection(db,"users",userId,"notifications"),{
-    title:"Order Update",
-    message:`Order ${orderNumber} is now ${status.replaceAll("_"," ")}`,
-    createdAt:now,
-    read:false
-  });
-
-  loadOrders();
 };
 
 loadOrders();
