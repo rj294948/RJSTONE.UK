@@ -2,168 +2,334 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Admin – IRYA STONE</title>
+<title>Admin – IRYA STONE Orders Panel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body { font-family: Arial; background:#f4f6f8; padding:15px; }
-.order { background:#fff; padding:15px; margin-bottom:15px; border-radius:8px; border:1px solid #ddd; }
-button { padding:6px 10px; margin-top:6px; cursor:pointer; }
-input, select { width:100%; padding:6px; margin-top:5px; }
-.badge { padding:4px 8px; border-radius:4px; font-size:12px; margin-right:5px; }
-.advance { background:#ffc107; color:#000; }
+/* --- PROFESSIONAL STYLING --- */
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background:#eef1f4; 
+    padding:20px; 
+    color: #333;
+}
+.header {
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.order { 
+    background:#ffffff; 
+    padding:20px; 
+    margin-bottom:20px; 
+    border-radius:12px; 
+    border:1px solid #e0e0e0; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: box-shadow 0.3s ease;
+}
+.order:hover {
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+h2, h3, h4 { margin-top: 0; color: #1f2937; }
+hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
+
+/* Action Buttons and Inputs */
+button { 
+    padding: 8px 15px;
+    margin-top: 10px;
+    cursor: pointer; 
+    border: none;
+    border-radius: 6px;
+    background: #007bff;
+    color: white;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+button:hover { background: #0056b3; }
+input, select { 
+    width: 100%; 
+    padding: 10px;
+    margin-top: 8px; 
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box; 
+    font-size: 14px;
+}
+select { appearance: none; background-color: #f9f9f9; }
+
+/* Badges */
+.badge { 
+    padding: 4px 10px; 
+    border-radius: 6px; 
+    font-size: 12px; 
+    margin-left: 8px;
+    font-weight: bold;
+    display: inline-block;
+}
+.advance { background:#ffc107; color:#333; }
 .full { background:#28a745; color:#fff; }
 .shipped { background:#17a2b8; color:#fff; }
 .pending { background:#6c757d; color:#fff; }
-.product-img { width:60px; height:60px; object-fit:cover; margin-right:10px; border-radius:4px; }
-.flex { display:flex; align-items:center; margin-top:5px; }
+
+/* Product Display */
+.product-img { 
+    width: 70px; 
+    height: 70px; 
+    object-fit: cover; 
+    margin-right: 15px; 
+    border-radius: 6px; 
+    border: 1px solid #eee;
+}
+.flex { 
+    display: flex; 
+    align-items: flex-start; 
+    margin-top: 15px; 
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #eee;
+}
+.flex:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.product-details b { color: #555; }
+.product-details { font-size: 14px; }
 </style>
 </head>
 <body>
 
-<h2>Admin Orders Panel</h2>
-<div id="orders"></div>
+<h2 class="header">Admin Orders Panel</h2>
+<div id="orders">
+    <p>Loading orders...</p>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getFirestore, collectionGroup, getDocs, doc, updateDoc, addDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
+// Your Firebase Config (Using a placeholder, assume it's valid)
 const firebaseConfig = {
-  apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-  authDomain: "iryastone-uk.firebaseapp.com",
-  projectId: "iryastone-uk",
+  apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+  authDomain: "iryastone-uk.firebaseapp.com",
+  projectId: "iryastone-uk",
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const ordersDiv = document.getElementById("orders");
 
+// Global functions exposed to window for inline onclick events
+window.updatePayment = updatePayment;
+window.updateShipping = updateShipping;
+
 // Load orders
 async function loadOrders() {
-  ordersDiv.innerHTML = "";
-  const snap = await getDocs(collectionGroup(db, "orders"));
-  let orderList = [];
-  
-  snap.forEach(d => {
-    let o = d.data();
-    o.docId = d.id;
-    orderList.push(o);
-  });
+    ordersDiv.innerHTML = "<p>Loading orders...</p>";
+    
+    try {
+        const snap = await getDocs(collectionGroup(db, "orders"));
+        let orderList = [];
+        const uniqueOrders = new Map(); // Use Map to filter by unique orderNumber
 
-  // Sort by latest
-  orderList.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+        snap.forEach(d => {
+            let o = d.data();
+            o.docId = d.id;
+            
+            // Filter: If we've already seen this orderNumber, skip (assuming the orderNumber is unique across the entire app)
+            if(uniqueOrders.has(o.orderNumber)) {
+                return;
+            }
+            
+            uniqueOrders.set(o.orderNumber, o);
+        });
 
-  for(const o of orderList){
-    // Avoid duplicate orders
-    if(!o.items || o.items.length===0) continue;
+        orderList = Array.from(uniqueOrders.values());
 
-    const totalPaid = o.advancePayment || 0;
-    const remaining = (o.total || 0) - totalPaid;
-    const isFull = remaining <= 0;
-    const statusBadge = isFull ? "full" : "advance";
-    const shippedBadge = o.shippingStatus==="shipped" ? "shipped" : "pending";
+        // Sort by latest createdAt date
+        orderList.sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0);
+            const dateB = new Date(b.createdAt || 0);
+            return dateB - dateA;
+        });
+        
+        ordersDiv.innerHTML = "";
+        
+        if (orderList.length === 0) {
+            ordersDiv.innerHTML = "<p>No orders found.</p>";
+            return;
+        }
 
-    // Products HTML
-    let productsHTML = "";
-    for(const item of o.items){
-      // Fetch product info by id
-      let productSnap = await getDoc(doc(db,"products",item.id));
-      let product = productSnap.exists() ? productSnap.data() : {};
-      let img = product.images?.[0] || 'https://via.placeholder.com/60';
-      let name = product.title || product.name || item.name;
-      productsHTML += `
-        <div class="flex">
-          <img src="${img}" class="product-img" />
-          <div>
-            <b>${name}</b><br/>
-            Qty: ${item.quantity} | Price: £${item.price} | Remaining: £${item.remainingPayment || remaining}
-          </div>
-        </div>
-      `;
+        for(const o of orderList){
+            // Ensure data integrity before displaying
+            if(!o.items || o.items.length === 0) continue;
+
+            const totalPaid = o.advancePayment || 0;
+            const remaining = (o.total || 0) - totalPaid;
+            const isFull = remaining <= 0.01; // Allow for floating point inaccuracies
+            const statusBadge = isFull ? "full" : "advance";
+            const shippedBadge = o.shippingStatus === "shipped" ? "shipped" : "pending";
+            
+            // Format dates and numbers
+            const totalFmt = o.total ? o.total.toFixed(2) : '0.00';
+            const paidFmt = totalPaid.toFixed(2);
+            const remainingFmt = remaining.toFixed(2);
+
+            // Products HTML
+            let productsHTML = "";
+            for(const item of o.items){
+                // Fetch product info by id
+                let productSnap = await getDoc(doc(db, "products", item.id));
+                let product = productSnap.exists() ? productSnap.data() : {};
+                let img = product.images?.[0] || 'https://via.placeholder.com/70?text=No+Image';
+                let name = product.title || product.name || item.name || "Unknown Product";
+                let itemTotal = item.quantity * item.price;
+                
+                productsHTML += `
+                    <div class="flex">
+                        <img src="${img}" class="product-img" alt="${name} Image" />
+                        <div class="product-details">
+                            <b>${name}</b><br/>
+                            Qty: ${item.quantity} | Unit Price: £${item.price.toFixed(2)}<br/>
+                            Total: £${itemTotal.toFixed(2)} | (Advance Paid: £${item.advancePayment ? item.advancePayment.toFixed(2) : '0.00'})
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Format datetime-local input for prefilling
+            const deliveryTimeValue = o.deliveryDateTime ? o.deliveryDateTime.substring(0, 16) : '';
+
+            ordersDiv.innerHTML += `
+                <div class="order">
+                    <h3>Order #: ${o.orderNumber}
+                        <span class="badge ${statusBadge}">${isFull ? "FULL PAID" : "ADVANCE PAID"}</span>
+                        <span class="badge ${shippedBadge}">${(o.shippingStatus || "PENDING").toUpperCase()}</span>
+                    </h3>
+                    
+                    <p>
+                        Customer: <b>${o.userName || 'N/A'}</b> (${o.userEmail || 'N/A'})<br/>
+                        Phone: ${o.shippingAddress?.phone || o.billingAddress?.phone || 'N/A'}
+                    </p>
+                    
+                    <p>
+                        **Order Summary:** Total: £${totalFmt} | Paid: £${paidFmt} | **Remaining: £${remainingFmt}**
+                    </p>
+
+                    <h4>Products (${o.items.length} items)</h4>
+                    ${productsHTML}
+
+                    <hr/>
+
+                    <h4>Payment Actions</h4>
+                    <select id="pay-${o.docId}">
+                        <option value="">-- Update Payment Status --</option>
+                        <option value="advance_confirmed" ${o.paymentStatus === 'advance_confirmed' ? 'selected' : ''}>Advance Confirmed</option>
+                        <option value="fully_paid" ${o.paymentStatus === 'fully_paid' ? 'selected' : ''}>Fully Paid</option>
+                    </select>
+                    <button onclick="updatePayment('${o.userId}', '${o.docId}', '${o.orderNumber}', ${o.total || 0})">Update Payment</button>
+
+                    <h4>Shipping Actions</h4>
+                    <input id="track-${o.docId}" placeholder="Tracking Number" value="${o.trackingNumber || ''}">
+                    <input type="datetime-local" id="delivery-${o.docId}" value="${deliveryTimeValue}">
+                    <button onclick="updateShipping('${o.userId}', '${o.docId}', '${o.orderNumber}')">Update Shipping</button>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error("Error loading orders:", error);
+        ordersDiv.innerHTML = `<p style="color:red;">Error loading orders: ${error.message}</p>`;
     }
-
-    ordersDiv.innerHTML += `
-      <div class="order">
-        <b>Order #: ${o.orderNumber}</b>
-        <span class="badge ${statusBadge}">${isFull ? "FULL PAID" : "ADVANCE PAID"}</span>
-        <span class="badge ${shippedBadge}">${o.shippingStatus || "PENDING"}</span>
-        <p>User: ${o.userName} | Email: ${o.userEmail}</p>
-        <p>Phone: ${o.shippingAddress?.phone || o.billingAddress?.phone}</p>
-        <p>Total: £${o.total} | Paid: £${totalPaid} | Remaining: £${remaining}</p>
-        ${productsHTML}
-
-        <select id="pay-${o.docId}">
-          <option value="">-- Update Payment --</option>
-          <option value="advance_confirmed">Advance Confirmed</option>
-          <option value="fully_paid">Fully Paid</option>
-        </select>
-        <button onclick="updatePayment('${o.userId}','${o.docId}','${o.orderNumber}', ${o.total})">Update Payment</button>
-
-        <input id="track-${o.docId}" placeholder="Tracking Number">
-        <input type="datetime-local" id="delivery-${o.docId}" placeholder="Delivery Date & Time">
-        <button onclick="updateShipping('${o.userId}','${o.docId}','${o.orderNumber}')">Update Shipping</button>
-      </div>
-    `;
-  }
 }
 
 // Update Payment
-window.updatePayment = async (userId, orderId, orderNumber, total) => {
-  const status = document.getElementById(`pay-${orderId}`).value;
-  if(!status) return alert("Select payment status");
+async function updatePayment(userId, orderId, orderNumber, total) {
+    const selectElement = document.getElementById(`pay-${orderId}`);
+    const status = selectElement.value;
+    
+    if(!status) return alert("Select payment status");
 
-  const paidAmount = status==="fully_paid" ? total : total*0.3;
+    const ADVANCE_PERCENTAGE = 0.3; // Assuming 30% is the advance rate
+    const isFullyPaid = status === "fully_paid";
 
-  await updateDoc(doc(db,"users",userId,"orders",orderId),{
-    paymentStatus: status,
-    advancePayment: paidAmount,
-    remainingPayment: total - paidAmount,
-    updatedAt: new Date().toISOString()
-  });
+    const paidAmount = isFullyPaid ? total : total * ADVANCE_PERCENTAGE;
+    const remainingAmount = total - paidAmount;
+    
+    // The data to update in Firestore
+    const updateData = {
+        paymentStatus: status,
+        // Update the main payment fields
+        advancePayment: paidAmount, 
+        remainingPayment: remainingAmount, 
+        updatedAt: new Date().toISOString()
+    };
 
-  await addDoc(collection(db,"users",userId,"notifications"),{
-    type:"payment",
-    orderId,
-    orderNumber,
-    title:"Payment Update",
-    message: status==="fully_paid"
-      ? `Your full payment of £${total} has been confirmed.`
-      : `Advance payment of £${paidAmount} received. Remaining £${total-paidAmount}. Please complete payment within 24 hours or order will auto-cancel. Advance is non-refundable.`,
-    createdAt:new Date().toISOString(),
-    read:false
-  });
+    // 1. Update the Order Document
+    try {
+        await updateDoc(doc(db, "users", userId, "orders", orderId), updateData);
+        
+        // 2. Create Notification
+        const paidFmt = paidAmount.toFixed(2);
+        const remainingFmt = remainingAmount.toFixed(2);
+        
+        await addDoc(collection(db,"users",userId,"notifications"),{
+            type:"payment",
+            orderId,
+            orderNumber,
+            title:"Payment Update",
+            message: isFullyPaid
+                ? `Your full payment of £${total.toFixed(2)} has been confirmed.`
+                : `Advance payment of £${paidFmt} received. Remaining balance: £${remainingFmt}. Please complete payment within 24 hours or the order may be cancelled.`,
+            createdAt:new Date().toISOString(),
+            read:false
+        });
 
-  alert("Payment updated");
-  loadOrders();
+        alert("Payment updated successfully!");
+        loadOrders(); 
+    } catch (error) {
+        console.error("Error updating payment:", error);
+        alert("Error updating payment. Check console for details.");
+    }
 }
 
 // Update Shipping
-window.updateShipping = async (userId, orderId, orderNumber) => {
-  const track = document.getElementById(`track-${orderId}`).value;
-  const delivery = document.getElementById(`delivery-${orderId}`).value;
-  if(!track) return alert("Enter tracking number");
-  if(!delivery) return alert("Set delivery date & time");
+async function updateShipping(userId, orderId, orderNumber) {
+    const track = document.getElementById(`track-${orderId}`).value.trim();
+    const delivery = document.getElementById(`delivery-${orderId}`).value;
+    
+    if(!track) return alert("Enter tracking number");
+    if(!delivery) return alert("Set delivery date & time");
+    
+    // 1. Update the Order Document
+    try {
+        await updateDoc(doc(db,"users",userId,"orders",orderId),{
+            shippingStatus:"shipped",
+            trackingNumber: track,
+            shippedAt: new Date().toISOString(),
+            deliveryDateTime: delivery, // YYYY-MM-DDTHH:MM format
+            updatedAt: new Date().toISOString()
+        });
 
-  await updateDoc(doc(db,"users",userId,"orders",orderId),{
-    shippingStatus:"shipped",
-    trackingNumber: track,
-    shippedAt: new Date().toISOString(),
-    deliveryDateTime: delivery
-  });
+        // Convert the date string to a locale-specific format for a friendly notification message
+        const deliveryDateDisplay = new Date(delivery).toLocaleString();
 
-  await addDoc(collection(db,"users",userId,"notifications"),{
-    type:"shipping",
-    orderId,
-    orderNumber,
-    title:"Order Shipped",
-    message: `Your order has been shipped. Tracking No: ${track}. Expected Delivery: ${delivery}`,
-    createdAt:new Date().toISOString(),
-    read:false
-  });
+        // 2. Create Notification
+        await addDoc(collection(db,"users",userId,"notifications"),{
+            type:"shipping",
+            orderId,
+            orderNumber,
+            title:"Order Shipped",
+            message: `Your order has been shipped. Tracking No: ${track}. Expected Delivery: ${deliveryDateDisplay}`,
+            createdAt:new Date().toISOString(),
+            read:false
+        });
 
-  alert("Shipping updated");
-  loadOrders();
+        alert("Shipping updated successfully!");
+        loadOrders();
+    } catch (error) {
+        console.error("Error updating shipping:", error);
+        alert("Error updating shipping. Check console for details.");
+    }
 }
 
+// Initial load
 loadOrders();
 </script>
 </body>
