@@ -8,759 +8,890 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-/* ===== AMAZON STYLE THEME ===== */
+/* ===== VARIABLES ===== */
 :root {
-  --amazon-blue: #131921;
-  --amazon-light-blue: #232f3e;
-  --amazon-orange: #ff9900;
-  --amazon-yellow: #ffd814;
-  --amazon-gray: #eaeded;
-  --text-dark: #0f1111;
-  --text-light: #fff;
-  --success: #007600;
-  --warning: #ffa41c;
-  --pending: #ffa500;
-  --processing: #007185;
-  --shipped: #b12704;
-  --delivered: #007600;
-  --cancelled: #d50000;
+    --primary-gold: #c9a227;
+    --gold-light: #f0d77c;
+    --gold-dark: #9c7c1f;
+    --stone-dark: #1a1a1a;
+    --stone-light: #f4f6f4;
+    --bg-light: #f7f9fc;
+    --text-dark: #222222;
+    --text-light: #666666;
+    --white: #ffffff;
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+    --transition: all 0.3s ease;
+    --border-radius: 12px;
+    --border-radius-lg: 20px;
+    
+    /* Order status colors */
+    --success: #007600;
+    --warning: #ffa41c;
+    --pending: #ffa500;
+    --processing: #007185;
+    --shipped: #b12704;
+    --delivered: #007600;
+    --cancelled: #d50000;
 }
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
 body {
-  background: var(--amazon-gray);
-  color: var(--text-dark);
-  line-height: 1.5;
+    background: var(--bg-light);
+    color: var(--text-dark);
+    padding-bottom: 80px;
+    font-size: 14px;
+    transition: padding-top 0.3s ease;
 }
 
-/* ===== HEADER ===== */
+/* ===== HEADER (Scroll Hide/Show) ===== */
 .header {
-  background: var(--amazon-blue);
-  color: var(--text-light);
-  padding: 12px 16px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    z-index: 1000;
+    gap: 10px;
+    transition: transform 0.3s ease;
+    transform: translateY(0);
 }
 
-.header-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
+.header.hide {
+    transform: translateY(-100%);
 }
 
 .logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 20px;
-  font-weight: 600;
-  text-decoration: none;
-  color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    min-width: 140px;
 }
 
 .logo i {
-  color: var(--amazon-orange);
+    color: var(--primary-gold);
+    font-size: 24px;
+}
+
+.logo span {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--stone-dark);
+    font-family: 'Roboto Slab', serif;
 }
 
 .header-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.header-btn {
-  background: none;
-  border: none;
-  color: var(--text-light);
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 4px;
-  transition: all 0.2s;
-  text-decoration: none;
+.action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-light);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    text-decoration: none;
 }
 
-.header-btn:hover {
-  background: rgba(255,255,255,0.1);
+.action-btn:hover {
+    background: var(--primary-gold);
+    color: var(--white);
 }
 
-.notification-btn {
-  position: relative;
+/* ===== FOOTER (Scroll Hide/Show) ===== */
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid #eee;
+    z-index: 999;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    transform: translateY(0);
 }
 
-.badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: var(--amazon-orange);
-  color: var(--text-dark);
-  font-size: 10px;
-  font-weight: 700;
-  min-width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.bottom-nav.hide {
+    transform: translateY(100%);
+}
+
+.nav-btn {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 10px;
+    min-width: 70px;
+    text-decoration: none;
+}
+
+.nav-btn:hover {
+    color: var(--primary-gold);
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.nav-btn.active {
+    color: var(--primary-gold);
+}
+
+.nav-btn i {
+    font-size: 18px;
+}
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb {
+    padding: 90px 16px 20px;
+    background: var(--white);
+    border-bottom: 1px solid #f0f0f0;
+    transition: padding-top 0.3s ease;
+}
+
+.breadcrumb-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.breadcrumb-item a {
+    color: var(--text-light);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary-gold);
+}
+
+.breadcrumb-item.active {
+    color: var(--primary-gold);
+    font-weight: 500;
+}
+
+.breadcrumb-divider {
+    color: var(--text-light);
 }
 
 /* ===== ORDER DETAILS TOP VIEW ===== */
 .order-top-view {
-  display: none;
-  background: var(--text-light);
-  padding: 20px;
-  border-radius: 8px;
-  margin: 20px auto;
-  max-width: 1200px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  animation: slideDown 0.3s ease;
+    display: none;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 1200px;
+    box-shadow: var(--shadow-lg);
+    animation: slideDown 0.3s ease;
+    position: relative;
+    z-index: 99;
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .order-top-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .order-top-header h2 {
-  font-size: 18px;
-  color: var(--text-dark);
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    font-size: 22px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-top-header h2 i {
+    color: var(--primary-gold);
 }
 
 .close-top-view {
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: #666;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
 }
 
 .close-top-view:hover {
-  background: #f5f5f5;
+    background: var(--bg-light);
+    color: var(--stone-dark);
 }
 
 .order-top-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
 }
 
 .order-top-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .order-top-label {
-  font-size: 12px;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+    font-size: 12px;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .order-top-value {
-  font-weight: 600;
-  color: var(--text-dark);
+    font-weight: 600;
+    color: var(--text-dark);
 }
 
 .order-top-value.amount {
-  color: var(--amazon-blue);
-  font-size: 18px;
+    color: var(--primary-gold);
+    font-size: 18px;
 }
 
 .order-top-value.status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
-.status-pending { background: #fff8e1; color: var(--pending); }
-.status-processing { background: #e3f2fd; color: var(--processing); }
-.status-shipped { background: #f3e5f5; color: var(--shipped); }
-.status-delivered { background: #e8f5e8; color: var(--delivered); }
-
-.order-top-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
-}
-
-.order-top-actions .btn {
-  flex: 1;
-}
-
-/* ===== MAIN CONTAINER ===== */
-.container {
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 0 16px;
-}
-
-.page-header {
-  margin-bottom: 20px;
-}
-
-.page-header h1 {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--text-dark);
-  margin-bottom: 8px;
-}
-
-.page-header p {
-  color: #666;
-  font-size: 14px;
-}
-
-/* ===== ORDERS FILTER ===== */
-.orders-filter {
-  background: var(--text-light);
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.filter-btn {
-  padding: 8px 16px;
-  border: 1px solid #d5d9d9;
-  border-radius: 20px;
-  background: var(--text-light);
-  color: var(--text-dark);
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.filter-btn:hover {
-  background: #f7f7f7;
-}
-
-.filter-btn.active {
-  background: var(--amazon-blue);
-  color: var(--text-light);
-  border-color: var(--amazon-blue);
-}
-
-.search-box {
-  flex: 1;
-  min-width: 200px;
-  position: relative;
-}
-
-.search-box input {
-  width: 100%;
-  padding: 10px 40px 10px 12px;
-  border: 1px solid #d5d9d9;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.search-box i {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
-}
-
-/* ===== ORDERS GRID ===== */
-.orders-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 20px;
-}
-
-@media (max-width: 768px) {
-  .orders-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ===== ORDER CARD ===== */
-.order-card {
-  background: var(--text-light);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 1px solid #ddd;
-}
-
-.order-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.order-header {
-  padding: 16px;
-  background: linear-gradient(to right, #f7f7f7, #fff);
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.order-info h3 {
-  font-size: 16px;
-  color: var(--text-dark);
-  margin-bottom: 4px;
-  font-weight: 600;
-}
-
-.order-date {
-  font-size: 12px;
-  color: #666;
-}
-
-.order-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
+/* ===== ORDER STATUS BADGES ===== */
 .status-pending { background: #fff8e1; color: var(--pending); }
 .status-processing { background: #e3f2fd; color: var(--processing); }
 .status-shipped { background: #f3e5f5; color: var(--shipped); }
 .status-delivered { background: #e8f5e8; color: var(--delivered); }
 .status-cancelled { background: #ffebee; color: var(--cancelled); }
+.status-pending_bank_transfer { background: #ffeaa7; color: #856404; }
+
+.order-status-badge {
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 16px;
+}
+
+.page-header {
+    margin-bottom: 20px;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--stone-dark);
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+/* ===== ORDERS FILTER ===== */
+.orders-filter {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    background: var(--white);
+    color: var(--text-dark);
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.filter-btn:hover {
+    background: var(--bg-light);
+}
+
+.filter-btn.active {
+    background: var(--primary-gold);
+    color: var(--white);
+    border-color: var(--primary-gold);
+}
+
+.search-box {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 40px 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: var(--transition);
+    background: var(--white);
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.1);
+}
+
+.search-box i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+
+/* ===== ORDERS GRID ===== */
+.orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .orders-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== ORDER CARD ===== */
+.order-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: 1px solid #f0f0f0;
+}
+
+.order-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.order-header {
+    padding: 16px;
+    background: linear-gradient(to right, #f7f7f7, var(--white));
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.order-info h3 {
+    font-size: 16px;
+    color: var(--stone-dark);
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.order-date {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.order-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
 
 .order-body {
-  padding: 16px;
+    padding: 16px;
 }
 
 .order-item {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #eee;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .item-image {
-  width: 80px;
-  height: 80px;
-  border-radius: 6px;
-  overflow: hidden;
-  background: #f5f5f5;
-  flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg-light);
+    flex-shrink: 0;
 }
 
 .item-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .item-details {
-  flex: 1;
+    flex: 1;
 }
 
 .item-name {
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 4px;
-  color: var(--text-dark);
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: var(--stone-dark);
 }
 
 .item-meta {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 4px;
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 4px;
 }
 
 .item-price {
-  font-weight: 600;
-  color: var(--text-dark);
-  font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 14px;
 }
 
 .order-summary {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .summary-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .summary-label {
-  font-size: 12px;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+    font-size: 12px;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .summary-value {
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--text-dark);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-dark);
 }
 
 .summary-value.paid { color: var(--delivered); }
 .summary-value.remaining { color: var(--pending); }
-.summary-value.total { color: var(--amazon-blue); }
+.summary-value.total { color: var(--primary-gold); }
 
 /* ===== TRACKING PROGRESS ===== */
 .tracking-progress {
-  margin: 20px 0;
+    margin: 20px 0;
 }
 
 .progress-steps {
-  display: flex;
-  justify-content: space-between;
-  position: relative;
-  padding: 0 10px;
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    padding: 0 10px;
 }
 
 .progress-steps::before {
-  content: '';
-  position: absolute;
-  top: 12px;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  background: #e0e0e0;
-  z-index: 1;
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: #e0e0e0;
+    z-index: 1;
 }
 
 .progress-bar {
-  position: absolute;
-  top: 12px;
-  left: 10%;
-  height: 2px;
-  background: var(--amazon-orange);
-  z-index: 2;
-  transition: width 0.3s;
+    position: absolute;
+    top: 12px;
+    left: 10%;
+    height: 2px;
+    background: var(--primary-gold);
+    z-index: 2;
+    transition: width 0.3s;
 }
 
 .step {
-  position: relative;
-  z-index: 3;
-  text-align: center;
-  flex: 1;
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    flex: 1;
 }
 
 .step-icon {
-  width: 26px;
-  height: 26px;
-  background: #fff;
-  border: 2px solid #e0e0e0;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 8px;
-  font-size: 12px;
-  color: #666;
-  transition: all 0.3s;
+    width: 26px;
+    height: 26px;
+    background: var(--white);
+    border: 2px solid #e0e0e0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    font-size: 12px;
+    color: var(--text-light);
+    transition: var(--transition);
 }
 
 .step.active .step-icon {
-  background: var(--amazon-orange);
-  border-color: var(--amazon-orange);
-  color: var(--text-light);
+    background: var(--primary-gold);
+    border-color: var(--primary-gold);
+    color: var(--white);
 }
 
 .step.completed .step-icon {
-  background: var(--delivered);
-  border-color: var(--delivered);
-  color: var(--text-light);
+    background: var(--delivered);
+    border-color: var(--delivered);
+    color: var(--white);
 }
 
 .step-label {
-  font-size: 11px;
-  color: #666;
-  font-weight: 500;
-  text-transform: uppercase;
+    font-size: 11px;
+    color: var(--text-light);
+    font-weight: 500;
+    text-transform: uppercase;
 }
 
 .step.active .step-label {
-  color: var(--amazon-orange);
-  font-weight: 600;
+    color: var(--primary-gold);
+    font-weight: 600;
 }
 
 .step.completed .step-label {
-  color: var(--delivered);
-  font-weight: 600;
+    color: var(--delivered);
+    font-weight: 600;
 }
 
 /* ===== ORDER ACTIONS ===== */
 .order-actions {
-  display: flex;
-  gap: 10px;
-  padding: 16px;
-  border-top: 1px solid #eee;
-  background: #fafafa;
+    display: flex;
+    gap: 10px;
+    padding: 16px;
+    border-top: 1px solid #f0f0f0;
+    background: var(--bg-light);
 }
 
 .btn {
-  flex: 1;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.2s;
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition);
 }
 
 .btn-primary {
-  background: var(--amazon-yellow);
-  color: var(--text-dark);
-  border: 1px solid #fcd200;
+    background: var(--primary-gold);
+    color: var(--white);
 }
 
 .btn-primary:hover {
-  background: #f7ca00;
-  border-color: #f2a900;
+    background: var(--gold-dark);
 }
 
 .btn-secondary {
-  background: #fff;
-  color: var(--text-dark);
-  border: 1px solid #d5d9d9;
+    background: var(--white);
+    color: var(--text-dark);
+    border: 1px solid #e0e0e0;
 }
 
 .btn-secondary:hover {
-  background: #f7f7f7;
-  border-color: #b2b5b5;
+    background: var(--bg-light);
+    border-color: var(--primary-gold);
 }
 
 .btn-outline {
-  background: transparent;
-  color: var(--amazon-blue);
-  border: 1px solid var(--amazon-blue);
+    background: transparent;
+    color: var(--primary-gold);
+    border: 1px solid var(--primary-gold);
 }
 
 .btn-outline:hover {
-  background: rgba(19, 25, 33, 0.05);
-}
-
-/* ===== LOADING STATE ===== */
-.loading {
-  text-align: center;
-  padding: 60px 20px;
-  color: #666;
-  grid-column: 1 / -1;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(0,0,0,0.1);
-  border-top-color: var(--amazon-orange);
-  border-radius: 50%;
-  animation: spin 1s ease-in-out infinite;
-  margin: 0 auto 20px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ===== EMPTY STATE ===== */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  background: var(--text-light);
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  grid-column: 1 / -1;
-}
-
-.empty-state i {
-  font-size: 48px;
-  color: #ccc;
-  margin-bottom: 20px;
-}
-
-.empty-state h3 {
-  color: #666;
-  margin-bottom: 10px;
-  font-weight: 600;
-}
-
-/* ===== BOTTOM NAV ===== */
-.bottom-nav {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--text-light);
-  display: flex;
-  justify-content: space-around;
-  padding: 12px 0;
-  border-top: 1px solid #eee;
-  z-index: 999;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  color: var(--text-dark);
-  text-decoration: none;
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.nav-item:hover {
-  color: var(--amazon-blue);
-}
-
-.nav-item.active {
-  color: var(--amazon-blue);
-  background: rgba(19, 25, 33, 0.05);
-}
-
-.nav-item i {
-  font-size: 18px;
+    background: rgba(201, 162, 39, 0.1);
 }
 
 /* ===== NOTIFICATION DROPDOWN ===== */
 .notification-dropdown {
-  display: none;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: 350px;
-  background: var(--text-light);
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  z-index: 1000;
-  margin-top: 8px;
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 350px;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    margin-top: 8px;
 }
 
 .notification-dropdown.active {
-  display: block;
+    display: block;
 }
 
 .notification-header {
-  padding: 16px;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .notification-header h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-dark);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--stone-dark);
 }
 
 .notification-actions button {
-  background: none;
-  border: none;
-  color: var(--amazon-blue);
-  font-size: 12px;
-  cursor: pointer;
-  padding: 4px 8px;
+    background: none;
+    border: none;
+    color: var(--primary-gold);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: var(--transition);
 }
 
 .notification-actions button:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 .notification-list {
-  max-height: 400px;
-  overflow-y: auto;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .notification-item {
-  padding: 12px 16px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-  transition: background 0.2s;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: var(--transition);
 }
 
 .notification-item:hover {
-  background: #f9f9f9;
+    background: var(--bg-light);
 }
 
 .notification-item.unread {
-  background: rgba(255, 153, 0, 0.05);
+    background: rgba(201, 162, 39, 0.05);
 }
 
 .notification-title {
-  font-weight: 600;
-  margin-bottom: 4px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--stone-dark);
 }
 
 .notification-message {
-  font-size: 13px;
-  color: #666;
-  margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 6px;
 }
 
 .notification-time {
-  font-size: 11px;
-  color: #999;
+    font-size: 11px;
+    color: var(--text-light);
+}
+
+/* ===== LOADING STATE ===== */
+.loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-light);
+    grid-column: 1 / -1;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(201, 162, 39, 0.1);
+    border-top-color: var(--primary-gold);
+    border-radius: 50%;
+    animation: spin 1s ease-in-out infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    border: 1px solid #f0f0f0;
+    grid-column: 1 / -1;
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: var(--text-light);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+/* ===== CART BADGE ===== */
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 600;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .breadcrumb {
+        padding: 80px 16px 20px;
+    }
+    
+    .container {
+        margin: 20px auto;
+    }
+    
+    .orders-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        min-width: 100%;
+    }
+    
+    .order-actions {
+        flex-direction: column;
+    }
+    
+    .order-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .notification-dropdown {
+        width: 300px;
+        right: -50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .orders-grid {
+        gap: 15px;
+    }
+    
+    .order-card {
+        border-radius: 10px;
+    }
+    
+    .container {
+        padding: 0 12px;
+    }
 }
 </style>
 </head>
@@ -778,7 +909,7 @@ body {
   <div class="order-top-content" id="orderTopContent">
     <!-- Order details will be loaded here -->
   </div>
-  <div class="order-top-actions">
+  <div class="order-actions">
     <button class="btn btn-primary" onclick="downloadInvoice()">
       <i class="fas fa-file-invoice"></i> Download Invoice
     </button>
@@ -789,39 +920,54 @@ body {
 </div>
 
 <!-- Header -->
-<header class="header">
-  <div class="header-container">
-    <a href="index.html" class="logo">
-      <i class="fas fa-gem"></i>
-      <span>IRYA STONE</span>
+<header class="header" id="mainHeader">
+  <div class="logo">
+    <i class="fa-solid fa-gem"></i>
+    <span>IRYA STONE</span>
+  </div>
+  
+  <div class="header-actions">
+    <a href="account.html" class="action-btn" title="Account">
+      <i class="fas fa-user"></i>
     </a>
-    
-    <div class="header-actions">
-      <a href="account.html" class="header-btn">
-        <i class="fas fa-user"></i>
-        <span>Account</span>
-      </a>
-      <div style="position: relative;">
-        <button class="header-btn notification-btn" onclick="toggleNotifications()">
-          <i class="fas fa-bell"></i>
-          <span>Notifications</span>
-          <span class="badge" id="notificationBadge" style="display: none;">0</span>
-        </button>
-        <div class="notification-dropdown" id="notificationDropdown">
-          <div class="notification-header">
-            <h3>Notifications</h3>
-            <div class="notification-actions">
-              <button onclick="markAllAsRead()">Mark all read</button>
-            </div>
+    <div style="position: relative;">
+      <button class="action-btn notification-btn" onclick="toggleNotifications()" title="Notifications">
+        <i class="fas fa-bell"></i>
+        <span class="cart-badge" id="notificationBadge">0</span>
+      </button>
+      <div class="notification-dropdown" id="notificationDropdown">
+        <div class="notification-header">
+          <h3>Notifications</h3>
+          <div class="notification-actions">
+            <button onclick="markAllAsRead()">Mark all read</button>
           </div>
-          <div class="notification-list" id="notificationList">
-            <!-- Notifications will be loaded here -->
-          </div>
+        </div>
+        <div class="notification-list" id="notificationList">
+          <!-- Notifications will be loaded here -->
         </div>
       </div>
     </div>
+    <a href="cart.html" class="action-btn" title="Cart" style="position: relative;">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="cart-badge" id="cartBadge">0</span>
+    </a>
   </div>
 </header>
+
+<!-- Breadcrumb -->
+<section class="breadcrumb">
+  <div class="breadcrumb-content">
+    <div class="breadcrumb-item">
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+    </div>
+    <div class="breadcrumb-divider">
+      <i class="fas fa-chevron-right"></i>
+    </div>
+    <div class="breadcrumb-item active">
+      My Orders
+    </div>
+  </div>
+</section>
 
 <!-- Main Container -->
 <main class="container">
@@ -854,20 +1000,20 @@ body {
 </main>
 
 <!-- Bottom Navigation -->
-<nav class="bottom-nav">
-  <a href="index.html" class="nav-item">
+<nav class="bottom-nav" id="bottomNav">
+  <a href="index.html" class="nav-btn">
     <i class="fas fa-home"></i>
     <span>Home</span>
   </a>
-  <a href="products.html" class="nav-item">
+  <a href="products.html" class="nav-btn">
     <i class="fas fa-th-large"></i>
     <span>Products</span>
   </a>
-  <a href="orders.html" class="nav-item active">
+  <a href="orders.html" class="nav-btn active">
     <i class="fas fa-box"></i>
     <span>Orders</span>
   </a>
-  <a href="account.html" class="nav-item">
+  <a href="account.html" class="nav-btn">
     <i class="fas fa-user"></i>
     <span>Account</span>
   </a>
@@ -886,7 +1032,8 @@ import {
   updateDoc,
   doc,
   where,
-  limit
+  limit,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // Firebase Configuration
@@ -904,7 +1051,72 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Global variables
+// ============================================
+// SCROLL HIDE/SHOW HEADER & FOOTER
+// ============================================
+
+let lastScrollTop = 0;
+const header = document.getElementById('mainHeader');
+const bottomNav = document.getElementById('bottomNav');
+const breadcrumb = document.querySelector('.breadcrumb');
+
+// Scroll threshold for hiding/showing
+const SCROLL_THRESHOLD = 50;
+
+function handleScroll() {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  
+  // Hide/show header
+  if (scrollTop > lastScrollTop && scrollTop > SCROLL_THRESHOLD) {
+    // Scrolling down
+    header.classList.add('hide');
+    bottomNav.classList.add('hide');
+  } else {
+    // Scrolling up
+    header.classList.remove('hide');
+    bottomNav.classList.remove('hide');
+  }
+  
+  lastScrollTop = scrollTop;
+}
+
+// Add scroll event listener
+window.addEventListener('scroll', handleScroll, { passive: true });
+
+// ============================================
+// USER ID MANAGEMENT
+// ============================================
+
+async function getUserId() {
+  try {
+    // Check localStorage for user
+    const savedUser = localStorage.getItem('irya_stone_auth_user');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      console.log("✅ User ID from localStorage:", user.uid);
+      return user.uid;
+    }
+
+    // Check for guest ID
+    let guestId = localStorage.getItem('irya_guest_id');
+    if (!guestId) {
+      guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('irya_guest_id', guestId);
+    }
+    
+    console.log("✅ Guest user ID:", guestId);
+    return guestId;
+    
+  } catch (error) {
+    console.error("❌ Error getting user ID:", error);
+    return 'guest_' + Date.now();
+  }
+}
+
+// ============================================
+// ORDERS MANAGEMENT - REAL-TIME
+// ============================================
+
 let userId = null;
 let orders = [];
 let notifications = [];
@@ -913,48 +1125,11 @@ let currentOrderDetails = null;
 let ordersUnsubscribe = null;
 let notificationsUnsubscribe = null;
 
-// ============================================
-// USER ID MANAGEMENT (My Account से लिया गया)
-// ============================================
-
-async function getUserId() {
-  try {
-    // First check localStorage (My Account page की तरह)
-    const savedUser = localStorage.getItem('irya_stone_auth_user');
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
-      userId = user.uid;
-      console.log("✅ User ID from localStorage:", userId);
-      return userId;
-    }
-
-    // Check for guest ID (My Account page की तरह)
-    let guestId = localStorage.getItem('irya_guest_id');
-    if (!guestId) {
-      guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('irya_guest_id', guestId);
-    }
-    
-    userId = guestId;
-    console.log("✅ Guest user ID:", userId);
-    return userId;
-    
-  } catch (error) {
-    console.error("❌ Error getting user ID:", error);
-    userId = 'guest_' + Date.now();
-    return userId;
-  }
-}
-
-// ============================================
-// ORDERS MANAGEMENT - REAL-TIME
-// ============================================
-
 async function loadOrders() {
   try {
     const ordersDiv = document.getElementById("orders");
     
-    // Get user ID (My Account page की तरह)
+    // Get user ID
     userId = await getUserId();
     console.log("📱 Loading orders for user:", userId);
     
@@ -964,19 +1139,21 @@ async function loadOrders() {
     // Load notifications
     loadNotifications();
     
+    // Update cart badge
+    updateCartBadge();
+    
   } catch (error) {
     console.error("❌ Error loading orders:", error);
     showEmptyState("Failed to load orders. Please try again.");
   }
 }
 
-function setupOrdersListener() {
+async function setupOrdersListener() {
   const ordersDiv = document.getElementById("orders");
   
   // Clean up previous listener
   if (ordersUnsubscribe) ordersUnsubscribe();
   
-  // Try multiple sources like My Account page
   let ordersQuery;
   
   try {
@@ -996,7 +1173,7 @@ function setupOrdersListener() {
   }
   
   ordersUnsubscribe = onSnapshot(ordersQuery, 
-    (snapshot) => {
+    async (snapshot) => {
       orders = [];
       
       if (snapshot.empty) {
@@ -1005,14 +1182,46 @@ function setupOrdersListener() {
         return;
       }
       
-      snapshot.forEach((doc) => {
-        const orderData = doc.data();
-        orderData.id = doc.id;
+      // Process each order
+      for (const docSnapshot of snapshot.docs) {
+        const orderData = docSnapshot.data();
+        orderData.id = docSnapshot.id;
+        
+        // Fetch product images for order items
+        if (orderData.items && Array.isArray(orderData.items)) {
+          for (const item of orderData.items) {
+            if (item.imageId) {
+              // Try to fetch image from products collection
+              try {
+                const productDoc = await getDoc(doc(db, "products", item.imageId));
+                if (productDoc.exists()) {
+                  const productData = productDoc.data();
+                  item.image = productData.imageUrl || productData.image || 
+                              getDefaultImage(item.category);
+                } else {
+                  // Check in stone collection
+                  const stoneDoc = await getDoc(doc(db, "stone", item.imageId));
+                  if (stoneDoc.exists()) {
+                    const stoneData = stoneDoc.data();
+                    item.image = stoneData.imageUrl || stoneData.image || 
+                                getDefaultImage(item.category);
+                  }
+                }
+              } catch (error) {
+                console.warn("⚠️ Could not fetch image for item:", item.imageId);
+                item.image = getDefaultImage(item.category);
+              }
+            } else {
+              item.image = getDefaultImage(item.category);
+            }
+          }
+        }
+        
         orders.push(orderData);
         console.log(`📦 Order loaded: ${orderData.orderNumber} - ${orderData.status}`);
-      });
+      }
       
-      console.log(`✅ Loaded ${orders.length} orders`);
+      console.log(`✅ Loaded ${orders.length} orders with images`);
       displayOrders(orders);
       
     }, 
@@ -1030,6 +1239,22 @@ function setupOrdersListener() {
       `;
     }
   );
+}
+
+function getDefaultImage(category) {
+  const categoryLower = (category || '').toLowerCase();
+  
+  if (categoryLower.includes('sand')) {
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800&q=80';
+  } else if (categoryLower.includes('kota')) {
+    return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80';
+  } else if (categoryLower.includes('granite')) {
+    return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&q=80';
+  } else if (categoryLower.includes('marble')) {
+    return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80';
+  }
+  
+  return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800&q=80';
 }
 
 function displayOrders(ordersList) {
@@ -1076,11 +1301,12 @@ function displayOrders(ordersList) {
     
     // Get first item for preview
     let itemName = 'Multiple Items';
-    let itemImage = 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?w=200';
+    let itemImage = getDefaultImage();
+    let itemCount = order.items ? order.items.length : 1;
     
     if (order.items && order.items.length > 0) {
       const firstItem = order.items[0];
-      itemName = firstItem.name || firstItem.stoneName || 'Product';
+      itemName = firstItem.name || firstItem.stoneName || firstItem.productName || 'Product';
       if (firstItem.image) itemImage = firstItem.image;
     }
     
@@ -1103,13 +1329,16 @@ function displayOrders(ordersList) {
         <div class="order-body">
           <div class="order-item">
             <div class="item-image">
-              <img src="${itemImage}" alt="${itemName}" onerror="this.src='https://images.unsplash.com/photo-1544931170-3ca1337cce88?w=200'">
+              <img src="${itemImage}" alt="${itemName}" 
+                   onerror="this.src='${getDefaultImage()}'">
             </div>
             <div class="item-details">
               <div class="item-name">${itemName}</div>
               <div class="item-meta">
-                ${order.items ? order.items.length : 1} item${order.items && order.items.length !== 1 ? 's' : ''} 
-                • ${order.paymentMethod === 'bank' ? 'Bank Transfer' : 'Card Payment'}
+                ${itemCount} item${itemCount !== 1 ? 's' : ''} 
+                • ${order.paymentMethod === 'bank' ? 'Bank Transfer' : 
+                    order.paymentMethod === 'stripe' ? 'Card Payment' : 
+                    order.paymentMethod === 'paypal' ? 'PayPal' : 'Payment'}
               </div>
               <div class="item-price">£${order.total?.toFixed(2) || '0.00'}</div>
             </div>
@@ -1165,7 +1394,7 @@ function displayOrders(ordersList) {
 }
 
 // ============================================
-// ORDER TOP VIEW FUNCTIONS (NEW FEATURE)
+// ORDER TOP VIEW FUNCTIONS
 // ============================================
 
 async function showOrderTopView(orderId) {
@@ -1181,6 +1410,10 @@ async function showOrderTopView(orderId) {
     
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Show header and footer
+    header.classList.remove('hide');
+    bottomNav.classList.remove('hide');
     
     // Display order details in top view
     displayOrderTopView(order);
@@ -1306,7 +1539,7 @@ async function loadNotifications() {
         
         if (snapshot.empty) {
           notificationList.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #666;">
+            <div style="text-align: center; padding: 40px; color: var(--text-light);">
               <i class="fas fa-bell-slash" style="font-size: 24px; margin-bottom: 10px;"></i>
               <p>No notifications yet</p>
             </div>
@@ -1429,6 +1662,27 @@ function updateNotificationBadge(count = null) {
 }
 
 // ============================================
+// CART BADGE UPDATE
+// ============================================
+
+function updateCartBadge() {
+  try {
+    const cartKey = 'irya_local_cart_' + userId;
+    const cartData = localStorage.getItem(cartKey);
+    const cartItems = cartData ? JSON.parse(cartData) : [];
+    const count = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
+    
+    const cartBadge = document.getElementById('cartBadge');
+    if (cartBadge) {
+      cartBadge.textContent = count;
+      cartBadge.style.display = count > 0 ? 'flex' : 'none';
+    }
+  } catch (error) {
+    console.error('❌ Error updating cart badge:', error);
+  }
+}
+
+// ============================================
 // HELPER FUNCTIONS
 // ============================================
 
@@ -1458,7 +1712,8 @@ function searchOrders() {
       (order.orderNumber && order.orderNumber.toLowerCase().includes(searchTerm)) ||
       (order.items && order.items.some(item => 
         (item.name && item.name.toLowerCase().includes(searchTerm)) ||
-        (item.stoneName && item.stoneName.toLowerCase().includes(searchTerm))
+        (item.stoneName && item.stoneName.toLowerCase().includes(searchTerm)) ||
+        (item.productName && item.productName.toLowerCase().includes(searchTerm))
       ))
     );
   });
@@ -1516,6 +1771,7 @@ function getStatusClass(status) {
   if (statusLower.includes('shipped')) return 'status-shipped';
   if (statusLower.includes('delivered')) return 'status-delivered';
   if (statusLower.includes('cancelled')) return 'status-cancelled';
+  if (statusLower.includes('pending_bank_transfer')) return 'status-pending_bank_transfer';
   return 'status-pending';
 }
 
@@ -1529,7 +1785,8 @@ function getStatusText(status) {
     'delivered': 'Delivered',
     'cancelled': 'Cancelled',
     'payment_verified': 'Payment Verified',
-    'pending_bank_transfer': 'Awaiting Payment'
+    'pending_bank_transfer': 'Awaiting Payment',
+    'payment_received': 'Payment Received'
   };
   
   return statusMap[status.toLowerCase()] || status;
@@ -1543,6 +1800,7 @@ function getStatusIcon(status) {
   if (statusLower.includes('shipped')) return 'fa-shipping-fast';
   if (statusLower.includes('delivered')) return 'fa-check-circle';
   if (statusLower.includes('cancelled')) return 'fa-times-circle';
+  if (statusLower.includes('pending_bank_transfer')) return 'fa-exclamation-circle';
   return 'fa-clock';
 }
 
@@ -1607,12 +1865,13 @@ function showMessage(message) {
     position: fixed;
     top: 80px;
     right: 20px;
-    background: var(--amazon-blue);
-    color: white;
+    background: var(--primary-gold);
+    color: var(--white);
     padding: 12px 20px;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     z-index: 1000;
     animation: slideIn 0.3s ease;
+    box-shadow: var(--shadow-lg);
   `;
   
   toast.innerHTML = `
@@ -1626,7 +1885,10 @@ function showMessage(message) {
         to { transform: translateX(100%); opacity: 0; }
       }
     </style>
-    <div>${message}</div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="fas fa-check-circle"></i>
+      <span>${message}</span>
+    </div>
   `;
   
   document.body.appendChild(toast);
@@ -1656,66 +1918,167 @@ async function downloadOrderInvoice(orderId) {
       <head>
         <title>Invoice - ${order.orderNumber}</title>
         <style>
-          body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-          .invoice-header { text-align: center; margin-bottom: 30px; }
-          .company { font-size: 24px; font-weight: bold; color: #131921; }
-          .invoice-details { margin: 20px 0; }
-          .table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-          .table th, .table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-          .table th { background: #f8f9fa; }
-          .total-row { font-weight: bold; background: #f8f9fa; }
-          .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #ddd; }
+          body { 
+            font-family: 'Poppins', sans-serif; 
+            margin: 40px; 
+            line-height: 1.6;
+            background: #f7f9fc;
+            color: #222222;
+          }
+          .invoice-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+          }
+          .invoice-header { 
+            text-align: center; 
+            margin-bottom: 40px; 
+            padding-bottom: 20px;
+            border-bottom: 2px solid #c9a227;
+          }
+          .company { 
+            font-size: 28px; 
+            font-weight: 700; 
+            color: #1a1a1a; 
+            margin-bottom: 10px;
+            font-family: 'Roboto Slab', serif;
+          }
+          .company span { color: #c9a227; }
+          .invoice-title {
+            font-size: 20px;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+          }
+          .invoice-details { 
+            margin: 30px 0; 
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+          }
+          .invoice-details div {
+            margin-bottom: 10px;
+          }
+          .table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 30px 0; 
+          }
+          .table th, .table td { 
+            border: 1px solid #e0e0e0; 
+            padding: 12px; 
+            text-align: left; 
+          }
+          .table th { 
+            background: #f7f9fc; 
+            color: #222222;
+            font-weight: 600;
+          }
+          .total-row { 
+            font-weight: 600; 
+            background: #f7f9fc; 
+          }
+          .total-row td {
+            border-top: 2px solid #e0e0e0;
+          }
+          .footer { 
+            margin-top: 40px; 
+            padding-top: 20px; 
+            border-top: 2px solid #c9a227; 
+            text-align: center;
+          }
+          .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+          }
+          .status-pending { background: #fff8e1; color: #ffa500; }
+          .status-processing { background: #e3f2fd; color: #007185; }
+          .status-shipped { background: #f3e5f5; color: #b12704; }
+          .status-delivered { background: #e8f5e8; color: #007600; }
         </style>
       </head>
       <body>
-        <div class="invoice-header">
-          <div class="company">IRYA STONE</div>
-          <div>INVOICE</div>
-        </div>
-        
-        <div class="invoice-details">
-          <div><strong>Invoice Number:</strong> ${order.orderNumber}</div>
-          <div><strong>Invoice Date:</strong> ${formatDate(order.createdAt)}</div>
-          <div><strong>Customer:</strong> ${order.userName || 'Customer'}</div>
-        </div>
-        
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th>Quantity</th>
-              <th>Price</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${order.items ? order.items.map(item => `
+        <div class="invoice-container">
+          <div class="invoice-header">
+            <div class="company">IRYA <span>STONE</span></div>
+            <div class="invoice-title">INVOICE</div>
+          </div>
+          
+          <div class="invoice-details">
+            <div>
+              <strong>Invoice Number:</strong> ${order.orderNumber || 'N/A'}<br>
+              <strong>Invoice Date:</strong> ${formatDate(order.createdAt)}<br>
+              <strong>Status:</strong> 
+              <span class="status-badge ${getStatusClass(order.shippingStatus || order.status)}">
+                ${getStatusText(order.shippingStatus || order.status)}
+              </span>
+            </div>
+            <div style="text-align: right;">
+              <strong>Customer:</strong> ${order.userName || 'Customer'}<br>
+              <strong>Payment Method:</strong> 
+              ${order.paymentMethod === 'bank' ? 'Bank Transfer' : 
+                order.paymentMethod === 'stripe' ? 'Credit Card' : 
+                order.paymentMethod === 'paypal' ? 'PayPal' : 'N/A'}<br>
+              <strong>Email:</strong> ${order.userEmail || 'N/A'}
+            </div>
+          </div>
+          
+          <table class="table">
+            <thead>
               <tr>
-                <td>${item.name || item.stoneName || 'Product'}</td>
-                <td>${item.quantity || 1}</td>
-                <td>£${item.price?.toFixed(2) || '0.00'}</td>
-                <td>£${item.calculatedPrice?.toFixed(2) || item.totalPrice?.toFixed(2) || '0.00'}</td>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
               </tr>
-            `).join('') : ''}
-            <tr class="total-row">
-              <td colspan="3" style="text-align: right;">Total:</td>
-              <td>£${order.total?.toFixed(2) || '0.00'}</td>
-            </tr>
-            <tr class="total-row">
-              <td colspan="3" style="text-align: right;">Paid:</td>
-              <td>£${(order.submittedAmount || order.advancePayment || 0).toFixed(2)}</td>
-            </tr>
-            <tr class="total-row">
-              <td colspan="3" style="text-align: right;">Balance:</td>
-              <td>£${(order.remainingPayment || 0).toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <div class="footer">
-          <p><strong>Payment Status:</strong> ${order.paymentStatus || 'Pending'}</p>
-          <p><strong>Shipping Status:</strong> ${order.shippingStatus || order.status || 'Pending'}</p>
-          <p>Thank you for your business!</p>
+            </thead>
+            <tbody>
+              ${order.items ? order.items.map(item => `
+                <tr>
+                  <td>${item.name || item.stoneName || item.productName || 'Product'}</td>
+                  <td>${item.quantity || 1}</td>
+                  <td>£${item.price?.toFixed(2) || '0.00'}</td>
+                  <td>£${item.calculatedPrice?.toFixed(2) || item.totalPrice?.toFixed(2) || '0.00'}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="4">No items</td></tr>'}
+              
+              <tr class="total-row">
+                <td colspan="3" style="text-align: right;">Subtotal:</td>
+                <td>£${order.total?.toFixed(2) || '0.00'}</td>
+              </tr>
+              <tr class="total-row">
+                <td colspan="3" style="text-align: right;">Shipping:</td>
+                <td>£${order.shippingCost?.toFixed(2) || '0.00'}</td>
+              </tr>
+              <tr class="total-row">
+                <td colspan="3" style="text-align: right;">Tax:</td>
+                <td>£${order.tax?.toFixed(2) || '0.00'}</td>
+              </tr>
+              <tr class="total-row">
+                <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
+                <td><strong>£${order.total?.toFixed(2) || '0.00'}</strong></td>
+              </tr>
+              <tr class="total-row">
+                <td colspan="3" style="text-align: right;">Amount Paid:</td>
+                <td>£${(order.submittedAmount || order.advancePayment || 0).toFixed(2)}</td>
+              </tr>
+              <tr class="total-row">
+                <td colspan="3" style="text-align: right;">Balance Due:</td>
+                <td>£${(order.remainingPayment || 0).toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="footer">
+            <p><strong>Thank you for your business!</strong></p>
+            <p>IRYA STONE &copy; ${new Date().getFullYear()}</p>
+            <p>For any queries, contact us at: support@iryastone.com</p>
+          </div>
         </div>
       </body>
       </html>
@@ -1735,7 +2098,7 @@ async function downloadOrderInvoice(orderId) {
 
 function trackOrder(trackingNumber) {
   showMessage(`Tracking number: ${trackingNumber}`);
-  // In real implementation, you would redirect to tracking service
+  // In real implementation, redirect to tracking service
   // window.open(`https://tracking-url.com/${trackingNumber}`, '_blank');
 }
 
