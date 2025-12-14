@@ -2,224 +2,172 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>IRYA STONE Admin Panel</title>
+<title>Admin – IRYA STONE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body { font-family: Arial; background: #f4f6f8; padding: 20px; }
-h2 { text-align: center; margin-bottom: 20px; }
-.order-card { background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.order-header { display: flex; justify-content: space-between; align-items: center; }
-.badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-.badge.advance { background: #ffc107; color: #000; }
-.badge.full { background: #28a745; color: #fff; }
-.order-body { margin-top: 10px; }
-.order-body p { margin: 4px 0; }
-.order-body img { max-width: 80px; margin-right: 10px; vertical-align: middle; border-radius: 4px; }
-.order-actions { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px; }
-input, select { padding: 6px; width: 150px; }
-button { padding: 6px 10px; cursor: pointer; }
-.timeline { margin-top: 10px; font-size: 13px; color: #555; }
-.timeline div { margin-bottom: 4px; }
+body { font-family: Arial; background:#f4f6f8; padding:15px; }
+.order { background:#fff; padding:20px; margin-bottom:20px; border-radius:8px; box-shadow:0 3px 6px rgba(0,0,0,0.1);}
+button { padding:6px 10px; margin-top:6px; cursor:pointer;}
+input, select { width:100%; padding:6px; margin-top:5px; }
+.badge { padding:4px 8px; border-radius:4px; font-size:12px; color:#fff; }
+.advance { background:#ffc107; }
+.full { background:#28a745; }
+.shipped { background:#17a2b8; }
+.pending { background:#6c757d; }
+img.product-img { width:60px; height:60px; object-fit:cover; border-radius:5px; margin-right:10px; }
+.flex { display:flex; align-items:center; }
+h2 { margin-bottom:20px; }
 </style>
 </head>
 <body>
 
 <h2>Admin Orders Panel</h2>
-<div id="ordersContainer"></div>
+<div id="orders"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getFirestore, collectionGroup, getDocs, doc, updateDoc, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { getFirestore, collectionGroup, getDocs, doc, updateDoc, addDoc, collection } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
   authDomain: "iryastone-uk.firebaseapp.com",
   projectId: "iryastone-uk",
-  storageBucket: "iryastone-uk.firebasestorage.app",
-  messagingSenderId: "110940910896",
-  appId: "1:110940910896:web:b25e92127118665e5c84f5",
-  measurementId: "G-6YM1FLYN48"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const ordersContainer = document.getElementById("ordersContainer");
+const ordersDiv = document.getElementById("orders");
 
-// ================= LOAD ORDERS =================
 async function loadOrders() {
-  ordersContainer.innerHTML = "";
-  const ordersQuery = query(collectionGroup(db, "orders"), orderBy("createdAt", "desc"));
-  const snapshot = await getDocs(ordersQuery);
+  ordersDiv.innerHTML = "";
+  const snap = await getDocs(collectionGroup(db, "orders"));
 
-  snapshot.forEach(docSnap => {
-    const o = docSnap.data();
-    const orderId = docSnap.id;
+  // Sorting by createdAt descending
+  let orders = [];
+  snap.forEach(d => {
+    let o = d.data();
+    o.docId = d.id;
+    orders.push(o);
+  });
+  orders.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
 
-    // Determine payment badge
-    let badgeClass = "advance";
-    let badgeText = "ADVANCE PAID";
-    if (o.paymentStatus === "fully_paid") {
-      badgeClass = "full";
-      badgeText = "FULL PAID";
-    }
-
-    // Remaining Payment Handling
+  orders.forEach(o => {
     const remaining = o.total - (o.advancePayment || 0);
+    const isFull = remaining <= 0;
+    const statusBadge = isFull ? "full" : "advance";
+    const shippedBadge = o.shippingStatus==="shipped" ? "shipped" : "pending";
 
-    // Render Product Images & Title
-    let itemsHtml = "";
-    if (o.items && o.items.length) {
-      o.items.forEach(item => {
-        itemsHtml += `<div><img src="${item.imageURL || 'https://via.placeholder.com/80'}" alt="${item.name}"><strong>${item.name}</strong> | Qty: ${item.quantity} | Unit: ${item.priceUnit}</div>`;
-      });
-    }
-
-    // Timeline
-    let timelineHtml = `<div class="timeline">
-      <div><b>Order Placed:</b> ${new Date(o.createdAt).toLocaleString()}</div>`;
-    if (o.paymentStatus === "advance_paid") {
-      timelineHtml += `<div><b>Advance Payment Confirmed:</b> ${new Date(o.updatedAt).toLocaleString()}</div>`;
-    } else if (o.paymentStatus === "fully_paid") {
-      timelineHtml += `<div><b>Payment Confirmed:</b> ${new Date(o.updatedAt).toLocaleString()}</div>`;
-    }
-    if (o.shippingStatus) {
-      timelineHtml += `<div><b>Shipped:</b> ${new Date(o.shippedAt).toLocaleString()} | Tracking: ${o.trackingNumber || '-'}</div>`;
-    }
-    if (o.deliveryStatus) {
-      timelineHtml += `<div><b>Delivered:</b> ${new Date(o.deliveryDate).toLocaleString()}</div>`;
-    }
-    if (o.autoCancel) {
-      timelineHtml += `<div><b>Auto Cancel Date:</b> ${new Date(o.autoCancelDate).toLocaleString()}</div>`;
-    }
-    timelineHtml += `</div>`;
-
-    ordersContainer.innerHTML += `
-      <div class="order-card">
-        <div class="order-header">
-          <span><b>${o.orderNumber}</b></span>
-          <span class="badge ${badgeClass}">${badgeText}</span>
+    // Display products with image & title
+    const productsHTML = (o.items||[]).map(item=>`
+      <div class="flex">
+        <img src="${item.image || 'https://via.placeholder.com/60'}" class="product-img" />
+        <div>
+          <b>${item.name}</b><br/>
+          Qty: ${item.quantity} | Price: £${item.price} | Remaining: £${item.remainingPayment || 0}
         </div>
-        <div class="order-body">
-          <p>User: ${o.userName} | Email: ${o.userEmail}</p>
-          <p>Phone: ${o.shippingAddress?.phone || o.billingAddress?.phone}</p>
-          <p>Total: £${o.total} | Paid: £${o.advancePayment || 0} | Remaining: £${remaining}</p>
-          ${itemsHtml}
-          ${timelineHtml}
-        </div>
-        <div class="order-actions">
-          <select id="payment-${orderId}">
-            <option value="">-- Update Payment --</option>
-            <option value="advance_paid">Advance Paid</option>
-            <option value="fully_paid">Full Paid</option>
-          </select>
-          <button onclick="updatePayment('${o.userId}','${orderId}')">Update Payment</button>
+      </div>
+    `).join("");
 
-          <input type="text" id="tracking-${orderId}" placeholder="Tracking Number">
-          <button onclick="updateShipping('${o.userId}','${orderId}')">Update Shipping</button>
+    // Auto-cancel check
+    const orderTime = new Date(o.createdAt);
+    const now = new Date();
+    const hoursDiff = (now - orderTime)/1000/60/60;
+    let cancelNotice = "";
+    if(!isFull && hoursDiff>24) {
+      cancelNotice = `<p style="color:red;">Order auto-cancelled after 24h unpaid. Advance not refundable.</p>`;
+      updateDoc(doc(db,"users",o.userId,"orders",o.docId), {status:"cancelled"});
+    }
 
-          <input type="datetime-local" id="delivery-${orderId}">
-          <button onclick="updateDelivery('${o.userId}','${orderId}')">Confirm Delivery</button>
-        </div>
+    ordersDiv.innerHTML += `
+      <div class="order">
+        <b>Order #: ${o.orderNumber}</b>
+        <span class="badge ${statusBadge}">${isFull ? "FULL PAID" : "ADVANCE PAID"}</span>
+        <span class="badge ${shippedBadge}">${o.shippingStatus || "PENDING"}</span>
+
+        <p>User: ${o.userName} | Email: ${o.userEmail}</p>
+        <p>Phone: ${o.shippingAddress?.phone || o.billingAddress?.phone}</p>
+        <p>Total: £${o.total} | Paid: £${o.advancePayment || 0} | Remaining: £${remaining}</p>
+
+        <p>Created: ${new Date(o.createdAt).toLocaleString()}</p>
+        <p>Shipped: ${o.shippedAt ? new Date(o.shippedAt).toLocaleString() : "-"}</p>
+        <p>Delivery: ${o.deliveryDateTime ? new Date(o.deliveryDateTime).toLocaleString() : "-"}</p>
+
+        ${productsHTML}
+        ${cancelNotice}
+
+        <select id="pay-${o.docId}">
+          <option value="">-- Payment Status --</option>
+          <option value="advance_confirmed">Advance Confirmed</option>
+          <option value="fully_paid">Fully Paid</option>
+        </select>
+        <button onclick="updatePayment('${o.userId}','${o.docId}','${o.orderNumber}','${remaining}')">Update Payment</button>
+
+        <input id="track-${o.docId}" placeholder="Tracking Number">
+        <input type="datetime-local" id="delivery-${o.docId}">
+        <button onclick="updateShipping('${o.userId}','${o.docId}','${o.orderNumber}')">Update Shipping</button>
       </div>
     `;
   });
 }
 
-// ================= UPDATE PAYMENT =================
-window.updatePayment = async (userId, orderId) => {
-  const select = document.getElementById(`payment-${orderId}`);
-  const val = select.value;
-  if (!val) return alert("Select payment status");
+// Payment update
+window.updatePayment = async (userId, orderId, orderNumber, remaining) => {
+  const status = document.getElementById(`pay-${orderId}`).value;
+  if(!status) return alert("Select payment status");
 
-  const orderRef = doc(db,"users",userId,"orders",orderId);
-  const updatedAt = new Date().toISOString();
+  let newRemaining = remaining;
+  if(status==="fully_paid") newRemaining = 0;
 
-  let advancePayment = 0, paymentStatus = "advance_paid";
-  if (val === "advance_paid") {
-    advancePayment = 0.3 * 100; // Example 30% placeholder, adjust based on real order
-    paymentStatus = "advance_paid";
-  } else if (val === "fully_paid") {
-    advancePayment = 100; // Example full amount
-    paymentStatus = "fully_paid";
-  }
-
-  await updateDoc(orderRef, {
-    paymentStatus,
-    advancePayment,
-    updatedAt,
-    autoCancel: val === "advance_paid",
-    autoCancelDate: val === "advance_paid" ? new Date(Date.now() + 24*60*60*1000).toISOString() : null
+  await updateDoc(doc(db,"users",userId,"orders",orderId), {
+    paymentStatus: status,
+    remainingPayment: newRemaining,
+    updatedAt: new Date().toISOString()
   });
 
-  // Add notification
-  await addDoc(collection(db,"users",userId,"notifications"),{
+  await addDoc(collection(db,"users",userId,"notifications"), {
     type:"payment",
+    orderId,
+    orderNumber,
     title:"Payment Update",
-    message: val === "fully_paid" ? "Your full payment has been confirmed." : "Your advance payment is confirmed. Remaining payment pending. Order will auto-cancel after 24 hours if not completed.",
-    orderId,
-    createdAt: updatedAt,
+    message: status==="fully_paid"
+      ? "Your full payment has been confirmed. Remaining: £0"
+      : `Your advance payment has been confirmed. Remaining: £${newRemaining}`,
+    createdAt:new Date().toISOString(),
     read:false
   });
 
-  alert("Payment updated successfully");
+  alert("Payment updated successfully!");
   loadOrders();
-};
+}
 
-// ================= UPDATE SHIPPING =================
-window.updateShipping = async (userId, orderId) => {
-  const track = document.getElementById(`tracking-${orderId}`).value;
-  if (!track) return alert("Enter tracking number");
+// Shipping update
+window.updateShipping = async (userId, orderId, orderNumber) => {
+  const track = document.getElementById(`track-${orderId}`).value;
+  const deliveryInput = document.getElementById(`delivery-${orderId}`).value;
+  if(!track) return alert("Enter tracking number");
 
-  const orderRef = doc(db,"users",userId,"orders",orderId);
-  const shippedAt = new Date().toISOString();
-
-  await updateDoc(orderRef, {
-    shippingStatus: "shipped",
-    trackingNumber: track,
-    shippedAt
+  await updateDoc(doc(db,"users",userId,"orders",orderId), {
+    shippingStatus:"shipped",
+    trackingNumber:track,
+    shippedAt:new Date().toISOString(),
+    deliveryDateTime: deliveryInput || null,
+    updatedAt:new Date().toISOString()
   });
 
-  // Notification
-  await addDoc(collection(db,"users",userId,"notifications"),{
+  await addDoc(collection(db,"users",userId,"notifications"), {
     type:"shipping",
+    orderId,
+    orderNumber,
     title:"Order Shipped",
-    message:`Your order has been shipped. Tracking Number: ${track}`,
-    orderId,
-    createdAt: shippedAt,
+    message:`Your order has been shipped. Tracking: ${track}`,
+    createdAt:new Date().toISOString(),
     read:false
   });
 
-  alert("Shipping updated successfully");
+  alert("Shipping updated successfully!");
   loadOrders();
-};
-
-// ================= CONFIRM DELIVERY =================
-window.updateDelivery = async (userId, orderId) => {
-  const deliveryInput = document.getElementById(`delivery-${orderId}`);
-  if (!deliveryInput.value) return alert("Select delivery date/time");
-
-  const deliveryDate = new Date(deliveryInput.value).toISOString();
-  const orderRef = doc(db,"users",userId,"orders",orderId);
-
-  await updateDoc(orderRef, {
-    deliveryStatus: "delivered",
-    deliveryDate
-  });
-
-  await addDoc(collection(db,"users",userId,"notifications"),{
-    type:"delivery",
-    title:"Order Delivered",
-    message:`Your order has been delivered on ${new Date(deliveryDate).toLocaleString()}`,
-    orderId,
-    createdAt: new Date().toISOString(),
-    read:false
-  });
-
-  alert("Delivery confirmed");
-  loadOrders();
-};
+}
 
 loadOrders();
 </script>
