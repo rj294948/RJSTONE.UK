@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Track Order</title>
+<style>
+body { font-family: Arial; padding:10px; }
+.step {
+  border-left:4px solid #0d6efd;
+  padding-left:10px;
+  margin-bottom:10px;
+}
+</style>
+</head>
+
+<body>
+<h2>Order Tracking</h2>
+<div id="track"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+const app = initializeApp({ projectId:"iryastone-uk" });
+const db = getFirestore(app);
+
+const userId = "dCVM344so3VCKQGNdsHm2aUZrKA3";
+const orderId = new URLSearchParams(location.search).get("id");
+
+const o = (await getDoc(doc(db,"users",userId,"orders",orderId))).data();
+
+document.getElementById("track").innerHTML = `
+  <div class="step">✔ Order Placed</div>
+  <div class="step">✔ Payment: ${o.paymentStatus}</div>
+  <div class="step">✔ Shipping: ${o.shippingStatus || "Pending"}</div>
+  <div class="step">✔ Tracking No: ${o.trackingNumber || "Not Assigned"}</div>
+`;
+</script>
+</body>
+</html>
