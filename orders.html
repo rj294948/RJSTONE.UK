@@ -2,453 +2,221 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Orders | IRYA STONE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- ICONS -->
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* 1. Base Reset & Typography */
-:root {
-    --primary-gold: #c19a6b;
-    --text-dark: #333;
-    --text-light: #6c757d;
-    --bg-light: #f4f4f9;
+body{
+  font-family: Arial, sans-serif;
+  background:#f1f3f6;
+  margin:0;
 }
-body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: var(--bg-light);
-    color: var(--text-dark);
+header{
+  background:#131921;
+  color:#fff;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-
-/* 2. Header and Layout */
-header {
-    background: #131921; 
-    color: #fff;
-    padding: 15px 20px;
-    font-size: 1.2em;
-    font-weight: 600;
+header h2{margin:0;font-size:18px;}
+.notify{
+  position:relative;
+  font-size:22px;
 }
-.container {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 0 15px;
+.notify span{
+  position:absolute;
+  top:-6px;
+  right:-8px;
+  background:red;
+  color:#fff;
+  font-size:11px;
+  padding:2px 6px;
+  border-radius:50%;
 }
-
-/* 3. Order Card */
-.order-card {
-    background: #fff;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border-left: 5px solid var(--primary-gold); 
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:15px;
 }
-
-/* Order Header */
-.order-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px dashed #eee;
-    padding-bottom: 15px;
-    margin-bottom: 15px;
+.order-card{
+  background:#fff;
+  margin-bottom:15px;
+  border-radius:6px;
+  padding:15px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
 }
-.order-number {
-    font-weight: 700;
-    font-size: 1.1em;
-    color: var(--text-dark);
+.order-header{
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
 }
-.order-date {
-    display: block;
-    color: var(--text-light);
-    font-size: 0.85em;
-    margin-top: 2px;
+.badge{
+  padding:4px 8px;
+  font-size:12px;
+  border-radius:4px;
+  color:#fff;
 }
-
-/* Badges */
-.badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.75em;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.paid{background:#2ecc71;}
+.pending{background:#f39c12;}
+.shipped{background:#3498db;}
+.timeline{
+  display:flex;
+  margin-top:12px;
+  gap:10px;
 }
-.ok { background: #198754; color: #fff; } 
-.pending { background: #ffc107; color: var(--text-dark); } 
-.processing { background: #0dcaf0; color: var(--text-dark); } 
-.cancelled { background: #dc3545; color: #fff; } 
-
-/* Order Body */
-.order-body {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+.step{
+  flex:1;
+  text-align:center;
+  font-size:12px;
 }
-.item-summary {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.9em;
-    color: var(--text-dark);
+.step i{
+  font-size:18px;
+  margin-bottom:5px;
+  display:block;
 }
-.item-summary i {
-    color: var(--primary-gold);
-    font-size: 1.2em;
+.active{color:#2ecc71;}
+.btn{
+  background:#ffd814;
+  border:none;
+  padding:8px 12px;
+  cursor:pointer;
+  font-size:13px;
+  border-radius:4px;
 }
-
-/* Price Summary */
-.price-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    border-top: 1px solid #f8f9fa;
-    border-bottom: 1px solid #f8f9fa;
-    padding: 10px 0;
-    font-size: 0.95em;
-}
-.price-value {
-    font-weight: 600;
-    color: var(--text-dark);
-}
-.price-paid {
-    font-weight: 500;
-    color: #198754;
-}
-.remaining .price-value.gold {
-    color: #dc3545; 
-    font-weight: 700;
-}
-
-/* 4. Timeline */
-.step-timeline {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 15px 10px 5px;
-    position: relative;
-    margin-top: 10px;
-}
-.step-timeline::before {
-    content: '';
-    position: absolute;
-    top: 30px;
-    left: 15%; 
-    right: 15%;
-    height: 3px;
-    background: #e9ecef;
-    z-index: 1;
-    border-radius: 5px;
-}
-.step-item {
-    flex: 1;
-    text-align: center;
-    z-index: 2;
-    position: relative;
-}
-.step-item .icon {
-    font-size: 1.4em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 45px;
-    height: 45px;
-    margin: 0 auto 8px;
-    border-radius: 50%;
-    background: #f8f9fa;
-    border: 3px solid #e9ecef;
-    transition: all 0.3s ease;
-}
-.step-item .label {
-    font-size: 0.8em;
-    font-weight: 500;
-    color: var(--text-light);
-    display: block;
-}
-.step-item .done {
-    color: #fff;
-    background: #198754;
-    border-color: #198754;
-    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.3);
-}
-.step-item .wait {
-    color: var(--text-light);
-}
-
-/* 5. Action Buttons */
-.order-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
-.order-actions button {
-    padding: 10px 15px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s ease, border-color 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9em;
-}
-.btn-details {
-    background: var(--primary-gold);
-    color: white;
-    border: 1px solid var(--primary-gold);
-    flex-grow: 1;
-}
-.btn-details:hover {
-    background: #a9855f;
-    border-color: #a9855f;
-}
-.btn-invoice {
-    background: #f8f9fa;
-    color: var(--text-dark);
-    border: 1px solid #ced4da;
-    flex-grow: 1;
-}
-.btn-invoice:hover {
-    background: #e9ecef;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-    .container {
-        margin: 20px auto;
-    }
-    .order-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    .order-actions {
-        flex-direction: column;
-    }
-}
+.small{font-size:13px;color:#555;}
 </style>
 </head>
 
 <body>
 
 <header>
-  <div class="container" style="padding: 0; max-width: 100%;">
-    <b>IRYA STONE – My Orders</b>
-  </div>
+  <h2>My Orders</h2>
+  <div class="notify">
+    <i class="fa-solid fa-bell"></i>
+    <span id="notifyCount">0</span>
+  </div>
 </header>
 
-<div class="container">
-    <div id="orders"></div> 
-</div>
+<div class="container" id="orders"></div>
 
+<!-- 🔥 FIREBASE -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
-    
-    // --- 1. CONFIGURATION AND INITIALIZATION ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-        authDomain: "iryastone-uk.firebaseapp.com",
-        projectId: "iryastone-uk"
-    };
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  onSnapshot
+} from
+"https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+const firebaseConfig = {
+  apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+  authDomain: "iryastone-uk.firebaseapp.com",
+  projectId: "iryastone-uk"
+};
 
-    const ordersDiv = document.getElementById("orders");
-    const loadingMessage = '<div style="text-align: center; padding: 50px; color: var(--text-light);"><i class="fas fa-spinner fa-spin"></i> Loading your order history...</div>';
-    
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    // --- 2. HELPER FUNCTIONS (Same as before) ---
-    
-    function formatDate(timestamp) {
-        if (!timestamp) return 'N/A';
-        try {
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            if (isNaN(date.getTime())) return 'N/A';
-            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        } catch {
-            return String(timestamp).substring(0, 10);
-        }
-    }
+/* ✅ USER ID FROM account.html */
+const userId = localStorage.getItem("userId");
 
-    function getStatusBadge(status, paymentStatus) {
-        let text;
-        let className;
-        
-        if (status === 'cancelled') {
-            text = 'CANCELLED';
-            className = 'cancelled';
-        } else if (status === 'delivered') {
-            text = 'DELIVERED';
-            className = 'ok';
-        } else if (paymentStatus === 'fully_paid' || status === 'paid') {
-            text = 'FULL PAID';
-            className = 'ok';
-        } else if (paymentStatus === 'pending_bank_transfer' || paymentStatus === 'advance_paid') {
-            text = 'AWAITING PAYMENT';
-            className = 'pending';
-        } else {
-            text = 'PROCESSING';
-            className = 'processing';
-        }
+if(!userId){
+  alert("Please login first");
+  location.href="login.html";
+}
 
-        return `<span class="badge ${className}">${text}</span>`;
-    }
+/* ================= ORDERS ================= */
 
-    function createStepTimeline(order) {
-        const paid = order.paymentStatus === "fully_paid" || (Number(order.remainingPayment || 0) <= 0) || order.paymentStatus === 'verified';
-        const shipped = order.status === "shipped" || order.status === "delivered";
-        const delivered = order.status === "delivered";
+const ordersDiv = document.getElementById("orders");
 
-        return `
-            <div class="step-timeline">
-                <div class="step-item">
-                    <span class="icon ${paid ? 'done' : 'wait'}"><i class="fas fa-money-check-alt"></i></span>
-                    <span class="label">Payment</span>
-                </div>
-                <div class="step-item">
-                    <span class="icon ${shipped ? 'done' : 'wait'}"><i class="fas fa-truck-moving"></i></span>
-                    <span class="label">Shipped</span>
-                </div>
-                <div class="step-item">
-                    <span class="icon ${delivered ? 'done' : 'wait'}"><i class="fas fa-box-open"></i></span>
-                    <span class="label">Delivered</span>
-                </div>
-            </div>
-        `;
-    }
-    
-    window.viewDetails = (orderId) => {
-        window.location.href = `order-details.html?id=${orderId}`;
-    };
+const q = query(
+  collection(db,"users",userId,"orders"),
+  orderBy("createdAt","desc")
+);
 
-    window.downloadInvoice = (orderId) => {
-        alert('Generating invoice for Order: ' + orderId + ' (Feature not fully implemented)');
-    };
+onSnapshot(q,(snap)=>{
+  ordersDiv.innerHTML="";
+  snap.forEach(doc=>{
+    const o = doc.data();
 
-    /** * --- 3. CORE FUNCTION: Fetches and displays orders for a given userId */
-    function loadUserOrders(userId) {
-        ordersDiv.innerHTML = loadingMessage;
+    const fullyPaid = o.paymentStatus==="fully_paid";
+    const shipped = o.status==="shipped";
 
-        const q = query(
-            collection(db, "users", userId, "orders"),
-            orderBy("createdAt", "desc")
-        );
+    ordersDiv.innerHTML += `
+      <div class="order-card">
+        <div class="order-header">
+          <div>
+            <b>${o.orderNumber}</b><br>
+            <span class="small">${o.createdAt}</span>
+          </div>
+          <div>
+            <span class="badge ${fullyPaid?"paid":"pending"}">
+              ${o.paymentStatus}
+            </span>
+          </div>
+        </div>
 
-        // Realtime Listener
-        onSnapshot(q, snap => {
-            ordersDiv.innerHTML = "";
-            if (snap.empty) {
-                ordersDiv.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--text-light);">You have no orders yet. Start shopping!</div>';
-                return;
-            }
+        <p class="small">
+          Product: <b>${o.items[0].stoneName}</b><br>
+          Total: <b>£${o.total}</b><br>
+          Paid: <b>£${o.advancePayment || o.total}</b><br>
+          Remaining: <b>£${fullyPaid?0:o.remainingPayment}</b>
+        </p>
 
-            snap.forEach(doc => {
-                const order = { id: doc.id, ...doc.data() };
-                const firstItem = order.items?.[0] || { name: 'Product', stoneName: 'N/A' };
-                const total = (order.total || 0);
-                
-                // Calculate Paid and Remaining amounts safely
-                const advance = order.advancePayment || order.amountToPay || 0;
-                const remaining = order.remainingPayment || 0;
-                const paid = (total - remaining) > 0 ? (total - remaining) : advance; 
-                
-                const paidDisplay = Number(paid).toFixed(2);
-                const totalDisplay = Number(total).toFixed(2);
-                const remainingDisplay = Number(remaining).toFixed(2);
-                const paymentComplete = Number(remaining) <= 0;
-                
-                ordersDiv.innerHTML += `
-                    <article class="order-card">
-                        <div class="order-header">
-                            <div class="order-info">
-                                <span class="order-number">Order #${order.orderNumber || order.id.substring(0, 8)}</span>
-                                <small class="order-date">Placed on ${formatDate(order.createdAt)}</small>
-                            </div>
-                            ${getStatusBadge(order.status, paymentComplete ? 'fully_paid' : order.paymentStatus)}
-                        </div>
+        <div class="timeline">
+          <div class="step active">
+            <i class="fa-solid fa-cart-shopping"></i>Ordered
+          </div>
+          <div class="step ${fullyPaid?"active":""}">
+            <i class="fa-solid fa-credit-card"></i>Paid
+          </div>
+          <div class="step ${shipped?"active":""}">
+            <i class="fa-solid fa-truck"></i>Shipped
+          </div>
+          <div class="step ${o.status==="delivered"?"active":""}">
+            <i class="fa-solid fa-box"></i>Delivered
+          </div>
+        </div>
 
-                        <div class="order-body">
-                            <div class="item-summary">
-                                <i class="fas fa-box"></i>
-                                <p><strong>Main Item:</strong> ${firstItem.stoneName || firstItem.name} ${order.items.length > 1 ? ` (+ ${order.items.length - 1} more)` : ''}</p>
-                            </div>
-                            
-                            <div class="price-summary">
-                                <p><strong>Total:</strong> <span class="price-value">£${totalDisplay}</span></p>
-                                <p><strong>Paid:</strong> <span class="price-paid">£${paidDisplay}</span></p>
-                                ${!paymentComplete ? `<p class="remaining"><strong>Remaining:</strong> <span class="price-value gold">£${remainingDisplay}</span></p>` : ''}
-                            </div>
-                            
-                            ${createStepTimeline(order)}
+        ${shipped ? `
+          <p class="small">
+            Tracking No: <b>${o.trackingNumber}</b>
+          </p>` : ""}
 
-                            <div class="order-actions">
-                                <button class="btn-details" onclick="viewDetails('${order.id}')">
-                                    <i class="fas fa-search"></i> View Details
-                                </button>
-                                <button class="btn-invoice" onclick="downloadInvoice('${order.orderNumber || order.id}')">
-                                    <i class="fas fa-file-invoice-dollar"></i> Invoice
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-                `;
-            });
-            
-             if (snap.empty && ordersDiv.innerHTML === loadingMessage) {
-                 ordersDiv.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--text-light);">You have no orders yet. Start shopping!</div>';
-            }
-        });
-    }
+        <button class="btn" onclick="downloadInvoice('${o.orderNumber}')">
+          Download Invoice
+        </button>
+      </div>
+    `;
+  });
+});
 
-    // --- 4. EXECUTION: Get User ID from URL Hash ---
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!ordersDiv) return;
-        ordersDiv.innerHTML = loadingMessage; 
+/* ================= NOTIFICATIONS ================= */
 
-        // Get the hash part of the URL (e.g., "#orders" or "#dCVM344so3VCKQGNdsHm2aUZrKA3")
-        let hash = window.location.hash;
+const notifyRef = collection(db,"users",userId,"notifications");
 
-        // If the hash starts with "#orders", we need to see if the User ID is there.
-        // If your URL structure is actually like: /account.html#USER_ID (e.g., #dCVM344so3VCKQGNdsHm2aUZrKA3)
-        let userId = hash.substring(1).trim(); // Remove the '#' and trim whitespace
+onSnapshot(notifyRef,(snap)=>{
+  let unread=0;
+  snap.forEach(d=>{
+    if(!d.data().read) unread++;
+  });
+  document.getElementById("notifyCount").innerText=unread;
+});
 
-        // Fallback or specific logic check
-        if (userId === "orders" || userId === "") {
-            // This suggests the URL might not contain the ID yet, or the ID is passed differently.
-            // If the ID is *always* expected to be in the hash, this is where you'd put the fallback/error.
-            
-            ordersDiv.innerHTML = `
-                <div style="text-align: center; padding: 50px;">
-                    <i class="fas fa-info-circle" style="font-size: 3em; color: var(--primary-gold)"></i>
-                    <h3>User ID Missing</h3>
-                    <p>Could not find the User ID in the URL hash (e.g., #userid).</p>
-                    <p>Please make sure you are signed in correctly.</p>
-                </div>
-            `;
-            console.error("User ID not found in URL hash. Found hash:", hash);
-            return;
-            
-        } else {
-            // User ID found (e.g., dCVM344so3VCKQGNdsHm2aUZrKA3)
-            loadUserOrders(userId);
-            console.log("Loading orders for User ID from URL Hash:", userId);
-        }
-        
-        // Optionally listen for hash changes if the page is a Single Page Application (SPA)
-        window.addEventListener('hashchange', () => {
-             // Reload orders if the hash changes (optional, but good practice for SPAs)
-             const newHash = window.location.hash.substring(1).trim();
-             if(newHash && newHash !== "orders") {
-                 loadUserOrders(newHash);
-             }
-        });
-    });
+/* ================= INVOICE ================= */
+
+window.downloadInvoice = (orderNo)=>{
+  alert("Invoice download for "+orderNo+" (PDF integration next)");
+};
 </script>
 
 </body>
