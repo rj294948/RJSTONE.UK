@@ -1,61 +1,104 @@
 <!DOCTYPE html>
-}
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Orders – IRYA STONE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#f4f6f8}
+.order{background:#fff;padding:15px;border-radius:8px;margin-bottom:15px}
+.badge{padding:4px 8px;border-radius:4px;font-size:12px}
+.pending{background:#ffc107}
+.full{background:#28a745;color:#fff}
+.cancel{background:#dc3545;color:#fff}
+img{width:80px;border-radius:6px}
+</style>
+</head>
 
+<body>
+<h2>Admin Order Management</h2>
+<div id="orders"></div>
 
-/* ================= UPDATE STATUS ================= */
-window.updateStatus = async (userId,orderId,orderNumber)=>{
-const status = document.getElementById(`status-${orderId}`).value;
-const tracking = document.getElementById(`track-${orderId}`).value;
-if(!status) return alert('Select status');
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getFirestore, collectionGroup, getDocs, doc, updateDoc, getDoc, addDoc, collection } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-
-if(status==='shipped' && !tracking) return alert('Tracking required');
-
-
-const update = {
-orderStatus:status,
-updatedAt:new Date().toISOString(),
-[`statusTimeline.${status}`]:{at:new Date().toISOString()}
-};
-
-
-if(status==='shipped'){
-update.trackingNumber = tracking;
-update.shippingStatus='shipped';
-update[`statusTimeline.${status}`].tracking=tracking;
-}
-
-
-await updateDoc(doc(db,'users',userId,'orders',orderId),update);
-
-
-await addDoc(collection(db,'users',userId,'notifications'),{
-orderId,orderNumber,type:'order',status,
-title:getTitle(status),message:getMsg(status,tracking),
-createdAt:new Date().toISOString(),read:false
+const app = initializeApp({
+  apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+  authDomain: "iryastone-uk.firebaseapp.com",
+  projectId: "iryastone-uk"
 });
+const db = getFirestore(app);
+const ordersDiv = document.getElementById("orders");
 
+async function loadOrders(){
+  ordersDiv.innerHTML="";
+  const snap = await getDocs(collectionGroup(db,"orders"));
 
-alert('Updated Successfully');
-loadOrders();
+  for(const d of snap.docs){
+    const o = d.data();
+    const productSnap = await getDoc(doc(db,"products",o.items[0].id));
+    const img = productSnap.exists()?productSnap.data().image:"";
+
+    ordersDiv.innerHTML+=`
+      <div class="order">
+        <b>${o.orderNumber}</b>
+        <span class="badge ${o.paymentStatus==="fully_paid"?"full":"pending"}">
+          ${o.paymentStatus}
+        </span>
+
+        <p><b>User:</b> ${o.userName} (${o.userEmail})</p>
+        <p><b>Total:</b> £${o.total}</p>
+        <p><b>Pending:</b> £${o.remainingPayment || 0}</p>
+
+        <img src="${img}"><br><br>
+
+        <select id="status-${d.id}">
+          <option value="">-- Update Status --</option>
+          <option value="payment_confirmed">Payment Confirmed</option>
+          <option value="processing">Processing</option>
+          <option value="ready_to_ship">Ready to Ship</option>
+          <option value="shipped">Shipped</option>
+          <option value="out_for_delivery">Out for Delivery</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+
+        <input id="track-${d.id}" placeholder="Tracking No">
+        <button onclick="updateOrder('${o.userId}','${d.id}','${o.orderNumber}')">
+          Update
+        </button>
+      </div>
+    `;
+  }
 }
 
+window.updateOrder = async (userId, orderId, orderNumber)=>{
+  const status=document.getElementById(`status-${orderId}`).value;
+  const track=document.getElementById(`track-${orderId}`).value;
 
-function getTitle(s){return{
-payment_confirmed:'Payment Confirmed',processing:'Order Processing',ready_to_ship:'Ready To Ship',
-shipped:'Order Shipped',out_for_delivery:'Out For Delivery',delivered:'Delivered',cancelled:'Order Cancelled'
-}[s]}
+  const data={
+    status,
+    updatedAt:new Date().toISOString()
+  };
 
+  if(status==="shipped"){
+    data.trackingNumber=track;
+    data.shippedAt=new Date().toISOString();
+  }
 
-function getMsg(s,t){return{
-payment_confirmed:'Payment confirmed successfully',processing:'Your order is being processed',
-ready_to_ship:'Packed and ready for shipping',
-shipped:`Order shipped. Tracking: ${t}`,
-out_for_delivery:'Courier is out for delivery',
-delivered:'Order delivered successfully',
-cancelled:'Order cancelled. Advance is non-refundable'
-}[s]}
+  await updateDoc(doc(db,"users",userId,"orders",orderId),data);
 
+  await addDoc(collection(db,"users",userId,"notifications"),{
+    title:`Order ${status.replaceAll("_"," ")}`,
+    message:`Order ${orderNumber} status updated to ${status}`,
+    type:"status",
+    createdAt:new Date().toISOString(),
+    read:false
+  });
+
+  alert("Updated Successfully");
+};
 
 loadOrders();
 </script>
