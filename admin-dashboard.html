@@ -1,42 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Orders Dashboard</title>
+  <meta charset="UTF-8">
+  <title>IRYA STONE – Admin Orders</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body { font-family: Arial; background:#f2f2f2; padding:15px; }
     h2 { text-align:center; }
     .order {
       background:#fff;
-      padding:12px;
-      margin-bottom:12px;
+      padding:14px;
+      margin-bottom:14px;
       border-radius:6px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1);
     }
-    select, button {
+    .order small { color:#555; display:block; }
+    button {
       width:100%;
       padding:8px;
       margin-top:6px;
-    }
-    button {
-      background:#0d6efd;
-      color:#fff;
       border:none;
+      border-radius:4px;
+      cursor:pointer;
     }
+    .confirm { background:#198754; color:#fff; }
+    .ship { background:#0d6efd; color:#fff; }
   </style>
 </head>
 
 <body>
 
-<h2>All Orders (Safe Sync)</h2>
-<div id="orders">Loading orders...</div>
+<h2>Admin Orders Dashboard</h2>
+<div id="orders">Loading orders…</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import {
-  getFirestore, collectionGroup, getDocs,
-  doc, updateDoc, addDoc, collection
+  getFirestore,
+  collectionGroup,
+  getDocs,
+  doc,
+  updateDoc,
+  addDoc,
+  collection
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
+/* 🔥 FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
   authDomain: "iryastone-uk.firebaseapp.com",
@@ -50,50 +59,70 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const ordersDiv = document.getElementById("orders");
 
+/* ================= LOAD ALL ORDERS ================= */
 async function loadOrders() {
   ordersDiv.innerHTML = "";
   const snap = await getDocs(collectionGroup(db, "orders"));
 
+  if (snap.empty) {
+    ordersDiv.innerHTML = "No orders found";
+    return;
+  }
+
   snap.forEach(docSnap => {
-    // ✅ SAFE USER ID DETECTION
+    // ✅ SAFE PATH CHECK
     if (!docSnap.ref.parent?.parent?.id) return;
 
-    const userId = docSnap.ref.parent.parent.id;
-    const orderId = docSnap.id;
     const order = docSnap.data();
+    const orderId = docSnap.id;
+    const userId = docSnap.ref.parent.parent.id;
 
     ordersDiv.innerHTML += `
       <div class="order">
-        <b>Order:</b> ${order.orderNumber || orderId}<br>
-        <small>${order.userEmail || ""}</small><br>
+        <b>${order.orderNumber}</b>
+        <small>User: ${order.userEmail}</small>
         <small>Status: ${order.status}</small>
+        <small>Payment: ${order.paymentStatus}</small>
+        <small>Submitted: £${order.submittedAmount}</small>
+        <small>Remaining: £${order.remainingPayment}</small>
 
-        <select id="s-${orderId}">
-          <option value="pending">Pending</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="processing">Processing</option>
-          <option value="completed">Completed</option>
-        </select>
+        <button class="confirm"
+          onclick='confirmPayment("${userId}","${orderId}",${JSON.stringify(order).replace(/"/g,"&quot;")})'>
+          Confirm Payment
+        </button>
 
-        <button onclick="updateOrder('${userId}','${orderId}')">
-          Update
+        <button class="ship"
+          onclick='confirmShipping("${userId}","${orderId}",${order.remainingPayment})'>
+          Confirm Shipping
         </button>
       </div>
     `;
   });
-
-  if (!ordersDiv.innerHTML) {
-    ordersDiv.innerHTML = "No valid user orders found";
-  }
 }
 
-window.updateOrder = async (userId, orderId) => {
-  const status = document.getElementById(`s-${orderId}`).value;
+/* ================= CONFIRM PAYMENT LOGIC ================= */
+window.confirmPayment = async (userId, orderId, order) => {
+  let paymentStatus, status, remainingPayment;
+
+  // 🔹 FULL PAYMENT
+  if (order.submittedAmount >= order.total) {
+    paymentStatus = "fully_paid";
+    status = "completed";
+    remainingPayment = 0;
+  }
+  // 🔹 ADVANCE PAYMENT (30%)
+  else {
+    paymentStatus = "advance_confirmed";
+    status = "confirmed";
+    remainingPayment = order.total - order.submittedAmount;
+  }
 
   await updateDoc(
     doc(db, "users", userId, "orders", orderId),
     {
+      paymentStatus,
       status,
+      remainingPayment,
       updatedAt: new Date().toISOString()
     }
   );
@@ -101,15 +130,50 @@ window.updateOrder = async (userId, orderId) => {
   await addDoc(
     collection(db, "users", userId, "notifications"),
     {
-      title: "Order Update",
-      message: `Your order is now "${status}"`,
+      title: "Payment Confirmed",
+      message:
+        paymentStatus === "fully_paid"
+          ? "Your full payment has been confirmed. Order completed."
+          : "Your advance payment is confirmed. Remaining payment due before delivery.",
       orderId,
       read: false,
       createdAt: new Date().toISOString()
     }
   );
 
-  alert("✅ Updated & Notified");
+  alert("✅ Payment confirmed");
+  loadOrders();
+};
+
+/* ================= CONFIRM SHIPPING ================= */
+window.confirmShipping = async (userId, orderId, remainingPayment) => {
+
+  if (remainingPayment > 0) {
+    alert("❌ Remaining payment pending. Shipping blocked.");
+    return;
+  }
+
+  await updateDoc(
+    doc(db, "users", userId, "orders", orderId),
+    {
+      status: "shipped",
+      shippedAt: new Date().toISOString()
+    }
+  );
+
+  await addDoc(
+    collection(db, "users", userId, "notifications"),
+    {
+      title: "Order Shipped",
+      message: "Your order has been shipped successfully.",
+      orderId,
+      read: false,
+      createdAt: new Date().toISOString()
+    }
+  );
+
+  alert("🚚 Shipping confirmed");
+  loadOrders();
 };
 
 loadOrders();
