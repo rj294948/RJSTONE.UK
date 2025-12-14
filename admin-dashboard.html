@@ -1,221 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRYA STONE Admin Dashboard</title>
+<title>Admin – IRYA STONE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:0; }
-header { background:#333; color:#fff; padding:15px; text-align:center; font-size:22px; }
-.container { display:flex; }
-.sidebar { width:250px; background:#222; color:#fff; min-height:100vh; padding:20px; }
-.sidebar h3 { margin-top:0; }
-.sidebar div { margin:15px 0; cursor:pointer; }
-.main { flex:1; padding:20px; }
-.order-card { background:#fff; padding:15px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-.order-header { display:flex; justify-content:space-between; align-items:center; }
-.order-header .badge { padding:5px 10px; border-radius:5px; font-size:12px; color:#fff; }
-.badge.advance { background:#ffc107; color:#000; }
-.badge.full { background:#28a745; }
-.badge.cancelled { background:#dc3545; }
-.badge.delivered { background:#007bff; }
-.badge.outdelivery { background:#17a2b8; }
-.product { display:flex; align-items:center; margin-top:10px; }
-.product img { width:80px; height:80px; object-fit:cover; margin-right:15px; border-radius:5px; }
-.timeline { margin-top:10px; font-size:12px; color:#555; }
-.timeline span { display:block; margin:3px 0; }
-.actions { margin-top:10px; }
-.actions input, .actions select, .actions button { padding:6px; margin-right:5px; margin-top:5px; }
-.stats { display:flex; justify-content:space-between; margin-bottom:20px; }
-.stats div { background:#fff; padding:15px; border-radius:8px; flex:1; margin-right:10px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-.stats div:last-child { margin-right:0; }
+body { font-family: Arial; background:#f4f6f8; padding:15px; }
+.order { background:#fff; padding:15px; margin-bottom:15px; border-radius:8px; border:1px solid #ddd; }
+button { padding:6px 10px; margin-top:6px; cursor:pointer; }
+input, select { width:100%; padding:6px; margin-top:5px; }
+.badge { padding:4px 8px; border-radius:4px; font-size:12px; margin-right:5px; }
+.advance { background:#ffc107; color:#000; }
+.full { background:#28a745; color:#fff; }
+.shipped { background:#17a2b8; color:#fff; }
+.pending { background:#6c757d; color:#fff; }
+.product-img { width:60px; height:60px; object-fit:cover; margin-right:10px; border-radius:4px; }
+.flex { display:flex; align-items:center; margin-top:5px; }
 </style>
 </head>
 <body>
 
-<header>IRYA STONE Admin Dashboard</header>
-<div class="container">
-  <div class="sidebar">
-    <h3>Orders Filter</h3>
-    <div onclick="filterOrders('all')">All Orders</div>
-    <div onclick="filterOrders('advance')">Advance Paid</div>
-    <div onclick="filterOrders('full')">Fully Paid</div>
-    <div onclick="filterOrders('cancelled')">Cancelled</div>
-    <div onclick="filterOrders('pending')">Pending</div>
-  </div>
-  <div class="main">
-    <div class="stats">
-      <div id="totalOrders">Total Orders: 0</div>
-      <div id="advanceOrders">Advance Paid: 0</div>
-      <div id="fullOrders">Fully Paid: 0</div>
-      <div id="cancelledOrders">Cancelled: 0</div>
-    </div>
-    <div id="ordersContainer"></div>
-  </div>
-</div>
+<h2>Admin Orders Panel</h2>
+<div id="orders"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getFirestore, collectionGroup, getDocs, doc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { getFirestore, collectionGroup, getDocs, doc, updateDoc, addDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
   authDomain: "iryastone-uk.firebaseapp.com",
   projectId: "iryastone-uk",
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const ordersDiv = document.getElementById("orders");
 
-let allOrdersData = [];
-let currentFilter = 'all';
-
+// Load orders
 async function loadOrders() {
-  allOrdersData = [];
-  document.getElementById('ordersContainer').innerHTML = "";
+  ordersDiv.innerHTML = "";
   const snap = await getDocs(collectionGroup(db, "orders"));
-  snap.forEach(docSnap => {
-    const data = docSnap.data();
-    if(!data.userId) return;
-    data.docId = docSnap.id;
-    allOrdersData.push(data);
+  let orderList = [];
+  
+  snap.forEach(d => {
+    let o = d.data();
+    o.docId = d.id;
+    orderList.push(o);
   });
-  updateStats();
-  renderOrders();
-}
 
-function updateStats() {
-  const total = allOrdersData.length;
-  const advance = allOrdersData.filter(o=>o.paymentStatus!=='fully_paid').length;
-  const full = allOrdersData.filter(o=>o.paymentStatus==='fully_paid').length;
-  const cancelled = allOrdersData.filter(o=>o.status==='cancelled').length;
-  document.getElementById('totalOrders').innerText = `Total Orders: ${total}`;
-  document.getElementById('advanceOrders').innerText = `Advance Paid: ${advance}`;
-  document.getElementById('fullOrders').innerText = `Fully Paid: ${full}`;
-  document.getElementById('cancelledOrders').innerText = `Cancelled: ${cancelled}`;
-}
+  // Sort by latest
+  orderList.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
 
-function filterOrders(type) {
-  currentFilter = type;
-  renderOrders();
-}
+  for(const o of orderList){
+    // Avoid duplicate orders
+    if(!o.items || o.items.length===0) continue;
 
-function renderOrders() {
-  const container = document.getElementById('ordersContainer');
-  container.innerHTML = "";
-  let filtered = allOrdersData;
-  if(currentFilter==='advance') filtered = allOrdersData.filter(o=>o.paymentStatus!=='fully_paid');
-  if(currentFilter==='full') filtered = allOrdersData.filter(o=>o.paymentStatus==='fully_paid');
-  if(currentFilter==='cancelled') filtered = allOrdersData.filter(o=>o.status==='cancelled');
-  if(currentFilter==='pending') filtered = allOrdersData.filter(o=>o.paymentStatus!=='fully_paid' && o.status!=='cancelled');
+    const totalPaid = o.advancePayment || 0;
+    const remaining = (o.total || 0) - totalPaid;
+    const isFull = remaining <= 0;
+    const statusBadge = isFull ? "full" : "advance";
+    const shippedBadge = o.shippingStatus==="shipped" ? "shipped" : "pending";
 
-  filtered.forEach(o=>{
-    const badgeClass = o.status==='cancelled' ? 'cancelled' : (o.status==='delivered' ? 'delivered' : (o.status==='out_delivery' ? 'outdelivery' : o.paymentStatus==='fully_paid'?'full':'advance'));
-    let orderHtml = `
-    <div class="order-card">
-      <div class="order-header">
-        <div><b>Order #${o.orderNumber}</b></div>
-        <div class="badge ${badgeClass}">${o.status==='cancelled' ? 'CANCELLED' : o.status==='delivered' ? 'DELIVERED' : o.status==='out_delivery' ? 'OUT FOR DELIVERY' : o.paymentStatus==='fully_paid'?'FULL PAID':'ADVANCE PAID'}</div>
-      </div>
-      <div>Placed on: ${o.createdAt}</div>
-      <div class="product">
-        <img src="${o.items[0]?.image || ''}" alt="${o.items[0]?.name || ''}">
-        <div>
-          <div>${o.items[0]?.name}</div>
-          <div>Quantity: ${o.items[0]?.quantity} ${o.items[0]?.unit}</div>
-          <div>Total: £${o.items[0]?.totalPrice}</div>
+    // Products HTML
+    let productsHTML = "";
+    for(const item of o.items){
+      // Fetch product info by id
+      let productSnap = await getDoc(doc(db,"products",item.id));
+      let product = productSnap.exists() ? productSnap.data() : {};
+      let img = product.images?.[0] || 'https://via.placeholder.com/60';
+      let name = product.title || product.name || item.name;
+      productsHTML += `
+        <div class="flex">
+          <img src="${img}" class="product-img" />
+          <div>
+            <b>${name}</b><br/>
+            Qty: ${item.quantity} | Price: £${item.price} | Remaining: £${item.remainingPayment || remaining}
+          </div>
         </div>
-      </div>
-      <div class="timeline">
-        <span>Order Placed: ${o.createdAt}</span>
-        <span>Payment Confirmed: ${o.paymentStatus==='fully_paid'?o.updatedAt:'Pending'}</span>
-        <span>Processing: ${o.processingAt || 'Pending'}</span>
-        <span>Ready to Ship: ${o.readyToShipAt || 'Pending'}</span>
-        <span>Shipped: ${o.shippingStatus==='shipped'?o.shippedAt:'Pending'}</span>
-        <span>Out for Delivery: ${o.status==='out_delivery'?o.deliveryDateTime:'Pending'}</span>
-        <span>Delivered: ${o.status==='delivered'?o.deliveredAt:'Pending'}</span>
-        <span>Cancelled: ${o.status==='cancelled'?o.updatedAt:'No'}</span>
-      </div>
-      <div class="actions">
+      `;
+    }
+
+    ordersDiv.innerHTML += `
+      <div class="order">
+        <b>Order #: ${o.orderNumber}</b>
+        <span class="badge ${statusBadge}">${isFull ? "FULL PAID" : "ADVANCE PAID"}</span>
+        <span class="badge ${shippedBadge}">${o.shippingStatus || "PENDING"}</span>
+        <p>User: ${o.userName} | Email: ${o.userEmail}</p>
+        <p>Phone: ${o.shippingAddress?.phone || o.billingAddress?.phone}</p>
+        <p>Total: £${o.total} | Paid: £${totalPaid} | Remaining: £${remaining}</p>
+        ${productsHTML}
+
         <select id="pay-${o.docId}">
-          <option value="">-- Payment Status --</option>
+          <option value="">-- Update Payment --</option>
           <option value="advance_confirmed">Advance Confirmed</option>
           <option value="fully_paid">Fully Paid</option>
         </select>
+        <button onclick="updatePayment('${o.userId}','${o.docId}','${o.orderNumber}', ${o.total})">Update Payment</button>
+
         <input id="track-${o.docId}" placeholder="Tracking Number">
-        <input id="delivery-${o.docId}" type="datetime-local" placeholder="Delivery Date & Time">
-        <button onclick="updatePayment('${o.userId}','${o.docId}','${o.orderNumber}')">Update Payment</button>
+        <input type="datetime-local" id="delivery-${o.docId}" placeholder="Delivery Date & Time">
         <button onclick="updateShipping('${o.userId}','${o.docId}','${o.orderNumber}')">Update Shipping</button>
       </div>
-    </div>`;
-    container.innerHTML += orderHtml;
-  });
+    `;
+  }
 }
 
-window.updatePayment = async (userId, docId, orderNumber)=>{
-  const status = document.getElementById(`pay-${docId}`).value;
+// Update Payment
+window.updatePayment = async (userId, orderId, orderNumber, total) => {
+  const status = document.getElementById(`pay-${orderId}`).value;
   if(!status) return alert("Select payment status");
-  const orderRef = doc(db,'users',userId,'orders',docId);
-  const now = new Date().toISOString();
-  await updateDoc(orderRef, { paymentStatus:status, updatedAt:now, remainingPayment:0 });
-  await addDoc(collection(db,'users',userId,'notifications'),{
-    type:'payment',
-    orderId:docId,
-    orderNumber:orderNumber,
-    title:'Payment Update',
-    message: status==='fully_paid'?`Your full payment has been confirmed.`:`Your advance payment confirmed. Remaining: pending`,
-    createdAt:now,
+
+  const paidAmount = status==="fully_paid" ? total : total*0.3;
+
+  await updateDoc(doc(db,"users",userId,"orders",orderId),{
+    paymentStatus: status,
+    advancePayment: paidAmount,
+    remainingPayment: total - paidAmount,
+    updatedAt: new Date().toISOString()
+  });
+
+  await addDoc(collection(db,"users",userId,"notifications"),{
+    type:"payment",
+    orderId,
+    orderNumber,
+    title:"Payment Update",
+    message: status==="fully_paid"
+      ? `Your full payment of £${total} has been confirmed.`
+      : `Advance payment of £${paidAmount} received. Remaining £${total-paidAmount}. Please complete payment within 24 hours or order will auto-cancel. Advance is non-refundable.`,
+    createdAt:new Date().toISOString(),
     read:false
   });
-  alert("Payment updated!");
+
+  alert("Payment updated");
   loadOrders();
 }
 
-window.updateShipping = async (userId, docId, orderNumber)=>{
-  const track = document.getElementById(`track-${docId}`).value;
-  const delivery = document.getElementById(`delivery-${docId}`).value;
+// Update Shipping
+window.updateShipping = async (userId, orderId, orderNumber) => {
+  const track = document.getElementById(`track-${orderId}`).value;
+  const delivery = document.getElementById(`delivery-${orderId}`).value;
   if(!track) return alert("Enter tracking number");
-  const now = new Date().toISOString();
-  const orderRef = doc(db,'users',userId,'orders',docId);
-  await updateDoc(orderRef, { shippingStatus:'shipped', trackingNumber:track, shippedAt:now, deliveryDateTime:delivery });
-  await addDoc(collection(db,'users',userId,'notifications'),{
-    type:'shipping',
-    orderId:docId,
-    orderNumber:orderNumber,
-    title:'Order Shipped',
-    message:`Your order has been shipped. Tracking: ${track}, Delivery: ${delivery}`,
-    createdAt:now,
+  if(!delivery) return alert("Set delivery date & time");
+
+  await updateDoc(doc(db,"users",userId,"orders",orderId),{
+    shippingStatus:"shipped",
+    trackingNumber: track,
+    shippedAt: new Date().toISOString(),
+    deliveryDateTime: delivery
+  });
+
+  await addDoc(collection(db,"users",userId,"notifications"),{
+    type:"shipping",
+    orderId,
+    orderNumber,
+    title:"Order Shipped",
+    message: `Your order has been shipped. Tracking No: ${track}. Expected Delivery: ${delivery}`,
+    createdAt:new Date().toISOString(),
     read:false
   });
-  alert("Shipping updated!");
+
+  alert("Shipping updated");
   loadOrders();
 }
-
-// Auto-cancel orders after 24 hours if not fully paid
-setInterval(async ()=>{
-  const now = new Date();
-  allOrdersData.forEach(async o=>{
-    if(o.paymentStatus!=='fully_paid'){
-      const orderDate = new Date(o.createdAt);
-      if((now-orderDate)/1000/60/60 >=24){ // 24 hours
-        const orderRef = doc(db,'users',o.userId,'orders',o.docId);
-        await updateDoc(orderRef,{status:'cancelled',updatedAt:now.toISOString()});
-        await addDoc(collection(db,'users',o.userId,'notifications'),{
-          type:'cancel',
-          orderId:o.docId,
-          orderNumber:o.orderNumber,
-          title:'Order Cancelled',
-          message:`Your order ${o.orderNumber} has been cancelled due to incomplete payment.`,
-          createdAt:now.toISOString(),
-          read:false
-        });
-      }
-    }
-  });
-  loadOrders();
-},60*1000); // every 1 minute
 
 loadOrders();
-
 </script>
 </body>
 </html>
