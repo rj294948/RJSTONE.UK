@@ -1,152 +1,118 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>Admin Orders Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      padding: 15px;
-    }
-    h2 {
-      text-align: center;
-    }
+    body { font-family: Arial; background:#f2f2f2; padding:15px; }
+    h2 { text-align:center; }
     .order {
-      background: #fff;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .order small {
-      color: #666;
+      background:#fff;
+      padding:12px;
+      margin-bottom:12px;
+      border-radius:6px;
     }
     select, button {
-      width: 100%;
-      padding: 8px;
-      margin-top: 6px;
+      width:100%;
+      padding:8px;
+      margin-top:6px;
     }
     button {
-      background: #0d6efd;
-      color: #fff;
-      border: none;
-      cursor: pointer;
+      background:#0d6efd;
+      color:#fff;
+      border:none;
     }
   </style>
 </head>
 
 <body>
 
-<h2>All Orders (Live Sync)</h2>
+<h2>All Orders (Safe Sync)</h2>
 <div id="orders">Loading orders...</div>
 
-<!-- ================= FIREBASE SCRIPT ================= -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-  import {
-    getFirestore,
-    collectionGroup,
-    getDocs,
-    doc,
-    updateDoc,
-    addDoc,
-    collection
-  } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import {
+  getFirestore, collectionGroup, getDocs,
+  doc, updateDoc, addDoc, collection
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-  /* ================= FIREBASE CONFIG ================= */
-  const firebaseConfig = {
-    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-    authDomain: "iryastone-uk.firebaseapp.com",
-    projectId: "iryastone-uk",
-    storageBucket: "iryastone-uk.firebasestorage.app",
-    messagingSenderId: "110940910896",
-    appId: "1:110940910896:web:b25e92127118665e5c84f5"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+  authDomain: "iryastone-uk.firebaseapp.com",
+  projectId: "iryastone-uk",
+  storageBucket: "iryastone-uk.firebasestorage.app",
+  messagingSenderId: "110940910896",
+  appId: "1:110940910896:web:b25e92127118665e5c84f5"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const ordersDiv = document.getElementById("orders");
 
-  const ordersDiv = document.getElementById("orders");
+async function loadOrders() {
+  ordersDiv.innerHTML = "";
+  const snap = await getDocs(collectionGroup(db, "orders"));
 
-  /* ========== LOAD ALL ORDERS (SYNC) ========== */
-  async function loadOrders() {
-    ordersDiv.innerHTML = "Loading orders...";
-    const snap = await getDocs(collectionGroup(db, "orders"));
-    ordersDiv.innerHTML = "";
+  snap.forEach(docSnap => {
+    // ✅ SAFE USER ID DETECTION
+    if (!docSnap.ref.parent?.parent?.id) return;
 
-    if (snap.empty) {
-      ordersDiv.innerHTML = "No orders found";
-      return;
-    }
+    const userId = docSnap.ref.parent.parent.id;
+    const orderId = docSnap.id;
+    const order = docSnap.data();
 
-    snap.forEach(docSnap => {
-      const order = docSnap.data();
-      const orderId = docSnap.id;
+    ordersDiv.innerHTML += `
+      <div class="order">
+        <b>Order:</b> ${order.orderNumber || orderId}<br>
+        <small>${order.userEmail || ""}</small><br>
+        <small>Status: ${order.status}</small>
 
-      // ✅ 100% CORRECT USER ID
-      const userId = docSnap.ref.parent.parent.id;
+        <select id="s-${orderId}">
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="processing">Processing</option>
+          <option value="completed">Completed</option>
+        </select>
 
-      ordersDiv.innerHTML += `
-        <div class="order">
-          <b>Order:</b> ${order.orderNumber || orderId}<br>
-          <small>User: ${order.userEmail || userId}</small><br>
-          <small>Status: ${order.status}</small>
+        <button onclick="updateOrder('${userId}','${orderId}')">
+          Update
+        </button>
+      </div>
+    `;
+  });
 
-          <select id="status-${orderId}">
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="completed">Completed</option>
-          </select>
-
-          <button onclick="updateOrder('${userId}','${orderId}')">
-            Update Order
-          </button>
-        </div>
-      `;
-    });
+  if (!ordersDiv.innerHTML) {
+    ordersDiv.innerHTML = "No valid user orders found";
   }
+}
 
-  /* ========== UPDATE ORDER + CREATE NOTIFICATION ========== */
-  window.updateOrder = async (userId, orderId) => {
-    const status = document.getElementById(`status-${orderId}`).value;
+window.updateOrder = async (userId, orderId) => {
+  const status = document.getElementById(`s-${orderId}`).value;
 
-    try {
-      // 🔹 Order Update
-      await updateDoc(
-        doc(db, "users", userId, "orders", orderId),
-        {
-          status: status,
-          updatedAt: new Date().toISOString()
-        }
-      );
-
-      // 🔔 User Notification
-      await addDoc(
-        collection(db, "users", userId, "notifications"),
-        {
-          title: "Order Status Updated",
-          message: `Your order is now "${status}"`,
-          orderId: orderId,
-          read: false,
-          createdAt: new Date().toISOString()
-        }
-      );
-
-      alert("✅ Order updated & notification sent");
-      loadOrders();
-
-    } catch (err) {
-      console.error(err);
-      alert("❌ Update failed (check console)");
+  await updateDoc(
+    doc(db, "users", userId, "orders", orderId),
+    {
+      status,
+      updatedAt: new Date().toISOString()
     }
-  };
+  );
 
-  loadOrders();
+  await addDoc(
+    collection(db, "users", userId, "notifications"),
+    {
+      title: "Order Update",
+      message: `Your order is now "${status}"`,
+      orderId,
+      read: false,
+      createdAt: new Date().toISOString()
+    }
+  );
+
+  alert("✅ Updated & Notified");
+};
+
+loadOrders();
 </script>
 
 </body>
