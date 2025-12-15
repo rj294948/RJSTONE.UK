@@ -14,6 +14,7 @@ body{font-family:Segoe UI;background:#f4f6f8;margin:0;padding:15px}
 .paid{background:#28a745;color:#fff}
 .advance{background:#ffc107}
 .processing{background:#6f42c1;color:#fff}
+.ready{background:#20c997;color:#fff}
 .shipped{background:#17a2b8;color:#fff}
 .out{background:#fd7e14;color:#fff}
 .delivered{background:#007bff;color:#fff}
@@ -24,7 +25,6 @@ hr{border:none;border-top:1px solid #ddd;margin:10px 0}
 .timeline{font-size:12px;color:#555;margin-top:8px}
 </style>
 </head>
-
 <body>
 
 <h2>Admin Orders Panel</h2>
@@ -34,9 +34,11 @@ hr{border:none;border-top:1px solid #ddd;margin:10px 0}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import {
   getFirestore, collectionGroup, getDocs,
-  doc, getDoc, updateDoc, addDoc, collection
+  doc, getDoc, updateDoc, addDoc, collection,
+  serverTimestamp, query, orderBy, limit, deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
+/* ---------- FIREBASE ---------- */
 const app = initializeApp({
   apiKey: "AIzaSyDNW...",
   authDomain: "iryastone-uk.firebaseapp.com",
@@ -50,9 +52,14 @@ const nowISO = ()=> new Date().toISOString();
 const hoursBetween = (a,b)=> (new Date(b)-new Date(a))/36e5;
 
 async function notify(userId,title,msg){
-  await addDoc(collection(db,"users",userId,"notifications"),{
-    title, message:msg, createdAt:nowISO(), read:false
-  });
+  const col = collection(db,"users",userId,"notifications");
+  await addDoc(col,{ title,message:msg,createdAt:serverTimestamp(),read:false });
+
+  /* MAX 10 NOTIFICATIONS */
+  const q = query(col, orderBy("createdAt","desc"), limit(20));
+  const snap = await getDocs(q);
+  let i=0;
+  for(const d of snap.docs){ if(i++>=10) await deleteDoc(d.ref); }
 }
 
 /* ---------- LOAD ORDERS ---------- */
@@ -66,12 +73,12 @@ async function loadOrders(){
   for(const o of orders){
     if(!o.items?.length) continue;
 
-    /* AUTO CANCEL */
-    if(o.paymentStatus!=="fully_paid" && o.createdAt){
-      if(hoursBetween(o.createdAt,nowISO())>=24 && o.status!=="cancelled"){
+    /* AUTO CANCEL AFTER 24H IF NOT FULL PAID */
+    if(o.paymentStatus!=="fully_paid" && o.createdAt && o.status!=="cancelled"){
+      if(hoursBetween(o.createdAt,nowISO())>=24){
         await updateDoc(doc(db,"users",o.userId,"orders",o._id),{
           status:"cancelled",
-          cancelledAt:nowISO()
+          cancelledAt:serverTimestamp()
         });
         await notify(o.userId,"Order Cancelled",
           `Order ${o.orderNumber} cancelled due to pending payment.`);
@@ -84,6 +91,7 @@ async function loadOrders(){
       o.status==="delivered"?"delivered":
       o.status==="out_for_delivery"?"out":
       o.status==="shipped"?"shipped":
+      o.status==="ready_to_ship"?"ready":
       o.status==="processing"?"processing":
       o.paymentStatus==="fully_paid"?"paid":"advance";
 
@@ -112,8 +120,7 @@ async function loadOrders(){
 
       ${products}
 
-      <hr>
-      <b>Payment Update</b>
+      <hr><b>Payment Update</b>
       <select id="pay-${o._id}">
         <option value="">Select</option>
         <option value="advance">Advance Confirm</option>
@@ -121,25 +128,20 @@ async function loadOrders(){
       </select>
       <input id="paid-${o._id}" type="number" placeholder="Paid Amount">
       <input id="txn-${o._id}" placeholder="Transaction Reference">
-      <button onclick="updatePayment('${o.userId}','${o._id}','${o.orderNumber}',${o.total})">
-        Confirm Payment
-      </button>
+      <button onclick="updatePayment('${o.userId}','${o._id}','${o.orderNumber}',${o.total})">Confirm Payment</button>
 
-      <hr>
-      <b>Order Status</b>
+      <hr><b>Order Status</b>
       <select id="status-${o._id}">
         <option value="">Select Status</option>
         <option value="processing">Processing</option>
+        <option value="ready_to_ship">Ready to Ship</option>
         <option value="shipped">Shipped</option>
         <option value="out_for_delivery">Out for Delivery</option>
         <option value="delivered">Delivered</option>
         <option value="cancelled">Cancelled</option>
       </select>
       <input id="track-${o._id}" placeholder="Tracking Number">
-      <input type="datetime-local" id="delivery-${o._id}">
-      <button onclick="updateStatus('${o.userId}','${o._id}','${o.orderNumber}')">
-        Update Order
-      </button>
+      <button onclick="updateStatus('${o.userId}','${o._id}','${o.orderNumber}')">Update Order</button>
 
       <div class="timeline">
         ${(o.statusHistory||[]).map(h=>`• ${h.status} – ${h.at}`).join("<br>")}
@@ -156,20 +158,20 @@ window.updatePayment = async (userId,id,ord,total)=>{
   if(!type||!paid) return alert("Payment info missing");
 
   let remaining=Math.max(total-paid,0);
-  const ref=doc(db,"users",userId,"orders",id);
 
-  await updateDoc(ref,{
+  await updateDoc(doc(db,"users",userId,"orders",id),{
     paymentStatus:type==="full"?"fully_paid":"advance_paid",
     submittedAmount:paid,
     remainingPayment:remaining,
     transactionReference:txn,
-    updatedAt:nowISO()
+    updatedAt:serverTimestamp()
   });
 
   await notify(userId,"Payment Confirmed",
     type==="full"
-    ? `Full payment £${paid} confirmed for ${ord}.`
-    : `Advance £${paid} received. Remaining £${remaining}.`);
+      ? `Full payment £${paid} confirmed for ${ord}.`
+      : `Advance £${paid} received. Remaining £${remaining}.`
+  );
 
   loadOrders();
 };
@@ -179,22 +181,20 @@ window.updateStatus = async (userId,id,ord)=>{
   const st=document.getElementById(`status-${id}`).value;
   if(!st) return;
 
+  const ref=doc(db,"users",userId,"orders",id);
+  const snap=await getDoc(ref);
+  const hist=snap.data().statusHistory||[];
+
   const upd={
     status:st,
-    updatedAt:nowISO(),
-    statusHistory:[...(await getDoc(doc(db,"users",userId,"orders",id))).data().statusHistory||[],
-      {status:st,at:nowISO()}]
+    updatedAt:serverTimestamp(),
+    statusHistory:[...hist,{status:st,at:nowISO()}]
   };
 
-  if(st==="shipped"){
-    upd.trackingNumber=document.getElementById(`track-${id}`).value||"";
-  }
-  if(st==="delivered"){
-    upd.deliveredAt=nowISO();
-    upd.remainingPayment=0;
-  }
+  if(st==="shipped") upd.trackingNumber=document.getElementById(`track-${id}`).value||"";
+  if(st==="delivered") upd.remainingPayment=0;
 
-  await updateDoc(doc(db,"users",userId,"orders",id),upd);
+  await updateDoc(ref,upd);
   await notify(userId,"Order Update",`Order ${ord} is now ${st.replaceAll("_"," ")}`);
   loadOrders();
 };
