@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <title>My Orders | IRYA STONE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -1507,9 +1509,8 @@ async function fetchProductImage(item) {
     if (productDoc.exists()) {
       const productData = productDoc.data();
       
-      // Extract image URL
-      if (productData.images && productData.images.length > 0) {
-        // Take first image from array
+      // Extract image URL from images array
+      if (productData.images && Array.isArray(productData.images) && productData.images.length > 0) {
         if (typeof productData.images[0] === 'string') {
           item.image = productData.images[0];
         } else if (productData.images[0].url) {
@@ -2365,32 +2366,48 @@ async function loadNotifications() {
 function createNotificationElement(note) {
   const div = document.createElement('div');
   div.className = `notification-item ${note.read ? '' : 'unread'}`;
-  div.onclick = () => handleNotificationClick(note.id, note.orderId, note.type);
   
   const timeAgo = getTimeAgo(note.createdAt);
+  
+  // Notification message से orderId extract करें
+  let orderIdFromMessage = extractOrderIdFromMessage(note.message);
+  let orderId = note.orderId || orderIdFromMessage;
+  
+  // Notification type determine करें based on message
+  let notificationType = determineNotificationType(note.message, note.title);
+  
+  div.onclick = () => handleNotificationClick(note.id, orderId, notificationType);
   
   // Notification type based icon and color
   let icon = 'fa-bell';
   let color = '#c9a227';
   let actionText = '';
   
-  if (note.type === 'payment_remaining') {
-    icon = 'fa-money-bill-wave';
+  if (notificationType === 'payment_remaining_warning') {
+    icon = 'fa-exclamation-triangle';
     color = '#ff6b6b';
-    actionText = '<span style="color: var(--payment-pending); margin-left: 10px;"><i class="fas fa-exclamation-circle"></i> Pay Now</span>';
-  } else if (note.type === 'payment_confirmed') {
+    actionText = '<span style="color: var(--payment-pending); margin-left: 10px;"><i class="fas fa-money-bill-wave"></i> Pay Now</span>';
+  } else if (notificationType === 'payment_remaining_info') {
+    icon = 'fa-money-bill-wave';
+    color = '#ff922b';
+    actionText = '<span style="color: var(--payment-advance); margin-left: 10px;"><i class="fas fa-clock"></i> Pay Remaining</span>';
+  } else if (notificationType === 'payment_received') {
     icon = 'fa-check-circle';
     color = '#51cf66';
     actionText = '<span style="color: var(--payment-full); margin-left: 10px;"><i class="fas fa-eye"></i> View Status</span>';
-  } else if (note.type === 'order_shipped') {
+  } else if (notificationType === 'order_shipped') {
     icon = 'fa-shipping-fast';
     color = '#339af0';
     actionText = '<span style="color: var(--processing); margin-left: 10px;"><i class="fas fa-truck"></i> Track Order</span>';
-  } else if (note.type === 'order_delivered') {
+  } else if (notificationType === 'order_out_for_delivery') {
+    icon = 'fa-truck';
+    color = '#cc5de8';
+    actionText = '<span style="color: var(--out-for-delivery); margin-left: 10px;"><i class="fas fa-truck"></i> Track Order</span>';
+  } else if (notificationType === 'order_delivered') {
     icon = 'fa-check-double';
     color = '#40c057';
     actionText = '<span style="color: var(--delivered); margin-left: 10px;"><i class="fas fa-box-open"></i> View Details</span>';
-  } else if (note.type === 'order_cancelled') {
+  } else if (notificationType === 'order_cancelled') {
     icon = 'fa-times-circle';
     color = '#fa5252';
   }
@@ -2410,7 +2427,70 @@ function createNotificationElement(note) {
   return div;
 }
 
-async function handleNotificationClick(notificationId, orderId, notificationType) {
+function extractOrderIdFromMessage(message) {
+  if (!message) return null;
+  
+  // Try to extract order number like "IRYA-1765748514765-1207"
+  const orderNumberMatch = message.match(/IRYA[-\s]\d+/g);
+  if (orderNumberMatch && orderNumberMatch[0]) {
+    return orderNumberMatch[0];
+  }
+  
+  // Try to extract order number like "Order #12345"
+  const orderHashMatch = message.match(/Order[-\s]#?(\w+)/i);
+  if (orderHashMatch && orderHashMatch[1]) {
+    return orderHashMatch[1];
+  }
+  
+  return null;
+}
+
+function determineNotificationType(message, title) {
+  if (!message) return 'general';
+  
+  const msg = message.toLowerCase();
+  const tit = (title || '').toLowerCase();
+  
+  // Check for payment warnings
+  if (msg.includes('remaining payment') && 
+      (msg.includes('cancel') || msg.includes('warning') || msg.includes('within'))) {
+    return 'payment_remaining_warning';
+  }
+  
+  // Check for payment remaining info
+  if (msg.includes('remaining') && msg.includes('advance') && msg.includes('received')) {
+    return 'payment_remaining_info';
+  }
+  
+  // Check for payment received
+  if (msg.includes('advance') && msg.includes('received') && !msg.includes('remaining')) {
+    return 'payment_received';
+  }
+  
+  // Check for out for delivery
+  if (msg.includes('out for delivery') || msg.includes('delivery today')) {
+    return 'order_out_for_delivery';
+  }
+  
+  // Check for shipped
+  if (msg.includes('shipped') || msg.includes('dispatched')) {
+    return 'order_shipped';
+  }
+  
+  // Check for delivered
+  if (msg.includes('delivered') || msg.includes('successfully delivered')) {
+    return 'order_delivered';
+  }
+  
+  // Check for cancelled
+  if (msg.includes('cancelled') || msg.includes('canceled')) {
+    return 'order_cancelled';
+  }
+  
+  return 'general';
+}
+
+async function handleNotificationClick(notificationId, orderIdOrNumber, notificationType) {
   try {
     if (!userId) return;
     
@@ -2426,27 +2506,118 @@ async function handleNotificationClick(notificationId, orderId, notificationType
     // Close notification dropdown
     closeNotifications();
     
+    // Find order by ID or order number
+    let order = null;
+    
+    if (orderIdOrNumber) {
+      // First try to find by order number
+      order = orders.find(o => o.orderNumber === orderIdOrNumber);
+      
+      // If not found, try to find by order ID
+      if (!order) {
+        order = orders.find(o => o.id === orderIdOrNumber);
+      }
+    }
+    
     // Handle based on notification type
-    if (notificationType === 'payment_remaining') {
-      // Redirect to checkout for remaining payment
-      payRemainingAmount(orderId);
-    } else if (notificationType === 'payment_confirmed' || 
+    if (notificationType === 'payment_remaining_warning' || 
+        notificationType === 'payment_remaining_info') {
+      
+      if (order) {
+        // Redirect to checkout with remaining payment
+        redirectToCheckoutWithOrder(order);
+      } else {
+        // If order not found in current list, redirect to payment page with order info
+        redirectToPaymentPage(orderIdOrNumber, notificationType);
+      }
+      
+    } else if (notificationType === 'payment_received' || 
                notificationType === 'order_shipped' || 
+               notificationType === 'order_out_for_delivery' ||
                notificationType === 'order_delivered') {
-      // Open tracking modal
-      showTrackingModal(orderId);
-    } else if (notificationType === 'order_cancelled' || 
-               notificationType === 'order_returned') {
-      // Show order details
-      showOrderDetails(orderId);
+      
+      if (order) {
+        // Open tracking modal
+        showTrackingModal(order.id);
+      } else {
+        showMessage("Order not found in your orders list");
+      }
+      
+    } else if (notificationType === 'order_cancelled') {
+      
+      if (order) {
+        // Show order details
+        showOrderDetails(order.id);
+      } else {
+        showMessage("Cancelled order not found");
+      }
+      
     } else {
-      // Default: show tracking
-      showTrackingModal(orderId);
+      // Default: show all orders
+      document.getElementById('searchInput').value = orderIdOrNumber || '';
+      searchOrders();
     }
     
   } catch (error) {
     console.error("❌ Error handling notification click:", error);
     closeNotifications();
+    showMessage("Error handling notification");
+  }
+}
+
+function redirectToCheckoutWithOrder(order) {
+  try {
+    const paidAmount = order.submittedAmount || order.advancePayment || 0;
+    const totalAmount = order.total || 0;
+    const remainingAmount = order.remainingPayment || (totalAmount - paidAmount);
+    
+    if (remainingAmount <= 0) {
+      showMessage("No remaining amount to pay");
+      return;
+    }
+    
+    // Prepare data for checkout page
+    const checkoutData = {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      remainingAmount: remainingAmount,
+      totalAmount: totalAmount,
+      paidAmount: paidAmount,
+      orderType: 'existing_order',
+      items: order.items || [],
+      isWarning: true // Flag for warning notification
+    };
+    
+    // Save to localStorage
+    localStorage.setItem('irya_pending_payment_order', JSON.stringify(checkoutData));
+    
+    // Redirect to checkout page
+    window.location.href = `checkout.html?order=${order.id}&type=remaining_payment&warning=true`;
+    
+  } catch (error) {
+    console.error("❌ Error redirecting to checkout:", error);
+    showMessage("Failed to proceed to payment");
+  }
+}
+
+function redirectToPaymentPage(orderIdOrNumber, notificationType) {
+  try {
+    // Save order info for checkout page to fetch
+    const paymentData = {
+      orderNumber: orderIdOrNumber,
+      notificationType: notificationType,
+      redirectFrom: 'notification',
+      timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('irya_notification_payment_data', JSON.stringify(paymentData));
+    
+    // Redirect to checkout page
+    window.location.href = `checkout.html?order_ref=${encodeURIComponent(orderIdOrNumber)}&from_notification=true`;
+    
+  } catch (error) {
+    console.error("❌ Error redirecting to payment page:", error);
+    showMessage("Failed to redirect to payment page");
   }
 }
 
@@ -2498,6 +2669,7 @@ function updateNotificationBadge(count = null) {
 
 function updateCartBadge() {
   try {
+    const userId = localStorage.getItem('irya_guest_id') || 'guest';
     const cartKey = 'irya_local_cart_' + userId;
     const cartData = localStorage.getItem(cartKey);
     const cartItems = cartData ? JSON.parse(cartData) : [];
