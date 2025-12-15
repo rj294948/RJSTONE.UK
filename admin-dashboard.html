@@ -1,290 +1,1790 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>IRYA STONE – Admin Dashboard</title>
+<title>IRYA STONE – Professional Admin Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-body{
-  font-family:Inter,sans-serif;
-  background:#f4f7fa;
-  margin:0;
-  padding:20px;
-}
-h2{margin-bottom:20px}
-.section{margin-bottom:30px}
-
-.order{
-  background:#fff;
-  border-radius:14px;
-  padding:16px;
-  margin-bottom:18px;
-  box-shadow:0 6px 18px rgba(0,0,0,.07);
-  border-left:5px solid #ccc;
+/* ========== COMPACT PROFESSIONAL THEME ========== */
+:root {
+    --primary: #2563eb;
+    --secondary: #3b82f6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #06b6d4;
+    --light: #f8fafc;
+    --dark: #1e293b;
+    --border: #e2e8f0;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.top{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  flex-wrap:wrap;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.badge{
-  padding:5px 12px;
-  border-radius:20px;
-  font-size:12px;
-  font-weight:700;
-}
-.paid{background:#28a745;color:#fff}
-.advance{background:#ffc107}
-.processing{background:#6f42c1;color:#fff}
-.ready{background:#0dcaf0}
-.shipped{background:#17a2b8;color:#fff}
-.delivered{background:#007bff;color:#fff}
-.cancelled{background:#dc3545;color:#fff}
-
-.addr{
-  background:#f8f9fa;
-  padding:10px;
-  border-radius:10px;
-  font-size:13px;
-  margin:12px 0;
+body {
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
 }
 
-.products{background:#f7fafc;padding:10px;border-radius:10px}
-.product{
-  display:flex;gap:10px;margin-bottom:8px
-}
-.product img{width:55px;height:55px;border-radius:8px;object-fit:cover}
-
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:10px;
+/* ========== DASHBOARD LAYOUT ========== */
+.dashboard {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
 }
 
-input,select,button{
-  padding:9px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  width:100%;
+/* ========== SIDEBAR ========== */
+.sidebar {
+    background: white;
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
 }
 
-button{
-  background:#000;
-  color:#fff;
-  border:none;
-  cursor:pointer;
-  font-weight:600;
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
 }
 
-.timeline{
-  font-size:12px;
-  color:#666;
-  margin-top:10px;
+.logo i {
+    color: var(--primary);
+    font-size: 24px;
+}
+
+.logo h1 {
+    font-size: 18px;
+    color: var(--dark);
+}
+
+/* ========== FILTERS ========== */
+.filter-group {
+    margin-bottom: 25px;
+}
+
+.filter-group h3 {
+    font-size: 13px;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-btn {
+    background: var(--light);
+    border: 1px solid var(--border);
+    padding: 10px 15px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s;
+}
+
+.filter-btn:hover {
+    background: #e2e8f0;
+    border-color: var(--primary);
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.filter-btn .count {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+}
+
+/* ========== SEARCH ========== */
+.search-box {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    background: var(--light);
+}
+
+.search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+/* ========== STATS ========== */
+.stats-summary {
+    background: var(--light);
+    border-radius: var(--radius);
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+/* ========== MAIN CONTENT ========== */
+.main-content {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* ========== HEADER BAR ========== */
+.header-bar {
+    background: white;
+    padding: 15px 20px;
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+}
+
+.header-info h2 {
+    font-size: 18px;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    background: var(--light);
+    border: 1px solid var(--border);
+    padding: 8px 15px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: #e2e8f0;
+}
+
+.action-btn.primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* ========== ORDERS TABLE ========== */
+.orders-table-container {
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.table-header {
+    background: var(--light);
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.8fr 0.8fr 0.6fr 0.5fr;
+    gap: 15px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--dark);
+}
+
+.table-row {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.8fr 0.8fr 0.6fr 0.5fr;
+    gap: 15px;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.table-row:hover {
+    background: #f8fafc;
+}
+
+.table-row.expanded {
+    background: #f1f5f9;
+}
+
+/* ========== CELL STYLES ========== */
+.order-id {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 13px;
+}
+
+.customer-info {
+    font-size: 13px;
+}
+
+.customer-name {
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.customer-email {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.amount {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+/* ========== STATUS BADGES ========== */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.status-processing { background: #e0f2fe; color: #0369a1; }
+.status-ready { background: #dbeafe; color: #1d4ed8; }
+.status-shipped { background: #fef3c7; color: #d97706; }
+.status-out { background: #fef3c7; color: #d97706; }
+.status-delivered { background: #d1fae5; color: #047857; }
+.status-cancelled { background: #fee2e2; color: #dc2626; }
+
+.payment-badge {
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.payment-paid { background: #10b981; color: white; }
+.payment-advance { background: #f59e0b; color: white; }
+.payment-pending { background: #ef4444; color: white; }
+
+/* ========== ACTION BUTTONS ========== */
+.action-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    transition: all 0.2s;
+}
+
+.icon-btn:hover {
+    background: var(--light);
+    color: var(--primary);
+}
+
+.icon-btn.primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.icon-btn.danger {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+}
+
+.icon-btn.success {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+}
+
+/* ========== MODALS ========== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: var(--primary);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    background: var(--light);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* ========== PAYMENT FORM ========== */
+.payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.amount-info {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: var(--radius);
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.amount-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+.amount-row.total {
+    font-weight: 600;
+    color: var(--primary);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #bae6fd;
+}
+
+.calculated-amount {
+    font-weight: 600;
+    color: var(--success);
+}
+
+.calculated-remaining {
+    font-weight: 600;
+    color: var(--danger);
+}
+
+/* ========== STATUS FORM ========== */
+.status-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.status-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.status-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.status-option:hover {
+    background: var(--light);
+}
+
+.status-option.selected {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.status-option i {
+    font-size: 16px;
+}
+
+/* ========== BUTTONS ========== */
+.btn {
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.btn-secondary {
+    background: var(--light);
+    color: var(--dark);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover {
+    background: #059669;
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+}
+
+/* ========== LOADING ========== */
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.loading i {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+/* ========== EMPTY STATE ========== */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+}
+
+.empty-state i {
+    font-size: 32px;
+    margin-bottom: 15px;
+    color: #cbd5e1;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1200px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar {
+        height: auto;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .table-header,
+    .table-row {
+        grid-template-columns: 1fr 1fr 0.8fr 0.8fr;
+    }
+    
+    .status-cell,
+    .payment-cell {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .table-header,
+    .table-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .amount-cell,
+    .date-cell {
+        display: none;
+    }
+    
+    .header-bar {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .status-options {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 </head>
-
 <body>
 
-<h2>💎 IRYA STONE – Admin Orders</h2>
+<div class="dashboard">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-gem"></i>
+            <div>
+                <h1>IRYA STONE</h1>
+                <p style="font-size: 12px; color: #64748b;">Admin Dashboard</p>
+            </div>
+        </div>
 
-<div class="section">
-<h3>✅ Fully Paid Orders</h3>
-<div id="paidOrders"></div>
+        <!-- SEARCH -->
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search orders...">
+        </div>
+
+        <!-- STATUS FILTERS -->
+        <div class="filter-group">
+            <h3>Order Status</h3>
+            <div class="filter-options" id="statusFilters">
+                <button class="filter-btn active" data-status="all">
+                    All Orders <span class="count" id="countAll">0</span>
+                </button>
+                <button class="filter-btn" data-status="processing">
+                    Processing <span class="count" id="countProcessing">0</span>
+                </button>
+                <button class="filter-btn" data-status="ready_to_ship">
+                    Ready to Ship <span class="count" id="countReady">0</span>
+                </button>
+                <button class="filter-btn" data-status="shipped">
+                    Shipped <span class="count" id="countShipped">0</span>
+                </button>
+                <button class="filter-btn" data-status="out_for_delivery">
+                    Out for Delivery <span class="count" id="countOut">0</span>
+                </button>
+                <button class="filter-btn" data-status="delivered">
+                    Delivered <span class="count" id="countDelivered">0</span>
+                </button>
+                <button class="filter-btn" data-status="cancelled">
+                    Cancelled <span class="count" id="countCancelled">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- PAYMENT FILTERS -->
+        <div class="filter-group">
+            <h3>Payment Status</h3>
+            <div class="filter-options" id="paymentFilters">
+                <button class="filter-btn active" data-payment="all">
+                    All Payments
+                </button>
+                <button class="filter-btn" data-payment="fully_paid">
+                    Fully Paid
+                </button>
+                <button class="filter-btn" data-payment="advance_paid">
+                    Advance Paid
+                </button>
+                <button class="filter-btn" data-payment="pending">
+                    Payment Pending
+                </button>
+            </div>
+        </div>
+
+        <!-- STATS SUMMARY -->
+        <div class="stats-summary">
+            <div class="stat-item">
+                <span class="stat-label">Total Orders</span>
+                <span class="stat-value" id="totalOrders">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Total Revenue</span>
+                <span class="stat-value" id="totalRevenue">£0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Pending Payments</span>
+                <span class="stat-value" id="pendingAmount">£0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Avg. Order Value</span>
+                <span class="stat-value" id="avgOrder">£0</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- HEADER -->
+        <div class="header-bar">
+            <div class="header-info">
+                <h2><i class="fas fa-shopping-cart"></i> Orders Management</h2>
+                <p style="font-size: 13px; color: #64748b; margin-top: 5px;">
+                    Showing <span id="showingCount">0</span> of <span id="totalCount">0</span> orders
+                </p>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn" onclick="loadOrders()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="action-btn primary" onclick="exportData()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+
+        <!-- ORDERS TABLE -->
+        <div class="orders-table-container">
+            <div class="table-header">
+                <div>Order Details</div>
+                <div>Customer</div>
+                <div>Amount</div>
+                <div>Date</div>
+                <div>Status</div>
+                <div>Payment</div>
+            </div>
+
+            <div id="ordersContainer">
+                <!-- Orders will be loaded here -->
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading orders...</p>
+                </div>
+            </div>
+        </div>
+    </main>
 </div>
 
-<div class="section">
-<h3>⚠ Pending / Advance Orders</h3>
-<div id="pendingOrders"></div>
+<!-- PAYMENT EDIT MODAL -->
+<div class="modal" id="paymentModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-edit"></i> Edit Payment Details</h3>
+            <button class="close-modal" onclick="closePaymentModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="amount-info">
+                <div class="amount-row">
+                    <span>Order Total:</span>
+                    <span id="modalOrderTotal">£0.00</span>
+                </div>
+                <div class="amount-row">
+                    <span>Current Paid:</span>
+                    <span id="modalCurrentPaid">£0.00</span>
+                </div>
+                <div class="amount-row">
+                    <span>Current Remaining:</span>
+                    <span id="modalCurrentRemaining">£0.00</span>
+                </div>
+                <div class="amount-row total">
+                    <span>Enter New Amount:</span>
+                </div>
+            </div>
+            
+            <div class="payment-form">
+                <div class="form-group">
+                    <label><i class="fas fa-money-check-alt"></i> Payment Type</label>
+                    <select id="paymentType" class="form-control" onchange="calculatePayment()">
+                        <option value="edit">Edit Payment Amount</option>
+                        <option value="advance">Advance Payment</option>
+                        <option value="full">Full Payment</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-pound-sign"></i> Enter Amount</label>
+                    <input type="number" id="paidAmount" class="form-control" 
+                           placeholder="Enter exact amount paid" step="0.01" min="0"
+                           oninput="calculatePayment()">
+                    <small style="color: #64748b; font-size: 12px; display: block; margin-top: 5px;">
+                        Enter the exact amount that has been paid
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-hashtag"></i> Reference Number</label>
+                    <input type="text" id="referenceNumber" class="form-control" 
+                           placeholder="Enter transaction/reference number" required>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-alt"></i> Payment Date & Time</label>
+                    <input type="datetime-local" id="paymentDate" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-sticky-note"></i> Notes (Optional)</label>
+                    <textarea id="paymentNotes" class="form-control" 
+                              placeholder="Add any notes about this payment" rows="3"></textarea>
+                </div>
+                
+                <!-- CALCULATION RESULTS -->
+                <div class="amount-info" id="calculationResults" style="display: none;">
+                    <div class="amount-row">
+                        <span>New Paid Amount:</span>
+                        <span id="newPaidAmount" class="calculated-amount">£0.00</span>
+                    </div>
+                    <div class="amount-row">
+                        <span>New Remaining:</span>
+                        <span id="newRemainingAmount" class="calculated-remaining">£0.00</span>
+                    </div>
+                    <div class="amount-row">
+                        <span>Payment Status:</span>
+                        <span id="newPaymentStatus" style="font-weight: 600;">Pending</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closePaymentModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="btn btn-success" onclick="savePayment()" id="savePaymentBtn">
+                <i class="fas fa-save"></i> Save Payment
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- STATUS UPDATE MODAL -->
+<div class="modal" id="statusModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-exchange-alt"></i> Update Order Status</h3>
+            <button class="close-modal" onclick="closeStatusModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="status-form">
+                <div class="form-group">
+                    <label><i class="fas fa-info-circle"></i> Order Information</label>
+                    <div style="background: var(--light); padding: 10px; border-radius: var(--radius);">
+                        <div style="font-weight: 600; margin-bottom: 5px;" id="statusOrderNumber">Order #</div>
+                        <div style="font-size: 12px; color: #64748b;" id="statusCustomerInfo">Customer</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-flag"></i> Select New Status</label>
+                    <div class="status-options" id="statusOptions">
+                        <div class="status-option" data-status="processing" onclick="selectStatus('processing')">
+                            <i class="fas fa-cog"></i>
+                            <span>Processing</span>
+                        </div>
+                        <div class="status-option" data-status="ready_to_ship" onclick="selectStatus('ready_to_ship')">
+                            <i class="fas fa-box"></i>
+                            <span>Ready to Ship</span>
+                        </div>
+                        <div class="status-option" data-status="shipped" onclick="selectStatus('shipped')">
+                            <i class="fas fa-shipping-fast"></i>
+                            <span>Shipped</span>
+                        </div>
+                        <div class="status-option" data-status="out_for_delivery" onclick="selectStatus('out_for_delivery')">
+                            <i class="fas fa-truck"></i>
+                            <span>Out for Delivery</span>
+                        </div>
+                        <div class="status-option" data-status="delivered" onclick="selectStatus('delivered')">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Delivered</span>
+                        </div>
+                        <div class="status-option" data-status="cancelled" onclick="selectStatus('cancelled')">
+                            <i class="fas fa-times-circle"></i>
+                            <span>Cancelled</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-shipping-fast"></i> Tracking Number</label>
+                    <input type="text" id="statusTracking" class="form-control" 
+                           placeholder="Enter tracking number">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-alt"></i> Status Date & Time</label>
+                    <input type="datetime-local" id="statusDateTime" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-sticky-note"></i> Notes (Optional)</label>
+                    <textarea id="statusNotes" class="form-control" 
+                              placeholder="Add notes about this status update" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeStatusModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="btn btn-primary" onclick="saveStatus()" id="saveStatusBtn">
+                <i class="fas fa-save"></i> Update Status
+            </button>
+        </div>
+    </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import {
-  getFirestore, collectionGroup, getDocs,
-  doc, getDoc, updateDoc, addDoc, collection,
-  query, orderBy, limit, deleteDoc
+    getFirestore, collectionGroup, getDocs,
+    doc, getDoc, updateDoc, addDoc, collection,
+    query, orderBy, limit, deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey:"AIzaSyDNW...",
-  authDomain:"iryastone-uk.firebaseapp.com",
-  projectId:"iryastone-uk"
+    apiKey: "AIzaSyDNW...",
+    authDomain: "iryastone-uk.firebaseapp.com",
+    projectId: "iryastone-uk"
 });
 const db = getFirestore(app);
 
-const paidBox=document.getElementById("paidOrders");
-const pendingBox=document.getElementById("pendingOrders");
+// Global state
+let allOrders = [];
+let filteredOrders = [];
+let expandedOrderId = null;
+let currentStatusFilter = 'all';
+let currentPaymentFilter = 'all';
+let searchQuery = '';
+let currentPaymentOrder = null;
+let currentStatusOrder = null;
+let selectedStatus = null;
 
-const now=()=>new Date().toISOString();
-const hours=(a,b)=>(new Date(b)-new Date(a))/36e5;
-const money=a=>`£${(+a||0).toFixed(2)}`;
+// DOM Elements
+const ordersContainer = document.getElementById('ordersContainer');
+const searchInput = document.getElementById('searchInput');
+const paymentModal = document.getElementById('paymentModal');
+const statusModal = document.getElementById('statusModal');
 
-async function notify(uid,title,msg){
-  const ref=collection(db,"users",uid,"notifications");
-  await addDoc(ref,{title,message:msg,createdAt:now(),read:false});
-  const q=query(ref,orderBy("createdAt","desc"),limit(11));
-  const s=await getDocs(q);
-  if(s.size>10) s.docs.slice(10).forEach(d=>deleteDoc(d.ref));
-}
-
-async function loadOrders(){
-  paidBox.innerHTML="";
-  pendingBox.innerHTML="";
-  const snap=await getDocs(collectionGroup(db,"orders"));
-
-  for(const d of snap.docs){
-    const o=d.data(); o.id=d.id;
-
-    if(o.status==="ready_to_ship" && o.remainingPayment>0){
-      if(hours(o.readyToShipAt||o.updatedAt,now())>=1){
-        await updateDoc(doc(db,"users",o.userId,"orders",o.id),{
-          status:"cancelled",cancelledAt:now()
-        });
-        await notify(o.userId,"Order Cancelled",
-          `Order ${o.orderNumber} cancelled due to pending payment.`);
-        continue;
-      }
+// Statistics
+const stats = {
+    totalOrders: 0,
+    totalRevenue: 0,
+    pendingAmount: 0,
+    statusCounts: {
+        processing: 0,
+        ready_to_ship: 0,
+        shipped: 0,
+        out_for_delivery: 0,
+        delivered: 0,
+        cancelled: 0
     }
-
-    render(o);
-  }
-}
-
-async function render(o){
-  const box=o.paymentStatus==="fully_paid"?paidBox:pendingBox;
-
-  const status=o.status||"processing";
-  const pay=o.paymentStatus==="fully_paid"?"paid":"advance";
-
-  let prods="";
-  for(const it of o.items||[]){
-    const ps=await getDoc(doc(db,"products",it.id));
-    const p=ps.exists()?ps.data():{};
-    prods+=`
-    <div class="product">
-      <img src="${p.images?.[0]||'https://via.placeholder.com/55'}">
-      <div>
-        <b>${p.title||it.name}</b><br>
-        Qty ${it.quantity} • ${money(it.totalPrice)}
-      </div>
-    </div>`;
-  }
-
-  box.innerHTML+=`
-  <div class="order" style="border-color:${pay==='paid'?'#28a745':'#ffc107'}">
-    <div class="top">
-      <div>
-        <b>#${o.orderNumber}</b><br>
-        <span class="badge ${status}">${status.replaceAll("_"," ")}</span>
-        <span class="badge ${pay}">${pay==='paid'?'Paid':'Advance'}</span>
-      </div>
-      <div>
-        <b>${money(o.total)}</b><br>
-        Paid ${money(o.submittedAmount)}<br>
-        Due ${money(o.remainingPayment)}
-      </div>
-    </div>
-
-    <div class="addr">
-      <b>${o.shippingAddress?.fullName}</b><br>
-      ${o.shippingAddress?.address1}, ${o.shippingAddress?.city}<br>
-      ${o.shippingAddress?.state} - ${o.shippingAddress?.postalCode}
-    </div>
-
-    <div class="products">${prods}</div>
-
-    <div class="grid">
-      <select id="pay-${o.id}">
-        <option value="">Payment</option>
-        <option value="advance">Advance</option>
-        <option value="full">Full</option>
-      </select>
-      <input id="amt-${o.id}" placeholder="Amount">
-      <input id="ref-${o.id}" placeholder="Reference No">
-      <button onclick="pay('${o.userId}','${o.id}','${o.orderNumber}',${o.total})">Confirm Payment</button>
-    </div>
-
-    <div class="grid">
-      <select id="st-${o.id}">
-        <option value="">Status</option>
-        <option value="processing">Processing</option>
-        <option value="ready_to_ship">Ready to Ship</option>
-        <option value="shipped">Shipped</option>
-        <option value="delivered">Delivered</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
-      <input id="trk-${o.id}" placeholder="Tracking No">
-      <button onclick="status('${o.userId}','${o.id}','${o.orderNumber}')">Update Status</button>
-    </div>
-
-    <div class="timeline">
-      ${(o.statusHistory||[]).map(h=>`• ${h.status} – ${new Date(h.at).toLocaleString()}`).join("<br>")}
-    </div>
-  </div>`;
-}
-
-window.pay=async(uid,id,ord,total)=>{
-  const type=document.getElementById(`pay-${id}`).value;
-  const amt=+document.getElementById(`amt-${id}`).value;
-  const ref=document.getElementById(`ref-${id}`).value;
-  if(!type||!amt) return alert("Enter payment");
-
-  const r=doc(db,"users",uid,"orders",id);
-  const s=await getDoc(r);
-  const o=s.data();
-
-  const paid=(o.submittedAmount||0)+amt;
-  const rem=Math.max(total-paid,0);
-
-  await updateDoc(r,{
-    submittedAmount:paid,
-    remainingPayment:rem,
-    paymentStatus:paid>=total?"fully_paid":"advance_paid",
-    transactionReference:ref,
-    updatedAt:now()
-  });
-
-  await notify(uid,"Payment Update",
-    paid>=total?`Full payment confirmed for ${ord}`:
-    `Payment received. Remaining ${money(rem)}`);
-
-  loadOrders();
 };
 
-window.status=async(uid,id,ord)=>{
-  const st=document.getElementById(`st-${id}`).value;
-  const tr=document.getElementById(`trk-${id}`).value;
-  if(!st) return;
+/* ---------- UTILITY FUNCTIONS ---------- */
+const now = () => new Date().toISOString();
+const hoursDiff = (a, b) => (new Date(b) - new Date(a)) / 36e5;
 
-  const r=doc(db,"users",uid,"orders",id);
-  const s=await getDoc(r);
-  const o=s.data();
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+}
 
-  const h=[...(o.statusHistory||[]),{status:st,at:now()}];
+function formatDateTime(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
 
-  const u={status:st,trackingNumber:tr,updatedAt:now(),statusHistory:h};
+function formatCurrency(amount) {
+    return `£${(amount || 0).toFixed(2)}`;
+}
 
-  if(st==="ready_to_ship" && o.remainingPayment>0){
-    u.readyToShipAt=now();
-    await notify(uid,"Urgent Payment",
-      `Clear remaining payment within 1 hour or order will cancel.`);
-  }
+function getStatusClass(status) {
+    switch(status) {
+        case 'processing': return 'status-processing';
+        case 'ready_to_ship': return 'status-ready';
+        case 'shipped': return 'status-shipped';
+        case 'out_for_delivery': return 'status-out';
+        case 'delivered': return 'status-delivered';
+        case 'cancelled': return 'status-cancelled';
+        default: return 'status-processing';
+    }
+}
 
-  if(st==="delivered"){u.remainingPayment=0;u.deliveredAt=now();}
+function getPaymentClass(paymentStatus) {
+    switch(paymentStatus) {
+        case 'fully_paid': return 'payment-paid';
+        case 'advance_paid': return 'payment-advance';
+        default: return 'payment-pending';
+    }
+}
 
-  await updateDoc(r,u);
-  await notify(uid,"Order Update",`Order ${ord} is now ${st.replaceAll("_"," ")}`);
-  loadOrders();
+function getPaymentText(paymentStatus) {
+    switch(paymentStatus) {
+        case 'fully_paid': return 'Paid';
+        case 'advance_paid': return 'Advance';
+        default: return 'Pending';
+    }
+}
+
+/* ---------- LOAD ORDERS ---------- */
+async function loadOrders() {
+    ordersContainer.innerHTML = `
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading orders...</p>
+        </div>
+    `;
+
+    try {
+        const snap = await getDocs(collectionGroup(db, "orders"));
+        allOrders = [];
+        
+        // Reset statistics
+        stats.totalOrders = 0;
+        stats.totalRevenue = 0;
+        stats.pendingAmount = 0;
+        stats.statusCounts = { 
+            processing: 0, 
+            ready_to_ship: 0, 
+            shipped: 0, 
+            out_for_delivery: 0,
+            delivered: 0, 
+            cancelled: 0 
+        };
+
+        for (const d of snap.docs) {
+            const order = d.data();
+            order._id = d.id;
+            order._ref = d.ref;
+
+            /* AUTO CANCEL LOGIC */
+            if (order.status === "ready_to_ship" && order.remainingPayment > 0) {
+                const readyTime = order.readyToShipAt || order.updatedAt;
+                if (hoursDiff(readyTime, now()) >= 1) {
+                    await updateDoc(doc(db, "users", order.userId, "orders", order._id), {
+                        status: "cancelled",
+                        cancelledAt: now()
+                    });
+                    await notify(order.userId, "Order Cancelled",
+                        `Order ${order.orderNumber} cancelled. Remaining payment not cleared. Advance non-refundable.`);
+                    continue;
+                }
+            }
+
+            allOrders.push(order);
+            
+            // Update statistics
+            stats.totalOrders++;
+            stats.totalRevenue += order.total || 0;
+            stats.pendingAmount += order.remainingPayment || 0;
+            
+            if (order.status && stats.statusCounts[order.status] !== undefined) {
+                stats.statusCounts[order.status]++;
+            }
+        }
+
+        // Update UI statistics
+        updateStatistics();
+        applyFilters();
+        
+    } catch (error) {
+        console.error("Error loading orders:", error);
+        ordersContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Error loading orders: ${error.message}</p>
+                <button class="btn btn-secondary" onclick="loadOrders()" style="margin-top: 15px;">
+                    <i class="fas fa-redo"></i> Try Again
+                </button>
+            </div>
+        `;
+    }
+}
+
+/* ---------- UPDATE STATISTICS ---------- */
+function updateStatistics() {
+    // Update counts
+    document.getElementById('totalOrders').textContent = stats.totalOrders;
+    document.getElementById('totalRevenue').textContent = formatCurrency(stats.totalRevenue);
+    document.getElementById('pendingAmount').textContent = formatCurrency(stats.pendingAmount);
+    
+    const avgOrder = stats.totalOrders > 0 ? stats.totalRevenue / stats.totalOrders : 0;
+    document.getElementById('avgOrder').textContent = formatCurrency(avgOrder);
+    
+    // Update status counts
+    document.getElementById('countAll').textContent = stats.totalOrders;
+    document.getElementById('countProcessing').textContent = stats.statusCounts.processing;
+    document.getElementById('countReady').textContent = stats.statusCounts.ready_to_ship;
+    document.getElementById('countShipped').textContent = stats.statusCounts.shipped;
+    document.getElementById('countOut').textContent = stats.statusCounts.out_for_delivery;
+    document.getElementById('countDelivered').textContent = stats.statusCounts.delivered;
+    document.getElementById('countCancelled').textContent = stats.statusCounts.cancelled;
+}
+
+/* ---------- FILTER AND SEARCH ---------- */
+function applyFilters() {
+    let result = [...allOrders];
+    
+    // Apply status filter
+    if (currentStatusFilter !== 'all') {
+        result = result.filter(order => order.status === currentStatusFilter);
+    }
+    
+    // Apply payment filter
+    if (currentPaymentFilter !== 'all') {
+        result = result.filter(order => order.paymentStatus === currentPaymentFilter);
+    }
+    
+    // Apply search
+    if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        result = result.filter(order => 
+            (order.orderNumber && order.orderNumber.toLowerCase().includes(query)) ||
+            (order.userName && order.userName.toLowerCase().includes(query)) ||
+            (order.userEmail && order.userEmail.toLowerCase().includes(query)) ||
+            (order.shippingAddress?.fullName && order.shippingAddress.fullName.toLowerCase().includes(query)) ||
+            (order.trackingNumber && order.trackingNumber.toLowerCase().includes(query))
+        );
+    }
+    
+    // Sort by date (newest first)
+    result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    filteredOrders = result;
+    renderOrders();
+}
+
+function renderOrders() {
+    if (filteredOrders.length === 0) {
+        ordersContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No orders found matching your criteria</p>
+                <button class="btn btn-secondary" onclick="clearFilters()" style="margin-top: 15px;">
+                    <i class="fas fa-filter"></i> Clear Filters
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('showingCount').textContent = '0';
+        document.getElementById('totalCount').textContent = allOrders.length;
+        return;
+    }
+    
+    let html = '';
+    
+    filteredOrders.forEach(order => {
+        const isExpanded = expandedOrderId === order._id;
+        const statusText = order.status ? order.status.replace(/_/g, ' ') : 'Processing';
+        
+        html += `
+            <div class="table-row ${isExpanded ? 'expanded' : ''}">
+                <!-- Order Details -->
+                <div class="order-cell">
+                    <div class="order-id">${order.orderNumber || 'N/A'}</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                        ${formatDateTime(order.createdAt)}
+                    </div>
+                </div>
+                
+                <!-- Customer -->
+                <div class="customer-cell">
+                    <div class="customer-name">${order.userName || 'Unknown'}</div>
+                    <div class="customer-email">${order.userEmail || 'No email'}</div>
+                </div>
+                
+                <!-- Amount -->
+                <div class="amount-cell">
+                    <div class="amount">${formatCurrency(order.total)}</div>
+                    <div style="font-size: 12px; color: #64748b;">
+                        Paid: ${formatCurrency(order.submittedAmount)}
+                    </div>
+                </div>
+                
+                <!-- Date -->
+                <div class="date-cell">
+                    ${formatDate(order.createdAt)}
+                </div>
+                
+                <!-- Status -->
+                <div class="status-cell">
+                    <span class="status-badge ${getStatusClass(order.status)}">
+                        ${statusText}
+                    </span>
+                </div>
+                
+                <!-- Payment -->
+                <div class="payment-cell">
+                    <span class="payment-badge ${getPaymentClass(order.paymentStatus)}">
+                        ${getPaymentText(order.paymentStatus)}
+                    </span>
+                </div>
+                
+                <!-- Actions -->
+                <div class="action-cell">
+                    <button class="icon-btn ${isExpanded ? 'primary' : ''}" 
+                            onclick="toggleDetails('${order._id}')"
+                            title="${isExpanded ? 'Hide Details' : 'View Details'}">
+                        <i class="fas fa-${isExpanded ? 'chevron-up' : 'chevron-down'}"></i>
+                    </button>
+                    <button class="icon-btn success" onclick="showPaymentModal('${order._id}')" title="Edit Payment">
+                        <i class="fas fa-credit-card"></i>
+                    </button>
+                    <button class="icon-btn primary" onclick="showStatusModal('${order._id}')" title="Update Status">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Expanded details
+        if (isExpanded) {
+            html += `
+                <div class="expanded-details" id="details-${order._id}">
+                    <div style="padding: 20px;">
+                        <!-- Quick Stats -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div style="background: var(--light); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border);">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 5px;">Total Amount</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--primary);">${formatCurrency(order.total)}</div>
+                            </div>
+                            <div style="background: var(--light); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border);">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 5px;">Amount Paid</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--success);">${formatCurrency(order.submittedAmount)}</div>
+                            </div>
+                            <div style="background: var(--light); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border);">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 5px;">Remaining</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--warning);">${formatCurrency(order.remainingPayment)}</div>
+                            </div>
+                            <div style="background: var(--light); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border);">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 5px;">Status</div>
+                                <div>
+                                    <span class="status-badge ${getStatusClass(order.status)}" style="font-size: 12px;">
+                                        ${statusText}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <button class="btn btn-success" onclick="showPaymentModal('${order._id}')">
+                                <i class="fas fa-credit-card"></i> Edit Payment
+                            </button>
+                            <button class="btn btn-primary" onclick="showStatusModal('${order._id}')">
+                                <i class="fas fa-edit"></i> Update Status
+                            </button>
+                            <button class="btn btn-warning" onclick="viewDetails('${order._id}')">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                        </div>
+                        
+                        <!-- Recent Activity -->
+                        <div style="background: var(--light); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border);">
+                            <div style="font-size: 13px; font-weight: 600; color: var(--dark); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-history"></i> Recent Activity
+                            </div>
+                            <div style="max-height: 150px; overflow-y: auto;">
+                                ${(order.statusHistory || []).slice(-5).map(history => `
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                                        <div style="font-size: 12px; color: var(--dark);">
+                                            ${history.status.replace(/_/g, ' ')}
+                                        </div>
+                                        <div style="font-size: 11px; color: #64748b;">
+                                            ${formatDateTime(history.at)}
+                                        </div>
+                                    </div>
+                                `).join('') || '<div style="font-size: 12px; color: #64748b; text-align: center; padding: 10px;">No activity yet</div>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    ordersContainer.innerHTML = html;
+    document.getElementById('showingCount').textContent = filteredOrders.length;
+    document.getElementById('totalCount').textContent = allOrders.length;
+}
+
+/* ---------- EVENT HANDLERS ---------- */
+window.toggleDetails = function(orderId) {
+    expandedOrderId = expandedOrderId === orderId ? null : orderId;
+    renderOrders();
 };
 
-loadOrders();
+window.viewDetails = function(orderId) {
+    const order = allOrders.find(o => o._id === orderId);
+    if (!order) return;
+    
+    let details = `Order Details: ${order.orderNumber}\n\n`;
+    details += `Customer: ${order.userName} (${order.userEmail})\n`;
+    details += `Total: ${formatCurrency(order.total)}\n`;
+    details += `Paid: ${formatCurrency(order.submittedAmount)}\n`;
+    details += `Remaining: ${formatCurrency(order.remainingPayment)}\n`;
+    details += `Status: ${order.status?.replace(/_/g, ' ') || 'Processing'}\n`;
+    details += `Created: ${formatDateTime(order.createdAt)}\n`;
+    if (order.trackingNumber) details += `Tracking: ${order.trackingNumber}\n`;
+    if (order.shippingAddress?.fullName) details += `Shipping: ${order.shippingAddress.fullName}\n`;
+    
+    alert(details);
+};
+
+// Filter event handlers
+document.querySelectorAll('#statusFilters .filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('#statusFilters .filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentStatusFilter = this.dataset.status;
+        applyFilters();
+    });
+});
+
+document.querySelectorAll('#paymentFilters .filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('#paymentFilters .filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentPaymentFilter = this.dataset.payment;
+        applyFilters();
+    });
+});
+
+// Search handler
+searchInput.addEventListener('input', function() {
+    searchQuery = this.value.trim();
+    applyFilters();
+});
+
+window.clearFilters = function() {
+    currentStatusFilter = 'all';
+    currentPaymentFilter = 'all';
+    searchQuery = '';
+    searchInput.value = '';
+    
+    document.querySelectorAll('#statusFilters .filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('#statusFilters .filter-btn[data-status="all"]').classList.add('active');
+    
+    document.querySelectorAll('#paymentFilters .filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('#paymentFilters .filter-btn[data-payment="all"]').classList.add('active');
+    
+    applyFilters();
+};
+
+/* ---------- PAYMENT MODAL FUNCTIONS ---------- */
+window.showPaymentModal = function(orderId) {
+    const order = allOrders.find(o => o._id === orderId);
+    if (!order) return;
+    
+    currentPaymentOrder = order;
+    
+    // Set modal values
+    document.getElementById('modalOrderTotal').textContent = formatCurrency(order.total);
+    document.getElementById('modalCurrentPaid').textContent = formatCurrency(order.submittedAmount || 0);
+    document.getElementById('modalCurrentRemaining').textContent = formatCurrency(order.remainingPayment || order.total - (order.submittedAmount || 0));
+    
+    // Set default values
+    document.getElementById('paidAmount').value = (order.submittedAmount || 0).toFixed(2);
+    document.getElementById('paymentType').value = 'edit';
+    document.getElementById('referenceNumber').value = order.transactionReference || '';
+    document.getElementById('paymentNotes').value = '';
+    
+    // Set default payment date to now
+    const now = new Date();
+    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('paymentDate').value = localDateTime;
+    
+    // Hide calculation results initially
+    document.getElementById('calculationResults').style.display = 'none';
+    
+    // Show modal
+    paymentModal.style.display = 'flex';
+    
+    // Calculate initial values
+    setTimeout(() => calculatePayment(), 100);
+};
+
+window.closePaymentModal = function() {
+    paymentModal.style.display = 'none';
+    currentPaymentOrder = null;
+};
+
+/* ---------- PAYMENT CALCULATION ---------- */
+window.calculatePayment = function() {
+    if (!currentPaymentOrder) return;
+    
+    const order = currentPaymentOrder;
+    const enteredAmount = parseFloat(document.getElementById('paidAmount').value) || 0;
+    const paymentType = document.getElementById('paymentType').value;
+    
+    let newPaidAmount = enteredAmount;
+    let newRemaining = Math.max(order.total - newPaidAmount, 0);
+    let paymentStatus = '';
+    
+    // Determine payment status based on remaining amount
+    if (newRemaining <= 0) {
+        paymentStatus = 'fully_paid';
+    } else if (newPaidAmount > 0 && newPaidAmount < order.total) {
+        paymentStatus = 'advance_paid';
+    } else {
+        paymentStatus = 'pending';
+    }
+    
+    // Override based on selected type
+    if (paymentType === 'full') {
+        newPaidAmount = order.total;
+        newRemaining = 0;
+        paymentStatus = 'fully_paid';
+        document.getElementById('paidAmount').value = order.total.toFixed(2);
+    } else if (paymentType === 'advance' && enteredAmount > 0) {
+        paymentStatus = 'advance_paid';
+        // Keep entered amount as is
+    }
+    
+    // Update display
+    document.getElementById('newPaidAmount').textContent = formatCurrency(newPaidAmount);
+    document.getElementById('newRemainingAmount').textContent = formatCurrency(newRemaining);
+    document.getElementById('newPaymentStatus').textContent = paymentStatus.replace(/_/g, ' ');
+    
+    // Show calculation results
+    document.getElementById('calculationResults').style.display = 'block';
+    
+    // Update button text
+    const btn = document.getElementById('savePaymentBtn');
+    if (paymentType === 'full') {
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Full Payment';
+        btn.className = 'btn btn-success';
+    } else if (paymentType === 'advance') {
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Advance Payment';
+        btn.className = 'btn btn-warning';
+    } else {
+        btn.innerHTML = '<i class="fas fa-save"></i> Save Payment';
+        btn.className = 'btn btn-primary';
+    }
+};
+
+/* ---------- SAVE PAYMENT ---------- */
+window.savePayment = async function() {
+    if (!currentPaymentOrder) return;
+    
+    const order = currentPaymentOrder;
+    const enteredAmount = parseFloat(document.getElementById('paidAmount').value);
+    const referenceNumber = document.getElementById('referenceNumber').value.trim();
+    const paymentDate = document.getElementById('paymentDate').value;
+    const paymentNotes = document.getElementById('paymentNotes').value.trim();
+    const paymentType = document.getElementById('paymentType').value;
+    
+    // Validation
+    if (!enteredAmount || enteredAmount < 0) {
+        alert("Please enter a valid payment amount");
+        return;
+    }
+    
+    if (!referenceNumber) {
+        alert("Please enter reference number");
+        return;
+    }
+    
+    if (!paymentDate) {
+        alert("Please select payment date");
+        return;
+    }
+    
+    const orderRef = doc(db, "users", order.userId, "orders", order._id);
+    
+    // Calculate new values
+    const newPaid = enteredAmount;
+    const total = order.total || 0;
+    const remaining = Math.max(total - newPaid, 0);
+    
+    // Determine payment status
+    let paymentStatus = '';
+    if (remaining <= 0) {
+        paymentStatus = 'fully_paid';
+    } else if (newPaid > 0 && newPaid < total) {
+        paymentStatus = 'advance_paid';
+    } else {
+        paymentStatus = 'pending';
+    }
+    
+    // Prepare update data
+    const updateData = {
+        paymentStatus: paymentStatus,
+        submittedAmount: newPaid,
+        remainingPayment: remaining,
+        transactionReference: referenceNumber,
+        paymentSubmittedAt: paymentDate ? new Date(paymentDate).toISOString() : now(),
+        updatedAt: now()
+    };
+    
+    // Add to payment history
+    const paymentHistory = order.paymentHistory || [];
+    paymentHistory.push({
+        type: paymentType === 'full' ? 'full' : (paymentType === 'advance' ? 'advance' : 'edit'),
+        amount: newPaid,
+        previousAmount: order.submittedAmount || 0,
+        reference: referenceNumber,
+        date: paymentDate ? new Date(paymentDate).toISOString() : now(),
+        notes: paymentNotes,
+        status: "confirmed",
+        updatedBy: "admin"
+    });
+    
+    updateData.paymentHistory = paymentHistory;
+    
+    try {
+        // Update order in Firestore
+        await updateDoc(orderRef, updateData);
+        
+        // Send notification
+        let message = '';
+        if (paymentType === 'full') {
+            message = `Full payment £${newPaid.toFixed(2)} confirmed for order ${order.orderNumber}. Reference: ${referenceNumber}`;
+        } else if (paymentType === 'advance') {
+            message = `Advance payment £${newPaid.toFixed(2)} received for order ${order.orderNumber}. Remaining: £${remaining.toFixed(2)}. Reference: ${referenceNumber}`;
+        } else {
+            message = `Payment updated to £${newPaid.toFixed(2)} for order ${order.orderNumber}. Remaining: £${remaining.toFixed(2)}. Reference: ${referenceNumber}`;
+        }
+        
+        if (paymentNotes) {
+            message += `\nNotes: ${paymentNotes}`;
+        }
+        
+        await notify(order.userId, "Payment Updated", message);
+        
+        // Show success message
+        alert(`Payment saved successfully!\n\nOrder: ${order.orderNumber}\nNew Amount: £${newPaid.toFixed(2)}\nRemaining: £${remaining.toFixed(2)}\nStatus: ${paymentStatus}\nReference: ${referenceNumber}`);
+        
+        // Close modal and refresh orders
+        closePaymentModal();
+        loadOrders();
+        
+    } catch (error) {
+        console.error("Error saving payment:", error);
+        alert("Error saving payment: " + error.message);
+    }
+};
+
+/* ---------- STATUS MODAL FUNCTIONS ---------- */
+window.showStatusModal = function(orderId) {
+    const order = allOrders.find(o => o._id === orderId);
+    if (!order) return;
+    
+    currentStatusOrder = order;
+    selectedStatus = order.status || 'processing';
+    
+    // Set modal values
+    document.getElementById('statusOrderNumber').textContent = `Order: ${order.orderNumber}`;
+    document.getElementById('statusCustomerInfo').textContent = `${order.userName} • ${order.userEmail}`;
+    document.getElementById('statusTracking').value = order.trackingNumber || '';
+    document.getElementById('statusNotes').value = '';
+    
+    // Set default status date to now
+    const now = new Date();
+    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('statusDateTime').value = localDateTime;
+    
+    // Select current status
+    selectStatus(selectedStatus);
+    
+    // Show modal
+    statusModal.style.display = 'flex';
+};
+
+window.closeStatusModal = function() {
+    statusModal.style.display = 'none';
+    currentStatusOrder = null;
+    selectedStatus = null;
+};
+
+window.selectStatus = function(status) {
+    selectedStatus = status;
+    
+    // Update all option buttons
+    document.querySelectorAll('.status-option').forEach(option => {
+        if (option.dataset.status === status) {
+            option.classList.add('selected');
+        } else {
+            option.classList.remove('selected');
+        }
+    });
+};
+
+/* ---------- SAVE STATUS ---------- */
+window.saveStatus = async function() {
+    if (!currentStatusOrder || !selectedStatus) {
+        alert("Please select a status");
+        return;
+    }
+    
+    const order = currentStatusOrder;
+    const trackingNumber = document.getElementById('statusTracking').value.trim();
+    const statusDateTime = document.getElementById('statusDateTime').value;
+    const statusNotes = document.getElementById('statusNotes').value.trim();
+    
+    if (!statusDateTime) {
+        alert("Please select status date and time");
+        return;
+    }
+    
+    const orderRef = doc(db, "users", order.userId, "orders", order._id);
+    const snap = await getDoc(orderRef);
+    const orderData = snap.data();
+    
+    // Prepare update data
+    const updateData = {
+        status: selectedStatus,
+        updatedAt: now(),
+        statusHistory: [...(orderData.statusHistory || []), { 
+            status: selectedStatus, 
+            at: statusDateTime ? new Date(statusDateTime).toISOString() : now(),
+            notes: statusNotes,
+            tracking: trackingNumber
+        }]
+    };
+    
+    // Add tracking number if provided
+    if (trackingNumber) {
+        updateData.trackingNumber = trackingNumber;
+    }
+    
+    // Handle specific status updates
+    if (selectedStatus === "ready_to_ship") {
+        updateData.readyToShipAt = statusDateTime ? new Date(statusDateTime).toISOString() : now();
+        if (orderData.remainingPayment > 0) {
+            await notify(order.userId, "Payment Pending",
+                `Remaining payment clear within 1 hour or order will be cancelled. Advance non-refundable.`);
+        }
+    }
+    
+    if (selectedStatus === "shipped") {
+        updateData.shippedAt = statusDateTime ? new Date(statusDateTime).toISOString() : now();
+    }
+    
+    if (selectedStatus === "out_for_delivery") {
+        updateData.outForDeliveryAt = statusDateTime ? new Date(statusDateTime).toISOString() : now();
+    }
+    
+    if (selectedStatus === "delivered") {
+        updateData.deliveredAt = statusDateTime ? new Date(statusDateTime).toISOString() : now();
+        updateData.remainingPayment = 0;
+        updateData.paymentStatus = 'fully_paid';
+    }
+    
+    if (selectedStatus === "cancelled") {
+        updateData.cancelledAt = statusDateTime ? new Date(statusDateTime).toISOString() : now();
+    }
+    
+    try {
+        await updateDoc(orderRef, updateData);
+        
+        // Send notification
+        let message = `Order ${order.orderNumber} is now ${selectedStatus.replace(/_/g, ' ')}`;
+        if (trackingNumber) {
+            message += `\nTracking Number: ${trackingNumber}`;
+        }
+        if (statusNotes) {
+            message += `\nNotes: ${statusNotes}`;
+        }
+        
+        await notify(order.userId, "Order Status Updated", message);
+        
+        // Show success message
+        alert(`Status updated successfully!\n\nOrder: ${order.orderNumber}\nNew Status: ${selectedStatus.replace(/_/g, ' ')}\nDate: ${formatDateTime(statusDateTime)}${trackingNumber ? `\nTracking: ${trackingNumber}` : ''}`);
+        
+        // Close modal and refresh orders
+        closeStatusModal();
+        loadOrders();
+        
+    } catch (error) {
+        console.error("Error updating status:", error);
+        alert("Error updating status: " + error.message);
+    }
+};
+
+/* ---------- NOTIFICATION ---------- */
+async function notify(userId, title, msg) {
+    const ref = collection(db, "users", userId, "notifications");
+    await addDoc(ref, {
+        title,
+        message: msg,
+        createdAt: now(),
+        read: false
+    });
+}
+
+/* ---------- EXPORT DATA ---------- */
+window.exportData = function() {
+    const data = filteredOrders.map(order => ({
+        'Order Number': order.orderNumber,
+        'Customer': order.userName,
+        'Email': order.userEmail,
+        'Total': order.total,
+        'Paid': order.submittedAmount,
+        'Remaining': order.remainingPayment,
+        'Status': order.status,
+        'Payment Status': order.paymentStatus,
+        'Created Date': formatDateTime(order.createdAt),
+        'Tracking Number': order.trackingNumber || ''
+    }));
+    
+    // Simple CSV export
+    const csv = [
+        Object.keys(data[0]).join(','),
+        ...data.map(row => Object.values(row).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-export-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+};
+
+// Initialize
+document.addEventListener('DOMContentLoaded', loadOrders);
 </script>
 </body>
 </html>
