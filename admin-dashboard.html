@@ -4,36 +4,37 @@
 <meta charset="UTF-8">
 <title>IRYA STONE – Admin Orders</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
 body{font-family:Segoe UI;background:#f4f6f8;margin:0;padding:15px}
-h2{margin-bottom:10px}
-.order{background:#fff;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-.flex{display:flex;gap:12px;align-items:center;margin-bottom:6px}
-.product-img{width:70px;height:70px;border-radius:6px;object-fit:cover}
-.badge{padding:4px 8px;border-radius:6px;font-size:12px;margin-left:6px}
+.order{background:#fff;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 6px 16px rgba(0,0,0,.08)}
+.flex{display:flex;gap:12px;align-items:center}
+.product-img{width:70px;height:70px;border-radius:8px;object-fit:cover}
+.badge{padding:4px 10px;border-radius:8px;font-size:12px;margin-right:6px}
 .paid{background:#28a745;color:#fff}
 .advance{background:#ffc107}
-.processing{background:#6c757d;color:#fff}
-.ready{background:#20c997;color:#fff}
+.processing{background:#6f42c1;color:#fff}
 .shipped{background:#17a2b8;color:#fff}
 .out{background:#fd7e14;color:#fff}
 .delivered{background:#007bff;color:#fff}
 .cancelled{background:#dc3545;color:#fff}
-select,input,button{padding:6px;margin-top:6px;width:100%}
-button{cursor:pointer;background:#000;color:#fff;border:none;border-radius:6px}
+select,input,button{padding:7px;margin-top:6px;width:100%}
+button{cursor:pointer;background:#000;color:#fff;border:none;border-radius:8px}
+hr{border:none;border-top:1px solid #ddd;margin:10px 0}
 .timeline{font-size:12px;color:#555;margin-top:8px}
 </style>
 </head>
+
 <body>
+
 <h2>Admin Orders Panel</h2>
 <div id="orders"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import {
-  getFirestore, collectionGroup, getDocs, doc,
-  getDoc, updateDoc, addDoc, collection,
-  query, orderBy, limit, deleteDoc
+  getFirestore, collectionGroup, getDocs,
+  doc, getDoc, updateDoc, addDoc, collection
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const app = initializeApp({
@@ -44,28 +45,36 @@ const app = initializeApp({
 const db = getFirestore(app);
 const box = document.getElementById("orders");
 
-/* ================= LOAD ORDERS ================= */
+/* ---------- UTIL ---------- */
+const nowISO = ()=> new Date().toISOString();
+const hoursBetween = (a,b)=> (new Date(b)-new Date(a))/36e5;
+
+async function notify(userId,title,msg){
+  await addDoc(collection(db,"users",userId,"notifications"),{
+    title, message:msg, createdAt:nowISO(), read:false
+  });
+}
+
+/* ---------- LOAD ORDERS ---------- */
 async function loadOrders(){
   box.innerHTML="";
   const snap = await getDocs(collectionGroup(db,"orders"));
   let orders=[];
-
-  snap.forEach(d=>{
-    const o=d.data();
-    o._docId=d.id;
-    orders.push(o);
-  });
-
+  snap.forEach(d=>{ let o=d.data(); o._id=d.id; orders.push(o); });
   orders.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
 
   for(const o of orders){
     if(!o.items?.length) continue;
 
-    // AUTO CANCEL IF ADVANCE NOT PAID IN 24 HRS
+    /* AUTO CANCEL */
     if(o.paymentStatus!=="fully_paid" && o.createdAt){
-      const diff=(Date.now()-new Date(o.createdAt).getTime())/3600000;
-      if(diff>24 && o.status!=="cancelled"){
-        await autoCancel(o);
+      if(hoursBetween(o.createdAt,nowISO())>=24 && o.status!=="cancelled"){
+        await updateDoc(doc(db,"users",o.userId,"orders",o._id),{
+          status:"cancelled",
+          cancelledAt:nowISO()
+        });
+        await notify(o.userId,"Order Cancelled",
+          `Order ${o.orderNumber} cancelled due to pending payment.`);
         continue;
       }
     }
@@ -75,47 +84,62 @@ async function loadOrders(){
       o.status==="delivered"?"delivered":
       o.status==="out_for_delivery"?"out":
       o.status==="shipped"?"shipped":
-      o.status==="ready_to_ship"?"ready":
       o.status==="processing"?"processing":
       o.paymentStatus==="fully_paid"?"paid":"advance";
 
-    let productsHTML="";
+    let products="";
     for(const it of o.items){
       const ps=await getDoc(doc(db,"products",it.id));
       const p=ps.exists()?ps.data():{};
       const img=p.images?.[0]||"https://via.placeholder.com/70";
-      const title=p.title||it.name;
-      productsHTML+=`
-        <div class="flex">
-          <img src="${img}" class="product-img">
-          <div><b>${title}</b><br>Qty ${it.quantity} | £${it.totalPrice}</div>
-        </div>`;
+      products+=`
+      <div class="flex">
+        <img src="${img}" class="product-img">
+        <div>
+          <b>${p.title||it.name}</b><br>
+          Qty ${it.quantity} | £${it.totalPrice}
+        </div>
+      </div>`;
     }
 
     box.innerHTML+=`
     <div class="order">
       <b>${o.orderNumber}</b>
       <span class="badge ${badgeClass}">${o.status||"pending"}</span>
+
       <p>${o.userName} – ${o.userEmail}</p>
       <p>Total £${o.total} | Paid £${o.submittedAmount||0} | Remaining £${o.remainingPayment||0}</p>
 
-      ${productsHTML}
+      ${products}
 
-      <select id="status-${o._docId}">
-        <option value="">Update Status</option>
+      <hr>
+      <b>Payment Update</b>
+      <select id="pay-${o._id}">
+        <option value="">Select</option>
+        <option value="advance">Advance Confirm</option>
+        <option value="full">Full Payment Confirm</option>
+      </select>
+      <input id="paid-${o._id}" type="number" placeholder="Paid Amount">
+      <input id="txn-${o._id}" placeholder="Transaction Reference">
+      <button onclick="updatePayment('${o.userId}','${o._id}','${o.orderNumber}',${o.total})">
+        Confirm Payment
+      </button>
+
+      <hr>
+      <b>Order Status</b>
+      <select id="status-${o._id}">
+        <option value="">Select Status</option>
         <option value="processing">Processing</option>
-        <option value="ready_to_ship">Ready to Ship</option>
         <option value="shipped">Shipped</option>
         <option value="out_for_delivery">Out for Delivery</option>
         <option value="delivered">Delivered</option>
         <option value="cancelled">Cancelled</option>
       </select>
-
-      <input id="track-${o._docId}" placeholder="Tracking Number">
-
-      <button onclick="updateStatus('${o.userId}','${o._docId}','${o.orderNumber}')">Update Order</button>
-
-      <button onclick="confirmFullPayment('${o.userId}','${o._docId}','${o.orderNumber}')">Confirm Full Payment</button>
+      <input id="track-${o._id}" placeholder="Tracking Number">
+      <input type="datetime-local" id="delivery-${o._id}">
+      <button onclick="updateStatus('${o.userId}','${o._id}','${o.orderNumber}')">
+        Update Order
+      </button>
 
       <div class="timeline">
         ${(o.statusHistory||[]).map(h=>`• ${h.status} – ${h.at}`).join("<br>")}
@@ -124,75 +148,56 @@ async function loadOrders(){
   }
 }
 
-/* ================= UPDATE STATUS ================= */
-window.updateStatus=async(userId,orderId,orderNumber)=>{
-  const status=document.getElementById(`status-${orderId}`).value;
-  if(!status) return alert("Select status");
+/* ---------- PAYMENT ---------- */
+window.updatePayment = async (userId,id,ord,total)=>{
+  const type=document.getElementById(`pay-${id}`).value;
+  const paid=Number(document.getElementById(`paid-${id}`).value);
+  const txn=document.getElementById(`txn-${id}`).value||"";
+  if(!type||!paid) return alert("Payment info missing");
 
-  const ref=doc(db,"users",userId,"orders",orderId);
-  const snap=await getDoc(ref);
-  if(!snap.exists()) return;
-
-  const now=new Date().toISOString();
-  const o=snap.data();
-
-  const update={
-    status,
-    updatedAt:now,
-    statusHistory:[...(o.statusHistory||[]),{status,at:now}]
-  };
-
-  if(status==="shipped"){
-    update.shippingStatus="shipped";
-    update.trackingNumber=document.getElementById(`track-${orderId}`).value||"";
-  }
-  if(status==="delivered") update.deliveredAt=now;
-  if(status==="cancelled") update.cancelledAt=now;
-
-  await updateDoc(ref,update);
-  await pushNotification(userId,`Order ${orderNumber} is ${status}`);
-  loadOrders();
-};
-
-/* ================= PAYMENT CONFIRM ================= */
-window.confirmFullPayment=async(userId,orderId,orderNumber)=>{
-  const ref=doc(db,"users",userId,"orders",orderId);
-  const snap=await getDoc(ref);
-  if(!snap.exists()) return;
-
-  const o=snap.data();
-  const now=new Date().toISOString();
+  let remaining=Math.max(total-paid,0);
+  const ref=doc(db,"users",userId,"orders",id);
 
   await updateDoc(ref,{
-    paymentStatus:"fully_paid",
-    submittedAmount:o.total,
-    remainingPayment:0,
-    updatedAt:now
+    paymentStatus:type==="full"?"fully_paid":"advance_paid",
+    submittedAmount:paid,
+    remainingPayment:remaining,
+    transactionReference:txn,
+    updatedAt:nowISO()
   });
 
-  await pushNotification(userId,`Full payment confirmed for ${orderNumber}`);
+  await notify(userId,"Payment Confirmed",
+    type==="full"
+    ? `Full payment £${paid} confirmed for ${ord}.`
+    : `Advance £${paid} received. Remaining £${remaining}.`);
+
   loadOrders();
 };
 
-/* ================= AUTO CANCEL ================= */
-async function autoCancel(o){
-  const ref=doc(db,"users",o.userId,"orders",o._docId);
-  const now=new Date().toISOString();
-  await updateDoc(ref,{status:"cancelled",cancelledAt:now});
-  await pushNotification(o.userId,`Order ${o.orderNumber} auto-cancelled (payment not received)`);
-}
+/* ---------- STATUS ---------- */
+window.updateStatus = async (userId,id,ord)=>{
+  const st=document.getElementById(`status-${id}`).value;
+  if(!st) return;
 
-/* ================= NOTIFICATIONS (MAX 10) ================= */
-async function pushNotification(userId,message){
-  const ref=collection(db,"users",userId,"notifications");
-  await addDoc(ref,{title:"Order Update",message,createdAt:new Date().toISOString(),read:false});
+  const upd={
+    status:st,
+    updatedAt:nowISO(),
+    statusHistory:[...(await getDoc(doc(db,"users",userId,"orders",id))).data().statusHistory||[],
+      {status:st,at:nowISO()}]
+  };
 
-  const q=query(ref,orderBy("createdAt","desc"));
-  const snap=await getDocs(q);
-  if(snap.size>10){
-    snap.docs.slice(10).forEach(d=>deleteDoc(d.ref));
+  if(st==="shipped"){
+    upd.trackingNumber=document.getElementById(`track-${id}`).value||"";
   }
-}
+  if(st==="delivered"){
+    upd.deliveredAt=nowISO();
+    upd.remainingPayment=0;
+  }
+
+  await updateDoc(doc(db,"users",userId,"orders",id),upd);
+  await notify(userId,"Order Update",`Order ${ord} is now ${st.replaceAll("_"," ")}`);
+  loadOrders();
+};
 
 loadOrders();
 </script>
