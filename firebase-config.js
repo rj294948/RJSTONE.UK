@@ -1,1127 +1,399 @@
-// ==============================================
-// firebase-config.js - COMPLETE WITH AUTH & FIRESTORE
-// ==============================================
-
-// Firebase Core
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-analytics.js";
-
-// Firestore Database
+// firebase-config.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { 
-  getFirestore,
-  collection,
-  doc,
-  setDoc,
-  getDoc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  startAfter,
-  onSnapshot,
-  serverTimestamp,
-  Timestamp,
-  writeBatch,
-  arrayUnion,
-  arrayRemove,
-  increment
-} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+    getAuth, 
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
+    signOut,
+    sendPasswordResetEmail,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    getDoc, 
+    updateDoc,
+    collection,
+    addDoc,
+    query,
+    where,
+    getDocs,
+    orderBy,
+    limit,
+    deleteDoc
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// Authentication
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updateProfile,
-  updatePassword,
-  sendPasswordResetEmail,
-  GoogleAuthProvider,
-  signInWithPopup,
-  EmailAuthProvider,
-  reauthenticateWithCredential
-} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-
-// ==============================================
-// FIREBASE CONFIGURATION
-// ==============================================
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-  authDomain: "iryastone-uk.firebaseapp.com",
-  projectId: "iryastone-uk",
-  storageBucket: "iryastone-uk.firebasestorage.app",
-  messagingSenderId: "110940910896",
-  appId: "1:110940910896:web:b25e92127118665e5c84f5",
-  measurementId: "G-6YM1FLYN48"
+    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+    authDomain: "iryastone-uk.firebaseapp.com",
+    projectId: "iryastone-uk",
+    storageBucket: "iryastone-uk.firebasestorage.app",
+    messagingSenderId: "110940910896",
+    appId: "1:110940910896:web:b25e92127118665e5c84f5",
+    measurementId: "G-6YM1FLYN48"
 };
 
-// ==============================================
-// INITIALIZE FIREBASE
-// ==============================================
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app);
 const auth = getAuth(app);
-
-// Initialize Google Auth Provider
+const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({
-  prompt: "select_account"
-});
 
-// ==============================================
-// AUTHENTICATION FUNCTIONS
-// ==============================================
+// Get current user ID
+function getCurrentUserId() {
+    const user = auth.currentUser;
+    return user ? user.uid : null;
+}
 
-// Register new user
-const registerUser = async (email, password, userData) => {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    
-    // Update profile if name provided
-    if (userData.displayName) {
-      await updateProfile(user, {
-        displayName: userData.displayName
-      });
-    }
-    
-    // Create user document in Firestore
-    const userDoc = {
-      uid: user.uid,
-      email: user.email,
-      displayName: userData.displayName || userData.name || '',
-      phone: userData.phone || '',
-      createdAt: serverTimestamp(),
-      lastLogin: serverTimestamp(),
-      role: 'customer',
-      address: userData.address || null,
-      city: userData.city || '',
-      postcode: userData.postcode || '',
-      country: 'UK',
-      preferences: {
-        newsletter: userData.newsletter || true,
-        marketing: userData.marketing || false
-      }
-    };
-    
-    await setDoc(doc(db, "users", user.uid), userDoc);
-    
-    return { success: true, user: user };
-  } catch (error) {
-    console.error("Registration error:", error);
-    return { 
-      success: false, 
-      error: error.message,
-      errorCode: error.code 
-    };
-  }
-};
-
-// Login user
-const loginUser = async (email, password) => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    
-    // Update last login
-    await updateDoc(doc(db, "users", user.uid), {
-      lastLogin: serverTimestamp()
-    });
-    
-    return { success: true, user: user };
-  } catch (error) {
-    console.error("Login error:", error);
-    return { 
-      success: false, 
-      error: error.message,
-      errorCode: error.code 
-    };
-  }
-};
-
-// Google Sign-in
-const signInWithGoogle = async () => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-    
-    // Check if user document exists
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    
-    if (!userDoc.exists()) {
-      // Create new user document
-      const userData = {
+// Store user data in localStorage
+function storeUserData(user) {
+    const userData = {
         uid: user.uid,
         email: user.email,
         displayName: user.displayName,
-        photoURL: user.photoURL,
-        createdAt: serverTimestamp(),
-        lastLogin: serverTimestamp(),
-        role: 'customer',
-        provider: 'google'
-      };
-      
-      await setDoc(doc(db, "users", user.uid), userData);
-    } else {
-      // Update last login
-      await updateDoc(doc(db, "users", user.uid), {
-        lastLogin: serverTimestamp()
-      });
+        phoneNumber: user.phoneNumber,
+        photoURL: user.photoURL
+    };
+    localStorage.setItem('irya_stone_user', JSON.stringify(userData));
+}
+
+// Clear user data from localStorage
+function clearUserData() {
+    localStorage.removeItem('irya_stone_user');
+    localStorage.removeItem('irya_stone_notifications');
+}
+
+// User Registration
+async function registerUser(email, password, additionalData = {}) {
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Store user data in Firestore
+        await setDoc(doc(db, "users", user.uid), {
+            email: user.email,
+            displayName: additionalData.displayName || "",
+            phone: additionalData.phone || "",
+            newsletter: additionalData.newsletter || false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        });
+        
+        // Store in localStorage
+        storeUserData(user);
+        
+        return { success: true, user: user };
+    } catch (error) {
+        console.error("Registration error:", error);
+        return { success: false, error: error.message };
     }
-    
-    return { success: true, user: user };
-  } catch (error) {
-    console.error("Google sign-in error:", error);
-    return { 
-      success: false, 
-      error: error.message,
-      errorCode: error.code 
-    };
-  }
-};
+}
 
-// Logout user
-const logoutUser = async () => {
-  try {
-    await signOut(auth);
-    return { success: true };
-  } catch (error) {
-    console.error("Logout error:", error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
-  }
-};
+// User Login
+async function loginUser(email, password) {
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Store in localStorage
+        storeUserData(user);
+        
+        return { success: true, user: user };
+    } catch (error) {
+        console.error("Login error:", error);
+        return { success: false, error: error.message };
+    }
+}
 
-// Get current user
-const getCurrentUser = () => {
-  return auth.currentUser;
-};
+// Google Sign In
+async function signInWithGoogle() {
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
+        
+        // Check if user exists in Firestore
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        
+        if (!userDoc.exists()) {
+            // Create new user document
+            await setDoc(doc(db, "users", user.uid), {
+                email: user.email,
+                displayName: user.displayName || "",
+                phone: user.phoneNumber || "",
+                photoURL: user.photoURL || "",
+                googleSignIn: true,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            });
+        } else {
+            // Update existing user
+            await updateDoc(doc(db, "users", user.uid), {
+                lastLogin: new Date().toISOString(),
+                photoURL: user.photoURL || userDoc.data().photoURL
+            });
+        }
+        
+        // Store in localStorage
+        storeUserData(user);
+        
+        return { success: true, user: user };
+    } catch (error) {
+        console.error("Google sign-in error:", error);
+        return { success: false, error: error.message };
+    }
+}
 
-// Check if user is logged in
-const isUserLoggedIn = () => {
-  return auth.currentUser !== null;
-};
+// Sign Out
+async function signOutUser() {
+    try {
+        await signOut(auth);
+        clearUserData();
+        return { success: true };
+    } catch (error) {
+        console.error("Sign out error:", error);
+        return { success: false, error: error.message };
+    }
+}
 
-// Password reset
-const resetPassword = async (email) => {
-  try {
-    await sendPasswordResetEmail(auth, email);
-    return { success: true };
-  } catch (error) {
-    console.error("Password reset error:", error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
-  }
-};
+// Reset Password
+async function resetPassword(email) {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        return { success: true };
+    } catch (error) {
+        console.error("Password reset error:", error);
+        return { success: false, error: error.message };
+    }
+}
 
-// ==============================================
-// USER PROFILE FUNCTIONS
-// ==============================================
+// Subscribe to Auth State Changes
+function subscribeToAuth(callback) {
+    return onAuthStateChanged(auth, (user) => {
+        if (user) {
+            storeUserData(user);
+        } else {
+            clearUserData();
+        }
+        callback(user);
+    });
+}
+
+// ============================================
+// NOTIFICATION FUNCTIONS
+// ============================================
+
+// Create notification for user
+async function createNotification(userId, notificationData) {
+    try {
+        const notification = {
+            ...notificationData,
+            userId: userId,
+            isRead: false,
+            createdAt: new Date().toISOString(),
+            readAt: null
+        };
+        
+        const notificationsRef = collection(db, "users", userId, "notifications");
+        const docRef = await addDoc(notificationsRef, notification);
+        
+        // Update local storage
+        await updateLocalNotifications(userId);
+        
+        return { success: true, id: docRef.id };
+    } catch (error) {
+        console.error("Create notification error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Get user notifications
+async function getUserNotifications(userId, limitCount = 20) {
+    try {
+        // Check local storage first for cached notifications
+        const cachedNotifications = localStorage.getItem(`irya_notifications_${userId}`);
+        if (cachedNotifications) {
+            const parsed = JSON.parse(cachedNotifications);
+            // Return cached if less than 5 minutes old
+            if (parsed.timestamp && (Date.now() - parsed.timestamp < 300000)) {
+                return { success: true, notifications: parsed.notifications };
+            }
+        }
+        
+        // Fetch from Firestore
+        const notificationsRef = collection(db, "users", userId, "notifications");
+        const q = query(notificationsRef, orderBy("createdAt", "desc"), limit(limitCount));
+        const querySnapshot = await getDocs(q);
+        
+        const notifications = [];
+        querySnapshot.forEach((doc) => {
+            notifications.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Cache in localStorage
+        localStorage.setItem(`irya_notifications_${userId}`, JSON.stringify({
+            notifications: notifications,
+            timestamp: Date.now()
+        }));
+        
+        return { success: true, notifications: notifications };
+    } catch (error) {
+        console.error("Get notifications error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Mark notification as read
+async function markNotificationAsRead(userId, notificationId) {
+    try {
+        const notificationRef = doc(db, "users", userId, "notifications", notificationId);
+        await updateDoc(notificationRef, {
+            isRead: true,
+            readAt: new Date().toISOString()
+        });
+        
+        // Update local storage
+        await updateLocalNotifications(userId);
+        
+        return { success: true };
+    } catch (error) {
+        console.error("Mark as read error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Mark all notifications as read
+async function markAllNotificationsAsRead(userId) {
+    try {
+        const notifications = await getUserNotifications(userId, 50);
+        if (!notifications.success) return notifications;
+        
+        const batchPromises = notifications.notifications
+            .filter(n => !n.isRead)
+            .map(n => markNotificationAsRead(userId, n.id));
+        
+        await Promise.all(batchPromises);
+        
+        return { success: true };
+    } catch (error) {
+        console.error("Mark all as read error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Delete notification
+async function deleteNotification(userId, notificationId) {
+    try {
+        await deleteDoc(doc(db, "users", userId, "notifications", notificationId));
+        
+        // Update local storage
+        await updateLocalNotifications(userId);
+        
+        return { success: true };
+    } catch (error) {
+        console.error("Delete notification error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Get unread notification count
+async function getUnreadNotificationCount(userId) {
+    try {
+        const notifications = await getUserNotifications(userId, 100);
+        if (!notifications.success) return { success: false, error: notifications.error };
+        
+        const unreadCount = notifications.notifications.filter(n => !n.isRead).length;
+        return { success: true, count: unreadCount };
+    } catch (error) {
+        console.error("Get unread count error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Update local notifications cache
+async function updateLocalNotifications(userId) {
+    try {
+        const result = await getUserNotifications(userId);
+        if (result.success) {
+            localStorage.removeItem(`irya_notifications_${userId}`);
+        }
+    } catch (error) {
+        console.error("Update local cache error:", error);
+    }
+}
+
+// Send admin notification (for admin users)
+async function sendAdminNotification(adminId, notificationData) {
+    try {
+        const notification = {
+            ...notificationData,
+            isAdmin: true,
+            isRead: false,
+            createdAt: new Date().toISOString()
+        };
+        
+        const notificationsRef = collection(db, "users", adminId, "adminNotifications");
+        const docRef = await addDoc(notificationsRef, notification);
+        
+        return { success: true, id: docRef.id };
+    } catch (error) {
+        console.error("Send admin notification error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Check if user is admin
+async function isUserAdmin(userId) {
+    try {
+        const userDoc = await getDoc(doc(db, "users", userId));
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            return userData.isAdmin === true;
+        }
+        return false;
+    } catch (error) {
+        console.error("Check admin error:", error);
+        return false;
+    }
+}
 
 // Get user data
-const getUserData = async (userId = null) => {
-  try {
-    const uid = userId || auth.currentUser?.uid;
-    if (!uid) return null;
-    
-    const userDoc = await getDoc(doc(db, "users", uid));
-    
-    if (userDoc.exists()) {
-      const data = userDoc.data();
-      return {
-        id: userDoc.id,
-        ...data,
-        // Convert timestamps if needed
-        createdAt: data.createdAt?.toDate() || null,
-        lastLogin: data.lastLogin?.toDate() || null
-      };
-    }
-    return null;
-  } catch (error) {
-    console.error("Error getting user data:", error);
-    return null;
-  }
-};
-
-// Update user profile
-const updateUserProfile = async (updates) => {
-  try {
-    const user = auth.currentUser;
-    if (!user) throw new Error("No user logged in");
-    
-    // Update in Firebase Auth
-    if (updates.displayName) {
-      await updateProfile(user, {
-        displayName: updates.displayName
-      });
-    }
-    
-    // Update in Firestore
-    const userUpdates = { ...updates };
-    delete userUpdates.email; // Can't change email directly
-    
-    await updateDoc(doc(db, "users", user.uid), {
-      ...userUpdates,
-      updatedAt: serverTimestamp()
-    });
-    
-    return { success: true };
-  } catch (error) {
-    console.error("Profile update error:", error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
-  }
-};
-
-// ==============================================
-// PRODUCT FUNCTIONS (Based on your data structure)
-// ==============================================
-
-// Get all products
-const getAllProducts = async (limitCount = 50) => {
-  try {
-    const q = query(
-      collection(db, "products"),
-      orderBy("created_at", "desc"),
-      limit(limitCount)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const products = [];
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      products.push({
-        id: doc.id,
-        name: data.name || data.stone_name || 'Stone Product',
-        stone_name: data.stone_name || data.name || '',
-        category: data.category || '',
-        type: data.type || 'Natural Stone',
-        color: data.color || '',
-        price: data.price || '£0.00',
-        price_unit: data.price_unit || 'sqft',
-        description: data.description || '',
-        image: data.image || '',
-        size: data.size || '',
-        thickness: data.thickness || '',
-        finish: data.finish || 'Natural',
-        usage: data.usage || '',
-        density: data.density || '',
-        compressive_strength: data.compressive_strength || '',
-        water_absorption: data.water_absorption || '',
-        status: data.status || 'active',
-        created_at: data.created_at?.toDate() || null
-      });
-    });
-    
-    return { success: true, products: products };
-  } catch (error) {
-    console.error("Error getting products:", error);
-    return { 
-      success: false, 
-      error: error.message,
-      products: [] 
-    };
-  }
-};
-
-// Get featured products (active status)
-const getFeaturedProducts = async (limitCount = 8) => {
-  try {
-    const q = query(
-      collection(db, "products"),
-      where("status", "==", "active"),
-      orderBy("created_at", "desc"),
-      limit(limitCount)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const products = [];
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      products.push({
-        id: doc.id,
-        name: data.name || data.stone_name || 'Stone Product',
-        stone_name: data.stone_name || '',
-        category: data.category || '',
-        price: data.price || '£0.00',
-        description: data.description || '',
-        image: data.image || '',
-        color: data.color || '',
-        size: data.size || ''
-      });
-    });
-    
-    return { success: true, products: products };
-  } catch (error) {
-    console.error("Error getting featured products:", error);
-    return { 
-      success: false, 
-      error: error.message,
-      products: [] 
-    };
-  }
-};
-
-// Get products by category
-const getProductsByCategory = async (category, limitCount = 20) => {
-  try {
-    const q = query(
-      collection(db, "products"),
-      where("category", "==", category),
-      where("status", "==", "active"),
-      orderBy("created_at", "desc"),
-      limit(limitCount)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const products = [];
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      products.push({
-        id: doc.id,
-        name: data.name || data.stone_name || 'Stone Product',
-        stone_name: data.stone_name || '',
-        category: data.category || '',
-        price: data.price || '£0.00',
-        description: data.description || '',
-        image: data.image || '',
-        color: data.color || '',
-        size: data.size || '',
-        thickness: data.thickness || ''
-      });
-    });
-    
-    return { success: true, products: products };
-  } catch (error) {
-    console.error("Error getting products by category:", error);
-    return { 
-      success: false, 
-      error: error.message,
-      products: [] 
-    };
-  }
-};
-
-// Get product by ID
-const getProductById = async (productId) => {
-  try {
-    const productDoc = await getDoc(doc(db, "products", productId));
-    
-    if (productDoc.exists()) {
-      const data = productDoc.data();
-      return {
-        success: true,
-        product: {
-          id: productDoc.id,
-          name: data.name || data.stone_name || 'Stone Product',
-          stone_name: data.stone_name || '',
-          category: data.category || '',
-          type: data.type || 'Natural Stone',
-          color: data.color || '',
-          price: data.price || '£0.00',
-          price_unit: data.price_unit || 'sqft',
-          description: data.description || '',
-          image: data.image || '',
-          size: data.size || '',
-          thickness: data.thickness || '',
-          finish: data.finish || 'Natural',
-          usage: data.usage || '',
-          density: data.density || '',
-          compressive_strength: data.compressive_strength || '',
-          water_absorption: data.water_absorption || '',
-          status: data.status || 'active',
-          created_at: data.created_at?.toDate() || null
-        }
-      };
-    } else {
-      return { 
-        success: false, 
-        error: "Product not found" 
-      };
-    }
-  } catch (error) {
-    console.error("Error getting product:", error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
-  }
-};
-
-// Search products
-const searchProducts = async (searchTerm, limitCount = 20) => {
-  try {
-    // Get all products first (Firebase doesn't support full-text search natively)
-    const q = query(
-      collection(db, "products"),
-      where("status", "==", "active"),
-      orderBy("name"),
-      limit(50)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const products = [];
-    const searchLower = searchTerm.toLowerCase();
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      const name = data.name || data.stone_name || '';
-      const category = data.category || '';
-      const description = data.description || '';
-      const color = data.color || '';
-      
-      // Simple client-side search
-      if (name.toLowerCase().includes(searchLower) ||
-          category.toLowerCase().includes(searchLower) ||
-          description.toLowerCase().includes(searchLower) ||
-          color.toLowerCase().includes(searchLower)) {
-        
-        products.push({
-          id: doc.id,
-          name: name,
-          stone_name: data.stone_name || '',
-          category: category,
-          price: data.price || '£0.00',
-          description: description,
-          image: data.image || '',
-          color: color
-        });
-      }
-    });
-    
-    // Limit results
-    const limitedProducts = products.slice(0, limitCount);
-    
-    return { success: true, products: limitedProducts };
-  } catch (error) {
-    console.error("Error searching products:", error);
-    return { 
-      success: false, 
-      error: error.message,
-      products: [] 
-    };
-  }
-};
-
-// ==============================================
-// CART FUNCTIONS
-// ==============================================
-
-// Add to cart
-const addToCart = async (productId, quantity = 1, productData = null) => {
-  try {
-    const user = auth.currentUser;
-    if (!user) {
-      // Save to localStorage if not logged in
-      const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
-      const existingIndex = cart.findIndex(item => item.productId === productId);
-      
-      if (existingIndex > -1) {
-        cart[existingIndex].quantity += quantity;
-      } else {
-        cart.push({
-          productId: productId,
-          quantity: quantity,
-          productData: productData || {},
-          addedAt: new Date().toISOString()
-        });
-      }
-      
-      localStorage.setItem('irya_cart', JSON.stringify(cart));
-      return { success: true, isLocal: true };
-    }
-    
-    // User is logged in - save to Firestore
-    const cartItem = {
-      userId: user.uid,
-      productId: productId,
-      quantity: quantity,
-      productData: productData || null,
-      addedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    };
-    
-    // Check if item already exists in cart
-    const q = query(
-      collection(db, "cart"),
-      where("userId", "==", user.uid),
-      where("productId", "==", productId)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    
-    if (!querySnapshot.empty) {
-      // Update existing item
-      const existingDoc = querySnapshot.docs[0];
-      const existingData = existingDoc.data();
-      
-      await updateDoc(doc(db, "cart", existingDoc.id), {
-        quantity: existingData.quantity + quantity,
-        updatedAt: serverTimestamp()
-      });
-      
-      return { 
-        success: true, 
-        cartItemId: existingDoc.id,
-        isLocal: false 
-      };
-    } else {
-      // Add new item
-      const docRef = await addDoc(collection(db, "cart"), cartItem);
-      return { 
-        success: true, 
-        cartItemId: docRef.id,
-        isLocal: false 
-      };
-    }
-  } catch (error) {
-    console.error("Error adding to cart:", error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
-  }
-};
-
-// Get cart items
-const getCartItems = async () => {
-  try {
-    const user = auth.currentUser;
-    
-    if (!user) {
-      // Get from localStorage
-      const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
-      return { success: true, items: cart, isLocal: true };
-    }
-    
-    // Get from Firestore
-    const q = query(
-      collection(db, "cart"),
-      where("userId", "==", user.uid)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const cartItems = [];
-    
-    for (const cartDoc of querySnapshot.docs) {
-      const cartItem = { 
-        id: cartDoc.id, 
-        ...cartDoc.data() 
-      };
-      
-      // Get product details if not already in productData
-      if (!cartItem.productData) {
-        try {
-          const productDoc = await getDoc(doc(db, "products", cartItem.productId));
-          if (productDoc.exists()) {
-            cartItem.productData = productDoc.data();
-          }
-        } catch (error) {
-          console.error("Error getting product details:", error);
-        }
-      }
-      
-      cartItems.push(cartItem);
-    }
-    
-    return { success: true, items: cartItems, isLocal: false };
-  } catch (error) {
-    console.error("Error getting cart items:", error);
-    return { 
-      success: false, 
-      error: error.message,
-      items: [] 
-    };
-  }
-};
-
-// Update cart item quantity
-const updateCartItemQuantity = async (cartItemId, quantity) => {
-  try {
-    const user = auth.currentUser;
-    
-    if (!user) {
-      // Update in localStorage
-      const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
-      const itemIndex = cart.findIndex(item => item.id === cartItemId);
-      
-      if (itemIndex > -1) {
-        cart[itemIndex].quantity = quantity;
-        localStorage.setItem('irya_cart', JSON.stringify(cart));
-        return { success: true, isLocal: true };
-      }
-      return { success: false, error: "Item not found" };
-    }
-    
-    // Update in Firestore
-    await updateDoc(doc(db, "cart", cartItemId), {
-      quantity: quantity,
-      updatedAt: serverTimestamp()
-    });
-    
-    return { success: true, isLocal: false };
-  } catch (error) {
-    console.error("Error updating cart quantity:", error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
-  }
-};
-
-// Remove from cart
-const removeFromCart = async (cartItemId) => {
-  try {
-    const user = auth.currentUser;
-    
-    if (!user) {
-      // Remove from localStorage
-      const cart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
-      const newCart = cart.filter(item => item.id !== cartItemId);
-      localStorage.setItem('irya_cart', JSON.stringify(newCart));
-      return { success: true, isLocal: true };
-    }
-    
-    // Remove from Firestore
-    await deleteDoc(doc(db, "cart", cartItemId));
-    
-    return { success: true, isLocal: false };
-  } catch (error) {
-    console.error("Error removing from cart:", error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
-  }
-};
-
-// Clear cart
-const clearCart = async () => {
-  try {
-    const user = auth.currentUser;
-    
-    if (!user) {
-      // Clear localStorage
-      localStorage.setItem('irya_cart', '[]');
-      return { success: true, isLocal: true };
-    }
-    
-    // Clear from Firestore
-    const q = query(
-      collection(db, "cart"),
-      where("userId", "==", user.uid)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const batch = writeBatch(db);
-    
-    querySnapshot.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-    
-    await batch.commit();
-    
-    return { success: true, isLocal: false };
-  } catch (error) {
-    console.error("Error clearing cart:", error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
-  }
-};
-
-// ==============================================
-// ORDER FUNCTIONS
-// ==============================================
-
-// Create order
-const createOrder = async (orderData) => {
-  try {
-    const user = auth.currentUser;
-    if (!user) {
-      return { 
-        success: false, 
-        error: "Please login to create an order" 
-      };
-    }
-    
-    // Generate order number
-    const orderNumber = 'IRYA-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-    
-    const order = {
-      orderNumber: orderNumber,
-      userId: user.uid,
-      customerName: orderData.customerName || user.displayName,
-      customerEmail: orderData.customerEmail || user.email,
-      customerPhone: orderData.customerPhone || '',
-      items: orderData.items || [],
-      subtotal: orderData.subtotal || 0,
-      vat: orderData.vat || 0,
-      shipping: orderData.shipping || 0,
-      total: orderData.total || 0,
-      deposit: orderData.deposit || 0,
-      balance: orderData.balance || 0,
-      shippingAddress: orderData.shippingAddress || {},
-      billingAddress: orderData.billingAddress || orderData.shippingAddress || {},
-      status: 'pending',
-      paymentStatus: 'pending',
-      notes: orderData.notes || '',
-      estimatedDelivery: orderData.estimatedDelivery || '',
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    };
-    
-    const docRef = await addDoc(collection(db, "orders"), order);
-    
-    // Clear cart after successful order
-    await clearCart();
-    
-    return { 
-      success: true, 
-      orderId: docRef.id,
-      orderNumber: orderNumber
-    };
-  } catch (error) {
-    console.error("Error creating order:", error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
-  }
-};
-
-// Get user orders
-const getUserOrders = async () => {
-  try {
-    const user = auth.currentUser;
-    if (!user) return { success: false, error: "Not logged in", orders: [] };
-    
-    const q = query(
-      collection(db, "orders"),
-      where("userId", "==", user.uid),
-      orderBy("createdAt", "desc")
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const orders = [];
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      orders.push({
-        id: doc.id,
-        orderNumber: data.orderNumber,
-        status: data.status,
-        total: data.total,
-        items: data.items,
-        createdAt: data.createdAt?.toDate() || null,
-        estimatedDelivery: data.estimatedDelivery || ''
-      });
-    });
-    
-    return { success: true, orders: orders };
-  } catch (error) {
-    console.error("Error getting orders:", error);
-    return { 
-      success: false, 
-      error: error.message,
-      orders: [] 
-    };
-  }
-};
-
-// ==============================================
-// WISHLIST FUNCTIONS
-// ==============================================
-
-// Add to wishlist
-const addToWishlist = async (productId) => {
-  try {
-    const user = auth.currentUser;
-    if (!user) {
-      // Save to localStorage
-      const wishlist = JSON.parse(localStorage.getItem('irya_wishlist') || '[]');
-      if (!wishlist.includes(productId)) {
-        wishlist.push(productId);
-        localStorage.setItem('irya_wishlist', JSON.stringify(wishlist));
-      }
-      return { success: true, isLocal: true };
-    }
-    
-    // Save to Firestore
-    const wishlistItem = {
-      userId: user.uid,
-      productId: productId,
-      addedAt: serverTimestamp()
-    };
-    
-    // Check if already in wishlist
-    const q = query(
-      collection(db, "wishlist"),
-      where("userId", "==", user.uid),
-      where("productId", "==", productId)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    
-    if (querySnapshot.empty) {
-      await addDoc(collection(db, "wishlist"), wishlistItem);
-    }
-    
-    return { success: true, isLocal: false };
-  } catch (error) {
-    console.error("Error adding to wishlist:", error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
-  }
-};
-
-// Get wishlist
-const getWishlist = async () => {
-  try {
-    const user = auth.currentUser;
-    
-    if (!user) {
-      // Get from localStorage
-      const wishlist = JSON.parse(localStorage.getItem('irya_wishlist') || '[]');
-      return { success: true, items: wishlist, isLocal: true };
-    }
-    
-    // Get from Firestore
-    const q = query(
-      collection(db, "wishlist"),
-      where("userId", "==", user.uid)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const wishlistItems = [];
-    
-    querySnapshot.forEach((doc) => {
-      wishlistItems.push(doc.data().productId);
-    });
-    
-    return { success: true, items: wishlistItems, isLocal: false };
-  } catch (error) {
-    console.error("Error getting wishlist:", error);
-    return { 
-      success: false, 
-      error: error.message,
-      items: [] 
-    };
-  }
-};
-
-// Remove from wishlist
-const removeFromWishlist = async (productId) => {
-  try {
-    const user = auth.currentUser;
-    
-    if (!user) {
-      // Remove from localStorage
-      const wishlist = JSON.parse(localStorage.getItem('irya_wishlist') || '[]');
-      const newWishlist = wishlist.filter(id => id !== productId);
-      localStorage.setItem('irya_wishlist', JSON.stringify(newWishlist));
-      return { success: true, isLocal: true };
-    }
-    
-    // Remove from Firestore
-    const q = query(
-      collection(db, "wishlist"),
-      where("userId", "==", user.uid),
-      where("productId", "==", productId)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    
-    if (!querySnapshot.empty) {
-      await deleteDoc(doc(db, "wishlist", querySnapshot.docs[0].id));
-    }
-    
-    return { success: true, isLocal: false };
-  } catch (error) {
-    console.error("Error removing from wishlist:", error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
-  }
-};
-
-// ==============================================
-// UTILITY FUNCTIONS
-// ==============================================
-
-// Calculate totals
-const calculateCartTotal = (items) => {
-  let subtotal = 0;
-  
-  items.forEach(item => {
-    const price = parseFloat(item.productData?.price?.replace('£', '') || 0);
-    subtotal += price * item.quantity;
-  });
-  
-  const vat = subtotal * 0.20; // 20% VAT
-  const total = subtotal + vat;
-  const deposit = total * 0.30; // 30% deposit
-  const balance = total * 0.70; // 70% balance
-  
-  return {
-    subtotal: parseFloat(subtotal.toFixed(2)),
-    vat: parseFloat(vat.toFixed(2)),
-    total: parseFloat(total.toFixed(2)),
-    deposit: parseFloat(deposit.toFixed(2)),
-    balance: parseFloat(balance.toFixed(2))
-  };
-};
-
-// Format price
-const formatPrice = (price) => {
-  if (typeof price === 'string' && price.startsWith('£')) {
-    return price;
-  }
-  return `£${parseFloat(price).toFixed(2)}`;
-};
-
-// Sync localStorage cart with Firestore on login
-const syncCartOnLogin = async () => {
-  try {
-    const user = auth.currentUser;
-    if (!user) return;
-    
-    const localCart = JSON.parse(localStorage.getItem('irya_cart') || '[]');
-    
-    if (localCart.length > 0) {
-      // Move local cart to Firestore
-      for (const item of localCart) {
-        await addToCart(item.productId, item.quantity, item.productData);
-      }
-      
-      // Clear localStorage cart
-      localStorage.removeItem('irya_cart');
-    }
-    
-    // Sync wishlist
-    const localWishlist = JSON.parse(localStorage.getItem('irya_wishlist') || '[]');
-    
-    if (localWishlist.length > 0) {
-      for (const productId of localWishlist) {
-        await addToWishlist(productId);
-      }
-      
-      localStorage.removeItem('irya_wishlist');
-    }
-    
-    return { success: true };
-  } catch (error) {
-    console.error("Error syncing cart:", error);
-    return { success: false, error: error.message };
-  }
-};
-
-// ==============================================
-// AUTH STATE LISTENER
-// ==============================================
-
-let authStateListeners = [];
-
-// Listen to auth state changes
-onAuthStateChanged(auth, (user) => {
-  // Notify all listeners
-  authStateListeners.forEach(listener => {
+async function getUserData(userId) {
     try {
-      listener(user);
+        const userDoc = await getDoc(doc(db, "users", userId));
+        if (userDoc.exists()) {
+            return { success: true, data: userDoc.data() };
+        }
+        return { success: false, error: "User not found" };
     } catch (error) {
-      console.error("Auth listener error:", error);
+        console.error("Get user data error:", error);
+        return { success: false, error: error.message };
     }
-  });
-  
-  // Sync cart when user logs in
-  if (user) {
-    setTimeout(() => {
-      syncCartOnLogin();
-    }, 1000);
-  }
-});
+}
 
-// Subscribe to auth state changes
-const subscribeToAuth = (callback) => {
-  authStateListeners.push(callback);
-  
-  // Return unsubscribe function
-  return () => {
-    const index = authStateListeners.indexOf(callback);
-    if (index > -1) {
-      authStateListeners.splice(index, 1);
-    }
-  };
-};
-
-// ==============================================
-// EXPORT ALL FUNCTIONS
-// ==============================================
-
+// Export all functions
 export {
-  // Firebase instances
-  app,
-  db,
-  auth,
-  
-  // Authentication
-  registerUser,
-  loginUser,
-  signInWithGoogle,
-  logoutUser,
-  getCurrentUser,
-  isUserLoggedIn,
-  resetPassword,
-  subscribeToAuth,
-  
-  // User Profile
-  getUserData,
-  updateUserProfile,
-  
-  // Products
-  getAllProducts,
-  getFeaturedProducts,
-  getProductsByCategory,
-  getProductById,
-  searchProducts,
-  
-  // Cart
-  addToCart,
-  getCartItems,
-  updateCartItemQuantity,
-  removeFromCart,
-  clearCart,
-  
-  // Orders
-  createOrder,
-  getUserOrders,
-  
-  // Wishlist
-  addToWishlist,
-  getWishlist,
-  removeFromWishlist,
-  
-  // Utilities
-  calculateCartTotal,
-  formatPrice,
-  syncCartOnLogin
+    auth,
+    db,
+    getCurrentUserId,
+    registerUser,
+    loginUser,
+    signInWithGoogle,
+    signOutUser,
+    resetPassword,
+    subscribeToAuth,
+    
+    // Notification functions
+    createNotification,
+    getUserNotifications,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    deleteNotification,
+    getUnreadNotificationCount,
+    sendAdminNotification,
+    isUserAdmin,
+    getUserData
 };
