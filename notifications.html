@@ -1,49 +1,125 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Notifications</title>
-<style>
-body { font-family: Arial; background:#f5f5f5; padding:10px; }
-.note {
-  background:#fff;
-  padding:10px;
-  margin-bottom:8px;
-  border-left:5px solid #0d6efd;
-}
-</style>
-</head>
-
-<body>
-<h2>Notifications</h2>
-<div id="notes"></div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
-
-const app = initializeApp({ projectId:"iryastone-uk" });
-const db = getFirestore(app);
-
-const userId = "dCVM344so3VCKQGNdsHm2aUZrKA3";
-
-const q = query(
-  collection(db,"users",userId,"notifications"),
-  orderBy("createdAt","desc")
-);
-
-onSnapshot(q, snap => {
-  notes.innerHTML = "";
-  snap.forEach(d => {
-    const n = d.data();
-    notes.innerHTML += `
-      <div class="note">
-        <b>${n.title}</b>
-        <p>${n.message}</p>
-        <small>${n.createdAt}</small>
-      </div>
-    `;
-  });
+// checkout.html में यह code जोड़ें
+document.addEventListener('DOMContentLoaded', async function() {
+  try {
+    // Check if redirected from notification
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromNotification = urlParams.get('from_notification');
+    const orderRef = urlParams.get('order_ref');
+    const notificationType = urlParams.get('type');
+    
+    if (fromNotification === 'true' && orderRef) {
+      // Get notification data from localStorage
+      const notificationData = localStorage.getItem('irya_notification_payment_data');
+      
+      if (notificationData) {
+        const data = JSON.parse(notificationData);
+        
+        // Show warning message for payment warnings
+        if (notificationType === 'payment_remaining_warning') {
+          showWarningMessage(
+            'Payment Required',
+            'Remaining payment must be cleared within 1 hour or order will be cancelled. Advance payment is non-refundable.',
+            'warning'
+          );
+        }
+        
+        // Try to fetch order details from Firestore
+        await fetchOrderFromNotification(orderRef);
+        
+        // Clear notification data
+        localStorage.removeItem('irya_notification_payment_data');
+      }
+    }
+    
+    // Rest of your checkout initialization...
+    
+  } catch (error) {
+    console.error("❌ Error in checkout initialization:", error);
+  }
 });
-</script>
-</body>
-</html>
+
+async function fetchOrderFromNotification(orderNumber) {
+  try {
+    const userId = await getUserId();
+    
+    // Try to fetch order from user's orders
+    const userOrdersRef = collection(db, "users", userId, "orders");
+    const q = query(userOrdersRef, where("orderNumber", "==", orderNumber));
+    
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const orderDoc = querySnapshot.docs[0];
+      const orderData = orderDoc.data();
+      orderData.id = orderDoc.id;
+      
+      // Populate checkout form with order data
+      populateCheckoutForm(orderData);
+    } else {
+      // Try main orders collection
+      const ordersRef = collection(db, "orders");
+      const q2 = query(ordersRef, where("orderNumber", "==", orderNumber));
+      
+      const querySnapshot2 = await getDocs(q2);
+      
+      if (!querySnapshot2.empty) {
+        const orderDoc = querySnapshot2.docs[0];
+        const orderData = orderDoc.data();
+        orderData.id = orderDoc.id;
+        
+        populateCheckoutForm(orderData);
+      } else {
+        showMessage("Order not found. Please check the order number.");
+      }
+    }
+    
+  } catch (error) {
+    console.error("❌ Error fetching order from notification:", error);
+  }
+}
+
+function populateCheckoutForm(order) {
+  // Populate form with order data
+  document.getElementById('orderNumber').value = order.orderNumber || '';
+  document.getElementById('totalAmount').value = order.total || 0;
+  document.getElementById('paidAmount').value = order.submittedAmount || order.advancePayment || 0;
+  
+  // Calculate remaining amount
+  const total = order.total || 0;
+  const paid = order.submittedAmount || order.advancePayment || 0;
+  const remaining = total - paid;
+  
+  document.getElementById('remainingAmount').value = remaining > 0 ? remaining : 0;
+  
+  // Show warning if it's a warning notification
+  if (remaining > 0) {
+    document.getElementById('paymentSection').style.display = 'block';
+  }
+}
+
+function showWarningMessage(title, message, type) {
+  const warningDiv = document.createElement('div');
+  warningDiv.className = `warning-message ${type}`;
+  warningDiv.style.cssText = `
+    background: ${type === 'warning' ? '#fff3cd' : '#f8d7da'};
+    border: 1px solid ${type === 'warning' ? '#ffeaa7' : '#f5c6cb'};
+    color: ${type === 'warning' ? '#856404' : '#721c24'};
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  `;
+  
+  warningDiv.innerHTML = `
+    <i class="fas fa-exclamation-triangle" style="color: #ff6b6b; font-size: 20px;"></i>
+    <div>
+      <strong>${title}</strong>
+      <p style="margin: 5px 0 0 0;">${message}</p>
+    </div>
+  `;
+  
+  const container = document.querySelector('.container');
+  container.insertBefore(warningDiv, container.firstChild);
+}
