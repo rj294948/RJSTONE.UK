@@ -15,7 +15,6 @@
     --success: #27ae60;
     --warning: #f39c12;
     --danger: #e74c3c;
-    --info: #17a2b8;
     --light: #ecf0f1;
     --dark: #2c3e50;
     --border: #bdc3c7;
@@ -308,8 +307,7 @@ body {
 }
 
 .form-group select,
-.form-group input,
-.form-group textarea {
+.form-group input {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--border);
@@ -319,16 +317,10 @@ body {
 }
 
 .form-group select:focus,
-.form-group input:focus,
-.form-group textarea:focus {
+.form-group input:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-}
-
-.form-group textarea {
-    min-height: 80px;
-    resize: vertical;
 }
 
 /* ========== BUTTONS ========== */
@@ -373,20 +365,10 @@ body {
     background: #c0392b;
 }
 
-.btn-warning {
-    background: var(--warning);
-    color: white;
-}
-
-.btn-warning:hover {
-    background: #e67e22;
-}
-
 .btn-group {
     display: flex;
     gap: 10px;
     margin-top: 10px;
-    flex-wrap: wrap;
 }
 
 /* ========== TIMELINE ========== */
@@ -450,23 +432,6 @@ body {
     border-left: 3px solid var(--accent);
 }
 
-/* ========== NOTIFICATION BADGE ========== */
-.notification-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: var(--danger);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-}
-
 /* ========== LOADING ========== */
 .loading {
     text-align: center;
@@ -478,99 +443,6 @@ body {
     font-size: 30px;
     margin-bottom: 15px;
     color: var(--accent);
-}
-
-/* ========== MODAL ========== */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background: white;
-    border-radius: var(--radius);
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-.modal-header {
-    background: var(--primary);
-    color: white;
-    padding: 20px;
-    border-radius: var(--radius) var(--radius) 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-header h3 {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.close-modal {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-body {
-    padding: 20px;
-}
-
-.modal-footer {
-    padding: 15px 20px;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-/* ========== PAYMENT CALCULATION ========== */
-.calculation-box {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: var(--radius);
-    padding: 15px;
-    margin: 15px 0;
-}
-
-.calc-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    padding-bottom: 8px;
-    border-bottom: 1px dashed #dee2e6;
-}
-
-.calc-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-    font-weight: bold;
-    color: var(--primary);
 }
 
 /* ========== RESPONSIVE ========== */
@@ -593,14 +465,6 @@ body {
     
     .form-grid {
         grid-template-columns: 1fr;
-    }
-    
-    .btn-group {
-        flex-direction: column;
-    }
-    
-    .btn-group .btn {
-        width: 100%;
     }
 }
 </style>
@@ -640,16 +504,8 @@ body {
         <p><i class="fas fa-cog"></i> Processing</p>
     </div>
     <div class="stat-card">
-        <h3 id="statsReady">0</h3>
-        <p><i class="fas fa-box"></i> Ready to Ship</p>
-    </div>
-    <div class="stat-card">
         <h3 id="statsShipped">0</h3>
         <p><i class="fas fa-shipping-fast"></i> Shipped</p>
-    </div>
-    <div class="stat-card">
-        <h3 id="statsDelivered">0</h3>
-        <p><i class="fas fa-check-circle"></i> Delivered</p>
     </div>
     <div class="stat-card">
         <h3 id="statsCancelled">0</h3>
@@ -666,403 +522,36 @@ body {
     <p>Loading orders...</p>
 </div>
 
-<!-- PAYMENT MODAL -->
-<div id="paymentModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fas fa-credit-card"></i> Update Payment Details</h3>
-            <button class="close-modal" onclick="closePaymentModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="calculation-box">
-                <div class="calc-row">
-                    <span>Order Total:</span>
-                    <span id="modalOrderTotal">£0.00</span>
-                </div>
-                <div class="calc-row">
-                    <span>Current Paid:</span>
-                    <span id="modalCurrentPaid">£0.00</span>
-                </div>
-                <div class="calc-row">
-                    <span>Remaining Balance:</span>
-                    <span id="modalRemaining">£0.00</span>
-                </div>
-            </div>
-            
-            <div class="form-section">
-                <h4><i class="fas fa-money-check-alt"></i> Payment Information</h4>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Payment Type</label>
-                        <select id="paymentType" onchange="calculatePayment()">
-                            <option value="advance">Advance Payment</option>
-                            <option value="full">Full Payment</option>
-                            <option value="partial">Partial Payment</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Amount Paid (£)</label>
-                        <input type="number" id="paidAmount" step="0.01" min="0" oninput="calculatePayment()" placeholder="Enter amount">
-                    </div>
-                    <div class="form-group">
-                        <label>Transaction Reference</label>
-                        <input type="text" id="transactionRef" placeholder="Enter transaction ID">
-                    </div>
-                    <div class="form-group">
-                        <label>Payment Date</label>
-                        <input type="datetime-local" id="paymentDate">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Payment Notes</label>
-                    <textarea id="paymentNotes" placeholder="Add any notes about this payment"></textarea>
-                </div>
-                
-                <!-- CALCULATION RESULTS -->
-                <div class="calculation-box" id="calcResults" style="display: none;">
-                    <div class="calc-row">
-                        <span>New Paid Amount:</span>
-                        <span id="newPaidAmount">£0.00</span>
-                    </div>
-                    <div class="calc-row">
-                        <span>New Remaining:</span>
-                        <span id="newRemaining">£0.00</span>
-                    </div>
-                    <div class="calc-row">
-                        <span>Payment Status:</span>
-                        <span id="newPaymentStatus">Pending</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary" onclick="closePaymentModal()">
-                <i class="fas fa-times"></i> Cancel
-            </button>
-            <button class="btn btn-success" onclick="savePayment()" id="savePaymentBtn">
-                <i class="fas fa-save"></i> Save Payment
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- STATUS MODAL -->
-<div id="statusModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fas fa-exchange-alt"></i> Update Order Status</h3>
-            <button class="close-modal" onclick="closeStatusModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-section">
-                <h4><i class="fas fa-info-circle"></i> Order Information</h4>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: var(--radius); margin-bottom: 20px;">
-                    <div style="font-weight: bold; margin-bottom: 5px;" id="modalOrderNumber">Order #</div>
-                    <div style="font-size: 14px; color: #666;" id="modalCustomerInfo">Customer</div>
-                </div>
-                
-                <h4><i class="fas fa-flag"></i> Select New Status</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px;">
-                    <button class="btn" onclick="selectStatus('processing')" id="statusProcessing">
-                        <i class="fas fa-cog"></i> Processing
-                    </button>
-                    <button class="btn" onclick="selectStatus('ready_to_ship')" id="statusReady">
-                        <i class="fas fa-box"></i> Ready to Ship
-                    </button>
-                    <button class="btn" onclick="selectStatus('shipped')" id="statusShipped">
-                        <i class="fas fa-shipping-fast"></i> Shipped
-                    </button>
-                    <button class="btn" onclick="selectStatus('out_for_delivery')" id="statusOut">
-                        <i class="fas fa-truck"></i> Out for Delivery
-                    </button>
-                    <button class="btn" onclick="selectStatus('delivered')" id="statusDelivered">
-                        <i class="fas fa-check-circle"></i> Delivered
-                    </button>
-                    <button class="btn btn-danger" onclick="selectStatus('cancelled')" id="statusCancelled">
-                        <i class="fas fa-times-circle"></i> Cancelled
-                    </button>
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label><i class="fas fa-shipping-fast"></i> Tracking Number</label>
-                        <input type="text" id="statusTracking" placeholder="Enter tracking number">
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-calendar-alt"></i> Status Date & Time</label>
-                        <input type="datetime-local" id="statusDateTime">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-sticky-note"></i> Status Notes</label>
-                    <textarea id="statusNotes" placeholder="Add notes about this status update"></textarea>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary" onclick="closeStatusModal()">
-                <i class="fas fa-times"></i> Cancel
-            </button>
-            <button class="btn btn-success" onclick="saveStatus()">
-                <i class="fas fa-save"></i> Update Status
-            </button>
-        </div>
-    </div>
-</div>
-
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { 
-    getFirestore, 
-    collection, 
-    getDocs, 
-    doc, 
-    getDoc, 
-    updateDoc, 
-    addDoc,
-    query,
-    where,
-    orderBy,
-    limit,
-    deleteDoc,
-    collectionGroup,
-    serverTimestamp 
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import {
+  getFirestore, collectionGroup, getDocs,
+  doc, getDoc, updateDoc, addDoc, collection
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// Your Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyDNWQ8h3N_lITIGCNnZGeH6_-iKJWU5pM0",
-    authDomain: "iryastone-uk.firebaseapp.com",
-    projectId: "iryastone-uk",
-    storageBucket: "iryastone-uk.firebasestorage.app",
-    messagingSenderId: "544507744745",
-    appId: "1:544507744745:web:08be89f93b19a9a6b0bf9c"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = initializeApp({
+  apiKey: "AIzaSyDNW...",
+  authDomain: "iryastone-uk.firebaseapp.com",
+  projectId: "iryastone-uk"
+});
 const db = getFirestore(app);
-
-// Global variables
-let allOrders = [];
-let currentOrder = null;
-let selectedStatus = null;
-
-// DOM elements
-const ordersContainer = document.getElementById("orders");
+const box = document.getElementById("orders");
 const loading = document.getElementById("loading");
-const paymentModal = document.getElementById("paymentModal");
-const statusModal = document.getElementById("statusModal");
 
-/* ========== NOTIFICATION SYSTEM ========== */
+/* ---------- UTIL ---------- */
+const nowISO = ()=> new Date().toISOString();
+const hoursBetween = (a,b)=> (new Date(b)-new Date(a))/36e5;
 
-/**
- * Manage notifications (keep max 10 per user)
- */
-async function manageUserNotifications(userId) {
-    try {
-        const notificationsRef = collection(db, "users", userId, "notifications");
-        const q = query(notificationsRef, orderBy("createdAt", "desc"));
-        const snapshot = await getDocs(q);
-        
-        const notifications = [];
-        snapshot.forEach(doc => {
-            notifications.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // Delete old notifications if more than 10
-        if (notifications.length > 10) {
-            const toDelete = notifications.slice(10);
-            for (const notif of toDelete) {
-                await deleteDoc(doc(db, "users", userId, "notifications", notif.id));
-            }
-        }
-        
-        return notifications.slice(0, 10);
-    } catch (error) {
-        console.error("Error managing notifications:", error);
-        return [];
-    }
+async function notify(userId,title,msg){
+  await addDoc(collection(db,"users",userId,"notifications"),{
+    title, message:msg, createdAt:nowISO(), read:false
+  });
 }
 
-/**
- * Send notification to user
- */
-async function sendOrderNotification(userId, orderId, orderNumber, title, message, type = "order_update") {
-    try {
-        // First manage notifications (keep only 10)
-        await manageUserNotifications(userId);
-        
-        const notificationRef = collection(db, "users", userId, "notifications");
-        
-        const notificationData = {
-            title: title,
-            message: message,
-            orderId: orderId,
-            orderNumber: orderNumber,
-            type: type,
-            createdAt: new Date().toISOString(),
-            read: false,
-            readAt: null
-        };
-        
-        await addDoc(notificationRef, notificationData);
-        console.log(`${type} notification sent: ${title} for order ${orderNumber}`);
-        return true;
-    } catch (error) {
-        console.error("Error sending notification:", error);
-        return false;
-    }
-}
-
-/**
- * Send payment warning notification
- */
-async function sendPaymentWarningNotification(order) {
-    const title = "⚠️ Payment Required - Order Ready to Ship";
-    let message = `Your order ${order.orderNumber} is ready to ship. `;
-    message += `Please clear the remaining payment of £${(order.remainingPayment || 0).toFixed(2)} `;
-    message += `within 1 hour to avoid automatic cancellation.`;
-    
-    return sendOrderNotification(
-        order.userId,
-        order._id,
-        order.orderNumber,
-        title,
-        message,
-        "payment_warning"
-    );
-}
-
-/**
- * Send status update notification
- */
-async function sendStatusNotification(order, statusInfo) {
-    const { newStatus, trackingNumber, statusNotes } = statusInfo;
-    
-    const statusText = newStatus.replace(/_/g, ' ');
-    const title = `📦 Order ${statusText}`;
-    let message = `Your order ${order.orderNumber} is now ${statusText}.`;
-    let notificationType = "status_update";
-    
-    if (trackingNumber) {
-        message += ` Tracking Number: ${trackingNumber}`;
-    }
-    
-    if (statusNotes) {
-        message += ` Notes: ${statusNotes}`;
-    }
-    
-    // Payment warning for ready_to_ship
-    if (newStatus === "ready_to_ship" && order.remainingPayment > 0) {
-        message += `\n\n⚠️ IMPORTANT: Please clear remaining payment of £${(order.remainingPayment || 0).toFixed(2)} within 1 hour.`;
-        notificationType = "payment_warning";
-    }
-    
-    // Thank you for delivered
-    if (newStatus === "delivered") {
-        title = "🎉 Order Delivered!";
-        message = `Your order ${order.orderNumber} has been delivered successfully!`;
-        notificationType = "thanks";
-    }
-    
-    // Cancellation notice
-    if (newStatus === "cancelled") {
-        title = "❌ Order Cancelled";
-        message = `Your order ${order.orderNumber} has been cancelled.`;
-        notificationType = "cancellation";
-    }
-    
-    return sendOrderNotification(
-        order.userId,
-        order._id,
-        order.orderNumber,
-        title,
-        message,
-        notificationType
-    );
-}
-
-/**
- * Send payment notification
- */
-async function sendPaymentNotification(order, paymentInfo) {
-    const { newPaid, remaining, referenceNumber, paymentType, notes } = paymentInfo;
-    
-    let title = "";
-    let message = "";
-    let notificationType = "payment_update";
-    
-    if (paymentType === 'full') {
-        title = "✅ Payment Completed";
-        message = `Full payment £${newPaid.toFixed(2)} confirmed for order ${order.orderNumber}.`;
-        notificationType = "thanks";
-    } else if (paymentType === 'advance') {
-        title = "💰 Advance Payment Received";
-        message = `Advance payment £${newPaid.toFixed(2)} received for order ${order.orderNumber}. Remaining: £${remaining.toFixed(2)}.`;
-    } else {
-        title = "📝 Payment Updated";
-        message = `Payment updated to £${newPaid.toFixed(2)} for order ${order.orderNumber}. Remaining: £${remaining.toFixed(2)}.`;
-    }
-    
-    if (referenceNumber) {
-        message += ` Reference: ${referenceNumber}`;
-    }
-    
-    if (notes) {
-        message += ` Notes: ${notes}`;
-    }
-    
-    return sendOrderNotification(
-        order.userId,
-        order._id,
-        order.orderNumber,
-        title,
-        message,
-        notificationType
-    );
-}
-
-/* ========== UTILITY FUNCTIONS ========== */
-
-function nowISO() {
-    return new Date().toISOString();
-}
-
-function hoursBetween(a, b) {
-    return (new Date(b) - new Date(a)) / 36e5;
-}
-
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-function formatCurrency(amount) {
-    return `£${(amount || 0).toFixed(2)}`;
-}
-
-function getStatusClass(status) {
-    return status || "processing";
-}
-
-function getPaymentBadgeClass(paymentStatus, submittedAmount) {
-    if (paymentStatus === "fully_paid") return "paid";
-    if (submittedAmount > 0) return "advance";
-    return "pending_payment";
-}
-
-/* ========== LOAD ORDERS ========== */
-async function loadOrders() {
+/* ---------- LOAD ORDERS ---------- */
+async function loadOrders(){
     loading.style.display = 'block';
-    ordersContainer.innerHTML = '';
+    box.innerHTML="";
     
     // Reset stats
     let stats = {
@@ -1070,106 +559,266 @@ async function loadOrders() {
         processing: 0,
         ready_to_ship: 0,
         shipped: 0,
-        delivered: 0,
         cancelled: 0,
         totalRevenue: 0
     };
 
     try {
-        // Load orders
-        const ordersQuery = query(collectionGroup(db, "orders"), orderBy("createdAt", "desc"));
-        const snap = await getDocs(ordersQuery);
-        
-        allOrders = [];
-        const orders = [];
-        
-        snap.forEach(doc => {
-            const order = doc.data();
-            order._id = doc.id;
-            
-            // Extract userId from path: users/{userId}/orders/{orderId}
-            const pathParts = doc.ref.path.split('/');
-            if (pathParts.length >= 2 && pathParts[0] === 'users') {
-                order.userId = pathParts[1];
-            }
-            
-            // Set defaults for missing fields
-            order.orderNumber = order.orderNumber || `ORDER-${order._id.substring(0, 8)}`;
-            order.status = order.status || 'processing';
-            order.paymentStatus = order.paymentStatus || 'pending';
-            order.total = order.total || 0;
-            order.submittedAmount = order.submittedAmount || 0;
-            order.remainingPayment = order.remainingPayment || Math.max(0, order.total - order.submittedAmount);
-            order.items = order.items || [];
-            
-            // Auto-cancel logic
-            if (order.status === "ready_to_ship" && order.remainingPayment > 0) {
-                const readyTime = order.readyToShipAt || order.updatedAt || order.createdAt;
-                if (readyTime && hoursBetween(readyTime, nowISO()) >= 1) {
-                    // Auto-cancel order
-                    setTimeout(async () => {
-                        try {
-                            const orderRef = doc(db, "users", order.userId, "orders", order._id);
-                            await updateDoc(orderRef, {
-                                status: "cancelled",
-                                cancelledAt: nowISO(),
-                                cancelledReason: "Payment not cleared within 1 hour",
-                                updatedAt: nowISO()
-                            });
-                            
-                            // Send cancellation notification
-                            await sendOrderNotification(
-                                order.userId,
-                                order._id,
-                                order.orderNumber,
-                                "❌ Order Cancelled",
-                                `Your order ${order.orderNumber} was cancelled because payment was not cleared within 1 hour.`,
-                                "cancellation"
-                            );
-                            
-                            // Reload orders to reflect changes
-                            loadOrders();
-                        } catch (error) {
-                            console.error("Error auto-cancelling order:", error);
-                        }
-                    }, 0);
-                    return; // Skip this order for display
-                }
-            }
-            
-            orders.push(order);
-            allOrders.push(order);
+        const snap = await getDocs(collectionGroup(db,"orders"));
+        let orders=[];
+        snap.forEach(d=>{ 
+            let o=d.data(); 
+            o._id=d.id; 
+            orders.push(o); 
             
             // Update stats
             stats.total++;
-            stats.totalRevenue += order.total || 0;
-            
-            if (order.status === 'processing') stats.processing++;
-            if (order.status === 'ready_to_ship') stats.ready_to_ship++;
-            if (order.status === 'shipped') stats.shipped++;
-            if (order.status === 'delivered') stats.delivered++;
-            if (order.status === 'cancelled') stats.cancelled++;
+            stats.totalRevenue += o.total || 0;
+            if(o.status === 'processing') stats.processing++;
+            if(o.status === 'ready_to_ship') stats.ready_to_ship++;
+            if(o.status === 'shipped') stats.shipped++;
+            if(o.status === 'cancelled') stats.cancelled++;
         });
         
         // Update stats display
         document.getElementById('statsTotal').textContent = stats.total;
         document.getElementById('statsProcessing').textContent = stats.processing;
-        document.getElementById('statsReady').textContent = stats.ready_to_ship;
         document.getElementById('statsShipped').textContent = stats.shipped;
-        document.getElementById('statsDelivered').textContent = stats.delivered;
         document.getElementById('statsCancelled').textContent = stats.cancelled;
         document.getElementById('totalOrders').textContent = stats.total;
         document.getElementById('totalRevenue').textContent = stats.totalRevenue.toFixed(2);
         
-        // Display orders
-        for (const order of orders) {
-            await displayOrder(order);
+        orders.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+
+        for(const o of orders){
+            if(!o.items?.length) continue;
+
+            /* AUTO CANCEL */
+            if(o.paymentStatus!=="fully_paid" && o.createdAt){
+                if(hoursBetween(o.createdAt,nowISO())>=24 && o.status!=="cancelled"){
+                    await updateDoc(doc(db,"users",o.userId,"orders",o._id),{
+                        status:"cancelled",
+                        cancelledAt:nowISO()
+                    });
+                    await notify(o.userId,"Order Cancelled",
+                        `Order ${o.orderNumber} cancelled due to pending payment.`);
+                    continue;
+                }
+            }
+
+            // Get status badge class
+            let statusClass = o.status || "processing";
+            let statusText = o.status ? o.status.replace(/_/g, ' ') : "Processing";
+            
+            // Get payment badge
+            let paymentBadge = '';
+            let paymentText = '';
+            if(o.paymentStatus === "fully_paid") {
+                paymentBadge = "paid";
+                paymentText = "Fully Paid";
+            } else if(o.submittedAmount > 0) {
+                paymentBadge = "advance";
+                paymentText = "Advance Paid";
+            } else {
+                paymentBadge = "pending_payment";
+                paymentText = "Payment Pending";
+            }
+
+            // Load products
+            let productsHTML = '';
+            let productCount = 0;
+            let productTotal = 0;
+            
+            for(const it of o.items){
+                try {
+                    const ps = await getDoc(doc(db,"products",it.id));
+                    const p = ps.exists() ? ps.data() : {};
+                    const img = p.images?.[0] || "https://via.placeholder.com/70/CCCCCC/666666?text=Product";
+                    const title = p.title || it.name || "Unknown Product";
+                    const price = it.totalPrice || 0;
+                    const qty = it.quantity || 1;
+                    
+                    productCount++;
+                    productTotal += price;
+                    
+                    productsHTML += `
+                    <div class="product-item">
+                        <img src="${img}" class="product-img" alt="${title}">
+                        <div class="product-info">
+                            <h5>${title}</h5>
+                            <p><i class="fas fa-hashtag"></i> Qty: ${qty}</p>
+                            <p><i class="fas fa-pound-sign"></i> £${price.toFixed(2)}</p>
+                        </div>
+                    </div>`;
+                } catch(error) {
+                    console.error("Error loading product:", error);
+                }
+            }
+
+            // Format dates
+            const orderDate = o.createdAt ? new Date(o.createdAt).toLocaleString('en-GB') : 'N/A';
+            const updatedDate = o.updatedAt ? new Date(o.updatedAt).toLocaleString('en-GB') : 'N/A';
+            
+            // Calculate remaining payment
+            const remainingPayment = o.remainingPayment || (o.total - (o.submittedAmount || 0));
+            
+            // Generate timeline
+            let timelineHTML = '';
+            if(o.statusHistory && o.statusHistory.length > 0) {
+                timelineHTML = o.statusHistory.map(h => {
+                    const date = new Date(h.at).toLocaleString('en-GB');
+                    return `
+                    <div class="timeline-item">
+                        <div class="timeline-date">
+                            <i class="far fa-clock"></i> ${date}
+                        </div>
+                        <div class="timeline-content">
+                            <i class="fas fa-arrow-right"></i> Status changed to <strong>${h.status.replace(/_/g, ' ')}</strong>
+                        </div>
+                    </div>`;
+                }).join('');
+            } else {
+                timelineHTML = '<div class="timeline-item"><div class="timeline-content">No status history available</div></div>';
+            }
+
+            // Create order card
+            const orderCard = document.createElement('div');
+            orderCard.className = 'order-card';
+            orderCard.innerHTML = `
+                <!-- ORDER HEADER -->
+                <div class="order-header">
+                    <div class="order-title">
+                        <h3><i class="fas fa-receipt"></i> Order: ${o.orderNumber || 'N/A'}</h3>
+                        <div class="order-meta">
+                            <span><i class="far fa-calendar"></i> ${orderDate}</span>
+                            <span><i class="fas fa-user"></i> ${o.userName || 'Unknown'}</span>
+                            <span><i class="fas fa-envelope"></i> ${o.userEmail || 'No email'}</span>
+                            <span><i class="fas fa-id-card"></i> ${o.userId || 'No ID'}</span>
+                        </div>
+                    </div>
+                    <div class="order-status">
+                        <span class="badge ${statusClass}">${statusText}</span>
+                        <span class="badge ${paymentBadge}">${paymentText}</span>
+                    </div>
+                </div>
+
+                <!-- ORDER DETAILS -->
+                <div class="order-details">
+                    <div class="detail-section">
+                        <h4><i class="fas fa-money-bill-wave"></i> Payment Details</h4>
+                        <p><strong>Total Amount:</strong> £${o.total || 0}</p>
+                        <p><strong>Amount Paid:</strong> £${o.submittedAmount || 0}</p>
+                        <p><strong>Remaining:</strong> £${remainingPayment.toFixed(2)}</p>
+                        ${o.transactionReference ? `<p><strong>Transaction Ref:</strong> ${o.transactionReference}</p>` : ''}
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4><i class="fas fa-shipping-fast"></i> Shipping Info</h4>
+                        ${o.trackingNumber ? `<p><strong>Tracking:</strong> ${o.trackingNumber}</p>` : ''}
+                        ${o.shippingAddress ? `<p><strong>Address:</strong> ${o.shippingAddress}</p>` : ''}
+                        ${o.deliveredAt ? `<p><strong>Delivered:</strong> ${new Date(o.deliveredAt).toLocaleString('en-GB')}</p>` : ''}
+                        ${o.cancelledAt ? `<p><strong>Cancelled:</strong> ${new Date(o.cancelledAt).toLocaleString('en-GB')}</p>` : ''}
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4><i class="fas fa-info-circle"></i> Order Info</h4>
+                        <p><strong>Order ID:</strong> ${o._id}</p>
+                        <p><strong>Last Updated:</strong> ${updatedDate}</p>
+                        <p><strong>Items:</strong> ${productCount} products</p>
+                        <p><strong>Products Total:</strong> £${productTotal.toFixed(2)}</p>
+                    </div>
+                </div>
+
+                <!-- PRODUCTS -->
+                <div class="products-section">
+                    <h4><i class="fas fa-box-open"></i> Products (${productCount})</h4>
+                    <div class="products-grid">
+                        ${productsHTML}
+                    </div>
+                </div>
+
+                <!-- UPDATE FORMS -->
+                <div class="update-forms">
+                    <!-- PAYMENT UPDATE -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-credit-card"></i> Update Payment</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Payment Type</label>
+                                <select id="pay-${o._id}">
+                                    <option value="">Select Payment Type</option>
+                                    <option value="advance">Advance Payment</option>
+                                    <option value="full">Full Payment</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Paid Amount (£)</label>
+                                <input id="paid-${o._id}" type="number" placeholder="Enter amount" value="${o.submittedAmount || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label>Transaction Reference</label>
+                                <input id="txn-${o._id}" placeholder="Transaction ID" value="${o.transactionReference || ''}">
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-success" onclick="updatePayment('${o.userId}','${o._id}','${o.orderNumber}',${o.total})">
+                                <i class="fas fa-check-circle"></i> Confirm Payment
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STATUS UPDATE -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-exchange-alt"></i> Update Status</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Order Status</label>
+                                <select id="status-${o._id}">
+                                    <option value="">Select Status</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="ready_to_ship">Ready to Ship</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="out_for_delivery">Out for Delivery</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tracking Number</label>
+                                <input id="track-${o._id}" placeholder="Enter tracking number" value="${o.trackingNumber || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label>Delivery Date</label>
+                                <input type="datetime-local" id="delivery-${o._id}">
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="updateStatus('${o.userId}','${o._id}','${o.orderNumber}')">
+                                <i class="fas fa-save"></i> Update Order Status
+                            </button>
+                            <button class="btn btn-danger" onclick="cancelOrder('${o.userId}','${o._id}','${o.orderNumber}')">
+                                <i class="fas fa-times"></i> Cancel Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIMELINE -->
+                <div class="timeline-section">
+                    <h4><i class="fas fa-history"></i> Status History</h4>
+                    <div class="timeline">
+                        ${timelineHTML}
+                    </div>
+                </div>
+            `;
+
+            box.appendChild(orderCard);
         }
         
         loading.style.display = 'none';
         
-        if (orders.length === 0) {
-            ordersContainer.innerHTML = `
+        if(orders.length === 0) {
+            box.innerHTML = `
                 <div class="order-card" style="text-align: center; padding: 40px;">
                     <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 20px;"></i>
                     <h3 style="color: #666;">No Orders Found</h3>
@@ -1177,10 +826,10 @@ async function loadOrders() {
                 </div>
             `;
         }
-    } catch (error) {
+    } catch(error) {
         console.error("Error loading orders:", error);
         loading.style.display = 'none';
-        ordersContainer.innerHTML = `
+        box.innerHTML = `
             <div class="order-card" style="text-align: center; padding: 40px; background: #ffebee; border-color: #ef5350;">
                 <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #c62828; margin-bottom: 20px;"></i>
                 <h3 style="color: #c62828;">Error Loading Orders</h3>
@@ -1193,595 +842,95 @@ async function loadOrders() {
     }
 }
 
-/* ========== DISPLAY ORDER ========== */
-async function displayOrder(order) {
-    try {
-        // Get status badge
-        const statusClass = getStatusClass(order.status);
-        const statusText = order.status ? order.status.replace(/_/g, ' ') : "Processing";
-        
-        // Get payment badge
-        const paymentBadge = getPaymentBadgeClass(order.paymentStatus, order.submittedAmount);
-        const paymentText = paymentBadge === "paid" ? "Fully Paid" : 
-                          paymentBadge === "advance" ? "Advance Paid" : "Payment Pending";
-        
-        // Load products
-        let productsHTML = '';
-        let productCount = 0;
-        let productTotal = 0;
-        
-        for (const item of order.items) {
-            try {
-                const productDoc = await getDoc(doc(db, "products", item.id || item.productId));
-                const product = productDoc.exists() ? productDoc.data() : {};
-                
-                const img = product.images?.[0] || product.image || product.imageUrl || 
-                           "https://via.placeholder.com/70/CCCCCC/666666?text=Product";
-                const title = item.name || product.title || "Unknown Product";
-                const price = item.totalPrice || item.price || 0;
-                const qty = item.quantity || 1;
-                
-                productCount++;
-                productTotal += price;
-                
-                productsHTML += `
-                <div class="product-item">
-                    <img src="${img}" class="product-img" alt="${title}" onerror="this.src='https://via.placeholder.com/70/CCCCCC/666666?text=Product'">
-                    <div class="product-info">
-                        <h5>${title}</h5>
-                        <p><i class="fas fa-hashtag"></i> Qty: ${qty}</p>
-                        <p><i class="fas fa-pound-sign"></i> ${formatCurrency(price)}</p>
-                    </div>
-                </div>`;
-            } catch (error) {
-                console.error("Error loading product:", error);
-                // Still show item even if product data fails
-                const title = item.name || "Unknown Product";
-                const price = item.totalPrice || item.price || 0;
-                const qty = item.quantity || 1;
-                
-                productCount++;
-                productTotal += price;
-                
-                productsHTML += `
-                <div class="product-item">
-                    <img src="https://via.placeholder.com/70/CCCCCC/666666?text=Product" class="product-img" alt="${title}">
-                    <div class="product-info">
-                        <h5>${title}</h5>
-                        <p><i class="fas fa-hashtag"></i> Qty: ${qty}</p>
-                        <p><i class="fas fa-pound-sign"></i> ${formatCurrency(price)}</p>
-                    </div>
-                </div>`;
-            }
-        }
-        
-        // Format dates
-        const orderDate = formatDate(order.createdAt);
-        const updatedDate = formatDate(order.updatedAt);
-        const deliveredDate = formatDate(order.deliveredAt);
-        const cancelledDate = formatDate(order.cancelledAt);
-        
-        // Generate timeline
-        let timelineHTML = '';
-        if (order.statusHistory && order.statusHistory.length > 0) {
-            timelineHTML = order.statusHistory.slice(-10).map(history => {
-                const date = formatDate(history.at);
-                const status = history.status ? history.status.replace(/_/g, ' ') : 'Unknown';
-                const notes = history.notes ? `<br><small>${history.notes}</small>` : '';
-                return `
-                <div class="timeline-item">
-                    <div class="timeline-date">
-                        <i class="far fa-clock"></i> ${date}
-                    </div>
-                    <div class="timeline-content">
-                        <i class="fas fa-arrow-right"></i> Status changed to <strong>${status}</strong>
-                        ${notes}
-                    </div>
-                </div>`;
-            }).join('');
-        } else {
-            timelineHTML = '<div class="timeline-item"><div class="timeline-content">No status history available</div></div>';
-        }
-        
-        // Create order card
-        const orderCard = document.createElement('div');
-        orderCard.className = 'order-card';
-        orderCard.innerHTML = `
-            <!-- ORDER HEADER -->
-            <div class="order-header">
-                <div class="order-title">
-                    <h3><i class="fas fa-receipt"></i> Order: ${order.orderNumber || 'N/A'}</h3>
-                    <div class="order-meta">
-                        <span><i class="far fa-calendar"></i> ${orderDate}</span>
-                        <span><i class="fas fa-user"></i> ${order.userName || 'Unknown'}</span>
-                        <span><i class="fas fa-envelope"></i> ${order.userEmail || 'No email'}</span>
-                        <span><i class="fas fa-id-card"></i> ${order.userId?.substring(0, 8) || 'No ID'}</span>
-                    </div>
-                </div>
-                <div class="order-status">
-                    <span class="badge ${statusClass}">${statusText}</span>
-                    <span class="badge ${paymentBadge}">${paymentText}</span>
-                </div>
-            </div>
-
-            <!-- ORDER DETAILS -->
-            <div class="order-details">
-                <div class="detail-section">
-                    <h4><i class="fas fa-money-bill-wave"></i> Payment Details</h4>
-                    <p><strong>Total Amount:</strong> ${formatCurrency(order.total)}</p>
-                    <p><strong>Amount Paid:</strong> ${formatCurrency(order.submittedAmount)}</p>
-                    <p><strong>Remaining:</strong> ${formatCurrency(order.remainingPayment)}</p>
-                    ${order.transactionReference ? `<p><strong>Transaction Ref:</strong> ${order.transactionReference}</p>` : ''}
-                </div>
-                
-                <div class="detail-section">
-                    <h4><i class="fas fa-shipping-fast"></i> Shipping Info</h4>
-                    ${order.trackingNumber ? `<p><strong>Tracking:</strong> ${order.trackingNumber}</p>` : ''}
-                    ${order.shippingAddress ? `<p><strong>Address:</strong> ${order.shippingAddress}</p>` : ''}
-                    ${order.deliveredAt ? `<p><strong>Delivered:</strong> ${deliveredDate}</p>` : ''}
-                    ${order.cancelledAt ? `<p><strong>Cancelled:</strong> ${cancelledDate}</p>` : ''}
-                </div>
-                
-                <div class="detail-section">
-                    <h4><i class="fas fa-info-circle"></i> Order Info</h4>
-                    <p><strong>Order ID:</strong> ${order._id}</p>
-                    <p><strong>Last Updated:</strong> ${updatedDate}</p>
-                    <p><strong>Items:</strong> ${productCount} products</p>
-                    <p><strong>Products Total:</strong> ${formatCurrency(productTotal)}</p>
-                </div>
-            </div>
-
-            <!-- PRODUCTS -->
-            <div class="products-section">
-                <h4><i class="fas fa-box-open"></i> Products (${productCount})</h4>
-                <div class="products-grid">
-                    ${productsHTML}
-                </div>
-            </div>
-
-            <!-- UPDATE FORMS -->
-            <div class="update-forms">
-                <!-- ACTIONS -->
-                <div class="form-section">
-                    <h4><i class="fas fa-cogs"></i> Order Actions</h4>
-                    <div class="btn-group">
-                        <button class="btn btn-success" onclick="openPaymentModal('${order.userId}','${order._id}','${order.orderNumber}',${order.total},${order.submittedAmount},${order.remainingPayment})">
-                            <i class="fas fa-credit-card"></i> Update Payment
-                        </button>
-                        <button class="btn btn-primary" onclick="openStatusModal('${order.userId}','${order._id}','${order.orderNumber}','${order.status}','${order.trackingNumber || ''}',${order.remainingPayment})">
-                            <i class="fas fa-exchange-alt"></i> Update Status
-                        </button>
-                        <button class="btn btn-danger" onclick="cancelOrder('${order.userId}','${order._id}','${order.orderNumber}')">
-                            <i class="fas fa-times-circle"></i> Cancel Order
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TIMELINE -->
-            <div class="timeline-section">
-                <h4><i class="fas fa-history"></i> Status History</h4>
-                <div class="timeline">
-                    ${timelineHTML}
-                </div>
-            </div>
-        `;
-
-        ordersContainer.appendChild(orderCard);
-    } catch (error) {
-        console.error("Error displaying order:", error);
-    }
-}
-
-/* ========== MODAL FUNCTIONS ========== */
-
-// Payment Modal
-window.openPaymentModal = function(userId, orderId, orderNumber, total, paid, remaining) {
-    currentOrder = {
-        userId: userId,
-        orderId: orderId,
-        orderNumber: orderNumber,
-        total: total,
-        paid: paid,
-        remaining: remaining
-    };
+/* ---------- PAYMENT UPDATE (Original Logic) ---------- */
+window.updatePayment = async (userId,id,ord,total)=>{
+    const type = document.getElementById(`pay-${id}`).value;
+    const paid = Number(document.getElementById(`paid-${id}`).value);
+    const txn = document.getElementById(`txn-${id}`).value || "";
     
-    // Set modal values
-    document.getElementById('modalOrderTotal').textContent = formatCurrency(total);
-    document.getElementById('modalCurrentPaid').textContent = formatCurrency(paid);
-    document.getElementById('modalRemaining').textContent = formatCurrency(remaining);
-    
-    // Set default values
-    document.getElementById('paidAmount').value = paid;
-    document.getElementById('transactionRef').value = '';
-    document.getElementById('paymentNotes').value = '';
-    
-    // Set default date to now
-    const now = new Date();
-    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    document.getElementById('paymentDate').value = localDateTime;
-    
-    // Hide calculation results
-    document.getElementById('calcResults').style.display = 'none';
-    
-    // Show modal
-    paymentModal.style.display = 'flex';
-};
-
-window.closePaymentModal = function() {
-    paymentModal.style.display = 'none';
-    currentOrder = null;
-    document.getElementById('calcResults').style.display = 'none';
-};
-
-window.calculatePayment = function() {
-    if (!currentOrder) return;
-    
-    const paymentType = document.getElementById('paymentType').value;
-    const paidAmount = parseFloat(document.getElementById('paidAmount').value) || 0;
-    const total = currentOrder.total;
-    
-    let newPaid = paidAmount;
-    let newRemaining = Math.max(total - newPaid, 0);
-    let paymentStatus = 'pending';
-    
-    if (paymentType === 'full') {
-        newPaid = total;
-        newRemaining = 0;
-        paymentStatus = 'fully_paid';
-        document.getElementById('paidAmount').value = total;
-    } else if (paymentType === 'advance' && paidAmount > 0) {
-        paymentStatus = 'advance_paid';
-    } else if (paidAmount > 0 && paidAmount < total) {
-        paymentStatus = 'advance_paid';
-    }
-    
-    // Update display
-    document.getElementById('newPaidAmount').textContent = formatCurrency(newPaid);
-    document.getElementById('newRemaining').textContent = formatCurrency(newRemaining);
-    document.getElementById('newPaymentStatus').textContent = paymentStatus.replace(/_/g, ' ');
-    
-    // Show results
-    document.getElementById('calcResults').style.display = 'block';
-    
-    // Update button text
-    const btn = document.getElementById('savePaymentBtn');
-    if (paymentType === 'full') {
-        btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Full Payment';
-    } else if (paymentType === 'advance') {
-        btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Advance Payment';
-    } else {
-        btn.innerHTML = '<i class="fas fa-save"></i> Save Payment';
-    }
-};
-
-window.savePayment = async function() {
-    if (!currentOrder) {
-        alert("No order selected!");
+    if(!type || !paid) {
+        alert("Please select payment type and enter amount");
         return;
     }
-    
-    const paidAmount = parseFloat(document.getElementById('paidAmount').value);
-    const paymentType = document.getElementById('paymentType').value;
-    const transactionRef = document.getElementById('transactionRef').value.trim();
-    const paymentDate = document.getElementById('paymentDate').value;
-    const paymentNotes = document.getElementById('paymentNotes').value.trim();
-    
-    if (!paidAmount || paidAmount < 0) {
-        alert("Please enter a valid payment amount");
-        return;
-    }
-    
-    if (!paymentDate) {
-        alert("Please select payment date and time");
-        return;
-    }
-    
-    if (!transactionRef) {
-        alert("Please enter transaction reference");
-        return;
-    }
-    
-    try {
-        const orderRef = doc(db, "users", currentOrder.userId, "orders", currentOrder.orderId);
-        
-        // Get current order data
-        const orderSnap = await getDoc(orderRef);
-        if (!orderSnap.exists()) {
-            alert("Order not found!");
-            return;
-        }
-        
-        const orderData = orderSnap.data();
-        
-        // Calculate new values
-        const newPaid = paidAmount;
-        const total = orderData.total || currentOrder.total || 0;
-        const remaining = Math.max(total - newPaid, 0);
-        
-        // Determine payment status
-        let paymentStatus = 'pending';
-        if (remaining <= 0) {
-            paymentStatus = 'fully_paid';
-        } else if (newPaid > 0 && newPaid < total) {
-            paymentStatus = 'advance_paid';
-        }
-        
-        // Prepare update data
-        const updateData = {
-            paymentStatus: paymentStatus,
-            submittedAmount: newPaid,
-            remainingPayment: remaining,
-            transactionReference: transactionRef,
-            paymentSubmittedAt: paymentDate || nowISO(),
-            updatedAt: nowISO()
-        };
-        
-        // Add to payment history
-        const paymentHistory = orderData.paymentHistory || [];
-        paymentHistory.push({
-            type: paymentType,
-            amount: newPaid,
-            previousAmount: orderData.submittedAmount || 0,
-            reference: transactionRef,
-            date: paymentDate || nowISO(),
-            notes: paymentNotes,
-            status: "confirmed",
-            updatedBy: "admin"
-        });
-        
-        updateData.paymentHistory = paymentHistory;
-        
-        // Update order
-        await updateDoc(orderRef, updateData);
-        
-        // Send notification
-        await sendPaymentNotification(orderData, {
-            newPaid: newPaid,
-            remaining: remaining,
-            referenceNumber: transactionRef,
-            paymentType: paymentType,
-            notes: paymentNotes
-        });
-        
-        alert(`✅ Payment updated successfully!\n\nOrder: ${currentOrder.orderNumber}\nAmount: ${formatCurrency(newPaid)}\nRemaining: ${formatCurrency(remaining)}\nStatus: ${paymentStatus}`);
-        
-        // Close modal and reload
-        closePaymentModal();
-        loadOrders();
-        
-    } catch (error) {
-        console.error("Error saving payment:", error);
-        alert("❌ Error saving payment: " + error.message);
-    }
-};
 
-// Status Modal
-window.openStatusModal = function(userId, orderId, orderNumber, currentStatus, trackingNumber, remainingPayment) {
-    currentOrder = {
-        userId: userId,
-        orderId: orderId,
-        orderNumber: orderNumber,
-        currentStatus: currentStatus,
-        trackingNumber: trackingNumber,
-        remainingPayment: remainingPayment
-    };
-    
-    // Set modal values
-    document.getElementById('modalOrderNumber').textContent = `Order: ${orderNumber}`;
-    document.getElementById('modalCustomerInfo').textContent = `Remaining Payment: ${formatCurrency(remainingPayment)}`;
-    
-    // Set current values
-    document.getElementById('statusTracking').value = trackingNumber || '';
-    document.getElementById('statusNotes').value = '';
-    
-    // Set default date to now
-    const now = new Date();
-    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    document.getElementById('statusDateTime').value = localDateTime;
-    
-    // Reset all status buttons
-    document.querySelectorAll('#statusModal .btn').forEach(btn => {
-        btn.className = btn.className.replace(' btn-success', '');
-        if (btn.id === `status${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`) {
-            btn.className += ' btn-success';
-        }
+    let remaining = Math.max(total - paid, 0);
+    const ref = doc(db,"users",userId,"orders",id);
+
+    await updateDoc(ref, {
+        paymentStatus: type === "full" ? "fully_paid" : "advance_paid",
+        submittedAmount: paid,
+        remainingPayment: remaining,
+        transactionReference: txn,
+        updatedAt: nowISO()
     });
-    
-    selectedStatus = currentStatus;
-    
-    // Show modal
-    statusModal.style.display = 'flex';
+
+    await notify(userId, "Payment Confirmed",
+        type === "full"
+        ? `Full payment £${paid} confirmed for order ${ord}.`
+        : `Advance payment £${paid} received for order ${ord}. Remaining: £${remaining}.`);
+
+    loadOrders();
 };
 
-window.closeStatusModal = function() {
-    statusModal.style.display = 'none';
-    currentOrder = null;
-    selectedStatus = null;
-};
-
-window.selectStatus = function(status) {
-    selectedStatus = status;
-    
-    // Update button styles
-    document.querySelectorAll('#statusModal .btn').forEach(btn => {
-        btn.className = btn.className.replace(' btn-success', '');
-        if (btn.textContent.includes(status.replace(/_/g, ' '))) {
-            btn.className += ' btn-success';
-        }
-    });
-};
-
-window.saveStatus = async function() {
-    if (!currentOrder || !selectedStatus) {
+/* ---------- STATUS UPDATE (Original Logic with Ready to Ship added) ---------- */
+window.updateStatus = async (userId,id,ord)=>{
+    const st = document.getElementById(`status-${id}`).value;
+    if(!st) {
         alert("Please select a status");
         return;
     }
-    
-    const trackingNumber = document.getElementById('statusTracking').value.trim();
-    const statusDateTime = document.getElementById('statusDateTime').value;
-    const statusNotes = document.getElementById('statusNotes').value.trim();
-    
-    if (!statusDateTime) {
-        alert("Please select status date and time");
-        return;
-    }
-    
-    try {
-        const orderRef = doc(db, "users", currentOrder.userId, "orders", currentOrder.orderId);
-        
-        // Get current order data
-        const orderSnap = await getDoc(orderRef);
-        if (!orderSnap.exists()) {
-            alert("Order not found!");
-            return;
-        }
-        
-        const orderData = orderSnap.data();
-        
-        // Prepare update data
-        const updateData = {
-            status: selectedStatus,
-            updatedAt: nowISO()
-        };
-        
-        // Add tracking number if provided
-        if (trackingNumber) {
-            updateData.trackingNumber = trackingNumber;
-        }
-        
-        // Prepare status history entry
-        const statusHistoryEntry = {
-            status: selectedStatus,
-            at: statusDateTime || nowISO(),
-            notes: statusNotes,
-            tracking: trackingNumber || null,
-            updatedBy: "admin"
-        };
-        
-        // Update status history
-        const statusHistory = orderData.statusHistory || [];
-        statusHistory.push(statusHistoryEntry);
-        updateData.statusHistory = statusHistory;
-        
-        // Handle specific status updates
-        if (selectedStatus === "ready_to_ship") {
-            updateData.readyToShipAt = statusDateTime || nowISO();
-        }
-        
-        if (selectedStatus === "shipped") {
-            updateData.shippedAt = statusDateTime || nowISO();
-        }
-        
-        if (selectedStatus === "out_for_delivery") {
-            updateData.outForDeliveryAt = statusDateTime || nowISO();
-        }
-        
-        if (selectedStatus === "delivered") {
-            updateData.deliveredAt = statusDateTime || nowISO();
-            // Mark as fully paid if delivered
-            updateData.remainingPayment = 0;
-            updateData.paymentStatus = 'fully_paid';
-        }
-        
-        if (selectedStatus === "cancelled") {
-            updateData.cancelledAt = statusDateTime || nowISO();
-            updateData.cancelledReason = statusNotes || "Cancelled by admin";
-        }
-        
-        // Update order
-        await updateDoc(orderRef, updateData);
-        
-        // Send notification
-        await sendStatusNotification(orderData, {
-            newStatus: selectedStatus,
-            trackingNumber: trackingNumber,
-            statusNotes: statusNotes
-        });
-        
-        // Special handling for ready_to_ship status with remaining payment
-        if (selectedStatus === "ready_to_ship" && currentOrder.remainingPayment > 0) {
-            await sendPaymentWarningNotification({
-                ...orderData,
-                remainingPayment: currentOrder.remainingPayment
-            });
-        }
-        
-        alert(`✅ Status updated to ${selectedStatus.replace(/_/g, ' ')} for order ${currentOrder.orderNumber}`);
-        
-        // Close modal and reload
-        closeStatusModal();
-        loadOrders();
-        
-    } catch (error) {
-        console.error("Error updating status:", error);
-        alert("❌ Error updating status: " + error.message);
-    }
-};
 
-/* ========== CANCEL ORDER ========== */
-window.cancelOrder = async function(userId, orderId, orderNumber) {
-    if (!confirm(`Are you sure you want to cancel order ${orderNumber}?`)) return;
+    const orderRef = doc(db,"users",userId,"orders",id);
+    const orderSnap = await getDoc(orderRef);
+    const orderData = orderSnap.exists() ? orderSnap.data() : {};
     
-    try {
-        const orderRef = doc(db, "users", userId, "orders", orderId);
-        
-        // Get current order data
-        const orderSnap = await getDoc(orderRef);
-        if (!orderSnap.exists()) {
-            alert("Order not found!");
-            return;
-        }
-        
-        const orderData = orderSnap.data();
-        
-        // Prepare update data
-        const updateData = {
-            status: "cancelled",
-            cancelledAt: nowISO(),
-            cancelledReason: "Cancelled by admin",
-            updatedAt: nowISO()
-        };
-        
-        // Update status history
-        const statusHistory = orderData.statusHistory || [];
-        statusHistory.push({
-            status: "cancelled",
-            at: nowISO(),
-            notes: "Order cancelled by admin",
-            updatedBy: "admin"
-        });
-        updateData.statusHistory = statusHistory;
-        
-        // Update order
-        await updateDoc(orderRef, updateData);
-        
-        // Send notification
-        await sendOrderNotification(
-            userId,
-            orderId,
-            orderNumber,
-            "❌ Order Cancelled",
-            `Your order ${orderNumber} has been cancelled by admin.`,
-            "cancellation"
-        );
-        
-        alert(`✅ Order ${orderNumber} has been cancelled.`);
-        
-        // Reload orders
-        loadOrders();
-        
-    } catch (error) {
-        console.error("Error cancelling order:", error);
-        alert("❌ Error cancelling order: " + error.message);
-    }
-};
+    const upd = {
+        status: st,
+        updatedAt: nowISO(),
+        statusHistory: [...(orderData.statusHistory || []), {status: st, at: nowISO()}]
+    };
 
-// Initialize
-document.addEventListener('DOMContentLoaded', function() {
+    if(st === "shipped"){
+        upd.trackingNumber = document.getElementById(`track-${id}`).value || "";
+        upd.shippedAt = nowISO();
+    }
+    
+    if(st === "delivered"){
+        upd.deliveredAt = document.getElementById(`delivery-${id}`).value || nowISO();
+        upd.remainingPayment = 0;
+    }
+    
+    if(st === "ready_to_ship") {
+        upd.readyToShipAt = nowISO();
+    }
+
+    await updateDoc(orderRef, upd);
+    await notify(userId, "Order Update", `Order ${ord} is now ${st.replace(/_/g, ' ')}`);
     loadOrders();
-    console.log("Admin dashboard initialized!");
-});
+};
+
+/* ---------- CANCEL ORDER ---------- */
+window.cancelOrder = async (userId,id,ord)=>{
+    if(!confirm(`Are you sure you want to cancel order ${ord}?`)) return;
+    
+    const orderRef = doc(db,"users",userId,"orders",id);
+    const orderSnap = await getDoc(orderRef);
+    const orderData = orderSnap.exists() ? orderSnap.data() : {};
+    
+    const upd = {
+        status: "cancelled",
+        cancelledAt: nowISO(),
+        updatedAt: nowISO(),
+        statusHistory: [...(orderData.statusHistory || []), {status: "cancelled", at: nowISO()}]
+    };
+
+    await updateDoc(orderRef, upd);
+    await notify(userId, "Order Cancelled", `Order ${ord} has been cancelled.`);
+    loadOrders();
+};
+
+// Initial load
+loadOrders();
 </script>
 </body>
 </html>
