@@ -1316,7 +1316,8 @@ import {
   doc,
   where,
   limit,
-  getDoc
+  getDoc,
+  Timestamp
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // Firebase Configuration
@@ -1363,33 +1364,54 @@ window.addEventListener('scroll', handleScroll, { passive: true });
 // USER ID MANAGEMENT
 // ============================================
 
+let currentUserId = null;
+let userEmail = null;
+let userName = null;
+
 async function getUserId() {
   try {
+    // Check if we have a saved user
     const savedUser = localStorage.getItem('irya_stone_auth_user');
     if (savedUser) {
       const user = JSON.parse(savedUser);
-      return user.uid;
+      currentUserId = user.uid;
+      userEmail = user.email;
+      userName = user.name || user.displayName || userEmail?.split('@')[0];
+      console.log("✅ Authenticated user detected:", currentUserId);
+      return currentUserId;
     }
 
+    // Check for guest user
     let guestId = localStorage.getItem('irya_guest_id');
     if (!guestId) {
       guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       localStorage.setItem('irya_guest_id', guestId);
     }
     
-    return guestId;
+    currentUserId = guestId;
+    console.log("👤 Guest user detected:", currentUserId);
+    
+    return currentUserId;
     
   } catch (error) {
     console.error("❌ Error getting user ID:", error);
-    return 'guest_' + Date.now();
+    currentUserId = 'guest_' + Date.now();
+    return currentUserId;
   }
+}
+
+function getUserInfo() {
+  return {
+    userId: currentUserId,
+    email: userEmail,
+    name: userName
+  };
 }
 
 // ============================================
 // GLOBAL VARIABLES
 // ============================================
 
-let userId = null;
 let orders = [];
 let notifications = [];
 let ordersUnsubscribe = null;
@@ -1401,12 +1423,15 @@ let notificationsUnsubscribe = null;
 
 async function loadOrders() {
   try {
-    userId = await getUserId();
+    const userId = await getUserId();
     console.log("📱 Loading orders for user:", userId);
     
     setupOrdersListener();
     loadNotifications();
     updateCartBadge();
+    
+    // Check if we have a notification redirect
+    checkNotificationRedirect();
     
   } catch (error) {
     console.error("❌ Error loading orders:", error);
@@ -1432,14 +1457,14 @@ async function setupOrdersListener() {
     
     // Try user-specific orders collection first
     try {
-      const userOrdersRef = collection(db, "users", userId, "orders");
+      const userOrdersRef = collection(db, "users", currentUserId, "orders");
       ordersQuery = query(userOrdersRef, orderBy("createdAt", "desc"));
     } catch (error) {
       // Fallback to main orders collection
       const ordersRef = collection(db, "orders");
       ordersQuery = query(
         ordersRef, 
-        where("userId", "==", userId),
+        where("userId", "==", currentUserId),
         orderBy("createdAt", "desc")
       );
     }
@@ -1459,6 +1484,11 @@ async function setupOrdersListener() {
           const orderData = docSnapshot.data();
           orderData.id = docSnapshot.id;
           
+          // Add user info if missing
+          if (!orderData.userId) {
+            orderData.userId = currentUserId;
+          }
+          
           // Fetch product images for each item
           if (orderData.items && Array.isArray(orderData.items)) {
             for (const item of orderData.items) {
@@ -1472,7 +1502,7 @@ async function setupOrdersListener() {
         // Wait for all images to load
         await Promise.all(imagePromises);
         
-        console.log(`✅ Loaded ${orders.length} orders`);
+        console.log(`✅ Loaded ${orders.length} orders for user: ${currentUserId}`);
         displayOrders(orders);
         
       }, 
@@ -1605,7 +1635,7 @@ function displayOrders(ordersList) {
     const cardClass = isCancelled ? 'order-card cancelled' : 'order-card';
     
     ordersHTML += `
-      <div class="${cardClass}" data-order-id="${order.id}">
+      <div class="${cardClass}" data-order-id="${order.id}" data-order-number="${order.orderNumber || ''}">
         <div class="order-header">
           <div class="order-info">
             <h3>${order.orderNumber || 'Order #' + order.id.substring(0, 8)}</h3>
@@ -1744,7 +1774,7 @@ function displayOrders(ordersList) {
             <i class="fas fa-file-invoice"></i> Invoice
           </button>
           ${!isCancelled && orderStatus !== 'delivered' && orderStatus !== 'returned' && remainingAmount > 0 ? `
-          <button class="btn btn-danger" onclick="payRemainingAmount('${order.id}')">
+          <button class="btn btn-danger" onclick="payRemainingAmount('${order.id}', '${order.orderNumber || order.id}')">
             <i class="fas fa-money-bill-wave"></i> Pay Remaining
           </button>
           ` : ''}
@@ -1759,6 +1789,22 @@ function displayOrders(ordersList) {
   });
   
   ordersDiv.innerHTML = ordersHTML;
+  
+  // Check if we need to scroll to a specific order
+  const urlParams = new URLSearchParams(window.location.search);
+  const orderToScroll = urlParams.get('order_id');
+  if (orderToScroll) {
+    setTimeout(() => {
+      const orderElement = document.querySelector(`[data-order-id="${orderToScroll}"]`);
+      if (orderElement) {
+        orderElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        orderElement.style.boxShadow = '0 0 0 3px var(--primary-gold)';
+        setTimeout(() => {
+          orderElement.style.boxShadow = '';
+        }, 3000);
+      }
+    }, 500);
+  }
 }
 
 function getAddressHTML(address) {
@@ -1781,6 +1827,65 @@ function getAddressHTML(address) {
   if (address.email) html += `<div class="address-line">Email: ${address.email}</div>`;
   
   return html;
+}
+
+// ============================================
+// CHECK NOTIFICATION REDIRECT
+// ============================================
+
+function checkNotificationRedirect() {
+  // Check if we were redirected from a notification
+  const notificationRedirect = localStorage.getItem('irya_notification_redirect');
+  if (notificationRedirect) {
+    try {
+      const redirectData = JSON.parse(notificationRedirect);
+      console.log("📌 Processing notification redirect:", redirectData);
+      
+      // Extract order information
+      const { orderId, orderNumber, notificationType, action } = redirectData;
+      
+      if (orderId || orderNumber) {
+        // Scroll to the specific order
+        setTimeout(() => {
+          let orderElement;
+          
+          if (orderId) {
+            orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
+          }
+          
+          if (!orderElement && orderNumber) {
+            orderElement = document.querySelector(`[data-order-number="${orderNumber}"]`);
+          }
+          
+          if (orderElement) {
+            orderElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            orderElement.style.boxShadow = '0 0 0 3px var(--primary-gold)';
+            setTimeout(() => {
+              orderElement.style.boxShadow = '';
+            }, 3000);
+            
+            // If it's a payment notification, highlight the pay button
+            if (notificationType && notificationType.includes('payment')) {
+              const payBtn = orderElement.querySelector('.btn-danger');
+              if (payBtn) {
+                payBtn.style.animation = 'pulse 2s infinite';
+                setTimeout(() => {
+                  payBtn.style.animation = '';
+                }, 6000);
+              }
+            }
+          }
+        }, 1000);
+      }
+      
+      // Clear the redirect data
+      localStorage.removeItem('irya_notification_redirect');
+      
+    } catch (error) {
+      console.error("❌ Error processing notification redirect:", error);
+      localStorage.removeItem('irya_notification_redirect');
+    }
+  }
 }
 
 // ============================================
@@ -2031,7 +2136,7 @@ function trackOnWebsite(trackingNumber) {
 // PAY REMAINING AMOUNT
 // ============================================
 
-function payRemainingAmount(orderId) {
+function payRemainingAmount(orderId, orderNumber) {
   try {
     const order = orders.find(o => o.id === orderId);
     if (!order) {
@@ -2051,19 +2156,22 @@ function payRemainingAmount(orderId) {
     // Prepare data for checkout page
     const checkoutData = {
       orderId: order.id,
-      orderNumber: order.orderNumber,
+      orderNumber: order.orderNumber || orderNumber,
       remainingAmount: remainingAmount,
       totalAmount: totalAmount,
       paidAmount: paidAmount,
       orderType: 'existing_order',
-      items: order.items || []
+      items: order.items || [],
+      userId: currentUserId,
+      userEmail: userEmail,
+      userName: userName
     };
     
     // Save to localStorage
     localStorage.setItem('irya_pending_payment_order', JSON.stringify(checkoutData));
     
     // Redirect to checkout page
-    window.location.href = `checkout.html?order=${order.id}&type=remaining_payment`;
+    window.location.href = `checkout.html?order=${order.id}&type=remaining_payment&user=${currentUserId}`;
     
   } catch (error) {
     console.error("❌ Error in pay remaining amount:", error);
@@ -2090,6 +2198,9 @@ async function showOrderDetails(orderId) {
           <h2 style="margin: 0; font-size: 22px; display: flex; align-items: center; gap: 12px;">
             <i class="fas fa-box"></i> Order Details - ${order.orderNumber || order.id.substring(0, 8)}
           </h2>
+          <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">
+            User ID: ${currentUserId}
+          </div>
         </div>
         
         <div style="padding: 30px;">
@@ -2172,6 +2283,7 @@ function createOrderDetailsHTML(order) {
               <i class="fas ${paymentIcon}"></i> ${paymentBadgeText}
             </span>
           </div>
+          <div><strong>User ID:</strong> ${order.userId || currentUserId}</div>
         </div>
       </div>
       
@@ -2269,6 +2381,12 @@ function createOrderDetailsHTML(order) {
     ` : ''}
     
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px;">
+      ${remainingAmount > 0 ? `
+      <button onclick="payRemainingAmount('${order.id}', '${order.orderNumber || order.id}')" 
+              style="background: var(--payment-pending); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-money-bill-wave"></i> Pay Remaining £${remainingAmount.toFixed(2)}
+      </button>
+      ` : ''}
       <button onclick="window.print()" 
               style="background: var(--primary-gold); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
         <i class="fas fa-print"></i> Print Details
@@ -2286,36 +2404,14 @@ function createOrderDetailsHTML(order) {
 }
 
 // ============================================
-// ORDER CANCELLATION
-// ============================================
-
-async function cancelOrder(orderId) {
-  if (!confirm('Are you sure you want to cancel this order?')) return;
-  
-  try {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) {
-      showMessage("Order not found");
-      return;
-    }
-    
-    showMessage('Order cancellation request submitted. Our team will contact you shortly.');
-    
-  } catch (error) {
-    console.error('❌ Error cancelling order:', error);
-    showMessage('Failed to cancel order. Please contact support.');
-  }
-}
-
-// ============================================
-// NOTIFICATIONS - UPDATED FOR REDIRECT
+// NOTIFICATIONS - UPDATED FOR ORDER REDIRECT
 // ============================================
 
 async function loadNotifications() {
   try {
-    if (!db || !userId) return;
+    if (!db || !currentUserId) return;
     
-    const notificationsRef = collection(db, "users", userId, "notifications");
+    const notificationsRef = collection(db, "users", currentUserId, "notifications");
     const notificationsQuery = query(notificationsRef, orderBy("createdAt", "desc"), limit(20));
     
     if (notificationsUnsubscribe) notificationsUnsubscribe();
@@ -2370,78 +2466,99 @@ function createNotificationElement(note) {
   const timeAgo = getTimeAgo(note.createdAt);
   
   // Extract order information from notification
-  let orderNumber = note.orderNumber;
   let orderId = note.orderId;
-  let notificationType = note.type || determineNotificationType(note.message, note.title);
+  let orderNumber = note.orderNumber;
+  let notificationType = note.type || 'general';
   
-  // Extract order number from message if not directly available
-  if (!orderNumber) {
-    orderNumber = extractOrderNumberFromMessage(note.message);
-  }
-  
-  // Find order in current list to get orderId
-  if (orderNumber && !orderId) {
-    const order = orders.find(o => o.orderNumber === orderNumber);
-    if (order) {
-      orderId = order.id;
+  // If orderId or orderNumber is missing, try to extract from message
+  if (!orderId && !orderNumber && note.message) {
+    const extracted = extractOrderInfoFromMessage(note.message);
+    if (extracted) {
+      orderNumber = extracted.orderNumber;
+      // Try to find order in current list
+      if (orderNumber && orders.length > 0) {
+        const order = orders.find(o => o.orderNumber === orderNumber);
+        if (order) {
+          orderId = order.id;
+        }
+      }
     }
   }
   
-  // Set click handler based on notification type
-  div.onclick = (event) => {
-    event.stopPropagation();
-    handleNotificationClick(note.id, orderId, orderNumber, notificationType);
-  };
-  
-  // Determine notification styling
+  // Determine notification type and styling
   let icon = 'fa-bell';
   let color = '#c9a227';
   let actionText = '';
   let badgeText = 'Info';
   
-  if (notificationType === 'payment_remaining_warning') {
+  if (notificationType === 'payment_remaining_warning' || 
+      note.title?.includes('Payment Pending') ||
+      note.message?.includes('Remaining payment') ||
+      note.message?.includes('within 1 hour')) {
     icon = 'fa-exclamation-triangle';
     color = '#ff6b6b';
-    actionText = '<span style="color: var(--payment-pending);"><i class="fas fa-money-bill-wave"></i> Pay Now</span>';
+    actionText = `<span style="color: var(--payment-pending);">
+      <i class="fas fa-money-bill-wave"></i> Pay Now
+    </span>`;
     badgeText = 'Payment';
-  } else if (notificationType === 'payment_remaining_info' || 
-             notificationType === 'payment_updated' ||
-             notificationType === 'payment_due') {
+    notificationType = 'payment_remaining';
+  } else if (notificationType === 'payment_updated' ||
+             note.title?.includes('Payment Updated') ||
+             note.title?.includes('Payment Received')) {
     icon = 'fa-money-bill-wave';
     color = '#ff922b';
-    actionText = '<span style="color: var(--payment-advance);"><i class="fas fa-money-bill-wave"></i> Pay Remaining</span>';
+    actionText = `<span style="color: var(--payment-advance);">
+      <i class="fas fa-eye"></i> View Order
+    </span>`;
     badgeText = 'Payment';
-  } else if (notificationType === 'payment_received') {
-    icon = 'fa-check-circle';
-    color = '#51cf66';
-    actionText = '<span style="color: var(--payment-full);"><i class="fas fa-eye"></i> View Details</span>';
-    badgeText = 'Payment';
-  } else if (notificationType === 'order_shipped') {
+    notificationType = 'payment_update';
+  } else if (notificationType === 'order_shipped' ||
+             note.title?.includes('Shipped') ||
+             note.message?.includes('has been shipped')) {
     icon = 'fa-shipping-fast';
     color = '#339af0';
-    actionText = '<span style="color: var(--processing);"><i class="fas fa-truck"></i> Track Order</span>';
+    actionText = `<span style="color: var(--processing);">
+      <i class="fas fa-truck"></i> Track Order
+    </span>`;
     badgeText = 'Shipping';
-  } else if (notificationType === 'order_out_for_delivery') {
+    notificationType = 'order_shipped';
+  } else if (notificationType === 'order_out_for_delivery' ||
+             note.title?.includes('Out for Delivery')) {
     icon = 'fa-truck';
     color = '#cc5de8';
-    actionText = '<span style="color: var(--out-for-delivery);"><i class="fas fa-truck"></i> Track Order</span>';
+    actionText = `<span style="color: var(--out-for-delivery);">
+      <i class="fas fa-truck"></i> Track Order
+    </span>`;
     badgeText = 'Delivery';
-  } else if (notificationType === 'order_delivered') {
+    notificationType = 'order_out_for_delivery';
+  } else if (notificationType === 'order_delivered' ||
+             note.title?.includes('Delivered')) {
     icon = 'fa-check-double';
     color = '#40c057';
-    actionText = '<span style="color: var(--delivered);"><i class="fas fa-box-open"></i> View Details</span>';
+    actionText = `<span style="color: var(--delivered);">
+      <i class="fas fa-box-open"></i> View Details
+    </span>`;
     badgeText = 'Delivery';
-  } else if (notificationType === 'order_cancelled') {
+    notificationType = 'order_delivered';
+  } else if (notificationType === 'order_cancelled' ||
+             note.title?.includes('Cancelled')) {
     icon = 'fa-times-circle';
     color = '#fa5252';
     badgeText = 'Cancelled';
+    notificationType = 'order_cancelled';
   }
+  
+  // Set click handler
+  div.onclick = (event) => {
+    event.stopPropagation();
+    handleNotificationClick(note.id, orderId, orderNumber, notificationType);
+  };
   
   div.innerHTML = `
     <div class="notification-title">
       <i class="fas ${icon}" style="color: ${color}; margin-right: 8px;"></i>
       ${note.title || 'Notification'}
-      <span class="notification-badge" style="background: ${color}; color: white;">${badgeText}</span>
+      <span class="notification-badge" style="background: ${color}; color: white; padding: 2px 6px; border-radius: 10px; font-size: 9px; margin-left: 8px;">${badgeText}</span>
     </div>
     <div class="notification-message">${note.message || ''}</div>
     <div class="notification-time">
@@ -2450,7 +2567,7 @@ function createNotificationElement(note) {
     </div>
   `;
   
-  // Store metadata
+  // Store metadata for debugging
   div.setAttribute('data-notification-id', note.id);
   div.setAttribute('data-order-id', orderId || '');
   div.setAttribute('data-order-number', orderNumber || '');
@@ -2459,86 +2576,37 @@ function createNotificationElement(note) {
   return div;
 }
 
-function extractOrderNumberFromMessage(message) {
+function extractOrderInfoFromMessage(message) {
   if (!message) return null;
   
-  console.log("Extracting order number from message:", message);
+  console.log("Extracting order info from message:", message);
   
   // Pattern 1: IRYA-数字-数字 (e.g., IRYA-1765748514765-1207)
   const pattern1 = message.match(/IRYA[-\s]\d+[-\s]\d+/g);
   if (pattern1 && pattern1[0]) {
-    return pattern1[0];
+    return { orderNumber: pattern1[0] };
   }
   
   // Pattern 2: IRYA-数字 (simple version)
   const pattern2 = message.match(/IRYA[-\s]\d+/g);
   if (pattern2 && pattern2[0]) {
-    return pattern2[0];
+    return { orderNumber: pattern2[0] };
   }
   
-  // Pattern 3: Just find numbers that look like order numbers
-  const pattern3 = message.match(/\b\d{10,}\b/g);
+  // Pattern 3: Order # followed by numbers
+  const pattern3 = message.match(/Order[#\s]+\d+/gi);
   if (pattern3 && pattern3[0]) {
-    return `IRYA-${pattern3[0]}`;
+    const orderNum = pattern3[0].replace(/Order[#\s]+/i, '').trim();
+    return { orderNumber: `IRYA-${orderNum}` };
+  }
+  
+  // Pattern 4: Just find numbers that look like order numbers
+  const pattern4 = message.match(/\b\d{10,}\b/g);
+  if (pattern4 && pattern4[0]) {
+    return { orderNumber: `IRYA-${pattern4[0]}` };
   }
   
   return null;
-}
-
-function determineNotificationType(message, title) {
-  if (!message) return 'general';
-  
-  const msg = message.toLowerCase();
-  const tit = (title || '').toLowerCase();
-  
-  // Payment related notifications
-  if (msg.includes('remaining payment') || 
-      msg.includes('balance due') || 
-      msg.includes('amount due') ||
-      msg.includes('pay remaining') ||
-      msg.includes('complete payment') ||
-      msg.includes('payment due')) {
-    return 'payment_remaining_info';
-  }
-  
-  if (msg.includes('payment updated') || 
-      msg.includes('updated to £') ||
-      msg.includes('payment changed')) {
-    return 'payment_updated';
-  }
-  
-  if (msg.includes('payment received') || 
-      msg.includes('advance received') ||
-      msg.includes('payment confirmed') ||
-      msg.includes('paid successfully')) {
-    return 'payment_received';
-  }
-  
-  if ((msg.includes('warning') && msg.includes('payment')) ||
-      msg.includes('urgent') ||
-      msg.includes('immediately') ||
-      msg.includes('within 1 hour')) {
-    return 'payment_remaining_warning';
-  }
-  
-  // Order status notifications
-  if (msg.includes('shipped') || msg.includes('dispatched')) {
-    return 'order_shipped';
-  }
-  
-  if (msg.includes('out for delivery') || msg.includes('delivery today')) {
-    return 'order_out_for_delivery';
-  }
-  
-  if (msg.includes('delivered') || msg.includes('arrived') || msg.includes('successfully delivered')) {
-    return 'order_delivered';
-  }
-  
-  if (msg.includes('cancelled') || msg.includes('canceled')) {
-    return 'order_cancelled';
-  }
-  
-  return 'general';
 }
 
 async function handleNotificationClick(notificationId, orderId, orderNumber, notificationType) {
@@ -2547,12 +2615,13 @@ async function handleNotificationClick(notificationId, orderId, orderNumber, not
       notificationId,
       orderId,
       orderNumber,
-      notificationType
+      notificationType,
+      currentUserId
     });
     
     // First mark as read
     if (db) {
-      const notificationRef = doc(db, "users", userId, "notifications", notificationId);
+      const notificationRef = doc(db, "users", currentUserId, "notifications", notificationId);
       await updateDoc(notificationRef, {
         read: true,
         readAt: new Date().toISOString()
@@ -2562,107 +2631,123 @@ async function handleNotificationClick(notificationId, orderId, orderNumber, not
     // Close notification dropdown
     closeNotifications();
     
-    // Check if it's a payment notification
-    if (notificationType.includes('payment')) {
-      // Handle payment notification - redirect to checkout
-      handlePaymentNotification(orderId, orderNumber, notificationType);
+    // Save redirect data for when orders load
+    const redirectData = {
+      orderId: orderId,
+      orderNumber: orderNumber,
+      notificationType: notificationType,
+      userId: currentUserId,
+      timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('irya_notification_redirect', JSON.stringify(redirectData));
+    
+    // Handle based on notification type
+    if (notificationType === 'payment_remaining') {
+      handlePaymentNotification(orderId, orderNumber);
+    } else if (notificationType === 'order_shipped' || 
+               notificationType === 'order_out_for_delivery') {
+      handleTrackingNotification(orderId, orderNumber);
     } else {
-      // Handle other notifications
-      handleOtherNotification(orderId, orderNumber, notificationType);
+      handleOrderDetailsNotification(orderId, orderNumber);
     }
     
   } catch (error) {
     console.error("❌ Error handling notification click:", error);
     closeNotifications();
-    showMessage("Error handling notification: " + error.message);
+    showMessage("Error handling notification");
   }
 }
 
-function handlePaymentNotification(orderId, orderNumber, notificationType) {
-  console.log("💰 Handling payment notification - redirecting to checkout");
-  
-  // Prepare data for checkout redirect
-  const checkoutData = {
-    orderId: orderId,
-    orderNumber: orderNumber,
-    notificationType: notificationType,
-    userId: userId,
-    redirectFrom: 'notification',
-    timestamp: new Date().toISOString(),
-    isWarning: notificationType === 'payment_remaining_warning',
-    source: 'orders_page'
-  };
-  
-  // Save to localStorage
-  localStorage.setItem('irya_checkout_redirect_data', JSON.stringify(checkoutData));
-  console.log("Checkout data saved to localStorage");
-  
-  // Redirect to checkout page
-  let checkoutUrl = 'checkout.html?from_notification=true';
+function handlePaymentNotification(orderId, orderNumber) {
+  console.log("💰 Handling payment notification");
   
   if (orderId) {
-    checkoutUrl += `&order_id=${orderId}`;
-  }
-  if (orderNumber) {
-    checkoutUrl += `&order_number=${encodeURIComponent(orderNumber)}`;
-  }
-  if (notificationType) {
-    checkoutUrl += `&type=${notificationType}`;
-  }
-  if (notificationType === 'payment_remaining_warning') {
-    checkoutUrl += `&warning=true`;
-  }
-  
-  console.log("Redirecting to checkout:", checkoutUrl);
-  window.location.href = checkoutUrl;
-}
-
-function handleOtherNotification(orderId, orderNumber, notificationType) {
-  console.log("📦 Handling other notification:", notificationType);
-  
-  // Find order in current list
-  let order = null;
-  
-  if (orderId) {
-    order = orders.find(o => o.id === orderId);
-  }
-  
-  if (!order && orderNumber) {
-    order = orders.find(o => o.orderNumber === orderNumber);
-  }
-  
-  if (order) {
-    // Take appropriate action based on notification type
-    if (notificationType === 'order_shipped' || 
-        notificationType === 'order_out_for_delivery') {
-      showTrackingModal(order.id);
-    } else if (notificationType === 'order_delivered' ||
-               notificationType === 'payment_received') {
-      showOrderDetails(order.id);
-    } else if (notificationType === 'order_cancelled') {
-      // Search for cancelled order
+    // Directly trigger payment for this order
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      payRemainingAmount(order.id, order.orderNumber || orderNumber);
+    } else {
+      // Search for the order
+      showMessage(`Order ${orderNumber || orderId} not found. Searching...`);
       document.getElementById('searchInput').value = orderNumber || orderId || '';
       searchOrders();
-      showMessage("Order cancelled. Search results updated.");
+    }
+  } else if (orderNumber) {
+    // Find order by order number
+    const order = orders.find(o => o.orderNumber === orderNumber);
+    if (order) {
+      payRemainingAmount(order.id, orderNumber);
     } else {
-      showOrderDetails(order.id);
+      showMessage(`Order ${orderNumber} not found. Searching...`);
+      document.getElementById('searchInput').value = orderNumber;
+      searchOrders();
     }
   } else {
-    // Order not found, search for it
-    showMessage(`Order ${orderNumber || orderId || ''} not found. Searching...`);
-    document.getElementById('searchInput').value = orderNumber || orderId || '';
-    searchOrders();
+    showMessage("Cannot process payment notification. Order information missing.");
+  }
+}
+
+function handleTrackingNotification(orderId, orderNumber) {
+  console.log("🚚 Handling tracking notification");
+  
+  if (orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (order && order.trackingNumber) {
+      showTrackingModal(order.id);
+    } else if (order) {
+      showMessage(`Order ${order.orderNumber} doesn't have tracking information yet.`);
+      showOrderDetails(order.id);
+    } else {
+      showMessage(`Order ${orderNumber || orderId} not found.`);
+    }
+  } else if (orderNumber) {
+    const order = orders.find(o => o.orderNumber === orderNumber);
+    if (order && order.trackingNumber) {
+      showTrackingModal(order.id);
+    } else if (order) {
+      showMessage(`Order ${orderNumber} doesn't have tracking information yet.`);
+      showOrderDetails(order.id);
+    } else {
+      showMessage(`Order ${orderNumber} not found.`);
+    }
+  }
+}
+
+function handleOrderDetailsNotification(orderId, orderNumber) {
+  console.log("📦 Handling order details notification");
+  
+  if (orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      showOrderDetails(order.id);
+    } else {
+      showMessage(`Order ${orderNumber || orderId} not found. Searching...`);
+      document.getElementById('searchInput').value = orderNumber || orderId || '';
+      searchOrders();
+    }
+  } else if (orderNumber) {
+    const order = orders.find(o => o.orderNumber === orderNumber);
+    if (order) {
+      showOrderDetails(order.id);
+    } else {
+      showMessage(`Order ${orderNumber} not found. Searching...`);
+      document.getElementById('searchInput').value = orderNumber;
+      searchOrders();
+    }
+  } else {
+    showMessage("Cannot open order details. Order information missing.");
   }
 }
 
 async function markAllAsRead() {
   try {
-    if (!db || !userId) return;
+    if (!db || !currentUserId) return;
     
     const unreadNotifications = notifications.filter(n => !n.read);
     
     for (const note of unreadNotifications) {
-      const notificationRef = doc(db, "users", userId, "notifications", note.id);
+      const notificationRef = doc(db, "users", currentUserId, "notifications", note.id);
       await updateDoc(notificationRef, {
         read: true,
         readAt: new Date().toISOString()
@@ -2753,6 +2838,11 @@ function searchOrders() {
     
     // Search by order ID
     if (order.id.toLowerCase().includes(searchTerm)) {
+      return true;
+    }
+    
+    // Search by user ID
+    if (order.userId && order.userId.toLowerCase().includes(searchTerm)) {
       return true;
     }
     
@@ -3081,15 +3171,16 @@ async function downloadInvoice(orderId) {
               <strong>Status:</strong> 
               <span class="status-badge" style="background: ${getStatusColor(order.status || order.orderStatus)}; color: white;">
                 ${getStatusText(order.status || order.orderStatus)}
-              </span>
+              </span><br>
+              <strong>User ID:</strong> ${currentUserId}
             </div>
             <div style="text-align: right;">
-              <strong>Customer:</strong> ${order.userName || 'Customer'}<br>
+              <strong>Customer:</strong> ${order.userName || userName || 'Customer'}<br>
               <strong>Payment Method:</strong> 
               ${order.paymentMethod === 'bank' ? 'Bank Transfer' : 
                 order.paymentMethod === 'stripe' ? 'Credit Card' : 
                 order.paymentMethod === 'paypal' ? 'PayPal' : 'N/A'}<br>
-              <strong>Email:</strong> ${order.userEmail || 'N/A'}
+              <strong>Email:</strong> ${order.userEmail || userEmail || 'N/A'}
             </div>
           </div>
           
@@ -3224,6 +3315,28 @@ document.addEventListener('click', function(event) {
 });
 
 // ============================================
+// ORDER CANCELLATION
+// ============================================
+
+async function cancelOrder(orderId) {
+  if (!confirm('Are you sure you want to cancel this order?')) return;
+  
+  try {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) {
+      showMessage("Order not found");
+      return;
+    }
+    
+    showMessage('Order cancellation request submitted. Our team will contact you shortly.');
+    
+  } catch (error) {
+    console.error('❌ Error cancelling order:', error);
+    showMessage('Failed to cancel order. Please contact support.');
+  }
+}
+
+// ============================================
 // INITIALIZATION
 // ============================================
 
@@ -3261,6 +3374,7 @@ window.toggleNotifications = toggleNotifications;
 window.markAllAsRead = markAllAsRead;
 window.cancelOrder = cancelOrder;
 window.payRemainingAmount = payRemainingAmount;
+window.getUserInfo = getUserInfo;
 </script>
 
 </body>
