@@ -2,17 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>IRYA STONE – Admin Orders</title>
+<title>IRYA STONE – Admin Orders & Payments (FULL FINAL)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 <style>
-:root{
-  --primary:#2c3e50;--accent:#3498db;--success:#27ae60;--warning:#f39c12;--danger:#e74c3c;
-}
+:root{--primary:#2c3e50;--accent:#3498db;--success:#27ae60;--warning:#f39c12;--danger:#e74c3c}
 body{font-family:Segoe UI,Arial;background:#f4f6f9;padding:20px}
-h2{margin-bottom:20px}
-.order-card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:18px;margin-bottom:18px}
+.order{background:#fff;border-radius:10px;padding:18px;margin-bottom:20px;border:1px solid #ddd}
 .badge{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600}
 .processing{background:#e3f2fd;color:#1565c0}
 .ready_to_ship{background:#fff3e0;color:#ef6c00}
@@ -20,133 +16,121 @@ h2{margin-bottom:20px}
 .out_for_delivery{background:#ede7f6;color:#5e35b1}
 .delivered{background:#e8f5e9;color:#2e7d32}
 .cancelled{background:#ffebee;color:#c62828}
-.btn{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:600;margin-right:8px}
+.btn{padding:7px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:600;margin:5px}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-warning{background:var(--warning);color:#fff}
 .btn-success{background:var(--success);color:#fff}
-select,input{padding:6px 8px;border-radius:6px;border:1px solid #ccc}
-hr{border:none;border-top:1px solid #eee;margin:15px 0}
+input,select{padding:6px;border-radius:6px;border:1px solid #ccc;margin:4px}
+hr{border:none;border-top:1px solid #eee;margin:12px 0}
 </style>
 </head>
-
 <body>
-<h2><i class="fas fa-gem"></i> IRYA STONE – Admin Orders</h2>
+<h2><i class="fas fa-gem"></i> IRYA STONE – Admin Orders & Payments</h2>
 <div id="orders"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getFirestore, collectionGroup, getDocs, doc, updateDoc, addDoc, collection, query, where, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { getFirestore, collectionGroup, getDocs, doc, updateDoc, addDoc, collection, query, where, orderBy, deleteDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-/* ================= FIREBASE ================= */
-const app = initializeApp({
-  apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-  authDomain: "iryastone-uk.firebaseapp.com",
-  projectId: "iryastone-uk"
-});
+/* FIREBASE */
+const app = initializeApp({ apiKey:"YOUR_API_KEY", authDomain:"iryastone-uk.firebaseapp.com", projectId:"iryastone-uk"});
 const db = getFirestore(app);
 const now = ()=>new Date().toISOString();
 
-/* ================= NOTIFICATION ENGINE ================= */
-async function sendOrderNotification(userId, orderId, orderNumber, title, message, type="other"){
-  if(!userId || !orderId || !orderNumber){
-    console.error("Notification blocked – missing order link",{userId,orderId,orderNumber});
-    return;
-  }
-  const notifCol = collection(db,"users",userId,"notifications");
-
-  // max 10 notifications per order
-  const q = query(notifCol, where("orderId","==",orderId), orderBy("createdAt","desc"));
-  const snap = await getDocs(q);
-  if(snap.size >= 10){
-    snap.docs.slice(9).forEach(d=>deleteDoc(d.ref));
-  }
-
-  await addDoc(notifCol,{
-    title,message,orderId,orderNumber,type,
-    createdAt:now(),read:false,readAt:null
-  });
+/* ================= NOTIFICATIONS ================= */
+async function sendOrderNotification(userId,orderId,orderNumber,title,message,type="other"){
+ if(!userId||!orderId||!orderNumber) return;
+ const col=collection(db,'users',userId,'notifications');
+ const q=query(col,where('orderId','==',orderId),orderBy('createdAt','desc'));
+ const snap=await getDocs(q);
+ if(snap.size>=10){ snap.docs.slice(9).forEach(d=>deleteDoc(d.ref)); }
+ await addDoc(col,{title,message,type,orderId,orderNumber,createdAt:now(),read:false});
 }
 
-async function sendPaymentWarning(order){
-  return sendOrderNotification(
-    order.userId,order._id,order.orderNumber,
-    "Payment Warning",
-    "Your order is ready to ship. Please clear remaining / full payment within 1 hour otherwise your order will be cancelled.",
-    "warning"
-  );
+/* ================= PAYMENTS ================= */
+async function confirmPayment(order,amount,method,reference,paymentType){
+ const ref=doc(db,'users',order.userId,'orders',order._id);
+ await updateDoc(ref,{
+  paymentHistory: arrayUnion({
+    amount,
+    previousAmount: order.remainingPayment,
+    reference,
+    paymentMethod: method,
+    paymentType,
+    status:'confirmed',
+    updatedBy:'admin',
+    date: now()
+  }),
+  remainingPayment: increment(-amount),
+  paymentStatus: (order.remainingPayment-amount)<=0?'fully_paid':'partial',
+  paymentSubmittedAt: now(),
+  transactionReference: reference,
+  updatedAt: now()
+ });
+ await sendOrderNotification(order.userId,order._id,order.orderNumber,'Payment Confirmed',`£${amount} received via ${method}. Ref: ${reference}`,'payment');
 }
 
-async function sendThanks(order){
-  return sendOrderNotification(
-    order.userId,order._id,order.orderNumber,
-    "Thank You",
-    "Thank you for completing the payment. Your order is being processed.",
-    "thanks"
-  );
+/* ================= STATUS UPDATE ================= */
+async function updateStatus(order,status,tracking){
+ const ref=doc(db,'users',order.userId,'orders',order._id);
+ await updateDoc(ref,{
+  status,
+  trackingNumber: tracking||order.trackingNumber||'',
+  statusHistory: arrayUnion({status,tracking:tracking||'',notes:'',at:now()}),
+  [`${status}At`]: now(),
+  updatedAt: now()
+ });
+ if(status==='ready_to_ship' && order.remainingPayment>0){
+  await sendOrderNotification(order.userId,order._id,order.orderNumber,'Payment Warning','Your order is ready to ship. Clear remaining payment within 1 hour otherwise order will be cancelled.','warning');
+ }
+ await sendOrderNotification(order.userId,order._id,order.orderNumber,'Order Status Updated',`Order is now ${status}`,'status');
 }
 
-/* ================= LOAD ORDERS ================= */
-async function loadOrders(){
-  const box=document.getElementById('orders');
-  box.innerHTML='';
-  const snap=await getDocs(collectionGroup(db,'orders'));
-
-  snap.forEach(d=>{
-    const o=d.data(); o._id=d.id;
-    const div=document.createElement('div');
-    div.className='order-card';
-    div.innerHTML=`
-      <h3>Order ${o.orderNumber}</h3>
-      <p><b>User:</b> ${o.userName||''} (${o.userEmail||''})</p>
-      <p><b>Status:</b> <span class="badge ${o.status}">${o.status}</span></p>
-      <p><b>Total:</b> £${o.total} | <b>Remaining:</b> £${o.remainingPayment||0}</p>
-      <hr>
-      <label>Status:</label>
-      <select id="st-${o._id}">
-        <option value="processing">Processing</option>
-        <option value="ready_to_ship">Ready to Ship</option>
-        <option value="shipped">Shipped</option>
-        <option value="out_for_delivery">Out for Delivery</option>
-        <option value="delivered">Delivered</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
-      <br><br>
-      <button class="btn btn-primary" onclick="updateStatus('${o.userId}','${o._id}','${o.orderNumber}')">Update Status</button>
-      <button class="btn btn-warning" onclick="manualNotify('${o.userId}','${o._id}','${o.orderNumber}')">Manual Notification</button>
-    `;
-    box.appendChild(div);
-  });
+/* ================= LOAD ================= */
+async function load(){
+ const box=document.getElementById('orders'); box.innerHTML='';
+ const snap=await getDocs(collectionGroup(db,'orders'));
+ snap.forEach(d=>{
+  const o=d.data(); o._id=d.id;
+  const div=document.createElement('div'); div.className='order';
+  div.innerHTML=`
+   <h3>${o.orderNumber}</h3>
+   <p>Status: <span class="badge ${o.status}">${o.status}</span></p>
+   <p>Total £${o.total} | Remaining £${o.remainingPayment}</p>
+   <hr>
+   <b>Confirm Payment</b><br>
+   Amount <input id="amt-${o._id}" type="number">
+   Method <select id="pm-${o._id}"><option>bank</option><option>cash</option><option>upi</option></select>
+   Ref <input id="ref-${o._id}">
+   Type <select id="pt-${o._id}"><option value="advance">Advance</option><option value="full">Full</option></select>
+   <button class="btn btn-success" onclick="pay('${o._id}')">Confirm</button>
+   <hr>
+   <b>Update Status</b><br>
+   <select id="st-${o._id}"><option>processing</option><option>ready_to_ship</option><option>shipped</option><option>out_for_delivery</option><option>delivered</option><option>cancelled</option></select>
+   Tracking <input id="tr-${o._id}" value="${o.trackingNumber||''}">
+   <button class="btn btn-primary" onclick="status('${o._id}')">Update</button>
+  `;
+  box.appendChild(div);
+ });
 }
 
-/* ================= UPDATE STATUS ================= */
-window.updateStatus=async(userId,orderId,orderNumber)=>{
-  const st=document.getElementById(`st-${orderId}`).value;
-  const ref=doc(db,'users',userId,'orders',orderId);
-  await updateDoc(ref,{status:st,updatedAt:now()});
-
-  if(st==='ready_to_ship'){
-    const snap=await getDocs(collectionGroup(db,'orders'));
-    snap.forEach(async d=>{
-      if(d.id===orderId){
-        const o=d.data(); o._id=orderId;
-        if((o.remainingPayment||0)>0) await sendPaymentWarning(o);
-      }
-    });
-  }
-
-  await sendOrderNotification(userId,orderId,orderNumber,'Order Status Updated',`Order is now ${st}`,'other');
-  loadOrders();
+window.pay=async(id)=>{
+ const snap=await getDocs(collectionGroup(db,'orders'));
+ snap.forEach(async d=>{ if(d.id===id){ const o=d.data(); o._id=id;
+  await confirmPayment(o,Number(document.getElementById('amt-'+id).value),document.getElementById('pm-'+id).value,document.getElementById('ref-'+id).value,document.getElementById('pt-'+id).value);
+ }});
+ load();
 };
 
-/* ================= MANUAL NOTIFICATION ================= */
-window.manualNotify=async(userId,orderId,orderNumber)=>{
-  const type=prompt('Type: payment / warning / thanks / other','payment');
-  const msg=prompt('Enter message');
-  if(!msg) return;
-  await sendOrderNotification(userId,orderId,orderNumber,'Manual Notification',msg,type);
+window.status=async(id)=>{
+ const snap=await getDocs(collectionGroup(db,'orders'));
+ snap.forEach(async d=>{ if(d.id===id){ const o=d.data(); o._id=id;
+  await updateStatus(o,document.getElementById('st-'+id).value,document.getElementById('tr-'+id).value);
+ }});
+ load();
 };
 
-loadOrders();
+load();
 </script>
 </body>
 </html>
