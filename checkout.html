@@ -1267,6 +1267,7 @@ let currentOrderData = null;
 let existingOrderData = null;
 let authSystem = null;
 let checkoutType = null;
+let buyNowItemId = null;
 
 // ============================================
 // CHECKOUT TYPES
@@ -1279,7 +1280,7 @@ const CHECKOUT_TYPES = {
 };
 
 // ============================================
-// CHECKOUT INITIALIZATION - UPDATED
+// CHECKOUT INITIALIZATION
 // ============================================
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -1288,7 +1289,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Get URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     isBuyNowFlow = urlParams.get('buynow') === 'true';
-    const buyNowItemId = urlParams.get('buynow_item_id');
+    buyNowItemId = urlParams.get('buynow_item_id');
     const source = urlParams.get('source');
     const existingOrderId = urlParams.get('order');
     const paymentType = urlParams.get('type');
@@ -1340,20 +1341,20 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ============================================
-// LOAD BUY NOW ITEMS - NEW FUNCTION
+// LOAD BUY NOW ITEMS FROM buyNowItems COLLECTION
 // ============================================
 
 async function loadBuyNowItems(buyNowItemId) {
     try {
         showLoading(true);
-        console.log("Loading Buy Now item:", buyNowItemId);
+        console.log("Loading Buy Now item from buyNowItems collection:", buyNowItemId);
         
         if (!firebaseDB) {
             throw new Error('Firebase not initialized');
         }
         
         const userId = authSystem.getUserId();
-        console.log("User ID for Buy Now:", userId);
+        console.log("Current User ID:", userId);
         
         // Fetch from buyNowItems collection
         const buyNowDoc = await firebaseDB.collection('buyNowItems')
@@ -1362,38 +1363,62 @@ async function loadBuyNowItems(buyNowItemId) {
         
         if (buyNowDoc.exists) {
             const buyNowData = buyNowDoc.data();
-            console.log("Buy Now data found:", buyNowData);
+            console.log("✅ Buy Now data found in buyNowItems collection:", buyNowData);
             
             // Check if it belongs to current user
             if (buyNowData.userId !== userId) {
-                throw new Error('This Buy Now item does not belong to you');
+                console.warn("Buy Now item user ID mismatch:", buyNowData.userId, "vs", userId);
+                showError('This Buy Now item does not belong to your account.');
+                setTimeout(() => window.location.href = 'products.html', 2000);
+                return;
             }
             
-            // Load product images
-            const productIds = buyNowData.items ? 
-                buyNowData.items.map(item => item.productId).filter(id => id) : 
-                [];
+            // Get the item object
+            const buyNowItem = buyNowData.item;
             
-            if (productIds.length > 0) {
-                await loadProductImagesForItems(buyNowData.items);
-            }
+            // Convert single item to array format for checkout
+            cartItems = [{
+                id: buyNowItem.id,
+                productId: buyNowItem.id,
+                name: buyNowItem.name || buyNowItem.stoneName,
+                stoneName: buyNowItem.stoneName,
+                category: buyNowItem.category,
+                description: buyNowItem.description,
+                image: buyNowItem.image,
+                imageUrl: buyNowItem.image,
+                price: buyNowItem.price || 0,
+                quantity: buyNowItem.quantity || 1,
+                priceUnit: buyNowItem.priceUnit,
+                calculatedPrice: buyNowItem.calculatedPrice || 0,
+                totalPrice: buyNowItem.totalPrice || 0,
+                calculationType: buyNowItem.calculationType,
+                calculationData: buyNowItem.calculationData,
+                customRequirements: buyNowItem.customRequirements,
+                advancePayment: buyNowItem.advancePayment || 0,
+                remainingPayment: buyNowItem.remainingPayment || 0,
+                isBuyNow: true,
+                source: 'buy_now',
+                addedAt: buyNowItem.addedAt,
+                updatedAt: buyNowItem.updatedAt,
+                uniqueId: buyNowItem.uniqueId
+            }];
             
-            // Set cartItems
-            cartItems = buyNowData.items || [];
+            console.log("✅ Cart items prepared from Buy Now:", cartItems);
             
             // Load items in UI
             await displayOrderItems(cartItems);
             
             // Display custom requirements if any
-            displayCustomRequirements(buyNowData);
+            if (buyNowItem.customRequirements && buyNowItem.customRequirements.trim()) {
+                showCustomRequirements(buyNowItem.customRequirements);
+            }
             
-            console.log("Buy Now items loaded successfully:", cartItems.length);
         } else {
-            throw new Error('Buy Now item not found');
+            throw new Error('Buy Now item not found in buyNowItems collection');
         }
         
     } catch (error) {
-        console.error('Error loading Buy Now items:', error);
+        console.error('❌ Error loading Buy Now items:', error);
         showError('Failed to load Buy Now items: ' + error.message);
         setTimeout(() => window.location.href = 'products.html', 2000);
     } finally {
@@ -1402,258 +1427,331 @@ async function loadBuyNowItems(buyNowItemId) {
 }
 
 // ============================================
-// LOAD CART ITEMS - UPDATED
+// LOAD CART ITEMS FROM userCarts COLLECTION
 // ============================================
 
-// ===================================================
-// GLOBAL
-// ===================================================
-let cartItems = [];
-
-// ===================================================
-// LOAD CART ITEMS (NORMAL CART)
-// ===================================================
 async function loadCartItems() {
     try {
         showLoading(true);
-
+        console.log("Loading cart items from userCarts collection");
+        
+        if (!firebaseDB) {
+            throw new Error('Firebase not initialized');
+        }
+        
         const userId = authSystem.getUserId();
-        if (!firebaseDB || !userId) throw new Error("Firebase/User missing");
-
+        console.log("Current User ID for cart:", userId);
+        
+        // Fetch from userCarts collection
         const cartDoc = await firebaseDB.collection('users')
             .doc(userId)
             .collection('userCarts')
             .doc('current')
             .get();
-
-        if (!cartDoc.exists) {
-            cartItems = [];
-            return;
-        }
-
-        cartItems = cartDoc.data().items || [];
-
-        cartItems.forEach(item => {
-            item.calculatedPrice = item.totalAmount || (item.price * (item.quantity || 1));
-            item.totalPrice = item.calculatedPrice;
-        });
-
-        await loadProductImagesForItems(cartItems);
-        await displayOrderItems(cartItems);
-
-    } catch (e) {
-        console.error(e);
-        showError("Cart load failed");
-    } finally {
-        showLoading(false);
-    }
-}
-
-// ===================================================
-// LOAD BUY NOW ITEM
-// ===================================================
-async function loadBuyNowItems(buyNowItemId) {
-    try {
-        showLoading(true);
-
-        const doc = await firebaseDB.collection('buyNowItems')
-            .doc(buyNowItemId)
-            .get();
-
-        if (!doc.exists) return;
-
-        const i = doc.data().item;
-
-        cartItems = [{
-            id: i.id,
-            productId: i.id,
-            name: i.name || i.stoneName,
-            category: i.category,
-            imageUrl: i.image,
-            price: i.price || 0,
-            quantity: i.quantity || 1,
-            priceUnit: i.priceUnit,
-            calculatedPrice: i.calculatedPrice || i.totalPrice,
-            totalPrice: i.calculatedPrice || i.totalPrice,
-            calculationType: i.calculationType,
-            calculationData: i.calculationData,
-            customRequirements: i.customRequirements,
-            isBuyNow: true,
-            source: "buy_now"
-        }];
-
-        await loadProductImagesForItems(cartItems);
-        await displayOrderItems(cartItems);
-
-        if (i.customRequirements) {
-            showCustomRequirements(i.customRequirements);
-        }
-
-    } catch (e) {
-        console.error(e);
-    } finally {
-        showLoading(false);
-    }
-}
-
-// ===================================================
-// DISPLAY ITEMS
-// ===================================================
-async function displayOrderItems(items) {
-    const box = document.getElementById("orderItems");
-    if (!box) return;
-
-    if (!items || items.length === 0) {
-        box.innerHTML = "<p style='text-align:center'>No items</p>";
-        return;
-    }
-
-    box.innerHTML = items.map(item => {
-        const img = item.imageUrl || getDefaultImage(item.category);
-        const price = item.calculatedPrice || item.totalPrice;
-
-        return `
-        <div class="order-item">
-            <div class="order-item-image">
-                <img src="${img}" onerror="this.src='${getDefaultImage(item.category)}'">
-            </div>
-            <div class="order-item-details">
-                <div class="order-item-name">${item.name}</div>
-                <div class="order-item-info">${item.category || 'General'}</div>
-                <div class="order-item-info">Qty: ${item.quantity}</div>
-
-                ${item.priceUnit ? `<div class="order-item-info">Per ${item.priceUnit}</div>` : ''}
-
-                ${item.calculationType === 'standard' && item.calculationData ? `
-                    <div class="order-item-info">
-                        Size: ${item.calculationData.length} × ${item.calculationData.width} ${item.calculationData.unit}
-                    </div>` : ''}
-
-                <div class="order-item-price">£${price.toFixed(2)}</div>
-            </div>
-        </div>`;
-    }).join("");
-
-    calculateAndUpdateTotals(items);
-}
-
-// ===================================================
-// CUSTOM REQUIREMENTS
-// ===================================================
-function showCustomRequirements(text) {
-    const c = document.getElementById("customRequirementsContainer");
-    if (!c || !text) return;
-
-    c.innerHTML = `
-        <div class="custom-requirements-box">
-            <h5><i class="fas fa-clipboard-check"></i> Custom Requirements</h5>
-            <div class="custom-requirements-text">${text}</div>
-        </div>`;
-}
-
-// ===================================================
-// LOAD PRODUCT IMAGES
-// ===================================================
-async function loadProductImagesForItems(items) {
-    const ids = [...new Set(items.map(i => i.productId).filter(Boolean))];
-    if (ids.length === 0) return;
-
-    const results = await Promise.all(ids.map(id =>
-        firebaseDB.collection("products").doc(id).get()
-    ));
-
-    const map = {};
-    results.forEach((d, i) => {
-        if (d.exists) map[ids[i]] = d.data();
-    });
-
-    items.forEach(item => {
-        const p = map[item.productId];
-        if (!p) return;
-
-        if (p.images?.length) item.imageUrl = p.images[0];
-        else if (p.imageUrl) item.imageUrl = p.imageUrl;
-        else if (p.image) item.imageUrl = p.image;
-
-        if (!item.name && p.name) item.name = p.name;
-        if (!item.category && p.category) item.category = p.category;
-
-        if (!item.imageUrl) item.imageUrl = getDefaultImage(item.category);
-    });
-}
-
-// ===================================================
-// PAYMENT VALIDATION & PROCESS
-// ===================================================
-async function validateAndProcessPayment() {
-    if (!validateForm()) return;
-
-    showLoading(true);
-
-    try {
-        const address = getAddressData();
-
-        if (checkoutType === CHECKOUT_TYPES.BUY_NOW) {
-            await processBuyNowPayment(address);
+        
+        if (cartDoc.exists) {
+            const cartData = cartDoc.data();
+            console.log("✅ Cart data found in userCarts collection:", cartData);
+            
+            // Direct items array mil raha hai
+            cartItems = cartData.items || [];
+            
+            console.log("✅ Cart items loaded:", cartItems.length, "items");
+            
+            // Load items in UI
+            await displayOrderItems(cartItems);
+            
         } else {
-            await processCartPayment(address);
+            console.log("No cart found in userCarts collection, checking localStorage");
+            // Fallback to localStorage
+            const cartData = localStorage.getItem('irya_stone_cart');
+            if (cartData) {
+                cartItems = JSON.parse(cartData);
+                await displayOrderItems(cartItems);
+                console.log("Cart items loaded from localStorage:", cartItems.length);
+            } else {
+                console.log("No cart items found");
+                cartItems = [];
+                showError('Your cart is empty');
+                setTimeout(() => window.location.href = 'cart.html', 2000);
+            }
         }
-
-    } catch (e) {
-        console.error(e);
-        showError(e.message);
+        
+    } catch (error) {
+        console.error('❌ Error loading cart items:', error);
+        showError('Failed to load cart items: ' + error.message);
+        cartItems = [];
     } finally {
         showLoading(false);
-    }
-}
-
-// ===================================================
-// BUY NOW PAYMENT
-// ===================================================
-async function processBuyNowPayment(address) {
-    if (cartItems.length === 0) throw new Error("No items");
-
-    const total = calculateTotal(cartItems);
-
-    const order = {
-        orderNumber: generateOrderNumber(),
-        userId: authSystem.getUserId(),
-        userEmail: authSystem.getUserEmail(),
-        userName: authSystem.getUserName(),
-        items: cartItems,
-        shippingAddress: address,
-        billingAddress: address,
-        total,
-        subtotal: calculateSubtotal(cartItems),
-        tax: calculateTax(cartItems),
-        shipping: calculateShipping(cartItems),
-        paymentType: currentPaymentType,
-        paymentMethod: selectedPaymentMethod,
-        status: "pending",
-        paymentStatus: "pending",
-        createdAt: new Date().toISOString(),
-        source: "buy_now"
-    };
-
-    if (currentPaymentType === "advance") {
-        order.advancePayment = total * 0.3;
-        order.remainingPayment = total * 0.7;
-    } else {
-        const d = total * 0.05;
-        order.advancePayment = total - d;
-        order.remainingPayment = 0;
-        order.discount = d;
-    }
-
-    if (selectedPaymentMethod === "bank") {
-        await processBankTransfer(order, "buy_now");
-    } else {
-        showError("Only Bank Transfer available");
     }
 }
 
 // ============================================
-// PROCESS CART PAYMENT - NEW FUNCTION
+// DISPLAY ORDER ITEMS
+// ============================================
+
+async function displayOrderItems(items) {
+    try {
+        const orderItemsDiv = document.getElementById('orderItems');
+        if (!orderItemsDiv) return;
+        
+        if (items && items.length > 0) {
+            const itemsHTML = items.map(item => {
+                // Image decide karo
+                let imageUrl = item.imageUrl || item.image;
+                
+                // Agar image nahi hai to default lelo
+                if (!imageUrl) {
+                    imageUrl = getDefaultImage(item.category);
+                }
+                
+                // Price calculate karo based on available fields
+                let itemPrice = 0;
+                
+                if (item.calculatedPrice && item.calculatedPrice > 0) {
+                    itemPrice = item.calculatedPrice;
+                } else if (item.totalPrice && item.totalPrice > 0) {
+                    itemPrice = item.totalPrice;
+                } else if (item.totalAmount && item.totalAmount > 0) {
+                    itemPrice = item.totalAmount;
+                } else if (item.price && item.quantity) {
+                    itemPrice = item.price * item.quantity;
+                } else if (item.price) {
+                    itemPrice = item.price;
+                }
+                
+                const quantity = item.quantity || 1;
+                const itemName = item.name || item.stoneName || 'Product';
+                const category = item.category || 'General';
+                
+                return `
+                    <div class="order-item">
+                        <div class="order-item-image">
+                            <img src="${imageUrl}" 
+                                 alt="${itemName}" 
+                                 onerror="this.src='${getDefaultImage(category)}'">
+                        </div>
+                        <div class="order-item-details">
+                            <div class="order-item-name">${itemName}</div>
+                            <div class="order-item-info">${category}</div>
+                            <div class="order-item-info">Quantity: ${quantity}</div>
+                            ${item.priceUnit ? `<div class="order-item-info">Price per ${item.priceUnit}</div>` : ''}
+                            ${item.calculationType === 'standard' && item.calculationData ? 
+                              `<div class="order-item-info">
+                                Size: ${item.calculationData.length || 1} × ${item.calculationData.width || 1} ${item.calculationData.unit || 'sqft'}
+                               </div>` : ''}
+                            <div class="order-item-price">£${itemPrice.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            orderItemsDiv.innerHTML = itemsHTML;
+            
+            // Calculate and update totals
+            calculateAndUpdateTotals(items);
+        } else {
+            orderItemsDiv.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 20px;">No items found</p>';
+        }
+        
+    } catch (error) {
+        console.error('Error displaying order items:', error);
+        const orderItemsDiv = document.getElementById('orderItems');
+        if (orderItemsDiv) {
+            orderItemsDiv.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 20px;">Error loading items</p>';
+        }
+    }
+}
+
+// ============================================
+// SHOW CUSTOM REQUIREMENTS
+// ============================================
+
+function showCustomRequirements(requirements) {
+    const container = document.getElementById('customRequirementsContainer');
+    if (!container || !requirements || !requirements.trim()) return;
+    
+    container.innerHTML = `
+        <div class="custom-requirements-box">
+            <h5><i class="fas fa-clipboard-check"></i> Custom Requirements</h5>
+            <div class="custom-requirements-text">${requirements}</div>
+        </div>
+    `;
+}
+
+// ============================================
+// CALCULATE AND UPDATE TOTALS
+// ============================================
+
+function calculateAndUpdateTotals(items) {
+    try {
+        const subtotalEl = document.getElementById('subtotal');
+        const taxEl = document.getElementById('tax');
+        const shippingEl = document.getElementById('shipping');
+        const totalEl = document.getElementById('total');
+        
+        if (!subtotalEl || !totalEl) return;
+        
+        // Calculate subtotal
+        let subtotal = 0;
+        items.forEach(item => {
+            let itemPrice = 0;
+            
+            if (item.calculatedPrice && item.calculatedPrice > 0) {
+                itemPrice = item.calculatedPrice;
+            } else if (item.totalPrice && item.totalPrice > 0) {
+                itemPrice = item.totalPrice;
+            } else if (item.totalAmount && item.totalAmount > 0) {
+                itemPrice = item.totalAmount;
+            } else if (item.price && item.quantity) {
+                itemPrice = item.price * item.quantity;
+            } else if (item.price) {
+                itemPrice = item.price;
+            }
+            
+            subtotal += itemPrice;
+        });
+        
+        // Calculate tax (20% VAT)
+        const tax = subtotal * 0.2;
+        
+        // Calculate shipping (free for orders over £500, otherwise £50)
+        const shipping = subtotal >= 500 ? 0 : 50;
+        
+        // Calculate total
+        const total = subtotal + tax + shipping;
+        
+        // Update display
+        subtotalEl.textContent = `£${subtotal.toFixed(2)}`;
+        taxEl.textContent = `£${tax.toFixed(2)}`;
+        shippingEl.textContent = shipping === 0 ? 'FREE' : `£${shipping.toFixed(2)}`;
+        totalEl.textContent = `£${total.toFixed(2)}`;
+        
+        // Also update payment breakdown
+        updatePaymentBreakdown();
+        
+    } catch (error) {
+        console.error('Error calculating totals:', error);
+    }
+}
+
+// ============================================
+// PAYMENT PROCESSING - VALIDATE AND PROCESS
+// ============================================
+
+async function validateAndProcessPayment() {
+    try {
+        console.log("Starting payment process...");
+        console.log("Checkout Type:", checkoutType);
+        console.log("Cart Items:", cartItems);
+        
+        if (!validateForm()) {
+            console.log("Form validation failed");
+            return;
+        }
+        
+        showLoading(true);
+        
+        // Get address data
+        const addressData = getAddressData();
+        
+        // Process based on checkout type
+        if (checkoutType === CHECKOUT_TYPES.EXISTING_ORDER) {
+            await processExistingOrderPayment(addressData);
+        } else if (checkoutType === CHECKOUT_TYPES.BUY_NOW) {
+            await processBuyNowPayment(addressData);
+        } else if (checkoutType === CHECKOUT_TYPES.CART) {
+            await processCartPayment(addressData);
+        } else {
+            throw new Error('Invalid checkout type');
+        }
+        
+    } catch (error) {
+        console.error('❌ Payment processing error:', error);
+        showError('Payment processing failed: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
+// PROCESS BUY NOW PAYMENT
+// ============================================
+
+async function processBuyNowPayment(addressData) {
+    try {
+        console.log("Processing Buy Now payment...");
+        
+        if (cartItems.length === 0 || !cartItems[0]) {
+            throw new Error('No Buy Now item to purchase');
+        }
+        
+        const buyNowItem = cartItems[0];
+        
+        // Calculate total
+        const total = calculateTotal(cartItems);
+        
+        // Create order number
+        const orderNumber = generateOrderNumber();
+        
+        // Create order data
+        const orderData = {
+            orderNumber: orderNumber,
+            userId: authSystem.getUserId(),
+            userEmail: authSystem.getUserEmail(),
+            userName: authSystem.getUserName(),
+            items: cartItems,
+            shippingAddress: addressData,
+            billingAddress: addressData,
+            total: total,
+            subtotal: calculateSubtotal(cartItems),
+            tax: calculateTax(cartItems),
+            shipping: calculateShipping(cartItems),
+            paymentType: currentPaymentType,
+            paymentMethod: selectedPaymentMethod,
+            status: 'pending',
+            paymentStatus: 'pending',
+            createdAt: new Date().toISOString(),
+            source: 'buy_now',
+            buyNowItemId: buyNowItemId,
+            customRequirements: buyNowItem.customRequirements || ''
+        };
+        
+        // Add payment details based on type
+        if (currentPaymentType === 'advance') {
+            orderData.advancePayment = total * 0.3;
+            orderData.remainingPayment = total * 0.7;
+            orderData.submittedAmount = 0;
+        } else if (currentPaymentType === 'full') {
+            const discount = total * 0.05;
+            orderData.advancePayment = total - discount;
+            orderData.remainingPayment = 0;
+            orderData.submittedAmount = 0;
+            orderData.discount = discount;
+            orderData.discountPercentage = 5;
+        }
+        
+        console.log("Buy Now order data:", orderData);
+        
+        // Process based on payment method
+        if (selectedPaymentMethod === 'bank') {
+            await processBankTransfer(orderData, 'buy_now');
+        } else if (selectedPaymentMethod === 'stripe') {
+            showError('Credit card payment coming soon. Please use Bank Transfer.');
+        } else if (selectedPaymentMethod === 'paypal') {
+            showError('PayPal payment coming soon. Please use Bank Transfer.');
+        } else {
+            showError('Please select a payment method');
+        }
+        
+    } catch (error) {
+        console.error('Buy Now payment processing error:', error);
+        throw error;
+    }
+}
+
+// ============================================
+// PROCESS CART PAYMENT
 // ============================================
 
 async function processCartPayment(addressData) {
@@ -1667,9 +1765,12 @@ async function processCartPayment(addressData) {
         // Calculate total
         const total = calculateTotal(cartItems);
         
+        // Create order number
+        const orderNumber = generateOrderNumber();
+        
         // Create order data
         const orderData = {
-            orderNumber: generateOrderNumber(),
+            orderNumber: orderNumber,
             userId: authSystem.getUserId(),
             userEmail: authSystem.getUserEmail(),
             userName: authSystem.getUserName(),
@@ -1699,6 +1800,7 @@ async function processCartPayment(addressData) {
             orderData.remainingPayment = 0;
             orderData.submittedAmount = 0;
             orderData.discount = discount;
+            orderData.discountPercentage = 5;
         }
         
         console.log("Cart order data:", orderData);
@@ -1706,8 +1808,12 @@ async function processCartPayment(addressData) {
         // Process based on payment method
         if (selectedPaymentMethod === 'bank') {
             await processBankTransfer(orderData, 'cart');
+        } else if (selectedPaymentMethod === 'stripe') {
+            showError('Credit card payment coming soon. Please use Bank Transfer.');
+        } else if (selectedPaymentMethod === 'paypal') {
+            showError('PayPal payment coming soon. Please use Bank Transfer.');
         } else {
-            showError(`${selectedPaymentMethod} payment coming soon. Please use Bank Transfer.`);
+            showError('Please select a payment method');
         }
         
     } catch (error) {
@@ -1717,7 +1823,7 @@ async function processCartPayment(addressData) {
 }
 
 // ============================================
-// BANK TRANSFER PROCESSING - UPDATED
+// BANK TRANSFER PROCESSING
 // ============================================
 
 async function processBankTransfer(orderData, source) {
@@ -1757,6 +1863,11 @@ async function processBankTransfer(orderData, source) {
             await clearUserCart();
         }
         
+        // Delete buyNowItems entry if it was a buy now
+        if (source === 'buy_now' && buyNowItemId) {
+            await deleteBuyNowItem(buyNowItemId);
+        }
+        
         // Hide processing modal
         hidePaymentProcessing();
         
@@ -1771,7 +1882,7 @@ async function processBankTransfer(orderData, source) {
 }
 
 // ============================================
-// SAVE ORDER TO FIREBASE - UPDATED
+// SAVE ORDER TO FIREBASE
 // ============================================
 
 async function saveOrderToFirebase(orderData, paymentId) {
@@ -1817,7 +1928,8 @@ async function saveOrderToFirebase(orderData, paymentId) {
             amount: orderData.bankTransferDetails.amount,
             status: 'pending',
             createdAt: new Date().toISOString(),
-            bankTransferDetails: orderData.bankTransferDetails
+            bankTransferDetails: orderData.bankTransferDetails,
+            source: orderData.source
         };
         
         // Save to payments collection
@@ -1840,7 +1952,7 @@ async function saveOrderToFirebase(orderData, paymentId) {
 }
 
 // ============================================
-// CLEAR USER CART - NEW FUNCTION
+// CLEAR USER CART
 // ============================================
 
 async function clearUserCart() {
@@ -1869,7 +1981,25 @@ async function clearUserCart() {
 }
 
 // ============================================
-// SHOW BANK TRANSFER DETAILS - UPDATED
+// DELETE BUY NOW ITEM
+// ============================================
+
+async function deleteBuyNowItem(itemId) {
+    try {
+        await firebaseDB.collection('buyNowItems')
+            .doc(itemId)
+            .delete();
+        
+        console.log('✅ Buy Now item deleted:', itemId);
+        
+    } catch (error) {
+        console.error('Error deleting Buy Now item:', error);
+        // Continue anyway
+    }
+}
+
+// ============================================
+// SHOW BANK TRANSFER DETAILS
 // ============================================
 
 function showBankTransferDetails(orderData, paymentId, source) {
@@ -1964,7 +2094,7 @@ function showBankTransferDetails(orderData, paymentId, source) {
 }
 
 // ============================================
-// COMPLETE PAYMENT - UPDATED
+// COMPLETE PAYMENT
 // ============================================
 
 async function completePayment(paymentId, orderNumber, source) {
@@ -1975,6 +2105,8 @@ async function completePayment(paymentId, orderNumber, source) {
             throw new Error('Firebase not initialized');
         }
         
+        const userId = authSystem.getUserId();
+        
         // Update payment status to completed
         const paymentRef = firebaseDB.collection('payments').doc(paymentId);
         await paymentRef.update({
@@ -1984,7 +2116,6 @@ async function completePayment(paymentId, orderNumber, source) {
         });
         
         // Update user's payment status
-        const userId = authSystem.getUserId();
         const userPaymentRef = firebaseDB.collection('users')
             .doc(userId)
             .collection('payments')
@@ -2002,25 +2133,42 @@ async function completePayment(paymentId, orderNumber, source) {
             .collection('orders')
             .doc(paymentId);
         
-        await userOrderRef.update({
-            status: 'processing',
-            paymentStatus: currentPaymentType === 'full' ? 'fully_paid' : 'advance_paid',
-            submittedAmount: firebase.firestore.FieldValue.increment(
-                currentPaymentType === 'full' ? 'advancePayment' : 'advancePayment'
-            ),
-            updatedAt: new Date().toISOString()
-        });
+        let paymentStatus = 'pending';
+        if (currentPaymentType === 'full') {
+            paymentStatus = 'fully_paid';
+            await userOrderRef.update({
+                status: 'processing',
+                paymentStatus: 'fully_paid',
+                submittedAmount: firebase.firestore.FieldValue.increment(orderData.bankTransferDetails.amount),
+                updatedAt: new Date().toISOString()
+            });
+        } else if (currentPaymentType === 'advance') {
+            paymentStatus = 'advance_paid';
+            await userOrderRef.update({
+                status: 'processing',
+                paymentStatus: 'advance_paid',
+                submittedAmount: firebase.firestore.FieldValue.increment(orderData.bankTransferDetails.amount),
+                updatedAt: new Date().toISOString()
+            });
+        }
         
         // Update order in main collection
         const mainOrderRef = firebaseDB.collection('orders').doc(paymentId);
-        await mainOrderRef.update({
-            status: 'processing',
-            paymentStatus: currentPaymentType === 'full' ? 'fully_paid' : 'advance_paid',
-            submittedAmount: firebase.firestore.FieldValue.increment(
-                currentPaymentType === 'full' ? 'advancePayment' : 'advancePayment'
-            ),
-            updatedAt: new Date().toISOString()
-        });
+        if (currentPaymentType === 'full') {
+            await mainOrderRef.update({
+                status: 'processing',
+                paymentStatus: 'fully_paid',
+                submittedAmount: firebase.firestore.FieldValue.increment(orderData.bankTransferDetails.amount),
+                updatedAt: new Date().toISOString()
+            });
+        } else if (currentPaymentType === 'advance') {
+            await mainOrderRef.update({
+                status: 'processing',
+                paymentStatus: 'advance_paid',
+                submittedAmount: firebase.firestore.FieldValue.increment(orderData.bankTransferDetails.amount),
+                updatedAt: new Date().toISOString()
+            });
+        }
         
         // Create notification for user
         await createNotificationForUser(userId, orderNumber, source);
@@ -2033,7 +2181,7 @@ async function completePayment(paymentId, orderNumber, source) {
         
         // Redirect to order confirmation
         setTimeout(() => {
-            window.location.href = `order-confirmation.html?order=${orderNumber}&payment=bank&type=${currentPaymentType}&source=${source}`;
+            window.location.href = `order-confirmation.html?order=${orderNumber}&payment=bank&type=${currentPaymentType}&source=${source}&payment_id=${paymentId}`;
         }, 2000);
         
     } catch (error) {
@@ -2045,7 +2193,7 @@ async function completePayment(paymentId, orderNumber, source) {
 }
 
 // ============================================
-// CREATE NOTIFICATION FOR USER - NEW FUNCTION
+// CREATE NOTIFICATION FOR USER
 // ============================================
 
 async function createNotificationForUser(userId, orderNumber, source) {
@@ -2079,29 +2227,29 @@ async function createNotificationForUser(userId, orderNumber, source) {
 }
 
 // ============================================
-// HELPER FUNCTIONS - UPDATED
+// CALCULATION HELPER FUNCTIONS
 // ============================================
 
-function getAddressData() {
-    return {
-        fullName: document.getElementById('fullName').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        country: document.getElementById('country').value,
-        address1: document.getElementById('address1').value.trim(),
-        address2: document.getElementById('address2').value.trim(),
-        city: document.getElementById('city').value.trim(),
-        state: document.getElementById('state').value.trim(),
-        postalCode: document.getElementById('postalCode').value.trim(),
-        instructions: document.getElementById('instructions').value.trim()
-    };
-}
-
 function calculateSubtotal(items) {
-    return items.reduce((sum, item) => {
-        const itemPrice = item.calculatedPrice || item.totalPrice || (item.price * (item.quantity || 1));
-        return sum + itemPrice;
-    }, 0);
+    let subtotal = 0;
+    items.forEach(item => {
+        let itemPrice = 0;
+        
+        if (item.calculatedPrice && item.calculatedPrice > 0) {
+            itemPrice = item.calculatedPrice;
+        } else if (item.totalPrice && item.totalPrice > 0) {
+            itemPrice = item.totalPrice;
+        } else if (item.totalAmount && item.totalAmount > 0) {
+            itemPrice = item.totalAmount;
+        } else if (item.price && item.quantity) {
+            itemPrice = item.price * item.quantity;
+        } else if (item.price) {
+            itemPrice = item.price;
+        }
+        
+        subtotal += itemPrice;
+    });
+    return subtotal;
 }
 
 function calculateTax(items) {
@@ -2128,39 +2276,8 @@ function generateOrderNumber() {
     return `${prefix}-${timestamp}-${random}`;
 }
 
-function updateCartBadge() {
-    try {
-        const cartBadge = document.getElementById('cartBadge');
-        if (!cartBadge) return;
-        
-        // Try to get from Firestore first, then localStorage
-        if (firebaseDB && authSystem.isLoggedIn()) {
-            // For logged in users, count from userCarts
-            // This could be enhanced to actually fetch the count
-            const cartData = localStorage.getItem('irya_stone_cart');
-            if (cartData) {
-                const cartItems = JSON.parse(cartData);
-                const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-                cartBadge.textContent = totalItems > 0 ? totalItems : '0';
-            }
-        } else {
-            // For guests, use localStorage
-            const cartData = localStorage.getItem('irya_stone_cart');
-            if (cartData) {
-                const cartItems = JSON.parse(cartData);
-                const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-                cartBadge.textContent = totalItems > 0 ? totalItems : '0';
-            } else {
-                cartBadge.textContent = '0';
-            }
-        }
-    } catch (error) {
-        console.error('Error updating cart badge:', error);
-    }
-}
-
 // ============================================
-// EXISTING ORDER FUNCTIONS - KEPT SAME
+// EXISTING ORDER FUNCTIONS
 // ============================================
 
 async function loadExistingOrder(orderId, userId) {
@@ -2225,8 +2342,12 @@ async function processExistingOrderPayment(addressData) {
         // Process based on payment method
         if (selectedPaymentMethod === 'bank') {
             await processBankTransferForExistingOrder(paymentData, addressData);
+        } else if (selectedPaymentMethod === 'stripe') {
+            showError('Credit card payment coming soon. Please use Bank Transfer.');
+        } else if (selectedPaymentMethod === 'paypal') {
+            showError('PayPal payment coming soon. Please use Bank Transfer.');
         } else {
-            showError(`${selectedPaymentMethod} payment coming soon. Please use Bank Transfer.`);
+            showError('Please select a payment method');
         }
         
     } catch (error) {
@@ -2235,8 +2356,45 @@ async function processExistingOrderPayment(addressData) {
     }
 }
 
+async function processBankTransferForExistingOrder(paymentData, addressData) {
+    try {
+        showPaymentProcessing('Preparing Bank Transfer Details...');
+        
+        // Generate payment ID
+        const paymentId = 'payment_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // Add bank transfer details
+        paymentData.bankTransferDetails = {
+            accountName: 'IRYA STONE LTD',
+            accountNumber: '12345678',
+            sortCode: '04-00-04',
+            iban: 'GB29NWBK60161331926819',
+            swift: 'NWBKGB2L',
+            reference: `${paymentData.orderNumber}-REM`,
+            amount: paymentData.amount,
+            currency: 'GBP',
+            bankName: 'NatWest Bank',
+            bankAddress: 'NatWest Bank PLC, 135 Bishopsgate, London EC2M 3UR, United Kingdom'
+        };
+        
+        // Save payment record to Firebase
+        await savePaymentToFirebase(paymentData, paymentId);
+        
+        // Hide processing modal
+        hidePaymentProcessing();
+        
+        // Show bank transfer details
+        showBankTransferDetailsForExistingOrder(paymentData, paymentId);
+        
+    } catch (error) {
+        console.error('Bank transfer error for existing order:', error);
+        hidePaymentProcessing();
+        showError('Failed to process bank transfer: ' + error.message);
+    }
+}
+
 // ============================================
-// UI FUNCTIONS - KEPT SAME
+// UI AND FORM FUNCTIONS
 // ============================================
 
 function selectPaymentOption(paymentType) {
@@ -2408,30 +2566,19 @@ function updatePaymentBreakdown() {
     }
 }
 
-function calculateAndUpdateTotals(items) {
-    try {
-        const subtotalEl = document.getElementById('subtotal');
-        const taxEl = document.getElementById('tax');
-        const shippingEl = document.getElementById('shipping');
-        const totalEl = document.getElementById('total');
-        
-        if (!subtotalEl || !totalEl) return;
-        
-        const subtotal = calculateSubtotal(items);
-        const tax = calculateTax(items);
-        const shipping = calculateShipping(items);
-        const total = subtotal + tax + shipping;
-        
-        subtotalEl.textContent = `£${subtotal.toFixed(2)}`;
-        taxEl.textContent = `£${tax.toFixed(2)}`;
-        shippingEl.textContent = shipping === 0 ? 'FREE' : `£${shipping.toFixed(2)}`;
-        totalEl.textContent = `£${total.toFixed(2)}`;
-        
-        updatePaymentBreakdown();
-        
-    } catch (error) {
-        console.error('Error calculating totals:', error);
-    }
+function getAddressData() {
+    return {
+        fullName: document.getElementById('fullName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        country: document.getElementById('country').value,
+        address1: document.getElementById('address1').value.trim(),
+        address2: document.getElementById('address2').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        state: document.getElementById('state').value.trim(),
+        postalCode: document.getElementById('postalCode').value.trim(),
+        instructions: document.getElementById('instructions').value.trim()
+    };
 }
 
 function updateUITitles(type) {
@@ -2458,6 +2605,22 @@ function updateUITitles(type) {
     }
 }
 
+function updateCartBadge() {
+    try {
+        const cartBadge = document.getElementById('cartBadge');
+        if (!cartBadge) return;
+        
+        if (cartItems && cartItems.length > 0) {
+            const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+            cartBadge.textContent = totalItems > 0 ? totalItems : '0';
+        } else {
+            cartBadge.textContent = '0';
+        }
+    } catch (error) {
+        console.error('Error updating cart badge:', error);
+    }
+}
+
 function getDefaultImage(category) {
     const categoryLower = (category || '').toLowerCase();
     
@@ -2471,6 +2634,8 @@ function getDefaultImage(category) {
         return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800';
     } else if (categoryLower.includes('limestone')) {
         return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('kitchen')) {
+        return 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=800';
     }
     
     return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
@@ -2536,7 +2701,7 @@ function goBack() {
 }
 
 // ============================================
-// AUTHENTICATION SYSTEM - KEPT SAME
+// AUTHENTICATION SYSTEM
 // ============================================
 
 class CheckoutAuthSystem {
@@ -2666,7 +2831,7 @@ class CheckoutAuthSystem {
 }
 
 // ============================================
-// EXISTING ORDER SPECIFIC FUNCTIONS - KEPT SAME
+// EXISTING ORDER SPECIFIC FUNCTIONS
 // ============================================
 
 async function loadOrderFromFirebase(orderId, userId) {
@@ -2845,37 +3010,6 @@ function updatePaymentBreakdownForExistingOrder() {
     if (advanceLabel) advanceLabel.textContent = 'Already Paid:';
     if (remainingLabel) remainingLabel.textContent = 'Remaining Balance:';
     if (payNowLabel) payNowLabel.textContent = 'Amount to Pay Now:';
-}
-
-async function processBankTransferForExistingOrder(paymentData, addressData) {
-    try {
-        showPaymentProcessing('Preparing Bank Transfer Details...');
-        
-        const paymentId = 'payment_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        
-        paymentData.bankTransferDetails = {
-            accountName: 'IRYA STONE LTD',
-            accountNumber: '12345678',
-            sortCode: '04-00-04',
-            iban: 'GB29NWBK60161331926819',
-            swift: 'NWBKGB2L',
-            reference: `${paymentData.orderNumber}-REM`,
-            amount: paymentData.amount,
-            currency: 'GBP',
-            bankName: 'NatWest Bank',
-            bankAddress: 'NatWest Bank PLC, 135 Bishopsgate, London EC2M 3UR, United Kingdom'
-        };
-        
-        await savePaymentToFirebase(paymentData, paymentId);
-        
-        hidePaymentProcessing();
-        showBankTransferDetailsForExistingOrder(paymentData, paymentId);
-        
-    } catch (error) {
-        console.error('Bank transfer error for existing order:', error);
-        hidePaymentProcessing();
-        showError('Failed to process bank transfer: ' + error.message);
-    }
 }
 
 async function savePaymentToFirebase(paymentData, paymentId) {
