@@ -1425,6 +1425,50 @@ async function displayOrderItems(items) {
 }
 
 // ============================================
+// DEBUG FUNCTIONS
+// ============================================
+
+async function debugFirebase() {
+    console.log("=== DEBUG START ===");
+    
+    // 1. Check Firebase initialization
+    console.log("Firebase App:", firebaseApp ? "Initialized" : "NOT Initialized");
+    console.log("Firebase DB:", firebaseDB ? "Initialized" : "NOT Initialized");
+    console.log("Firebase Auth:", firebaseAuth ? "Initialized" : "NOT Initialized");
+    
+    // 2. Check current user
+    console.log("Current User:", authSystem.currentUser);
+    console.log("User ID:", authSystem.getUserId());
+    console.log("Is Logged In:", authSystem.isLoggedIn());
+    
+    // 3. Check cartItems
+    console.log("Cart Items:", cartItems);
+    console.log("Cart Items Length:", cartItems.length);
+    
+    // 4. Check URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    console.log("URL Parameters:");
+    console.log("- buynow:", urlParams.get('buynow'));
+    console.log("- buynow_item_id:", urlParams.get('buynow_item_id'));
+    console.log("- order:", urlParams.get('order'));
+    console.log("- type:", urlParams.get('type'));
+    
+    console.log("=== DEBUG END ===");
+}
+
+// Initialize ke baad debug call karo
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log("Checkout page loaded");
+    
+    // ... existing initialization code ...
+    
+    // Debug call
+    setTimeout(() => {
+        debugFirebase();
+    }, 1000);
+});
+
+// ============================================
 // SHOW CUSTOM REQUIREMENTS
 // ============================================
 
