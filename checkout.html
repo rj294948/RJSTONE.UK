@@ -395,6 +395,21 @@ header.hidden {
     color: var(--text-light);
 }
 
+/* Source Badge */
+.source-badge {
+    display: inline-block;
+    background: var(--primary-gold);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 /* Existing Order Info Box */
 .existing-order-info {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1241,10 +1256,11 @@ header.hidden {
                     <h3 id="orderSummaryTitle">Order Summary</h3>
                 </div>
                 
-                <!-- Source Indicator -->
-                <div id="orderSourceIndicator" style="margin-bottom: 15px; display: none;">
-                    <span style="background: var(--primary-gold); color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: 500;">
-                        <i class="fas fa-info-circle"></i> Source: <span id="sourceType"></span>
+                <!-- Source Badge -->
+                <div id="sourceBadge" style="margin-bottom: 15px;">
+                    <span class="source-badge">
+                        <i class="fas fa-info-circle"></i> 
+                        <span id="sourceText">Loading...</span>
                     </span>
                 </div>
                 
@@ -1354,28 +1370,15 @@ const firebaseConfig = {
 };
 
 let firebaseApp, firebaseDB, firebaseAuth;
-let cartItems = [];
-let isBuyNowFlow = false;
-let isExistingOrderFlow = false;
-let isFromCart = false;
 let currentPaymentType = 'advance';
 let selectedPaymentMethod = 'bank';
-let currentOrderData = null;
-let existingOrderData = null;
 let authSystem = null;
 let checkoutItems = [];
 let checkoutSource = null;
 let selectedAddressId = null;
-
-// ============================================
-// CHECKOUT TYPES
-// ============================================
-
-const CHECKOUT_TYPES = {
-    BUY_NOW: 'buy_now',
-    CART: 'cart',
-    EXISTING_ORDER: 'existing_order'
-};
+let existingOrderData = null;
+let isExistingOrderFlow = false;
+let buyNowItemId = null;
 
 // ============================================
 // CHECKOUT INITIALIZATION
@@ -1386,43 +1389,51 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Get URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    checkoutSource = urlParams.get('source') || 'cart';
-    isBuyNowFlow = urlParams.get('buynow') === 'true' || checkoutSource === 'buy_now';
-    const buyNowProductId = urlParams.get('product');
+    checkoutSource = urlParams.get('source');
+    const buyNowId = urlParams.get('buyNowId');
     const existingOrderId = urlParams.get('order');
     const paymentType = urlParams.get('type');
     const userId = urlParams.get('user');
     
     console.log("URL Parameters:", {
         source: checkoutSource,
-        isBuyNowFlow: isBuyNowFlow,
-        productId: buyNowProductId,
+        buyNowId: buyNowId,
         existingOrderId: existingOrderId,
         paymentType: paymentType,
         userId: userId
     });
     
-    // Initialize Auth System FIRST
+    // Initialize Auth System
     authSystem = new CheckoutAuthSystem();
     await authSystem.init();
     
-    console.log("Auth initialized. User ID:", authSystem.getUserId(), "Logged in:", authSystem.isLoggedIn());
-    
-    // Set source indicator
-    updateSourceIndicator(checkoutSource);
+    console.log("Auth initialized. User ID:", authSystem.getUserId());
     
     // Check for existing order from notification
     if (existingOrderId && paymentType === 'remaining_payment') {
-        console.log("Existing order payment detected:", existingOrderId);
+        console.log("Existing order payment detected");
         isExistingOrderFlow = true;
         await loadExistingOrder(existingOrderId, userId);
-    } else {
-        // Load items based on source
-        await loadCheckoutItems(checkoutSource);
-        
-        // Update UI titles
-        updateUITitles(isBuyNowFlow ? 'Buy Now' : 'Checkout');
+    } 
+    // Check for Buy Now flow
+    else if (buyNowId) {
+        console.log("Buy Now flow detected:", buyNowId);
+        buyNowItemId = buyNowId;
+        await loadBuyNowItem(buyNowId);
     }
+    // Check for Cart flow
+    else if (checkoutSource === 'cart') {
+        console.log("Cart checkout flow detected");
+        await loadCartItems();
+    }
+    // Default to cart
+    else {
+        console.log("Defaulting to cart checkout");
+        await loadCartItems();
+    }
+    
+    // Update source badge
+    updateSourceBadge();
     
     // Initialize payment options
     initializePaymentOptions();
@@ -1433,123 +1444,126 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load saved addresses
     await loadSavedAddresses();
     
-    // Initialize form validation
-    initializeFormValidation();
+    // Display order items
+    displayOrderItems();
 });
 
 // ============================================
 // LOAD ITEMS FROM DIFFERENT SOURCES
 // ============================================
 
-async function loadCheckoutItems(source) {
-    console.log("Loading checkout items from source:", source);
-    
+async function loadBuyNowItem(buyNowId) {
     try {
         showLoading(true);
         
-        switch(source) {
-            case 'buy_now':
-                await loadBuyNowItems();
-                break;
-                
-            case 'cart':
-                await loadCartItems();
-                break;
-                
-            default:
-                await loadCartItems();
+        if (!firebaseDB) {
+            throw new Error('Firebase not initialized');
         }
         
-        // Display items in order summary
-        await displayOrderItems();
+        console.log("Loading buy now item with ID:", buyNowId);
+        
+        // Fetch specific buy now item from Firebase
+        const buyNowDoc = await firebaseDB.collection('buyNowItems')
+            .doc(buyNowId)
+            .get();
+        
+        if (buyNowDoc.exists) {
+            const buyNowItem = buyNowDoc.data();
+            console.log("Buy Now item found:", buyNowItem);
+            
+            // Convert to checkout item format
+            checkoutItems = [{
+                ...buyNowItem.item,
+                id: buyNowItem.item.id || buyNowItem.id,
+                name: buyNowItem.item.name || buyNowItem.item.stoneName,
+                price: buyNowItem.item.price || 0,
+                quantity: buyNowItem.item.quantity || 1,
+                calculationData: buyNowItem.item.calculationData || {},
+                customRequirements: buyNowItem.item.customRequirements || '',
+                image: buyNowItem.item.image || '',
+                category: buyNowItem.item.category || '',
+                source: 'buy_now',
+                buyNowId: buyNowId,
+                isBuyNow: true,
+                createdAt: buyNowItem.createdAt,
+                userId: buyNowItem.userId
+            }];
+            
+            console.log("Checkout items for buy now:", checkoutItems);
+            checkoutSource = 'buy_now';
+            
+        } else {
+            console.error("Buy Now item not found:", buyNowId);
+            showError("Product not found. Please try again.");
+            checkoutItems = [];
+        }
         
     } catch (error) {
-        console.error('Error loading checkout items:', error);
-        showError('Failed to load order items');
+        console.error('Error loading buy now item:', error);
+        showError('Failed to load product details');
+        checkoutItems = [];
     } finally {
         showLoading(false);
     }
 }
 
-async function loadBuyNowItems() {
-    try {
-        if (!firebaseDB) {
-            throw new Error('Firebase not initialized');
-        }
-        
-        const userId = authSystem.getUserId();
-        console.log("Loading buy now items for user:", userId);
-        
-        // Fetch buy now items from Firebase
-        const buyNowSnapshot = await firebaseDB.collection('buyNowItems')
-            .where('userId', '==', userId)
-            .orderBy('createdAt', 'desc')
-            .limit(1)
-            .get();
-        
-        if (!buyNowSnapshot.empty) {
-            const buyNowItem = buyNowSnapshot.docs[0].data();
-            console.log("Found buy now item:", buyNowItem);
-            
-            // Convert to checkout item format
-            checkoutItems = [{
-                ...buyNowItem.item,
-                source: 'buy_now',
-                buyNowId: buyNowSnapshot.docs[0].id,
-                isBuyNow: true
-            }];
-            
-            console.log("Converted checkout items:", checkoutItems);
-        } else {
-            console.log("No buy now items found");
-            checkoutItems = [];
-        }
-        
-    } catch (error) {
-        console.error('Error loading buy now items:', error);
-        checkoutItems = [];
-    }
-}
-
 async function loadCartItems() {
     try {
+        showLoading(true);
+        
         if (!firebaseDB) {
-            throw new Error('Firebase not initialized');
+            console.log("Firebase not initialized, using localStorage");
+            await loadCartFromLocalStorage();
+            return;
         }
         
         const userId = authSystem.getUserId();
         console.log("Loading cart items for user:", userId);
         
         // Try to fetch from userCarts collection
-        const cartSnapshot = await firebaseDB.collection('userCarts')
-            .where('userId', '==', userId)
-            .limit(1)
-            .get();
+        const cartQuery = firebaseDB.collection('userCarts')
+            .where('userId', '==', userId);
+        
+        const cartSnapshot = await cartQuery.get();
         
         if (!cartSnapshot.empty) {
             const cartData = cartSnapshot.docs[0].data();
-            console.log("Found user cart:", cartData);
+            console.log("Cart data found:", cartData);
             
             if (cartData.items && Array.isArray(cartData.items)) {
                 checkoutItems = cartData.items.map(item => ({
                     ...item,
+                    id: item.id || Math.random().toString(36).substr(2, 9),
+                    name: item.name || item.stoneName,
+                    price: item.price || 0,
+                    quantity: item.quantity || 1,
+                    calculationData: item.calculationData || {},
+                    customRequirements: item.customRequirements || '',
+                    image: item.image || '',
+                    category: item.category || '',
                     source: 'cart',
-                    cartId: cartSnapshot.docs[0].id
+                    cartId: cartSnapshot.docs[0].id,
+                    isBuyNow: false
                 }));
-                console.log("Converted cart items:", checkoutItems);
+                console.log("Cart items loaded:", checkoutItems.length);
             } else {
+                console.log("No items in cart");
                 checkoutItems = [];
             }
         } else {
-            console.log("No cart items found in userCarts");
-            // Try localStorage as fallback
+            console.log("No cart found in Firebase");
+            // Fallback to localStorage
             await loadCartFromLocalStorage();
         }
+        
+        checkoutSource = 'cart';
         
     } catch (error) {
         console.error('Error loading cart items:', error);
         // Fallback to localStorage
         await loadCartFromLocalStorage();
+    } finally {
+        showLoading(false);
     }
 }
 
@@ -1557,15 +1571,27 @@ async function loadCartFromLocalStorage() {
     try {
         const cartData = localStorage.getItem('irya_stone_cart');
         if (cartData) {
-            checkoutItems = JSON.parse(cartData).map(item => ({
+            const items = JSON.parse(cartData);
+            checkoutItems = items.map(item => ({
                 ...item,
-                source: 'cart',
-                fromLocalStorage: true
+                id: item.id || Math.random().toString(36).substr(2, 9),
+                name: item.name || item.stoneName,
+                price: item.price || 0,
+                quantity: item.quantity || 1,
+                calculationData: item.calculationData || {},
+                customRequirements: item.customRequirements || '',
+                image: item.image || '',
+                category: item.category || '',
+                source: 'cart_local',
+                isBuyNow: false
             }));
-            console.log("Loaded cart from localStorage:", checkoutItems);
+            console.log("Loaded cart from localStorage:", checkoutItems.length);
         } else {
             checkoutItems = [];
         }
+        
+        checkoutSource = 'cart_local';
+        
     } catch (error) {
         console.error('Error loading cart from localStorage:', error);
         checkoutItems = [];
@@ -1573,31 +1599,210 @@ async function loadCartFromLocalStorage() {
 }
 
 // ============================================
+// LOAD EXISTING ORDER
+// ============================================
+
+async function loadExistingOrder(orderId, userId) {
+    try {
+        showLoading(true);
+        
+        const targetUserId = userId || authSystem.getUserId();
+        console.log("Loading existing order:", orderId, "for user:", targetUserId);
+        
+        // Load order from Firebase
+        if (firebaseDB) {
+            // Try user's orders collection
+            try {
+                const orderDoc = await firebaseDB.collection('users')
+                    .doc(targetUserId)
+                    .collection('orders')
+                    .doc(orderId)
+                    .get();
+                
+                if (orderDoc.exists) {
+                    existingOrderData = orderDoc.data();
+                    existingOrderData.id = orderDoc.id;
+                    console.log("Existing order loaded from user collection:", existingOrderData);
+                }
+            } catch (error) {
+                console.log("Order not in user collection, trying main collection:", error);
+            }
+            
+            // Try main orders collection
+            if (!existingOrderData) {
+                try {
+                    const mainOrderDoc = await firebaseDB.collection('orders')
+                        .doc(orderId)
+                        .get();
+                    
+                    if (mainOrderDoc.exists) {
+                        existingOrderData = mainOrderDoc.data();
+                        existingOrderData.id = mainOrderDoc.id;
+                        console.log("Existing order loaded from main collection:", existingOrderData);
+                    }
+                } catch (error) {
+                    console.log("Order not in main collection:", error);
+                }
+            }
+        }
+        
+        if (existingOrderData) {
+            // Set checkout items from existing order
+            if (existingOrderData.items && Array.isArray(existingOrderData.items)) {
+                checkoutItems = existingOrderData.items.map(item => ({
+                    ...item,
+                    source: 'existing_order',
+                    isExistingOrder: true
+                }));
+            }
+            
+            // Update UI
+            updateUITitles('Pay Remaining Balance');
+            displayExistingOrderInfo();
+            
+            // Show existing order info section
+            document.getElementById('existingOrderInfo').style.display = 'block';
+            
+            // Setup for remaining payment
+            setupForExistingOrderPayment();
+            
+            checkoutSource = 'existing_order';
+            
+            // Pre-fill address if exists
+            if (existingOrderData.shippingAddress) {
+                prefillAddressFromOrder(existingOrderData.shippingAddress);
+            }
+            
+        } else {
+            console.error("Existing order not found");
+            showError("Order not found. Please try again.");
+        }
+        
+    } catch (error) {
+        console.error('Error loading existing order:', error);
+        showError('Failed to load order details');
+    } finally {
+        showLoading(false);
+    }
+}
+
+function displayExistingOrderInfo() {
+    if (!existingOrderData) return;
+    
+    const existingOrderNumber = document.getElementById('existingOrderNumber');
+    const existingOrderStatus = document.getElementById('existingOrderStatus');
+    const existingOrderPaid = document.getElementById('existingOrderPaid');
+    const existingOrderRemaining = document.getElementById('existingOrderRemaining');
+    
+    if (existingOrderNumber) {
+        existingOrderNumber.textContent = existingOrderData.orderNumber || `#${existingOrderData.id?.substring(0, 8)}`;
+    }
+    
+    if (existingOrderStatus) {
+        existingOrderStatus.textContent = existingOrderData.status ? 
+            existingOrderData.status.replace(/_/g, ' ') : 'Processing';
+    }
+    
+    // Calculate amounts
+    const paidAmount = existingOrderData.submittedAmount || existingOrderData.advancePayment || 0;
+    const totalAmount = existingOrderData.total || calculateTotalFromItems();
+    const remainingAmount = existingOrderData.remainingPayment || (totalAmount - paidAmount);
+    
+    if (existingOrderPaid) {
+        existingOrderPaid.textContent = `£${paidAmount.toFixed(2)}`;
+    }
+    
+    if (existingOrderRemaining) {
+        existingOrderRemaining.textContent = `£${remainingAmount.toFixed(2)}`;
+    }
+    
+    // Update payment button text
+    const payButtonText = document.getElementById('payButtonText');
+    if (payButtonText && remainingAmount > 0) {
+        payButtonText.textContent = `Pay Remaining £${remainingAmount.toFixed(2)}`;
+    }
+}
+
+function prefillAddressFromOrder(address) {
+    if (!address) return;
+    
+    const fullNameField = document.getElementById('fullName');
+    const emailField = document.getElementById('email');
+    const phoneField = document.getElementById('phone');
+    const countryField = document.getElementById('country');
+    const address1Field = document.getElementById('address1');
+    const address2Field = document.getElementById('address2');
+    const cityField = document.getElementById('city');
+    const stateField = document.getElementById('state');
+    const postalCodeField = document.getElementById('postalCode');
+    const instructionsField = document.getElementById('instructions');
+    
+    if (fullNameField && address.fullName) fullNameField.value = address.fullName;
+    if (emailField && address.email) emailField.value = address.email;
+    if (phoneField && address.phone) phoneField.value = address.phone;
+    if (countryField && address.country) countryField.value = address.country;
+    if (address1Field && address.address1) address1Field.value = address.address1;
+    if (address2Field && address.address2) address2Field.value = address.address2;
+    if (cityField && address.city) cityField.value = address.city;
+    if (stateField && address.state) stateField.value = address.state;
+    if (postalCodeField && address.postalCode) postalCodeField.value = address.postalCode;
+    if (instructionsField && address.instructions) instructionsField.value = address.instructions;
+    
+    // Hide address saving for existing orders
+    const saveAddressContainer = document.getElementById('saveAddressContainer');
+    if (saveAddressContainer) {
+        saveAddressContainer.style.display = 'none';
+    }
+}
+
+function setupForExistingOrderPayment() {
+    // Show only remaining payment option
+    const advanceOption = document.getElementById('advancePaymentOption');
+    const fullOption = document.getElementById('fullPaymentOption');
+    const remainingOption = document.getElementById('remainingPaymentOption');
+    
+    if (advanceOption) advanceOption.style.display = 'none';
+    if (fullOption) fullOption.style.display = 'none';
+    if (remainingOption) remainingOption.style.display = 'block';
+    
+    // Select remaining payment option
+    selectPaymentOption('remaining');
+}
+
+// ============================================
 // DISPLAY ORDER ITEMS
 // ============================================
 
-async function displayOrderItems() {
+function displayOrderItems() {
     const orderItemsDiv = document.getElementById('orderItems');
     if (!orderItemsDiv) return;
     
     try {
         if (checkoutItems.length === 0) {
-            orderItemsDiv.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 20px;">No items to checkout</p>';
+            orderItemsDiv.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px;">
+                    <i class="fas fa-shopping-cart" style="font-size: 48px; color: var(--text-light); margin-bottom: 15px;"></i>
+                    <p style="color: var(--text-light); font-size: 16px;">No items to checkout</p>
+                    <button onclick="goBack()" style="margin-top: 20px; padding: 10px 20px; background: var(--primary-gold); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        <i class="fas fa-arrow-left"></i> Go Back
+                    </button>
+                </div>
+            `;
             return;
         }
         
-        const itemsHTML = checkoutItems.map(item => {
+        const itemsHTML = checkoutItems.map((item, index) => {
             const imageUrl = item.image || getDefaultImage(item.category);
             const itemName = item.name || item.stoneName || 'Product';
             const quantity = item.quantity || 1;
             
             // Calculate price
             let itemPrice = 0;
-            if (item.calculatedPrice !== undefined) {
+            if (item.calculatedPrice !== undefined && item.calculatedPrice !== null) {
                 itemPrice = item.calculatedPrice;
-            } else if (item.price !== undefined) {
+            } else if (item.price !== undefined && item.price !== null) {
                 itemPrice = item.price * quantity;
-            } else if (item.totalPrice !== undefined) {
+            } else if (item.totalPrice !== undefined && item.totalPrice !== null) {
                 itemPrice = item.totalPrice;
             }
             
@@ -1606,11 +1811,18 @@ async function displayOrderItems() {
             if (item.calculationData) {
                 const calc = item.calculationData;
                 if (calc.unit === 'sqft' && calc.length && calc.width) {
-                    calculationInfo = `${calc.length}ft x ${calc.width}ft = ${calc.area} sqft`;
+                    const area = calc.area || (calc.length * calc.width);
+                    calculationInfo = `${calc.length}ft × ${calc.width}ft = ${area} sqft`;
                 } else if (calc.unit === 'piece') {
                     calculationInfo = `${quantity} piece(s)`;
                 }
             }
+            
+            // Show custom requirements if present
+            const requirementsHTML = item.customRequirements ? 
+                `<div class="custom-requirements-text" style="margin-top: 8px; font-size: 12px;">
+                    <strong>Custom Requirements:</strong> ${item.customRequirements}
+                </div>` : '';
             
             return `
                 <div class="order-item">
@@ -1625,6 +1837,7 @@ async function displayOrderItems() {
                         ${calculationInfo ? `<div class="order-item-info">${calculationInfo}</div>` : ''}
                         <div class="order-item-info">Quantity: ${quantity}</div>
                         <div class="order-item-price">£${itemPrice.toFixed(2)}</div>
+                        ${requirementsHTML}
                     </div>
                 </div>
             `;
@@ -1635,12 +1848,20 @@ async function displayOrderItems() {
         // Calculate and update totals
         calculateAndUpdateTotals();
         
-        // Show custom requirements if any
+        // Show custom requirements section if any item has requirements
         displayCustomRequirements();
         
     } catch (error) {
         console.error('Error displaying order items:', error);
-        orderItemsDiv.innerHTML = '<p style="color: #ff4757; text-align: center; padding: 20px;">Error loading order items</p>';
+        orderItemsDiv.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px; color: #ff4757;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 15px;"></i>
+                <p>Error loading order items</p>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: var(--primary-gold); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    <i class="fas fa-redo"></i> Reload Page
+                </button>
+            </div>
+        `;
     }
 }
 
@@ -1661,8 +1882,8 @@ function displayCustomRequirements() {
     let requirementsHTML = '<div class="custom-requirements-box">';
     requirementsHTML += '<h5><i class="fas fa-clipboard-list"></i> Custom Requirements</h5>';
     
-    itemsWithRequirements.forEach(item => {
-        const itemName = item.name || item.stoneName || 'Product';
+    itemsWithRequirements.forEach((item, index) => {
+        const itemName = item.name || item.stoneName || `Product ${index + 1}`;
         requirementsHTML += `
             <div style="margin-bottom: 10px;">
                 <strong>${itemName}:</strong>
@@ -1675,6 +1896,20 @@ function displayCustomRequirements() {
     container.innerHTML = requirementsHTML;
 }
 
+function calculateTotalFromItems() {
+    return checkoutItems.reduce((sum, item) => {
+        let itemPrice = 0;
+        if (item.calculatedPrice !== undefined && item.calculatedPrice !== null) {
+            itemPrice = item.calculatedPrice;
+        } else if (item.price !== undefined && item.price !== null) {
+            itemPrice = item.price * (item.quantity || 1);
+        } else if (item.totalPrice !== undefined && item.totalPrice !== null) {
+            itemPrice = item.totalPrice;
+        }
+        return sum + itemPrice;
+    }, 0);
+}
+
 function calculateAndUpdateTotals() {
     const subtotalEl = document.getElementById('subtotal');
     const taxEl = document.getElementById('tax');
@@ -1684,17 +1919,7 @@ function calculateAndUpdateTotals() {
     if (!subtotalEl || !totalEl) return;
     
     // Calculate subtotal
-    const subtotal = checkoutItems.reduce((sum, item) => {
-        let itemPrice = 0;
-        if (item.calculatedPrice !== undefined) {
-            itemPrice = item.calculatedPrice;
-        } else if (item.price !== undefined) {
-            itemPrice = item.price * (item.quantity || 1);
-        } else if (item.totalPrice !== undefined) {
-            itemPrice = item.totalPrice;
-        }
-        return sum + itemPrice;
-    }, 0);
+    const subtotal = calculateTotalFromItems();
     
     // Calculate tax (20% VAT)
     const tax = subtotal * 0.2;
@@ -1711,12 +1936,122 @@ function calculateAndUpdateTotals() {
     shippingEl.textContent = shipping === 0 ? 'FREE' : `£${shipping.toFixed(2)}`;
     totalEl.textContent = `£${total.toFixed(2)}`;
     
-    // Also update payment breakdown
+    // Update payment breakdown
     updatePaymentBreakdown();
 }
 
 // ============================================
-// ADDRESS MANAGEMENT SYSTEM
+// PAYMENT FUNCTIONS
+// ============================================
+
+function selectPaymentOption(paymentType) {
+    const advanceOption = document.getElementById('advancePaymentOption');
+    const fullOption = document.getElementById('fullPaymentOption');
+    const remainingOption = document.getElementById('remainingPaymentOption');
+    
+    // Remove selected class from all options
+    [advanceOption, fullOption, remainingOption].forEach(option => {
+        if (option) option.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked option
+    if (paymentType === 'advance' && advanceOption) {
+        advanceOption.classList.add('selected');
+        document.getElementById('advancePayment').checked = true;
+    } else if (paymentType === 'full' && fullOption) {
+        fullOption.classList.add('selected');
+        document.getElementById('fullPayment').checked = true;
+    } else if (paymentType === 'remaining' && remainingOption) {
+        remainingOption.classList.add('selected');
+        document.getElementById('remainingPayment').checked = true;
+    }
+    
+    currentPaymentType = paymentType;
+    updatePaymentBreakdown();
+}
+
+function selectPaymentMethod(method) {
+    // Remove active class from all methods
+    document.querySelectorAll('.payment-method').forEach(element => {
+        element.classList.remove('active');
+        element.querySelector('.fa-check-circle').style.color = '';
+    });
+    
+    // Add active class to selected method
+    const selectedMethod = document.querySelector(`[data-method="${method}"]`);
+    if (selectedMethod) {
+        selectedMethod.classList.add('active');
+        selectedMethod.querySelector('.fa-check-circle').style.color = 'var(--primary-gold)';
+    }
+    
+    selectedPaymentMethod = method;
+    
+    // Show/hide payment method specific containers
+    document.getElementById('stripeCardElement').style.display = method === 'stripe' ? 'block' : 'none';
+    document.getElementById('paypalButtonsContainer').style.display = method === 'paypal' ? 'block' : 'none';
+}
+
+function updatePaymentBreakdown() {
+    const totalAmountText = document.getElementById('total').textContent;
+    const totalAmount = parseFloat(totalAmountText.replace(/[^0-9.-]+/g, "")) || 0;
+    
+    const totalOrderValue = document.getElementById('totalOrderValue');
+    const advanceAmount = document.getElementById('advanceAmount');
+    const remainingAmount = document.getElementById('remainingAmount');
+    const payNowAmount = document.getElementById('payNowAmount');
+    const advanceLabel = document.getElementById('advanceLabel');
+    const remainingLabel = document.getElementById('remainingLabel');
+    const payNowLabel = document.getElementById('payNowLabel');
+    
+    if (!totalOrderValue || !advanceAmount) return;
+    
+    if (currentPaymentType === 'full') {
+        // Full payment with 5% discount
+        const discount = totalAmount * 0.05;
+        const discountedTotal = totalAmount - discount;
+        
+        totalOrderValue.textContent = `£${totalAmount.toFixed(2)}`;
+        advanceAmount.textContent = `-£${discount.toFixed(2)} (5% discount)`;
+        remainingAmount.textContent = `£${discountedTotal.toFixed(2)}`;
+        payNowAmount.textContent = `£${discountedTotal.toFixed(2)}`;
+        
+        if (advanceLabel) advanceLabel.textContent = '5% Discount:';
+        if (remainingLabel) remainingLabel.textContent = 'Amount After Discount:';
+        if (payNowLabel) payNowLabel.textContent = 'Amount to Pay Now:';
+        
+    } else if (currentPaymentType === 'advance') {
+        // 30% advance payment
+        const advance = totalAmount * 0.3;
+        const remaining = totalAmount * 0.7;
+        
+        totalOrderValue.textContent = `£${totalAmount.toFixed(2)}`;
+        advanceAmount.textContent = `£${advance.toFixed(2)}`;
+        remainingAmount.textContent = `£${remaining.toFixed(2)}`;
+        payNowAmount.textContent = `£${advance.toFixed(2)}`;
+        
+        if (advanceLabel) advanceLabel.textContent = '30% Advance:';
+        if (remainingLabel) remainingLabel.textContent = '70% After Shipping:';
+        if (payNowLabel) payNowLabel.textContent = 'Amount to Pay Now:';
+        
+    } else if (currentPaymentType === 'remaining' && existingOrderData) {
+        // For existing order payment
+        const paidAmount = existingOrderData.submittedAmount || existingOrderData.advancePayment || 0;
+        const totalOrderValueAmount = existingOrderData.total || totalAmount;
+        const remaining = existingOrderData.remainingPayment || (totalOrderValueAmount - paidAmount);
+        
+        totalOrderValue.textContent = `£${totalOrderValueAmount.toFixed(2)}`;
+        advanceAmount.textContent = `£${paidAmount.toFixed(2)}`;
+        remainingAmount.textContent = `£${remaining.toFixed(2)}`;
+        payNowAmount.textContent = `£${remaining.toFixed(2)}`;
+        
+        if (advanceLabel) advanceLabel.textContent = 'Already Paid:';
+        if (remainingLabel) remainingLabel.textContent = 'Remaining Balance:';
+        if (payNowLabel) payNowLabel.textContent = 'Amount to Pay Now:';
+    }
+}
+
+// ============================================
+// ADDRESS MANAGEMENT FUNCTIONS
 // ============================================
 
 async function loadSavedAddresses() {
@@ -1912,7 +2247,7 @@ async function saveAddress() {
         const userId = authSystem.getUserId();
         let addressId = selectedAddressId;
         
-        if (authSystem.isLoggedIn()) {
+        if (authSystem.isLoggedIn() && firebaseDB) {
             // Save to Firebase
             if (addressId) {
                 // Update existing address
@@ -2044,131 +2379,20 @@ function validateAddressForm() {
 }
 
 // ============================================
-// PAYMENT PROCESSING
-// ============================================
-
-function selectPaymentOption(paymentType) {
-    const advanceOption = document.getElementById('advancePaymentOption');
-    const fullOption = document.getElementById('fullPaymentOption');
-    const remainingOption = document.getElementById('remainingPaymentOption');
-    
-    // Remove selected class from all options
-    [advanceOption, fullOption, remainingOption].forEach(option => {
-        if (option) option.classList.remove('selected');
-    });
-    
-    // Add selected class to clicked option
-    if (paymentType === 'advance' && advanceOption) {
-        advanceOption.classList.add('selected');
-        document.getElementById('advancePayment').checked = true;
-    } else if (paymentType === 'full' && fullOption) {
-        fullOption.classList.add('selected');
-        document.getElementById('fullPayment').checked = true;
-    } else if (paymentType === 'remaining' && remainingOption) {
-        remainingOption.classList.add('selected');
-        document.getElementById('remainingPayment').checked = true;
-    }
-    
-    currentPaymentType = paymentType;
-    updatePaymentBreakdown();
-}
-
-function selectPaymentMethod(method) {
-    // Remove active class from all methods
-    document.querySelectorAll('.payment-method').forEach(element => {
-        element.classList.remove('active');
-        element.querySelector('.fa-check-circle').style.color = '';
-    });
-    
-    // Add active class to selected method
-    const selectedMethod = document.querySelector(`[data-method="${method}"]`);
-    if (selectedMethod) {
-        selectedMethod.classList.add('active');
-        selectedMethod.querySelector('.fa-check-circle').style.color = 'var(--primary-gold)';
-    }
-    
-    selectedPaymentMethod = method;
-    
-    // Show/hide payment method specific containers
-    document.getElementById('stripeCardElement').style.display = method === 'stripe' ? 'block' : 'none';
-    document.getElementById('paypalButtonsContainer').style.display = method === 'paypal' ? 'block' : 'none';
-}
-
-function updatePaymentBreakdown() {
-    const totalAmountText = document.getElementById('total').textContent;
-    const totalAmount = parseFloat(totalAmountText.replace(/[^0-9.-]+/g, "")) || 0;
-    
-    const totalOrderValue = document.getElementById('totalOrderValue');
-    const advanceAmount = document.getElementById('advanceAmount');
-    const remainingAmount = document.getElementById('remainingAmount');
-    const payNowAmount = document.getElementById('payNowAmount');
-    const advanceLabel = document.getElementById('advanceLabel');
-    const remainingLabel = document.getElementById('remainingLabel');
-    const payNowLabel = document.getElementById('payNowLabel');
-    
-    if (!totalOrderValue || !advanceAmount) return;
-    
-    if (currentPaymentType === 'full') {
-        // Full payment with 5% discount
-        const discount = totalAmount * 0.05;
-        const discountedTotal = totalAmount - discount;
-        
-        totalOrderValue.textContent = `£${totalAmount.toFixed(2)}`;
-        advanceAmount.textContent = `-£${discount.toFixed(2)} (5% discount)`;
-        remainingAmount.textContent = `£${discountedTotal.toFixed(2)}`;
-        payNowAmount.textContent = `£${discountedTotal.toFixed(2)}`;
-        
-        if (advanceLabel) advanceLabel.textContent = '5% Discount:';
-        if (remainingLabel) remainingLabel.textContent = 'Amount After Discount:';
-        if (payNowLabel) payNowLabel.textContent = 'Amount to Pay Now:';
-        
-    } else if (currentPaymentType === 'advance') {
-        // 30% advance payment
-        const advance = totalAmount * 0.3;
-        const remaining = totalAmount * 0.7;
-        
-        totalOrderValue.textContent = `£${totalAmount.toFixed(2)}`;
-        advanceAmount.textContent = `£${advance.toFixed(2)}`;
-        remainingAmount.textContent = `£${remaining.toFixed(2)}`;
-        payNowAmount.textContent = `£${advance.toFixed(2)}`;
-        
-        if (advanceLabel) advanceLabel.textContent = '30% Advance:';
-        if (remainingLabel) remainingLabel.textContent = '70% After Shipping:';
-        if (payNowLabel) payNowLabel.textContent = 'Amount to Pay Now:';
-        
-    } else if (currentPaymentType === 'remaining') {
-        // For existing order payment
-        if (existingOrderData) {
-            const paidAmount = existingOrderData.submittedAmount || existingOrderData.advancePayment || 0;
-            const remaining = existingOrderData.remainingPayment || (totalAmount - paidAmount);
-            
-            totalOrderValue.textContent = `£${totalAmount.toFixed(2)}`;
-            advanceAmount.textContent = `£${paidAmount.toFixed(2)}`;
-            remainingAmount.textContent = `£${remaining.toFixed(2)}`;
-            payNowAmount.textContent = `£${remaining.toFixed(2)}`;
-            
-            if (advanceLabel) advanceLabel.textContent = 'Already Paid:';
-            if (remainingLabel) remainingLabel.textContent = 'Remaining Balance:';
-            if (payNowLabel) payNowLabel.textContent = 'Amount to Pay Now:';
-        }
-    }
-}
-
-// ============================================
 // VALIDATION AND PAYMENT PROCESSING
 // ============================================
 
 async function validateAndProcessPayment() {
     try {
-        // Validate address
-        if (!selectedAddressId) {
-            showError('Please select or create a shipping address');
-            return;
-        }
-        
         // Validate terms
         if (!document.getElementById('agreeTerms').checked) {
             showError('Please agree to the terms and conditions');
+            return;
+        }
+        
+        // Validate address
+        if (!selectedAddressId) {
+            showError('Please select or create a shipping address');
             return;
         }
         
@@ -2183,25 +2407,34 @@ async function validateAndProcessPayment() {
             return;
         }
         
-        // Calculate amounts
+        // Calculate payment amount based on type
         const totalAmount = parseFloat(document.getElementById('total').textContent.replace(/[^0-9.-]+/g, ""));
         let paymentAmount = 0;
+        let paymentDescription = '';
         
-        if (currentPaymentType === 'full') {
-            paymentAmount = totalAmount * 0.95; // 5% discount
-        } else if (currentPaymentType === 'advance') {
-            paymentAmount = totalAmount * 0.3; // 30% advance
-        } else if (currentPaymentType === 'remaining' && existingOrderData) {
+        if (isExistingOrderFlow && existingOrderData) {
+            // Existing order payment
             paymentAmount = existingOrderData.remainingPayment || 0;
+            paymentDescription = `Remaining payment for order ${existingOrderData.orderNumber}`;
+        } else if (currentPaymentType === 'full') {
+            // Full payment with discount
+            paymentAmount = totalAmount * 0.95; // 5% discount
+            paymentDescription = 'Full payment with 5% discount';
+        } else if (currentPaymentType === 'advance') {
+            // 30% advance payment
+            paymentAmount = totalAmount * 0.3;
+            paymentDescription = '30% advance payment';
         } else {
+            // Default to full amount
             paymentAmount = totalAmount;
+            paymentDescription = 'Full payment';
         }
         
         // Create order data
         const orderData = {
             items: checkoutItems,
             shippingAddress: selectedAddress,
-            paymentType: currentPaymentType,
+            paymentType: isExistingOrderFlow ? 'remaining' : currentPaymentType,
             paymentMethod: selectedPaymentMethod,
             amount: paymentAmount,
             totalAmount: totalAmount,
@@ -2217,7 +2450,15 @@ async function validateAndProcessPayment() {
         const orderNumber = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 4).toUpperCase();
         orderData.orderNumber = orderNumber;
         
-        // Process payment based on method
+        // For existing orders, link to original order
+        if (isExistingOrderFlow && existingOrderData) {
+            orderData.existingOrderId = existingOrderData.id;
+            orderData.existingOrderNumber = existingOrderData.orderNumber;
+            orderData.originalTotal = existingOrderData.total;
+            orderData.originalPaid = existingOrderData.submittedAmount || existingOrderData.advancePayment || 0;
+        }
+        
+        // Process payment
         await processPayment(orderData);
         
     } catch (error) {
@@ -2251,10 +2492,10 @@ async function processPayment(orderData) {
 async function processBankTransfer(orderData) {
     try {
         // Generate payment reference
-        const paymentRef = orderData.orderNumber + '_' + Date.now().toString(36);
+        const paymentRef = orderData.orderNumber + '_' + Date.now().toString(36).toUpperCase();
         
         // Create payment record
-        const paymentId = 'payment_' + Date.now();
+        const paymentId = 'payment_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         const paymentData = {
             ...orderData,
             paymentId: paymentId,
@@ -2265,23 +2506,45 @@ async function processBankTransfer(orderData) {
                 sortCode: '04-00-04',
                 iban: 'GB29NWBK60161331926819',
                 swift: 'NWBKGB2L',
-                reference: paymentRef
+                reference: paymentRef,
+                amount: orderData.amount,
+                currency: 'GBP'
             },
-            status: 'pending_bank_transfer'
+            status: 'pending_bank_transfer',
+            updatedAt: new Date().toISOString()
         };
         
         // Save to Firebase if user is logged in
         if (authSystem.isLoggedIn() && firebaseDB) {
+            // Save to user's orders
             await firebaseDB.collection('users')
                 .doc(orderData.userId)
                 .collection('orders')
                 .doc(paymentId)
                 .set(paymentData);
             
-            // Also save to main orders collection
+            // Save to main orders collection
             await firebaseDB.collection('orders')
                 .doc(paymentId)
                 .set(paymentData);
+            
+            // If buy now flow, remove from buyNowItems
+            if (buyNowItemId) {
+                await firebaseDB.collection('buyNowItems')
+                    .doc(buyNowItemId)
+                    .delete();
+                console.log("Removed buy now item:", buyNowItemId);
+            }
+            
+            // If cart flow, clear cart
+            if (checkoutSource === 'cart') {
+                await clearFirebaseCart(orderData.userId);
+            }
+        }
+        
+        // Clear local storage cart
+        if (checkoutSource === 'cart' || checkoutSource === 'cart_local') {
+            localStorage.removeItem('irya_stone_cart');
         }
         
         // Show bank transfer details
@@ -2290,6 +2553,28 @@ async function processBankTransfer(orderData) {
     } catch (error) {
         console.error('Bank transfer error:', error);
         throw error;
+    }
+}
+
+async function clearFirebaseCart(userId) {
+    try {
+        if (!firebaseDB) return;
+        
+        const cartQuery = firebaseDB.collection('userCarts')
+            .where('userId', '==', userId);
+        
+        const cartSnapshot = await cartQuery.get();
+        
+        if (!cartSnapshot.empty) {
+            const batch = firebaseDB.batch();
+            cartSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+            console.log("Firebase cart cleared");
+        }
+    } catch (error) {
+        console.error('Error clearing Firebase cart:', error);
     }
 }
 
@@ -2307,10 +2592,15 @@ function showBankTransferDetails(paymentData) {
                         <strong>Order Number:</strong> ${paymentData.orderNumber}
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <strong>Payment Type:</strong> ${paymentData.paymentType === 'full' ? 'Full Payment' : '30% Advance'}
+                        <strong>Payment Type:</strong> ${paymentData.paymentType === 'full' ? 'Full Payment' : 
+                                                         paymentData.paymentType === 'advance' ? '30% Advance' : 
+                                                         'Remaining Balance'}
                     </div>
                     <div style="margin-bottom: 10px;">
                         <strong>Amount to Pay:</strong> £${paymentData.amount.toFixed(2)}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Payment Reference:</strong> ${paymentData.paymentReference}
                     </div>
                 </div>
                 
@@ -2351,6 +2641,7 @@ function showBankTransferDetails(paymentData) {
                         <li>Payment will be verified within 1-2 business days</li>
                         <li>Order will be processed after payment verification</li>
                         <li>You will receive email confirmation</li>
+                        <li>You can view order status in your account</li>
                     </ul>
                 </div>
                 
@@ -2379,7 +2670,7 @@ async function completeBankTransfer(paymentId, orderNumber) {
     try {
         showLoading(true);
         
-        // Update payment status
+        // Update payment status in Firebase
         if (firebaseDB) {
             await firebaseDB.collection('orders')
                 .doc(paymentId)
@@ -2388,11 +2679,17 @@ async function completeBankTransfer(paymentId, orderNumber) {
                     paymentStatus: 'paid',
                     updatedAt: new Date().toISOString()
                 });
-        }
-        
-        // Clear cart if coming from cart
-        if (checkoutSource === 'cart') {
-            clearCart();
+            
+            // Also update in user's collection
+            await firebaseDB.collection('users')
+                .doc(authSystem.getUserId())
+                .collection('orders')
+                .doc(paymentId)
+                .update({
+                    status: 'processing',
+                    paymentStatus: 'paid',
+                    updatedAt: new Date().toISOString()
+                });
         }
         
         // Close modal
@@ -2402,7 +2699,7 @@ async function completeBankTransfer(paymentId, orderNumber) {
         showNotification('Payment marked as completed! Order confirmed.');
         
         setTimeout(() => {
-            window.location.href = `order-confirmation.html?order=${orderNumber}&payment=bank`;
+            window.location.href = `order-confirmation.html?order=${orderNumber}&payment=bank&source=${checkoutSource}`;
         }, 2000);
         
     } catch (error) {
@@ -2413,80 +2710,40 @@ async function completeBankTransfer(paymentId, orderNumber) {
     }
 }
 
-function clearCart() {
-    // Clear localStorage cart
-    localStorage.removeItem('irya_stone_cart');
-    
-    // Clear Firebase cart if logged in
-    if (authSystem.isLoggedIn() && firebaseDB) {
-        const userId = authSystem.getUserId();
-        firebaseDB.collection('userCarts')
-            .where('userId', '==', userId)
-            .get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    doc.ref.delete();
-                });
-            })
-            .catch(error => {
-                console.error('Error clearing Firebase cart:', error);
-            });
-    }
-}
-
-// ============================================
-// EXISTING ORDER PAYMENT FUNCTIONS
-// ============================================
-
-async function loadExistingOrder(orderId, userId) {
-    try {
-        showLoading(true);
-        
-        const targetUserId = userId || authSystem.getUserId();
-        
-        // Load order from Firebase
-        await loadOrderFromFirebase(orderId, targetUserId);
-        
-        if (existingOrderData) {
-            updateUITitles('Pay Remaining Balance');
-            displayExistingOrderInfo();
-            prefillAddressFromOrder();
-            setupForExistingOrderPayment();
-            await displayOrderItems();
-        } else {
-            showError('Failed to load order details');
-        }
-        
-    } catch (error) {
-        console.error('Error loading existing order:', error);
-        showError('Failed to load order details');
-    } finally {
-        showLoading(false);
-    }
-}
-
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
 
-function updateSourceIndicator(source) {
-    const indicator = document.getElementById('orderSourceIndicator');
-    const sourceType = document.getElementById('sourceType');
+function updateSourceBadge() {
+    const sourceBadge = document.getElementById('sourceText');
+    if (!sourceBadge) return;
     
-    if (indicator && sourceType) {
-        indicator.style.display = 'block';
-        
-        switch(source) {
-            case 'buy_now':
-                sourceType.textContent = 'Buy Now';
-                break;
-            case 'cart':
-                sourceType.textContent = 'Shopping Cart';
-                break;
-            default:
-                sourceType.textContent = source;
-        }
+    let sourceText = '';
+    let icon = 'fas fa-shopping-cart';
+    
+    switch(checkoutSource) {
+        case 'buy_now':
+            sourceText = 'Buy Now Order';
+            icon = 'fas fa-bolt';
+            break;
+        case 'cart':
+            sourceText = 'Shopping Cart';
+            icon = 'fas fa-shopping-cart';
+            break;
+        case 'cart_local':
+            sourceText = 'Shopping Cart (Local)';
+            icon = 'fas fa-shopping-cart';
+            break;
+        case 'existing_order':
+            sourceText = 'Existing Order Payment';
+            icon = 'fas fa-file-invoice-dollar';
+            break;
+        default:
+            sourceText = 'Order';
+            icon = 'fas fa-shopping-bag';
     }
+    
+    sourceBadge.innerHTML = `<i class="${icon}"></i> ${sourceText}`;
 }
 
 function updateUITitles(type) {
@@ -2497,12 +2754,12 @@ function updateUITitles(type) {
     
     if (type === 'Buy Now') {
         if (breadcrumbTitle) breadcrumbTitle.textContent = 'Buy Now Checkout';
-        if (orderSummaryTitle) orderSummaryTitle.textContent = 'Buy Now Summary';
+        if (orderSummaryTitle) orderSummaryTitle.textContent = 'Buy Now Order';
         if (payButtonText) payButtonText.textContent = 'Buy Now & Pay';
         if (backButtonText) backButtonText.textContent = 'Back to Product';
     } else if (type === 'Pay Remaining Balance') {
         if (breadcrumbTitle) breadcrumbTitle.textContent = 'Pay Remaining Balance';
-        if (orderSummaryTitle) orderSummaryTitle.textContent = 'Existing Order';
+        if (orderSummaryTitle) orderSummaryTitle.textContent = 'Existing Order Payment';
         if (payButtonText) payButtonText.textContent = 'Pay Remaining Balance';
         if (backButtonText) backButtonText.textContent = 'Back to Orders';
     } else {
@@ -2517,16 +2774,16 @@ function getDefaultImage(category) {
     const categoryLower = (category || '').toLowerCase();
     
     if (categoryLower.includes('sand')) {
-        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&q=80';
     } else if (categoryLower.includes('kota')) {
-        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800';
+        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&q=80';
     } else if (categoryLower.includes('granite')) {
-        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800';
+        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&q=80';
     } else if (categoryLower.includes('marble')) {
-        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800';
+        return 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&q=80';
     }
     
-    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&q=80';
 }
 
 function showLoading(show) {
@@ -2554,9 +2811,10 @@ function showError(message) {
 
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        showNotification('Copied to clipboard!');
+        showNotification('Reference copied to clipboard!');
     }).catch(err => {
         console.error('Failed to copy:', err);
+        showError('Failed to copy to clipboard');
     });
 }
 
@@ -2567,11 +2825,16 @@ function closeModal() {
     }
 }
 
+function cancelPayment() {
+    closeModal();
+    showNotification('Payment cancelled');
+}
+
 function goBack() {
     if (isExistingOrderFlow) {
         window.location.href = 'orders.html';
     } else if (checkoutSource === 'buy_now') {
-        window.history.back();
+        window.location.href = 'products.html';
     } else {
         window.location.href = 'cart.html';
     }
@@ -2592,6 +2855,30 @@ function updateCartBadge() {
     } catch (error) {
         console.error('Error updating cart badge:', error);
     }
+}
+
+function initializePaymentOptions() {
+    selectPaymentOption('advance');
+    selectPaymentMethod('bank');
+}
+
+function togglePaymentOptions() {
+    const paymentOptions = document.getElementById('paymentOptions');
+    const toggleBtn = document.getElementById('togglePaymentOptionsBtn');
+    
+    if (paymentOptions.style.display === 'none') {
+        paymentOptions.style.display = 'block';
+        toggleBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Payment Options';
+    } else {
+        paymentOptions.style.display = 'none';
+        toggleBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Show Payment Options';
+    }
+}
+
+function showOrderDetails() {
+    if (!existingOrderData) return;
+    
+    alert(`Order Details:\n\nOrder Number: ${existingOrderData.orderNumber}\nStatus: ${existingOrderData.status || 'Processing'}\nTotal: £${existingOrderData.total?.toFixed(2) || '0.00'}\nPaid: £${existingOrderData.submittedAmount?.toFixed(2) || '0.00'}\nRemaining: £${existingOrderData.remainingPayment?.toFixed(2) || '0.00'}`);
 }
 
 // ============================================
@@ -2733,6 +3020,9 @@ window.selectAddress = selectAddress;
 window.copyToClipboard = copyToClipboard;
 window.completeBankTransfer = completeBankTransfer;
 window.closeModal = closeModal;
+window.cancelPayment = cancelPayment;
+window.togglePaymentOptions = togglePaymentOptions;
+window.showOrderDetails = showOrderDetails;
 </script>
 </body>
 </html>
