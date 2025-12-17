@@ -1,1151 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Checkout | IRYA STONE</title>
 
 <!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Stripe -->
+<script src="https://js.stripe.com/v3/"></script>
 
 <style>
-/* All CSS same as before - unchanged */
-:root {
-    --primary-gold: #c9a227;
-    --gold-light: #f0d77c;
-    --gold-dark: #9c7c1f;
-    --stone-dark: #1a1a1a;
-    --stone-light: #f4f6f4;
-    --bg-light: #f7f9fc;
-    --text-dark: #222222;
-    --text-light: #666666;
-    --white: #ffffff;
-    --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
-    --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
-    --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
-    --transition: all 0.3s ease;
-    --border-radius: 12px;
-    --border-radius-lg: 20px;
+body{
+  font-family: Arial, sans-serif;
+  background:#f5f5f5;
+  margin:0;
 }
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+.container{
+  max-width:1100px;
+  margin:30px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
 }
-
-body {
-    background: var(--bg-light);
-    color: var(--text-dark);
-    padding-bottom: 80px;
-    font-size: 14px;
+h1{
+  margin-bottom:20px;
 }
-
-/* ... ALL CSS REMAINS SAME AS BEFORE ... */
-/* Copy all the CSS from your original file here */
+.checkout-grid{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:20px;
+}
+.product{
+  display:flex;
+  gap:15px;
+  border-bottom:1px solid #eee;
+  padding:10px 0;
+}
+.product img{
+  width:80px;
+  height:80px;
+  object-fit:cover;
+  border-radius:6px;
+}
+.summary{
+  background:#fafafa;
+  padding:15px;
+  border-radius:10px;
+}
+.total{
+  font-size:18px;
+  font-weight:bold;
+}
+button{
+  background:#000;
+  color:#fff;
+  padding:12px;
+  border:none;
+  width:100%;
+  border-radius:6px;
+  cursor:pointer;
+  margin-top:10px;
+}
+#card-element{
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:6px;
+}
 </style>
 </head>
-
 <body>
 
-<!-- Loading Spinner -->
-<div class="loading-spinner" id="loadingSpinner"></div>
+<div class="container">
+  <h1>Checkout</h1>
 
-<!-- Notification -->
-<div class="notification" id="notification"></div>
+  <div class="checkout-grid">
 
-<!-- Payment Processing Modal -->
-<div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
-    <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 400px;">
-        <div id="paymentSpinner" class="loading-spinner" style="position: relative; top: 0; left: 0; transform: none; margin: 0 auto 20px;"></div>
-        <h3 id="paymentTitle" style="margin-bottom: 15px;">Processing Payment</h3>
-        <p id="paymentMessage">Please wait while we process your payment...</p>
-        <button id="cancelPayment" onclick="cancelPayment()" style="margin-top: 20px; padding: 10px 20px; background: #ff4757; color: white; border: none; border-radius: 8px; cursor: pointer;">
-            Cancel Payment
-        </button>
+    <!-- CART ITEMS -->
+    <div>
+      <h3>Your Items</h3>
+      <div id="cartItems"></div>
     </div>
+
+    <!-- SUMMARY -->
+    <div class="summary">
+      <h3>Order Summary</h3>
+      <p>Subtotal: £<span id="subtotal">0</span></p>
+      <p>Advance (30%): £<span id="advance">0</span></p>
+      <p class="total">Pay Now: £<span id="payNow">0</span></p>
+
+      <form id="payment-form">
+        <div id="card-element"></div>
+        <button id="payBtn">Pay Securely</button>
+        <p id="payment-message"></p>
+      </form>
+    </div>
+
+  </div>
 </div>
 
-<!-- Header -->
-<header id="mainHeader">
-    <div class="logo">
-        <i class="fa-solid fa-gem"></i>
-        <span>IRYA STONE</span>
-    </div>
-    
-    <div style="display: flex; gap: 10px; align-items: center;">
-        <a href="cart.html" class="action-btn" style="position: relative;">
-            <i class="fas fa-shopping-cart"></i>
-            <span class="cart-badge" id="cartBadge">0</span>
-        </a>
-        <a href="products.html" class="action-btn">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-    </div>
-</header>
-
-<!-- Breadcrumb -->
-<section class="breadcrumb">
-    <div class="breadcrumb-content">
-        <div class="breadcrumb-item">
-            <a href="index.html"><i class="fas fa-home"></i> Home</a>
-        </div>
-        <div class="breadcrumb-divider">
-            <i class="fas fa-chevron-right"></i>
-        </div>
-        <div class="breadcrumb-item">
-            <a href="products.html">Products</a>
-        </div>
-        <div class="breadcrumb-divider">
-            <i class="fas fa-chevron-right"></i>
-        </div>
-        <div class="breadcrumb-item active" id="breadcrumbTitle">
-            Checkout
-        </div>
-    </div>
-</section>
-
-<!-- Checkout Container -->
-<section class="checkout-container">
-    <div class="checkout-grid">
-        <!-- Left Column: Shipping & Payment -->
-        <div>
-            <!-- EXISTING ORDER INFO -->
-            <div class="existing-order-info" id="existingOrderInfo" style="display: none;">
-                <h3 style="margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                    <span id="existingOrderTitle">Pay Remaining Balance</span>
-                </h3>
-                
-                <div class="existing-order-details">
-                    <div class="existing-order-item">
-                        <div class="existing-order-label">Order Number</div>
-                        <div class="existing-order-value" id="existingOrderNumber">#N/A</div>
-                    </div>
-                    <div class="existing-order-item">
-                        <div class="existing-order-label">Current Status</div>
-                        <div class="existing-order-value" id="existingOrderStatus">Processing</div>
-                    </div>
-                    <div class="existing-order-item">
-                        <div class="existing-order-label">Already Paid</div>
-                        <div class="existing-order-value" id="existingOrderPaid">£0.00</div>
-                    </div>
-                    <div class="existing-order-item">
-                        <div class="existing-order-label">Remaining Balance</div>
-                        <div class="existing-order-value" id="existingOrderRemaining">£0.00</div>
-                    </div>
-                </div>
-                
-                <div class="existing-order-actions">
-                    <button class="btn btn-success" onclick="showOrderDetails()">
-                        <i class="fas fa-eye"></i> View Order Details
-                    </button>
-                </div>
-            </div>
-
-            <!-- Shipping Address -->
-            <div class="checkout-section">
-                <div class="section-header">
-                    <i class="fas fa-shipping-fast"></i>
-                    <h3>Shipping Address</h3>
-                </div>
-                
-                <div class="address-form" id="addressForm">
-                    <div class="form-group">
-                        <label class="required">Full Name</label>
-                        <input type="text" id="fullName" placeholder="Enter your full name" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="required">Email Address</label>
-                        <input type="email" id="email" placeholder="your.email@example.com" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="required">Phone Number</label>
-                        <input type="tel" id="phone" placeholder="+1 234 567 8900" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="required">Country</label>
-                        <select id="country" required>
-                            <option value="">Select Country</option>
-                            <option value="GB">United Kingdom</option>
-                            <option value="US">United States</option>
-                            <option value="CA">Canada</option>
-                            <option value="IN">India</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="required">Address Line 1</label>
-                        <input type="text" id="address1" placeholder="Street address" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Address Line 2</label>
-                        <input type="text" id="address2" placeholder="Apartment, suite, etc.">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="required">City</label>
-                        <input type="text" id="city" placeholder="City" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="required">State</label>
-                        <input type="text" id="state" placeholder="State" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="required">Postal Code</label>
-                        <input type="text" id="postalCode" placeholder="ZIP code" required>
-                    </div>
-                    
-                    <div class="form-group full-width">
-                        <label>Special Instructions</label>
-                        <textarea id="instructions" placeholder="Any special delivery instructions..."></textarea>
-                    </div>
-                    
-                    <div class="form-group full-width">
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                            <input type="checkbox" id="saveAddress">
-                            <span>Save this address for future orders</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Payment Information -->
-            <div class="checkout-section">
-                <div class="section-header">
-                    <i class="fas fa-credit-card"></i>
-                    <h3>Payment Information</h3>
-                </div>
-                
-                <!-- Payment Type Selection -->
-                <div class="payment-options">
-                    <h4><i class="fas fa-money-bill-wave"></i> Select Payment Type</h4>
-                    
-                    <div class="payment-option selected" onclick="selectPaymentOption('advance')">
-                        <input type="radio" id="advancePayment" name="paymentType" value="advance" checked>
-                        <label for="advancePayment">
-                            <i class="fas fa-credit-card"></i>
-                            <div>
-                                <div>30% Advance Payment</div>
-                                <div class="payment-details">Pay 30% now, 70% after shipping</div>
-                            </div>
-                        </label>
-                    </div>
-                    
-                    <div class="payment-option" onclick="selectPaymentOption('full')">
-                        <input type="radio" id="fullPayment" name="paymentType" value="full">
-                        <label for="fullPayment">
-                            <i class="fas fa-money-check-alt"></i>
-                            <div>
-                                <div>Full Payment Now</div>
-                                <div class="payment-details">Pay full amount now - 5% discount</div>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-                
-                <!-- Payment Breakdown -->
-                <div class="payment-breakdown">
-                    <h4><i class="fas fa-file-invoice-dollar"></i> Payment Breakdown</h4>
-                    <div class="payment-item">
-                        <span class="payment-label">Total Order Value:</span>
-                        <span class="payment-amount" id="totalOrderValue">£0.00</span>
-                    </div>
-                    <div class="payment-item">
-                        <span class="payment-label" id="advanceLabel">30% Advance:</span>
-                        <span class="payment-amount" id="advanceAmount">£0.00</span>
-                    </div>
-                    <div class="payment-item">
-                        <span class="payment-label" id="remainingLabel">70% After Shipping:</span>
-                        <span class="payment-amount" id="remainingAmount">£0.00</span>
-                    </div>
-                    <div class="payment-item">
-                        <span class="payment-label">Amount to Pay Now:</span>
-                        <span class="payment-amount" id="payNowAmount">£0.00</span>
-                    </div>
-                </div>
-                
-                <!-- Payment Method -->
-                <div class="section-header" style="margin-top: 25px;">
-                    <i class="fas fa-credit-card"></i>
-                    <h3>Payment Method</h3>
-                </div>
-                
-                <div class="payment-methods">
-                    <div class="payment-method active" onclick="selectPaymentMethod('bank')">
-                        <div class="payment-icon">
-                            <i class="fas fa-university"></i>
-                        </div>
-                        <div class="payment-info">
-                            <div class="payment-name">Bank Transfer</div>
-                            <div class="payment-description">Direct bank transfer</div>
-                        </div>
-                        <i class="fas fa-check-circle" style="color: var(--primary-gold);"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Right Column: Order Summary -->
-        <div>
-            <!-- Order Summary -->
-            <div class="checkout-section">
-                <div class="section-header">
-                    <i class="fas fa-receipt"></i>
-                    <h3 id="orderSummaryTitle">Order Summary</h3>
-                </div>
-                
-                <div class="order-items" id="orderItems">
-                    <!-- Order items will be loaded here -->
-                </div>
-                
-                <!-- Custom Requirements Display -->
-                <div id="customRequirementsContainer"></div>
-                
-                <div class="price-breakdown">
-                    <div class="price-row">
-                        <span class="price-label">Subtotal</span>
-                        <span class="price-value" id="subtotal">£0.00</span>
-                    </div>
-                    
-                    <div class="price-row">
-                        <span class="price-label">Shipping</span>
-                        <span class="price-value" id="shipping">FREE</span>
-                    </div>
-                    
-                    <div class="price-row">
-                        <span class="price-label">Tax (VAT)</span>
-                        <span class="price-value" id="tax">£0.00</span>
-                    </div>
-                    
-                    <div class="price-row total">
-                        <span class="price-label">Total Amount</span>
-                        <span class="price-value" id="total">£0.00</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Terms & Conditions -->
-            <div class="checkout-section">
-                <div class="section-header">
-                    <i class="fas fa-file-contract"></i>
-                    <h3>Terms & Conditions</h3>
-                </div>
-                
-                <div style="font-size: 13px; color: var(--text-light); line-height: 1.6;">
-                    <p>By placing your order, you agree to our Terms of Service and Privacy Policy.</p>
-                    <p><strong>Payment Terms:</strong> 30% advance payment required to confirm order.</p>
-                    <p><strong>Shipping:</strong> Delivery within 7-14 business days.</p>
-                    <p style="margin-top: 10px;">
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                            <input type="checkbox" id="agreeTerms" required>
-                            <span>I agree to the terms and conditions</span>
-                        </label>
-                    </p>
-                </div>
-            </div>
-            
-            <!-- Place Order Button -->
-            <div class="action-buttons">
-                <button class="action-btn-large btn-primary" onclick="validateAndProcessPayment()" id="processPaymentBtn">
-                    <i class="fas fa-lock"></i>
-                    <span id="payButtonText">Proceed to Payment</span>
-                </button>
-                <button class="action-btn-large btn-secondary" onclick="goBack()">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Back</span>
-                </button>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Bottom Menu -->
-<div class="bottom-nav" id="bottomNav">
-    <a href="index.html" class="nav-btn">
-        <i class="fas fa-home"></i>
-        <span>Home</span>
-    </a>
-    <a href="products.html" class="nav-btn">
-        <i class="fas fa-th-large"></i>
-        <span>Products</span>
-    </a>
-    <a href="orders.html" class="nav-btn">
-        <i class="fas fa-box"></i>
-        <span>Orders</span>
-    </a>
-    <a href="account.html" class="nav-btn active">
-        <i class="fas fa-user"></i>
-        <span>Account</span>
-    </a>
-</div>
-
-<!-- Firebase SDK v12 -->
 <script type="module">
-  // Import Firebase modules
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, collection, getDocs, setDoc, updateDoc, deleteDoc, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+// ================= FIREBASE =================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
-  // Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-    authDomain: "iryastone-uk.firebaseapp.com",
-    projectId: "iryastone-uk",
-    storageBucket: "iryastone-uk.firebasestorage.app",
-    messagingSenderId: "110940910896",
-    appId: "1:110940910896:web:b25e92127118665e5c84f5",
-    measurementId: "G-6YM1FLYN48"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+  authDomain: "iryastone-uk.firebaseapp.com",
+  projectId: "iryastone-uk",
+  storageBucket: "iryastone-uk.firebasestorage.app",
+  messagingSenderId: "110940910896",
+  appId: "1:110940910896:web:b25e92127118665e5c84f5"
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-  // Global variables
-  let cartItems = [];
-  let currentPaymentType = 'advance';
-  let selectedPaymentMethod = 'bank';
-  let buyNowItemId = null;
+// ================= STRIPE =================
+const stripe = Stripe("YOUR_STRIPE_PUBLISHABLE_KEY");
+const elements = stripe.elements();
+const card = elements.create('card');
+card.mount('#card-element');
 
-  // ============================================
-  // INITIALIZATION
-  // ============================================
+let subtotal = 0;
 
-  document.addEventListener('DOMContentLoaded', async function() {
-      console.log("🚀 Checkout page loaded with Firebase v12");
-      
-      // Get URL parameters
-      const urlParams = new URLSearchParams(window.location.search);
-      const isBuyNow = urlParams.get('buynow') === 'true';
-      buyNowItemId = urlParams.get('buynow_item_id');
-      
-      console.log("📌 URL Parameters:");
-      console.log("- buynow:", isBuyNow);
-      console.log("- buynow_item_id:", buyNowItemId);
-      
-      try {
-          // Check authentication
-          const userId = await getCurrentUserId();
-          console.log("👤 User ID:", userId);
-          
-          // Load items based on flow
-          if (isBuyNow && buyNowItemId) {
-              console.log("🛍️ Buy Now flow detected");
-              updateUITitles('Buy Now');
-              await loadBuyNowItem(buyNowItemId, userId);
-          } else {
-              console.log("🛒 Cart flow detected");
-              updateUITitles('Checkout');
-              await loadCartItems(userId);
-          }
-          
-          // Initialize UI
-          initializePaymentOptions();
-          updateCartBadge();
-          
-      } catch (error) {
-          console.error("❌ Initialization error:", error);
-          showError('Failed to load checkout: ' + error.message);
-      }
+async function loadCheckout() {
+  const user = auth.currentUser;
+  if(!user){ alert('Please login'); return; }
+
+  const cartRef = doc(db,'users',user.uid,'userCarts','cart');
+  const snap = await getDoc(cartRef);
+  if(!snap.exists()) return;
+
+  const items = snap.data().items || [];
+  const container = document.getElementById('cartItems');
+
+  items.forEach(item => {
+    const price = (item.price || 0) * (item.quantity || 1);
+    subtotal += price;
+
+    container.innerHTML += `
+      <div class="product">
+        <img src="${item.image}" />
+        <div>
+          <strong>${item.name}</strong><br>
+          Qty: ${item.quantity}<br>
+          £${price}
+        </div>
+      </div>`;
   });
 
-  // ============================================
-  // GET CURRENT USER ID
-  // ============================================
+  const advance = subtotal * 0.3;
 
-  async function getCurrentUserId() {
-      return new Promise((resolve) => {
-          onAuthStateChanged(auth, (user) => {
-              if (user) {
-                  console.log("✅ User logged in:", user.uid);
-                  resolve(user.uid);
-              } else {
-                  // Check localStorage for guest user
-                  const storedUser = localStorage.getItem('irya_stone_auth_user');
-                  if (storedUser) {
-                      const userData = JSON.parse(storedUser);
-                      console.log("👤 Using stored user:", userData.uid);
-                      resolve(userData.uid);
-                  } else {
-                      // Create guest user
-                      const guestId = 'guest_' + Date.now();
-                      localStorage.setItem('irya_stone_auth_user', JSON.stringify({
-                          uid: guestId,
-                          displayName: 'Guest',
-                          isGuest: true
-                      }));
-                      console.log("👤 Created guest user:", guestId);
-                      resolve(guestId);
-                  }
-              }
-          });
-      });
+  document.getElementById('subtotal').innerText = subtotal.toFixed(2);
+  document.getElementById('advance').innerText = advance.toFixed(2);
+  document.getElementById('payNow').innerText = advance.toFixed(2);
+}
+
+loadCheckout();
+
+// ================= PAYMENT =================
+document.getElementById('payment-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+
+  document.getElementById('payment-message').innerText = 'Processing payment...';
+
+  // CALL YOUR BACKEND TO CREATE PAYMENT INTENT
+  const res = await fetch('/create-payment-intent',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ amount: Math.round(subtotal * 0.3 * 100) })
+  });
+
+  const { clientSecret } = await res.json();
+
+  const result = await stripe.confirmCardPayment(clientSecret,{
+    payment_method:{ card }
+  });
+
+  if(result.error){
+    document.getElementById('payment-message').innerText = result.error.message;
+  } else {
+    document.getElementById('payment-message').innerText = 'Payment Successful ✅';
+    // redirect or update order status
   }
-
-  // ============================================
-  // LOAD CART ITEMS
-  // ============================================
-
-  async function loadCartItems(userId) {
-      try {
-          console.log("🛒 Loading cart for user:", userId);
-          showLoading(true);
-          
-          // Path: users/{userId}/userCarts/{cartId}
-          const userCartsRef = collection(db, 'users', userId, 'userCarts');
-          
-          // Get all cart documents for this user
-          const snapshot = await getDocs(userCartsRef);
-          
-          if (snapshot.empty) {
-              console.log("📭 No cart found for user");
-              showError('Your cart is empty');
-              setTimeout(() => window.location.href = 'cart.html', 2000);
-              return;
-          }
-          
-          // Get the first cart (assuming one cart per user)
-          const cartDoc = snapshot.docs[0];
-          const cartData = cartDoc.data();
-          
-          console.log("📦 Cart data:", cartData);
-          
-          // Check if items array exists
-          if (!cartData.items || !Array.isArray(cartData.items) || cartData.items.length === 0) {
-              console.log("📭 Cart items array is empty");
-              showError('Your cart is empty');
-              setTimeout(() => window.location.href = 'cart.html', 2000);
-              return;
-          }
-          
-          cartItems = cartData.items;
-          console.log("✅ Loaded", cartItems.length, "items from cart");
-          
-          // Display items
-          displayOrderItems(cartItems);
-          
-      } catch (error) {
-          console.error("❌ Error loading cart:", error);
-          showError('Failed to load cart: ' + error.message);
-          
-          // Try localStorage as fallback
-          const localCart = localStorage.getItem('irya_stone_cart');
-          if (localCart) {
-              cartItems = JSON.parse(localCart);
-              displayOrderItems(cartItems);
-          }
-      } finally {
-          showLoading(false);
-      }
-  }
-
-  // ============================================
-  // LOAD BUY NOW ITEM
-  // ============================================
-
-  async function loadBuyNowItem(buyNowItemId, userId) {
-      try {
-          console.log("🛍️ Loading Buy Now item:", buyNowItemId);
-          showLoading(true);
-          
-          if (!buyNowItemId || buyNowItemId === 'undefined') {
-              throw new Error('Invalid Buy Now ID');
-          }
-          
-          // Path: buyNowItems/{buyNowItemId}
-          const buyNowDoc = await getDoc(doc(db, 'buyNowItems', buyNowItemId));
-          
-          if (!buyNowDoc.exists()) {
-              throw new Error('Buy Now item not found');
-          }
-          
-          const buyNowData = buyNowDoc.data();
-          console.log("📦 Buy Now data:", buyNowData);
-          
-          // Check user ownership
-          if (buyNowData.userId !== userId) {
-              console.warn("⚠️ User ID mismatch:", buyNowData.userId, "vs", userId);
-              showError('This Buy Now item does not belong to your account.');
-              setTimeout(() => window.location.href = 'products.html', 2000);
-              return;
-          }
-          
-          // Buy Now me "item" object hai, array nahi
-          const buyNowItem = buyNowData.item;
-          
-          if (!buyNowItem) {
-              throw new Error('No item found in Buy Now');
-          }
-          
-          // Convert single item to array
-          cartItems = [{
-              id: buyNowItem.id,
-              productId: buyNowItem.id,
-              name: buyNowItem.name || buyNowItem.stoneName,
-              stoneName: buyNowItem.stoneName,
-              category: buyNowItem.category,
-              description: buyNowItem.description,
-              image: buyNowItem.image,
-              price: buyNowItem.price || 0,
-              quantity: buyNowItem.quantity || 1,
-              priceUnit: buyNowItem.priceUnit,
-              calculatedPrice: buyNowItem.calculatedPrice || 0,
-              totalPrice: buyNowItem.totalPrice || 0,
-              calculationType: buyNowItem.calculationType,
-              calculationData: buyNowItem.calculationData,
-              customRequirements: buyNowItem.customRequirements || '',
-              isBuyNow: true
-          }];
-          
-          console.log("✅ Buy Now item loaded:", cartItems[0]);
-          
-          // Display item
-          displayOrderItems(cartItems);
-          
-          // Show custom requirements if any
-          if (buyNowItem.customRequirements && buyNowItem.customRequirements.trim()) {
-              showCustomRequirements(buyNowItem.customRequirements);
-          }
-          
-      } catch (error) {
-          console.error("❌ Error loading Buy Now:", error);
-          showError('Failed to load Buy Now item: ' + error.message);
-          setTimeout(() => window.location.href = 'products.html', 2000);
-      } finally {
-          showLoading(false);
-      }
-  }
-
-  // ============================================
-  // DISPLAY ORDER ITEMS
-  // ============================================
-
-  function displayOrderItems(items) {
-      const orderItemsDiv = document.getElementById('orderItems');
-      if (!orderItemsDiv) return;
-      
-      if (!items || items.length === 0) {
-          orderItemsDiv.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 20px;">No items found</p>';
-          return;
-      }
-      
-      let itemsHTML = '';
-      
-      items.forEach((item, index) => {
-          // Calculate price
-          let itemPrice = 0;
-          
-          if (item.calculatedPrice && item.calculatedPrice > 0) {
-              itemPrice = item.calculatedPrice;
-          } else if (item.totalPrice && item.totalPrice > 0) {
-              itemPrice = item.totalPrice;
-          } else if (item.totalAmount && item.totalAmount > 0) {
-              itemPrice = item.totalAmount;
-          } else if (item.price && item.quantity) {
-              itemPrice = item.price * item.quantity;
-          } else if (item.price) {
-              itemPrice = item.price;
-          }
-          
-          // Get image
-          const imageUrl = item.image || item.imageUrl || getDefaultImage(item.category);
-          const itemName = item.name || item.stoneName || 'Product';
-          const quantity = item.quantity || 1;
-          
-          itemsHTML += `
-              <div class="order-item">
-                  <div class="order-item-image">
-                      <img src="${imageUrl}" 
-                           alt="${itemName}"
-                           onerror="this.src='${getDefaultImage(item.category)}'">
-                  </div>
-                  <div class="order-item-details">
-                      <div class="order-item-name">${itemName}</div>
-                      <div class="order-item-info">${item.category || 'General'}</div>
-                      <div class="order-item-info">Quantity: ${quantity}</div>
-                      ${item.priceUnit ? `<div class="order-item-info">Price per ${item.priceUnit}</div>` : ''}
-                      ${item.calculationData ? `
-                      <div class="order-item-info">
-                          Size: ${item.calculationData.length || 1} × ${item.calculationData.width || 1} ${item.calculationData.unit || 'sqft'}
-                      </div>
-                      ` : ''}
-                      <div class="order-item-price">£${itemPrice.toFixed(2)}</div>
-                  </div>
-              </div>
-          `;
-      });
-      
-      orderItemsDiv.innerHTML = itemsHTML;
-      
-      // Calculate and update totals
-      calculateAndUpdateTotals(items);
-  }
-
-  // ============================================
-  // CALCULATE TOTALS
-  // ============================================
-
-  function calculateAndUpdateTotals(items) {
-      try {
-          // Calculate subtotal
-          let subtotal = 0;
-          
-          items.forEach(item => {
-              let itemPrice = 0;
-              
-              if (item.calculatedPrice && item.calculatedPrice > 0) {
-                  itemPrice = item.calculatedPrice;
-              } else if (item.totalPrice && item.totalPrice > 0) {
-                  itemPrice = item.totalPrice;
-              } else if (item.totalAmount && item.totalAmount > 0) {
-                  itemPrice = item.totalAmount;
-              } else if (item.price && item.quantity) {
-                  itemPrice = item.price * item.quantity;
-              } else if (item.price) {
-                  itemPrice = item.price;
-              }
-              
-              subtotal += itemPrice;
-          });
-          
-          // Calculate tax (20% VAT)
-          const tax = subtotal * 0.2;
-          
-          // Calculate total
-          const total = subtotal + tax;
-          
-          // Update display
-          document.getElementById('subtotal').textContent = `£${subtotal.toFixed(2)}`;
-          document.getElementById('tax').textContent = `£${tax.toFixed(2)}`;
-          document.getElementById('total').textContent = `£${total.toFixed(2)}`;
-          
-          // Update payment breakdown
-          updatePaymentBreakdown(total);
-          
-      } catch (error) {
-          console.error("Error calculating totals:", error);
-      }
-  }
-
-  function updatePaymentBreakdown(total) {
-      const totalOrderValue = document.getElementById('totalOrderValue');
-      const advanceAmount = document.getElementById('advanceAmount');
-      const remainingAmount = document.getElementById('remainingAmount');
-      const payNowAmount = document.getElementById('payNowAmount');
-      const advanceLabel = document.getElementById('advanceLabel');
-      const remainingLabel = document.getElementById('remainingLabel');
-      
-      if (!totalOrderValue) return;
-      
-      if (currentPaymentType === 'full') {
-          // Full payment with 5% discount
-          const discount = total * 0.05;
-          const discountedTotal = total - discount;
-          
-          totalOrderValue.textContent = `£${total.toFixed(2)}`;
-          advanceAmount.textContent = `-£${discount.toFixed(2)} (5% discount)`;
-          remainingAmount.textContent = `£${discountedTotal.toFixed(2)}`;
-          payNowAmount.textContent = `£${discountedTotal.toFixed(2)}`;
-          
-          if (advanceLabel) advanceLabel.textContent = '5% Discount:';
-          if (remainingLabel) remainingLabel.textContent = 'Amount After Discount:';
-          
-      } else {
-          // 30% advance payment
-          const advance = total * 0.3;
-          const remaining = total * 0.7;
-          
-          totalOrderValue.textContent = `£${total.toFixed(2)}`;
-          advanceAmount.textContent = `£${advance.toFixed(2)}`;
-          remainingAmount.textContent = `£${remaining.toFixed(2)}`;
-          payNowAmount.textContent = `£${advance.toFixed(2)}`;
-          
-          if (advanceLabel) advanceLabel.textContent = '30% Advance:';
-          if (remainingLabel) remainingLabel.textContent = '70% After Shipping:';
-      }
-  }
-
-  // ============================================
-  // SHOW CUSTOM REQUIREMENTS
-  // ============================================
-
-  function showCustomRequirements(requirements) {
-      const container = document.getElementById('customRequirementsContainer');
-      if (!container || !requirements || !requirements.trim()) return;
-      
-      container.innerHTML = `
-          <div class="custom-requirements-box">
-              <h5><i class="fas fa-clipboard-check"></i> Custom Requirements</h5>
-              <div class="custom-requirements-text">${requirements}</div>
-          </div>
-      `;
-  }
-
-  // ============================================
-  // PAYMENT PROCESSING
-  // ============================================
-
-  async function validateAndProcessPayment() {
-      try {
-          console.log("💳 Processing payment...");
-          
-          // Validate form
-          if (!validateForm()) {
-              return;
-          }
-          
-          showLoading(true);
-          
-          // Get address data
-          const addressData = {
-              fullName: document.getElementById('fullName').value.trim(),
-              email: document.getElementById('email').value.trim(),
-              phone: document.getElementById('phone').value.trim(),
-              country: document.getElementById('country').value,
-              address1: document.getElementById('address1').value.trim(),
-              address2: document.getElementById('address2').value.trim(),
-              city: document.getElementById('city').value.trim(),
-              state: document.getElementById('state').value.trim(),
-              postalCode: document.getElementById('postalCode').value.trim(),
-              instructions: document.getElementById('instructions').value.trim()
-          };
-          
-          // Get user ID
-          const userId = await getCurrentUserId();
-          
-          // Calculate total
-          const total = parseFloat(document.getElementById('total').textContent.replace(/[^0-9.-]+/g, ""));
-          
-          // Generate order number
-          const orderNumber = 'IRYA-' + Date.now().toString().slice(-6) + '-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-          
-          // Create order data
-          const orderData = {
-              orderNumber: orderNumber,
-              userId: userId,
-              items: cartItems,
-              shippingAddress: addressData,
-              billingAddress: addressData,
-              total: total,
-              subtotal: parseFloat(document.getElementById('subtotal').textContent.replace(/[^0-9.-]+/g, "")),
-              tax: parseFloat(document.getElementById('tax').textContent.replace(/[^0-9.-]+/g, "")),
-              shipping: 0,
-              paymentType: currentPaymentType,
-              paymentMethod: selectedPaymentMethod,
-              status: 'pending',
-              paymentStatus: 'pending',
-              createdAt: new Date().toISOString(),
-              source: buyNowItemId ? 'buy_now' : 'cart'
-          };
-          
-          // Add payment amounts
-          if (currentPaymentType === 'advance') {
-              orderData.advancePayment = total * 0.3;
-              orderData.remainingPayment = total * 0.7;
-              orderData.submittedAmount = 0;
-          } else if (currentPaymentType === 'full') {
-              const discount = total * 0.05;
-              orderData.advancePayment = total - discount;
-              orderData.remainingPayment = 0;
-              orderData.submittedAmount = 0;
-              orderData.discount = discount;
-          }
-          
-          console.log("📦 Order data:", orderData);
-          
-          // Process bank transfer
-          await processBankTransfer(orderData);
-          
-      } catch (error) {
-          console.error("❌ Payment processing error:", error);
-          showError('Payment failed: ' + error.message);
-          showLoading(false);
-      }
-  }
-
-  async function processBankTransfer(orderData) {
-      try {
-          // Generate payment ID
-          const paymentId = 'payment_' + Date.now();
-          
-          // Calculate amount to pay
-          let amountToPay = 0;
-          if (orderData.paymentType === 'advance') {
-              amountToPay = orderData.advancePayment;
-          } else if (orderData.paymentType === 'full') {
-              amountToPay = orderData.advancePayment;
-          }
-          
-          // Add bank details
-          orderData.bankTransferDetails = {
-              accountName: 'IRYA STONE LTD',
-              accountNumber: '12345678',
-              sortCode: '04-00-04',
-              reference: orderData.orderNumber,
-              amount: amountToPay,
-              currency: 'GBP'
-          };
-          
-          // Save order to user's collection
-          await setDoc(doc(db, 'users', orderData.userId, 'orders', paymentId), orderData);
-          console.log("✅ Order saved to user collection");
-          
-          // Save to main orders collection
-          await setDoc(doc(db, 'orders', paymentId), orderData);
-          console.log("✅ Order saved to main collection");
-          
-          // Clear cart if it was cart checkout
-          if (!buyNowItemId) {
-              await clearUserCart(orderData.userId);
-          }
-          
-          // Delete buyNowItems entry if it was buy now
-          if (buyNowItemId) {
-              await deleteBuyNowItem(buyNowItemId);
-          }
-          
-          // Show success message
-          showLoading(false);
-          showNotification('Order created successfully!');
-          
-          // Redirect to order confirmation
-          setTimeout(() => {
-              window.location.href = `order-confirmation.html?order=${orderData.orderNumber}&payment=bank`;
-          }, 2000);
-          
-      } catch (error) {
-          console.error("❌ Bank transfer error:", error);
-          throw error;
-      }
-  }
-
-  async function clearUserCart(userId) {
-      try {
-          // Get user's carts
-          const userCartsRef = collection(db, 'users', userId, 'userCarts');
-          const snapshot = await getDocs(userCartsRef);
-          
-          // Delete all cart documents
-          const deletePromises = [];
-          snapshot.forEach(doc => {
-              deletePromises.push(deleteDoc(doc.ref));
-          });
-          
-          await Promise.all(deletePromises);
-          console.log("✅ User cart cleared");
-          
-          // Clear localStorage
-          localStorage.removeItem('irya_stone_cart');
-          
-      } catch (error) {
-          console.error("Error clearing cart:", error);
-      }
-  }
-
-  async function deleteBuyNowItem(itemId) {
-      try {
-          await deleteDoc(doc(db, 'buyNowItems', itemId));
-          console.log("✅ Buy Now item deleted:", itemId);
-          
-      } catch (error) {
-          console.error("Error deleting Buy Now item:", error);
-      }
-  }
-
-  // ============================================
-  // UI FUNCTIONS
-  // ============================================
-
-  function selectPaymentOption(paymentType) {
-      console.log("Selected payment type:", paymentType);
-      
-      // Update UI
-      document.querySelectorAll('.payment-option').forEach(option => {
-          option.classList.remove('selected');
-      });
-      
-      if (paymentType === 'advance') {
-          document.getElementById('advancePaymentOption').classList.add('selected');
-      } else if (paymentType === 'full') {
-          document.getElementById('fullPaymentOption').classList.add('selected');
-      }
-      
-      currentPaymentType = paymentType;
-      
-      // Update payment breakdown
-      const total = parseFloat(document.getElementById('total').textContent.replace(/[^0-9.-]+/g, ""));
-      if (total > 0) {
-          updatePaymentBreakdown(total);
-      }
-  }
-
-  function selectPaymentMethod(method) {
-      console.log("Selected payment method:", method);
-      
-      // Update UI
-      document.querySelectorAll('.payment-method').forEach(element => {
-          element.classList.remove('active');
-          element.querySelector('.fa-check-circle').style.color = '';
-      });
-      
-      const selectedMethod = document.querySelector(`[onclick="selectPaymentMethod('${method}')"]`);
-      if (selectedMethod) {
-          selectedMethod.classList.add('active');
-          selectedMethod.querySelector('.fa-check-circle').style.color = 'var(--primary-gold)';
-      }
-      
-      selectedPaymentMethod = method;
-  }
-
-  function initializePaymentOptions() {
-      selectPaymentOption('advance');
-      selectPaymentMethod('bank');
-  }
-
-  function validateForm() {
-      let isValid = true;
-      
-      // Check required fields
-      const requiredFields = [
-          'fullName', 'email', 'phone', 'country', 
-          'address1', 'city', 'state', 'postalCode'
-      ];
-      
-      requiredFields.forEach(fieldId => {
-          const field = document.getElementById(fieldId);
-          if (field && field.required && !field.value.trim()) {
-              field.style.borderColor = '#ff4757';
-              isValid = false;
-          } else if (field) {
-              field.style.borderColor = '#e0e0e0';
-          }
-      });
-      
-      // Check email format
-      const emailField = document.getElementById('email');
-      if (emailField.value.trim()) {
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(emailField.value.trim())) {
-              emailField.style.borderColor = '#ff4757';
-              isValid = false;
-          }
-      }
-      
-      // Check terms agreement
-      const agreeTerms = document.getElementById('agreeTerms');
-      if (agreeTerms && !agreeTerms.checked) {
-          showError('Please agree to the terms and conditions');
-          isValid = false;
-      }
-      
-      return isValid;
-  }
-
-  function updateUITitles(type) {
-      const breadcrumbTitle = document.getElementById('breadcrumbTitle');
-      const orderSummaryTitle = document.getElementById('orderSummaryTitle');
-      const payButtonText = document.getElementById('payButtonText');
-      
-      if (type === 'Buy Now') {
-          if (breadcrumbTitle) breadcrumbTitle.textContent = 'Buy Now Checkout';
-          if (orderSummaryTitle) orderSummaryTitle.textContent = 'Buy Now Summary';
-          if (payButtonText) payButtonText.textContent = 'Buy Now & Pay';
-      } else {
-          if (breadcrumbTitle) breadcrumbTitle.textContent = 'Checkout';
-          if (orderSummaryTitle) orderSummaryTitle.textContent = 'Order Summary';
-          if (payButtonText) payButtonText.textContent = 'Proceed to Payment';
-      }
-  }
-
-  function updateCartBadge() {
-      try {
-          const cartBadge = document.getElementById('cartBadge');
-          if (!cartBadge) return;
-          
-          const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-          cartBadge.textContent = totalItems > 0 ? totalItems : '0';
-      } catch (error) {
-          console.error('Error updating cart badge:', error);
-      }
-  }
-
-  function getDefaultImage(category) {
-      const categoryLower = (category || '').toLowerCase();
-      
-      if (categoryLower.includes('sand')) {
-          return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
-      } else if (categoryLower.includes('kota') || categoryLower.includes('granite')) {
-          return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800';
-      } else if (categoryLower.includes('marble')) {
-          return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800';
-      }
-      
-      return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
-  }
-
-  function showLoading(show) {
-      const spinner = document.getElementById('loadingSpinner');
-      if (spinner) {
-          spinner.style.display = show ? 'block' : 'none';
-      }
-  }
-
-  function showNotification(message) {
-      const notification = document.getElementById('notification');
-      if (!notification) return;
-      
-      notification.textContent = message;
-      notification.classList.add('show');
-      
-      setTimeout(() => {
-          notification.classList.remove('show');
-      }, 3000);
-  }
-
-  function showError(message) {
-      alert(message);
-  }
-
-  function cancelPayment() {
-      const modal = document.getElementById('paymentModal');
-      if (modal) {
-          modal.style.display = 'none';
-      }
-      showNotification('Payment cancelled');
-  }
-
-  function goBack() {
-      if (buyNowItemId) {
-          window.history.back();
-      } else {
-          window.location.href = 'cart.html';
-      }
-  }
-
-  // ============================================
-  // GLOBAL FUNCTIONS
-  // ============================================
-
-  // Make functions available globally
-  window.selectPaymentOption = selectPaymentOption;
-  window.selectPaymentMethod = selectPaymentMethod;
-  window.validateAndProcessPayment = validateAndProcessPayment;
-  window.cancelPayment = cancelPayment;
-  window.goBack = goBack;
-
-  console.log("✅ Checkout script loaded successfully with Firebase v12");
+});
 </script>
 </body>
 </html>
