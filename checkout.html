@@ -1405,315 +1405,250 @@ async function loadBuyNowItems(buyNowItemId) {
 // LOAD CART ITEMS - UPDATED
 // ============================================
 
+// ===================================================
+// GLOBAL
+// ===================================================
+let cartItems = [];
+
+// ===================================================
+// LOAD CART ITEMS (NORMAL CART)
+// ===================================================
 async function loadCartItems() {
     try {
         showLoading(true);
-        console.log("Loading cart items from userCarts collection");
-        
-        if (!firebaseDB) {
-            throw new Error('Firebase not initialized');
-        }
-        
+
         const userId = authSystem.getUserId();
-        console.log("User ID for cart:", userId);
-        
-        // Fetch from userCarts collection
+        if (!firebaseDB || !userId) throw new Error("Firebase/User missing");
+
         const cartDoc = await firebaseDB.collection('users')
             .doc(userId)
             .collection('userCarts')
             .doc('current')
             .get();
-        
-        if (cartDoc.exists) {
-            const cartData = cartDoc.data();
-            console.log("Cart data found:", cartData);
-            
-            cartItems = cartData.items || [];
-            
-            // Load product images
-            const productIds = cartItems.map(item => item.productId).filter(id => id);
-            if (productIds.length > 0) {
-                await loadProductImagesForItems(cartItems);
-            }
-            
-            // Load items in UI
-            await displayOrderItems(cartItems);
-            
-            console.log("Cart items loaded successfully:", cartItems.length);
-        } else {
-            console.log("No cart found in Firestore, checking localStorage");
-            // Fallback to localStorage
-            const cartData = localStorage.getItem('irya_stone_cart');
-            if (cartData) {
-                cartItems = JSON.parse(cartData);
-                await displayOrderItems(cartItems);
-                console.log("Cart items loaded from localStorage:", cartItems.length);
-            } else {
-                console.log("No cart items found");
-                cartItems = [];
-            }
+
+        if (!cartDoc.exists) {
+            cartItems = [];
+            return;
         }
-        
-    } catch (error) {
-        console.error('Error loading cart items:', error);
-        showError('Failed to load cart items');
-        cartItems = [];
+
+        cartItems = cartDoc.data().items || [];
+
+        cartItems.forEach(item => {
+            item.calculatedPrice = item.totalAmount || (item.price * (item.quantity || 1));
+            item.totalPrice = item.calculatedPrice;
+        });
+
+        await loadProductImagesForItems(cartItems);
+        await displayOrderItems(cartItems);
+
+    } catch (e) {
+        console.error(e);
+        showError("Cart load failed");
     } finally {
         showLoading(false);
     }
 }
 
-// ============================================
-// DISPLAY ORDER ITEMS - UPDATED
-// ============================================
-
-async function displayOrderItems(items) {
+// ===================================================
+// LOAD BUY NOW ITEM
+// ===================================================
+async function loadBuyNowItems(buyNowItemId) {
     try {
-        const orderItemsDiv = document.getElementById('orderItems');
-        if (!orderItemsDiv) return;
-        
-        if (items.length > 0) {
-            const itemsHTML = items.map(item => {
-                const imageUrl = item.imageUrl || item.image || getDefaultImage(item.category);
-                const itemName = item.name || item.stoneName || 'Product';
-                const itemPrice = item.calculatedPrice || item.totalPrice || (item.price * (item.quantity || 1));
-                const quantity = item.quantity || 1;
-                
-                return `
-                    <div class="order-item">
-                        <div class="order-item-image">
-                            <img src="${imageUrl}" 
-                                 alt="${itemName}" 
-                                 onerror="this.src='${getDefaultImage(item.category)}'">
-                        </div>
-                        <div class="order-item-details">
-                            <div class="order-item-name">${itemName}</div>
-                            <div class="order-item-info">${item.category || 'General'}</div>
-                            <div class="order-item-info">Quantity: ${quantity}</div>
-                            <div class="order-item-price">£${itemPrice.toFixed(2)}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            orderItemsDiv.innerHTML = itemsHTML;
-            
-            // Calculate and update totals
-            calculateAndUpdateTotals(items);
-        } else {
-            orderItemsDiv.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 20px;">No items found</p>';
+        showLoading(true);
+
+        const doc = await firebaseDB.collection('buyNowItems')
+            .doc(buyNowItemId)
+            .get();
+
+        if (!doc.exists) return;
+
+        const i = doc.data().item;
+
+        cartItems = [{
+            id: i.id,
+            productId: i.id,
+            name: i.name || i.stoneName,
+            category: i.category,
+            imageUrl: i.image,
+            price: i.price || 0,
+            quantity: i.quantity || 1,
+            priceUnit: i.priceUnit,
+            calculatedPrice: i.calculatedPrice || i.totalPrice,
+            totalPrice: i.calculatedPrice || i.totalPrice,
+            calculationType: i.calculationType,
+            calculationData: i.calculationData,
+            customRequirements: i.customRequirements,
+            isBuyNow: true,
+            source: "buy_now"
+        }];
+
+        await loadProductImagesForItems(cartItems);
+        await displayOrderItems(cartItems);
+
+        if (i.customRequirements) {
+            showCustomRequirements(i.customRequirements);
         }
-        
-    } catch (error) {
-        console.error('Error displaying order items:', error);
+
+    } catch (e) {
+        console.error(e);
+    } finally {
+        showLoading(false);
     }
 }
 
-// ============================================
-// DISPLAY CUSTOM REQUIREMENTS - NEW FUNCTION
-// ============================================
+// ===================================================
+// DISPLAY ITEMS
+// ===================================================
+async function displayOrderItems(items) {
+    const box = document.getElementById("orderItems");
+    if (!box) return;
 
-function displayCustomRequirements(orderData) {
-    const container = document.getElementById('customRequirementsContainer');
-    if (!container) return;
-    
-    if (orderData.customRequirements && orderData.customRequirements.trim()) {
-        container.innerHTML = `
-            <div class="custom-requirements-box">
-                <h5><i class="fas fa-clipboard-check"></i> Custom Requirements</h5>
-                <div class="custom-requirements-text">${orderData.customRequirements}</div>
-            </div>
-        `;
-    } else {
-        container.innerHTML = '';
-    }
-}
-
-// ============================================
-// LOAD PRODUCT IMAGES FROM PRODUCTS COLLECTION - UPDATED
-// ============================================
-
-async function loadProductImagesForItems(items) {
-    console.log("Loading product images for", items.length, "items");
-    
-    if (!firebaseDB || items.length === 0) return;
-    
-    try {
-        // Collect all unique product IDs
-        const productIds = items
-            .filter(item => item.productId)
-            .map(item => item.productId)
-            .filter((id, index, self) => self.indexOf(id) === index);
-        
-        if (productIds.length === 0) return;
-        
-        console.log("Fetching images for product IDs:", productIds);
-        
-        // Fetch all products from products collection
-        const productsPromises = productIds.map(async (productId) => {
-            try {
-                const productDoc = await firebaseDB.collection('products').doc(productId).get();
-                if (productDoc.exists) {
-                    return { productId, data: productDoc.data() };
-                }
-                return null;
-            } catch (error) {
-                console.error(`Error fetching product ${productId}:`, error);
-                return null;
-            }
-        });
-        
-        const products = await Promise.all(productsPromises);
-        const productMap = {};
-        
-        // Create a map of productId to product data
-        products.forEach(product => {
-            if (product && product.data) {
-                productMap[product.productId] = product.data;
-            }
-        });
-        
-        console.log("Products fetched from products collection:", Object.keys(productMap).length);
-        
-        // Update items with images
-        items.forEach(item => {
-            if (item.productId && productMap[item.productId]) {
-                const productData = productMap[item.productId];
-                
-                // Try different possible image fields
-                if (productData.images && Array.isArray(productData.images) && productData.images.length > 0) {
-                    item.imageUrl = productData.images[0]; // Use first image
-                    console.log(`Found image for ${item.productId}:`, item.imageUrl);
-                } else if (productData.imageUrl) {
-                    item.imageUrl = productData.imageUrl;
-                    console.log(`Found imageUrl for ${item.productId}:`, item.imageUrl);
-                } else if (productData.image) {
-                    item.imageUrl = productData.image;
-                    console.log(`Found image for ${item.productId}:`, item.imageUrl);
-                } else if (productData.title && productData.title.includes('http')) {
-                    // Sometimes title might contain URL
-                    item.imageUrl = productData.title;
-                    console.log(`Using title as image URL for ${item.productId}:`, item.imageUrl);
-                }
-                
-                // Also update item name from product data if available
-                if (productData.name && !item.name) {
-                    item.name = productData.name;
-                }
-                if (productData.category && !item.category) {
-                    item.category = productData.category;
-                }
-            }
-            
-            // If still no image, use default based on category
-            if (!item.imageUrl || item.imageUrl === '') {
-                item.imageUrl = getDefaultImage(item.category);
-                console.log(`Using default image for ${item.productId || 'unknown'}`);
-            }
-        });
-        
-        console.log("All product images loaded successfully from products collection");
-        
-    } catch (error) {
-        console.error('Error loading product images from products collection:', error);
-    }
-}
-
-// ============================================
-// PROCESS PAYMENT BASED ON CHECKOUT TYPE - UPDATED
-// ============================================
-
-async function validateAndProcessPayment() {
-    if (!validateForm()) {
-        console.log("Form validation failed");
+    if (!items || items.length === 0) {
+        box.innerHTML = "<p style='text-align:center'>No items</p>";
         return;
     }
-    
+
+    box.innerHTML = items.map(item => {
+        const img = item.imageUrl || getDefaultImage(item.category);
+        const price = item.calculatedPrice || item.totalPrice;
+
+        return `
+        <div class="order-item">
+            <div class="order-item-image">
+                <img src="${img}" onerror="this.src='${getDefaultImage(item.category)}'">
+            </div>
+            <div class="order-item-details">
+                <div class="order-item-name">${item.name}</div>
+                <div class="order-item-info">${item.category || 'General'}</div>
+                <div class="order-item-info">Qty: ${item.quantity}</div>
+
+                ${item.priceUnit ? `<div class="order-item-info">Per ${item.priceUnit}</div>` : ''}
+
+                ${item.calculationType === 'standard' && item.calculationData ? `
+                    <div class="order-item-info">
+                        Size: ${item.calculationData.length} × ${item.calculationData.width} ${item.calculationData.unit}
+                    </div>` : ''}
+
+                <div class="order-item-price">£${price.toFixed(2)}</div>
+            </div>
+        </div>`;
+    }).join("");
+
+    calculateAndUpdateTotals(items);
+}
+
+// ===================================================
+// CUSTOM REQUIREMENTS
+// ===================================================
+function showCustomRequirements(text) {
+    const c = document.getElementById("customRequirementsContainer");
+    if (!c || !text) return;
+
+    c.innerHTML = `
+        <div class="custom-requirements-box">
+            <h5><i class="fas fa-clipboard-check"></i> Custom Requirements</h5>
+            <div class="custom-requirements-text">${text}</div>
+        </div>`;
+}
+
+// ===================================================
+// LOAD PRODUCT IMAGES
+// ===================================================
+async function loadProductImagesForItems(items) {
+    const ids = [...new Set(items.map(i => i.productId).filter(Boolean))];
+    if (ids.length === 0) return;
+
+    const results = await Promise.all(ids.map(id =>
+        firebaseDB.collection("products").doc(id).get()
+    ));
+
+    const map = {};
+    results.forEach((d, i) => {
+        if (d.exists) map[ids[i]] = d.data();
+    });
+
+    items.forEach(item => {
+        const p = map[item.productId];
+        if (!p) return;
+
+        if (p.images?.length) item.imageUrl = p.images[0];
+        else if (p.imageUrl) item.imageUrl = p.imageUrl;
+        else if (p.image) item.imageUrl = p.image;
+
+        if (!item.name && p.name) item.name = p.name;
+        if (!item.category && p.category) item.category = p.category;
+
+        if (!item.imageUrl) item.imageUrl = getDefaultImage(item.category);
+    });
+}
+
+// ===================================================
+// PAYMENT VALIDATION & PROCESS
+// ===================================================
+async function validateAndProcessPayment() {
+    if (!validateForm()) return;
+
     showLoading(true);
-    
+
     try {
-        // Get address data
-        const addressData = getAddressData();
-        
-        if (checkoutType === CHECKOUT_TYPES.EXISTING_ORDER) {
-            await processExistingOrderPayment(addressData);
-        } else if (checkoutType === CHECKOUT_TYPES.BUY_NOW) {
-            await processBuyNowPayment(addressData);
-        } else if (checkoutType === CHECKOUT_TYPES.CART) {
-            await processCartPayment(addressData);
+        const address = getAddressData();
+
+        if (checkoutType === CHECKOUT_TYPES.BUY_NOW) {
+            await processBuyNowPayment(address);
         } else {
-            throw new Error('Invalid checkout type');
+            await processCartPayment(address);
         }
-        
-    } catch (error) {
-        console.error('Payment processing error:', error);
-        showError('Payment processing failed: ' + error.message);
+
+    } catch (e) {
+        console.error(e);
+        showError(e.message);
     } finally {
         showLoading(false);
     }
 }
 
-// ============================================
-// PROCESS BUY NOW PAYMENT - NEW FUNCTION
-// ============================================
+// ===================================================
+// BUY NOW PAYMENT
+// ===================================================
+async function processBuyNowPayment(address) {
+    if (cartItems.length === 0) throw new Error("No items");
 
-async function processBuyNowPayment(addressData) {
-    try {
-        console.log("Processing Buy Now payment...");
-        
-        if (cartItems.length === 0) {
-            throw new Error('No items to purchase');
-        }
-        
-        // Calculate total
-        const total = calculateTotal(cartItems);
-        
-        // Create order data
-        const orderData = {
-            orderNumber: generateOrderNumber(),
-            userId: authSystem.getUserId(),
-            userEmail: authSystem.getUserEmail(),
-            userName: authSystem.getUserName(),
-            items: cartItems,
-            shippingAddress: addressData,
-            billingAddress: addressData,
-            total: total,
-            subtotal: calculateSubtotal(cartItems),
-            tax: calculateTax(cartItems),
-            shipping: calculateShipping(cartItems),
-            paymentType: currentPaymentType,
-            paymentMethod: selectedPaymentMethod,
-            status: 'pending',
-            paymentStatus: 'pending',
-            createdAt: new Date().toISOString(),
-            source: 'buy_now'
-        };
-        
-        // Add payment details based on type
-        if (currentPaymentType === 'advance') {
-            orderData.advancePayment = total * 0.3;
-            orderData.remainingPayment = total * 0.7;
-            orderData.submittedAmount = 0;
-        } else if (currentPaymentType === 'full') {
-            const discount = total * 0.05;
-            orderData.advancePayment = total - discount;
-            orderData.remainingPayment = 0;
-            orderData.submittedAmount = 0;
-            orderData.discount = discount;
-        }
-        
-        console.log("Buy Now order data:", orderData);
-        
-        // Process based on payment method
-        if (selectedPaymentMethod === 'bank') {
-            await processBankTransfer(orderData, 'buy_now');
-        } else {
-            showError(`${selectedPaymentMethod} payment coming soon. Please use Bank Transfer.`);
-        }
-        
-    } catch (error) {
-        console.error('Buy Now payment processing error:', error);
-        throw error;
+    const total = calculateTotal(cartItems);
+
+    const order = {
+        orderNumber: generateOrderNumber(),
+        userId: authSystem.getUserId(),
+        userEmail: authSystem.getUserEmail(),
+        userName: authSystem.getUserName(),
+        items: cartItems,
+        shippingAddress: address,
+        billingAddress: address,
+        total,
+        subtotal: calculateSubtotal(cartItems),
+        tax: calculateTax(cartItems),
+        shipping: calculateShipping(cartItems),
+        paymentType: currentPaymentType,
+        paymentMethod: selectedPaymentMethod,
+        status: "pending",
+        paymentStatus: "pending",
+        createdAt: new Date().toISOString(),
+        source: "buy_now"
+    };
+
+    if (currentPaymentType === "advance") {
+        order.advancePayment = total * 0.3;
+        order.remainingPayment = total * 0.7;
+    } else {
+        const d = total * 0.05;
+        order.advancePayment = total - d;
+        order.remainingPayment = 0;
+        order.discount = d;
+    }
+
+    if (selectedPaymentMethod === "bank") {
+        await processBankTransfer(order, "buy_now");
+    } else {
+        showError("Only Bank Transfer available");
     }
 }
 
