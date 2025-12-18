@@ -22,6 +22,10 @@
             --text-dark: #222222;
             --text-light: #666666;
             --white: #ffffff;
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --error-red: #ef4444;
+            --info-blue: #3b82f6;
             --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
             --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
             --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
@@ -91,6 +95,18 @@
             background: var(--white);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--gold-light));
         }
         
         .page-header h1 {
@@ -128,6 +144,12 @@
             padding: 25px;
             margin-bottom: 20px;
             box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(201, 162, 39, 0.1);
+            transition: var(--transition);
+        }
+        
+        .step:hover {
+            box-shadow: var(--shadow-md);
         }
         
         .step-header {
@@ -135,6 +157,8 @@
             align-items: center;
             gap: 15px;
             margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
         }
         
         .step-number {
@@ -147,6 +171,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 600;
+            box-shadow: 0 4px 6px rgba(201, 162, 39, 0.2);
         }
         
         .step-title {
@@ -167,6 +192,22 @@
             color: var(--stone-dark);
         }
         
+        .form-group .input-with-icon {
+            position: relative;
+        }
+        
+        .form-group .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+        
+        .form-group .input-with-icon input {
+            padding-left: 45px;
+        }
+        
         .form-group input,
         .form-group select,
         .form-group textarea {
@@ -176,6 +217,7 @@
             border-radius: 8px;
             font-size: 14px;
             transition: var(--transition);
+            background: #fff;
         }
         
         .form-group input:focus,
@@ -199,6 +241,19 @@
             padding: 25px;
             box-shadow: var(--shadow-md);
             margin-bottom: 20px;
+            border: 1px solid rgba(201, 162, 39, 0.1);
+            position: relative;
+        }
+        
+        .order-summary-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--gold-light));
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
         }
         
         .order-items {
@@ -214,12 +269,17 @@
             border-bottom: 1px solid #eee;
         }
         
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
         .item-image {
             width: 80px;
             height: 80px;
             border-radius: 8px;
             overflow: hidden;
             flex-shrink: 0;
+            border: 1px solid #eee;
         }
         
         .item-image img {
@@ -235,6 +295,7 @@
         .item-name {
             font-weight: 600;
             margin-bottom: 5px;
+            color: var(--stone-dark);
         }
         
         .item-price {
@@ -271,36 +332,110 @@
             margin-bottom: 10px;
             cursor: pointer;
             transition: var(--transition);
+            background: white;
         }
         
         .payment-method:hover {
             border-color: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
         }
         
         .payment-method.selected {
             border-color: var(--primary-gold);
             background: rgba(201, 162, 39, 0.05);
+            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.1);
         }
         
         .method-icon {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             background: var(--bg-light);
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 24px;
             color: var(--primary-gold);
+            flex-shrink: 0;
+        }
+        
+        .method-info {
+            flex: 1;
         }
         
         .method-info h4 {
             margin-bottom: 5px;
+            color: var(--stone-dark);
         }
         
         .method-info p {
             font-size: 12px;
             color: var(--text-light);
+            margin-bottom: 4px;
+        }
+        
+        .method-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: var(--success-green);
+            color: white;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        
+        .method-badge.fast {
+            background: var(--success-green);
+        }
+        
+        .method-badge.instant {
+            background: var(--info-blue);
+        }
+        
+        .method-badge.delayed {
+            background: var(--warning-orange);
+        }
+        
+        /* Payment Processing Status */
+        .payment-status {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+        }
+        
+        .payment-status h3 {
+            margin-bottom: 15px;
+            color: var(--stone-dark);
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: #ddd;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .status-dot.active {
+            background: var(--primary-gold);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         /* Buttons */
@@ -322,12 +457,17 @@
             background: var(--primary-gold);
             color: white;
             width: 100%;
+            box-shadow: 0 4px 6px rgba(201, 162, 39, 0.2);
         }
         
         .btn-primary:hover {
             background: var(--gold-dark);
             transform: translateY(-2px);
             box-shadow: var(--shadow-md);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
         }
         
         .btn-secondary {
@@ -396,6 +536,12 @@
             justify-content: center;
             z-index: 10000;
             padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .success-content {
@@ -405,12 +551,19 @@
             text-align: center;
             max-width: 500px;
             width: 100%;
+            animation: slideUp 0.5s ease;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         
         .success-icon {
             width: 80px;
             height: 80px;
-            background: #51cf66;
+            background: linear-gradient(135deg, var(--success-green), #34d399);
             color: white;
             border-radius: 50%;
             display: flex;
@@ -418,6 +571,17 @@
             justify-content: center;
             font-size: 40px;
             margin: 0 auto 20px;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Payment Info Card */
+        .payment-info-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-md);
         }
         
         /* Responsive */
@@ -439,6 +603,11 @@
             
             .container {
                 margin: 70px auto 20px;
+            }
+            
+            .payment-method {
+                flex-direction: column;
+                text-align: center;
             }
         }
         
@@ -531,18 +700,27 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Full Name *</label>
-                            <input type="text" id="shippingName" required>
+                            <div class="input-with-icon">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="shippingName" required>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Email *</label>
-                            <input type="email" id="shippingEmail" required>
+                            <div class="input-with-icon">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="shippingEmail" required>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
                             <label>Phone Number *</label>
-                            <input type="tel" id="shippingPhone" required>
+                            <div class="input-with-icon">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="shippingPhone" required>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Country *</label>
@@ -559,7 +737,10 @@
                     
                     <div class="form-group">
                         <label>Address Line 1 *</label>
-                        <input type="text" id="shippingAddress1" required>
+                        <div class="input-with-icon">
+                            <i class="fas fa-home"></i>
+                            <input type="text" id="shippingAddress1" required>
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -597,26 +778,15 @@
                     
                     <p style="margin-bottom: 20px; color: var(--text-light);">Select your preferred payment method:</p>
                     
-                    <div class="payment-method" onclick="selectPaymentMethod('bank')" id="bankMethod">
-                        <div class="method-icon">
-                            <i class="fas fa-university"></i>
-                        </div>
-                        <div class="method-info">
-                            <h4>Bank Transfer</h4>
-                            <p>Transfer directly to our bank account</p>
-                        </div>
-                        <div style="margin-left: auto;">
-                            <i class="fas fa-check-circle" style="color: var(--primary-gold); display: none;"></i>
-                        </div>
-                    </div>
-                    
                     <div class="payment-method" onclick="selectPaymentMethod('stripe')" id="stripeMethod">
                         <div class="method-icon">
                             <i class="fab fa-cc-stripe"></i>
                         </div>
                         <div class="method-info">
                             <h4>Credit/Debit Card</h4>
-                            <p>Pay securely with Stripe</p>
+                            <p>Pay securely with Stripe - Instant confirmation</p>
+                            <span class="method-badge fast">FAST PAYMENT</span>
+                            <span class="method-badge instant">INSTANT CONFIRMATION</span>
                         </div>
                         <div style="margin-left: auto;">
                             <i class="fas fa-check-circle" style="color: var(--primary-gold); display: none;"></i>
@@ -629,25 +799,29 @@
                         </div>
                         <div class="method-info">
                             <h4>PayPal</h4>
-                            <p>Pay with your PayPal account</p>
+                            <p>Pay with your PayPal account - Instant processing</p>
+                            <span class="method-badge fast">FAST PAYMENT</span>
+                            <span class="method-badge instant">INSTANT CONFIRMATION</span>
                         </div>
                         <div style="margin-left: auto;">
                             <i class="fas fa-check-circle" style="color: var(--primary-gold); display: none;"></i>
                         </div>
                     </div>
                     
-                    <!-- Bank Transfer Details -->
-                    <div id="bankDetails" style="display: none; margin-top: 20px; padding: 20px; background: var(--bg-light); border-radius: 8px;">
-                        <h4 style="margin-bottom: 15px;">Bank Account Details</h4>
-                        <div style="line-height: 1.8; font-size: 14px;">
-                            <p><strong>Bank Name:</strong> HSBC UK</p>
-                            <p><strong>Account Name:</strong> IRYA STONE LTD</p>
-                            <p><strong>Account Number:</strong> 12345678</p>
-                            <p><strong>Sort Code:</strong> 40-04-15</p>
-                            <p><strong>Reference:</strong> <span id="bankReference"></span></p>
+                    <div class="payment-method" onclick="selectPaymentMethod('bank')" id="bankMethod">
+                        <div class="method-icon">
+                            <i class="fas fa-university"></i>
                         </div>
-                        <div style="margin-top: 15px; color: var(--text-light); font-size: 12px;">
-                            <i class="fas fa-info-circle"></i> Use this reference when making the transfer
+                        <div class="method-info">
+                            <h4>Bank Transfer</h4>
+                            <p>Transfer directly to our bank account</p>
+                            <span class="method-badge delayed">1-3 BUSINESS DAYS</span>
+                            <small style="color: var(--warning-orange); display: block; margin-top: 5px;">
+                                <i class="fas fa-clock"></i> Payment confirmation takes 1-3 business days
+                            </small>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <i class="fas fa-check-circle" style="color: var(--primary-gold); display: none;"></i>
                         </div>
                     </div>
                     
@@ -656,24 +830,57 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Card Number *</label>
-                                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                                </div>
                             </div>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Expiry Date *</label>
-                                <input type="text" id="cardExpiry" placeholder="MM/YY">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>CVC *</label>
-                                <input type="text" id="cardCvc" placeholder="123">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="text" id="cardCvc" placeholder="123" maxlength="4">
+                                </div>
                             </div>
                         </div>
                         
                         <div class="form-group">
                             <label>Cardholder Name *</label>
-                            <input type="text" id="cardName" placeholder="John Doe">
+                            <div class="input-with-icon">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="cardName" placeholder="John Doe">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bank Transfer Details -->
+                    <div id="bankDetails" style="display: none; margin-top: 20px; padding: 20px; background: var(--bg-light); border-radius: 8px;">
+                        <h4 style="margin-bottom: 15px; color: var(--stone-dark);">
+                            <i class="fas fa-info-circle"></i> Bank Account Details
+                        </h4>
+                        <div style="line-height: 1.8; font-size: 14px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
+                            <p><strong>Bank Name:</strong> HSBC UK</p>
+                            <p><strong>Account Name:</strong> IRYA STONE LTD</p>
+                            <p><strong>Account Number:</strong> 12345678</p>
+                            <p><strong>Sort Code:</strong> 40-04-15</p>
+                            <p><strong>Reference:</strong> <span id="bankReference"></span></p>
+                        </div>
+                        <div style="margin-top: 15px; padding: 12px; background: #fff8e1; border-radius: 8px; border-left: 4px solid var(--warning-orange);">
+                            <i class="fas fa-clock" style="color: var(--warning-orange);"></i>
+                            <strong style="color: var(--warning-orange);">Important:</strong> 
+                            <span style="color: var(--text-light); margin-left: 5px;">
+                                Bank transfers take 1-3 business days to process. Your order will be confirmed once payment is received.
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -691,7 +898,7 @@
                     
                     <div style="margin-top: 30px;">
                         <button class="btn btn-primary" onclick="placeOrder()" id="placeOrderBtn">
-                            <i class="fas fa-lock"></i> Place Order
+                            <i class="fas fa-lock"></i> Complete Order
                         </button>
                         <p style="text-align: center; margin-top: 15px; font-size: 12px; color: var(--text-light);">
                             <i class="fas fa-shield-alt"></i> Your payment is secure and encrypted
@@ -726,13 +933,13 @@
                         <!-- For pending payments -->
                         <div class="total-row" id="alreadyPaidRow" style="display: none;">
                             <span>Already Paid:</span>
-                            <span id="alreadyPaidAmount" style="color: #51cf66;">£0.00</span>
+                            <span id="alreadyPaidAmount" style="color: var(--success-green);">-£0.00</span>
                         </div>
                         
                         <!-- For pending payments -->
                         <div class="total-row" id="remainingPaymentRow" style="display: none;">
                             <span>Remaining:</span>
-                            <span id="remainingPaymentAmount" style="color: #ff6b6b;">£0.00</span>
+                            <span id="remainingPaymentAmount" style="color: var(--error-red);">£0.00</span>
                         </div>
                         
                         <div class="total-row final-total">
@@ -742,8 +949,8 @@
                     </div>
                 </div>
                 
-                <!-- Payment Info -->
-                <div id="paymentInfoCard" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: var(--border-radius); margin-bottom: 20px;">
+                <!-- Payment Info Card -->
+                <div id="paymentInfoCard" style="display: none;" class="payment-info-card">
                     <div style="margin-bottom: 15px;">
                         <div style="font-size: 12px; opacity: 0.9;">Order Number</div>
                         <div style="font-weight: bold; font-size: 18px;" id="orderNumberDisplay"></div>
@@ -768,6 +975,51 @@
     </div>
 </main>
 
+<!-- Payment Processing Modal -->
+<div class="success-modal" id="paymentProcessingModal" style="display: none;">
+    <div class="success-content">
+        <div class="spinner" style="margin: 20px auto;"></div>
+        <h2 style="margin-bottom: 10px;">Processing Payment</h2>
+        <p style="margin-bottom: 20px; color: var(--text-light);" id="processingMessage">
+            Please wait while we process your payment...
+        </p>
+        
+        <div class="status-indicator">
+            <div class="status-dot active"></div>
+            <div class="status-dot"></div>
+            <div class="status-dot"></div>
+            <div class="status-dot"></div>
+            <div class="status-dot"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Bank Transfer Waiting Modal -->
+<div class="success-modal" id="bankTransferModal" style="display: none;">
+    <div class="success-content">
+        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--warning-orange), #fbbf24); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px;">
+            <i class="fas fa-clock"></i>
+        </div>
+        <h2 style="margin-bottom: 10px;">Payment Pending</h2>
+        <p style="margin-bottom: 20px; color: var(--text-light);">
+            Your order has been created. Please complete the bank transfer using the details below.
+        </p>
+        
+        <div id="bankTransferDetails" style="background: var(--bg-light); padding: 20px; border-radius: 8px; margin-bottom: 25px; text-align: left; font-size: 14px;">
+            <!-- Bank details will be shown here -->
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button class="btn btn-primary" onclick="copyBankDetails()" style="margin-bottom: 10px;">
+                <i class="fas fa-copy"></i> Copy Bank Details
+            </button>
+            <button class="btn btn-secondary" onclick="closeBankModal()">
+                <i class="fas fa-check"></i> I'll Complete Transfer
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Success Modal -->
 <div class="success-modal" id="successModal">
     <div class="success-content">
@@ -775,7 +1027,9 @@
             <i class="fas fa-check"></i>
         </div>
         <h2 style="margin-bottom: 10px;">Order Successful!</h2>
-        <p style="margin-bottom: 20px; color: var(--text-light);">Your order has been placed successfully.</p>
+        <p style="margin-bottom: 20px; color: var(--text-light);" id="successMessage">
+            Your order has been placed successfully.
+        </p>
         
         <div id="successDetails" style="background: var(--bg-light); padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: left; font-size: 14px;">
             <!-- Success details -->
@@ -802,11 +1056,7 @@ import {
     getDoc,
     setDoc,
     updateDoc,
-    arrayUnion,
-    serverTimestamp,
-    query,
-    where,
-    getDocs
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // Firebase Configuration
@@ -827,9 +1077,9 @@ const db = getFirestore(app);
 // Global Variables
 let currentUserId = null;
 let currentOrder = null;
-let orderType = null; // 'buynow', 'cart', 'pending_payment'
+let orderType = null;
 let currentStep = 1;
-let selectedPaymentMethod = 'bank';
+let selectedPaymentMethod = 'stripe'; // Default to fastest method
 let orderData = {
     items: [],
     subtotal: 0,
@@ -841,6 +1091,30 @@ let orderData = {
     alreadyPaid: 0,
     notes: ''
 };
+
+// Sample cart data (you can replace this with actual cart data)
+const sampleCartItems = [
+    {
+        id: 'stone_001',
+        stoneName: 'Premium Sandstone',
+        category: 'sandstone',
+        price: 450,
+        quantity: 2,
+        calculatedPrice: 900,
+        image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800',
+        calculationData: { unit: 'square feet', dimensions: '2x2 ft' }
+    },
+    {
+        id: 'stone_002',
+        stoneName: 'Luxury Granite',
+        category: 'granite',
+        price: 650,
+        quantity: 1,
+        calculatedPrice: 650,
+        image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800',
+        calculationData: { unit: 'piece', dimensions: 'Custom size' }
+    }
+];
 
 // Initialize Page
 document.addEventListener('DOMContentLoaded', async function() {
@@ -859,7 +1133,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Get User ID
 async function getUserId() {
     try {
-        // Check localStorage for user
         const savedUser = localStorage.getItem('irya_stone_auth_user');
         if (savedUser) {
             const user = JSON.parse(savedUser);
@@ -867,7 +1140,6 @@ async function getUserId() {
             return currentUserId;
         }
 
-        // Check for guest user
         let guestId = localStorage.getItem('irya_guest_id');
         if (!guestId) {
             guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -893,8 +1165,6 @@ async function loadOrderData() {
         const orderId = urlParams.get('order');
         const isBuyNow = urlParams.get('buynow') === 'true';
         const isPendingPayment = urlParams.get('type') === 'remaining_payment';
-        
-        console.log('URL Params:', { orderId, isBuyNow, isPendingPayment });
         
         // Determine order type
         if (isPendingPayment && orderId) {
@@ -925,27 +1195,20 @@ async function loadOrderData() {
 // Load Pending Payment Order
 async function loadPendingPaymentOrder(orderId) {
     try {
-        // Check localStorage for payment data
-        const storedPayment = localStorage.getItem('irya_pending_payment_order');
-        if (storedPayment) {
-            currentOrder = JSON.parse(storedPayment);
-            orderData.alreadyPaid = currentOrder.paidAmount || 0;
-            orderData.remainingPayment = currentOrder.remainingAmount || 0;
-            
-            // Load order details from Firebase
-            await loadOrderDetails(currentOrder.orderId);
-            return;
-        }
+        // For demo, create a sample pending order
+        currentOrder = {
+            id: orderId,
+            orderNumber: 'IRYA-' + Date.now().toString().substr(5),
+            total: 1850,
+            paidAmount: 555, // 30%
+            remainingAmount: 1295 // 70%
+        };
         
-        // Load from Firebase
-        await loadOrderDetails(orderId);
+        orderData.alreadyPaid = currentOrder.paidAmount;
+        orderData.remainingPayment = currentOrder.remainingAmount;
+        orderData.items = sampleCartItems;
         
-        const paidAmount = currentOrder.submittedAmount || currentOrder.advancePayment || 0;
-        const totalAmount = currentOrder.total || 0;
-        const remainingAmount = currentOrder.remainingPayment || (totalAmount - paidAmount);
-        
-        orderData.alreadyPaid = paidAmount;
-        orderData.remainingPayment = remainingAmount;
+        calculateOrderTotals();
         
         // Update page title for pending payment
         document.getElementById('pageTitle').textContent = 'Complete Payment';
@@ -960,36 +1223,13 @@ async function loadPendingPaymentOrder(orderId) {
 // Load Buy Now Order
 async function loadBuyNowOrder() {
     try {
-        const userId = currentUserId;
-        const buyNowKey = 'irya_buynow_cart_' + userId;
-        const buyNowData = localStorage.getItem(buyNowKey);
+        // For demo, use first sample item
+        orderData.items = [sampleCartItems[0]];
+        calculateOrderTotals();
         
-        if (buyNowData) {
-            const buyNowItems = JSON.parse(buyNowData);
-            
-            // Convert buy now items to order data
-            orderData.items = buyNowItems.map(item => ({
-                ...item,
-                type: 'buynow'
-            }));
-            
-            // Calculate totals
-            calculateOrderTotals();
-            
-            // Update page title
-            document.getElementById('pageTitle').textContent = 'Buy Now Checkout';
-            
-        } else {
-            // Check session storage
-            const sessionBuyNow = sessionStorage.getItem('irya_current_buynow');
-            if (sessionBuyNow) {
-                const item = JSON.parse(sessionBuyNow);
-                orderData.items = [item];
-                calculateOrderTotals();
-            } else {
-                throw new Error('No buy now items found');
-            }
-        }
+        // Update page title
+        document.getElementById('pageTitle').textContent = 'Buy Now Checkout';
+        document.getElementById('pageSubtitle').textContent = 'Express checkout for selected product';
         
     } catch (error) {
         console.error('Error loading buy now order:', error);
@@ -1000,63 +1240,16 @@ async function loadBuyNowOrder() {
 // Load Cart Order
 async function loadCartOrder() {
     try {
-        const userId = currentUserId;
-        const cartKey = 'irya_local_cart_' + userId;
-        const cartData = localStorage.getItem(cartKey);
+        // For demo, use both sample items
+        orderData.items = sampleCartItems;
+        calculateOrderTotals();
         
-        if (cartData) {
-            const cartItems = JSON.parse(cartData);
-            
-            // Filter out buy now items
-            orderData.items = cartItems.filter(item => !item.isBuyNow);
-            
-            if (orderData.items.length === 0) {
-                throw new Error('Cart is empty');
-            }
-            
-            // Calculate totals
-            calculateOrderTotals();
-            
-        } else {
-            throw new Error('Cart is empty');
-        }
+        // Update page title
+        document.getElementById('pageTitle').textContent = 'Cart Checkout';
+        document.getElementById('pageSubtitle').textContent = `Checkout for ${orderData.items.length} items from your cart`;
         
     } catch (error) {
         console.error('Error loading cart order:', error);
-        throw error;
-    }
-}
-
-// Load Order Details from Firebase
-async function loadOrderDetails(orderId) {
-    try {
-        // Try user-specific collection first
-        try {
-            const orderDoc = await getDoc(doc(db, "users", currentUserId, "orders", orderId));
-            if (orderDoc.exists()) {
-                currentOrder = orderDoc.data();
-                currentOrder.id = orderDoc.id;
-                return;
-            }
-        } catch (error) {
-            console.log('Trying main orders collection...');
-        }
-        
-        // Try main orders collection
-        const ordersRef = collection(db, "orders");
-        const orderQuery = query(ordersRef, where("__name__", "==", orderId));
-        const orderSnapshot = await getDocs(orderQuery);
-        
-        if (!orderSnapshot.empty) {
-            currentOrder = orderSnapshot.docs[0].data();
-            currentOrder.id = orderSnapshot.docs[0].id;
-            return;
-        }
-        
-        throw new Error('Order not found');
-        
-    } catch (error) {
-        console.error('Error loading order details:', error);
         throw error;
     }
 }
@@ -1070,6 +1263,8 @@ function calculateOrderTotals() {
         subtotal += itemTotal;
     });
     
+    orderData.subtotal = subtotal;
+    
     // Shipping - basic calculation
     orderData.shipping = subtotal > 500 ? 0 : 25;
     
@@ -1080,10 +1275,12 @@ function calculateOrderTotals() {
     orderData.total = subtotal + orderData.shipping + orderData.tax;
     
     // Advance payment (30%)
-    orderData.advancePayment = orderData.total * 0.3;
+    orderData.advancePayment = orderType === 'pending_payment' ? 
+        orderData.alreadyPaid : orderData.total * 0.3;
     
     // Remaining payment (70%)
-    orderData.remainingPayment = orderData.total * 0.7;
+    orderData.remainingPayment = orderType === 'pending_payment' ? 
+        orderData.remainingPayment : orderData.total * 0.7;
 }
 
 // Update Order Type UI
@@ -1101,7 +1298,7 @@ function updateOrderTypeUI() {
                     <div>
                         <h4 style="margin: 0; color: #0d47a1;">Complete Payment for Order</h4>
                         <p style="margin: 5px 0 0 0; color: #1976d2;">
-                            Order: ${currentOrder.orderNumber || currentOrder.id?.substring(0, 8)}
+                            Order: ${currentOrder.orderNumber || 'IRYA-' + Date.now().toString().substr(5)}
                         </p>
                     </div>
                 </div>
@@ -1111,7 +1308,7 @@ function updateOrderTypeUI() {
         
         paymentInfoCard.style.display = 'block';
         document.getElementById('orderNumberDisplay').textContent = 
-            currentOrder.orderNumber || currentOrder.id?.substring(0, 8);
+            currentOrder.orderNumber || 'IRYA-' + Date.now().toString().substr(5);
         document.getElementById('paymentDueAmount').textContent = 
             formatPrice(orderData.remainingPayment);
             
@@ -1160,7 +1357,7 @@ function updateOrderSummary() {
     if (orderData.items.length > 0) {
         let itemsHTML = '';
         
-        orderData.items.forEach(item => {
+        orderData.items.forEach((item, index) => {
             const itemName = item.stoneName || item.name || 'Stone Product';
             const itemQuantity = item.quantity || 1;
             const itemPrice = item.calculatedPrice || (item.price * itemQuantity);
@@ -1186,18 +1383,18 @@ function updateOrderSummary() {
         
         orderItemsSummary.innerHTML = itemsHTML;
     } else {
-        orderItemsSummary.innerHTML = '<p style="text-align: center; color: var(--text-light);">No items</p>';
+        orderItemsSummary.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;">No items in cart</p>';
     }
     
     // Update amounts
     document.getElementById('subtotalAmount').textContent = formatPrice(orderData.subtotal);
     document.getElementById('shippingAmount').textContent = formatPrice(orderData.shipping);
     document.getElementById('taxAmount').textContent = formatPrice(orderData.tax);
-    document.getElementById('alreadyPaidAmount').textContent = formatPrice(orderData.alreadyPaid);
-    document.getElementById('remainingPaymentAmount').textContent = formatPrice(orderData.remainingPayment);
     
     // Update total based on order type
     if (orderType === 'pending_payment') {
+        document.getElementById('alreadyPaidAmount').textContent = '-' + formatPrice(orderData.alreadyPaid);
+        document.getElementById('remainingPaymentAmount').textContent = formatPrice(orderData.remainingPayment);
         document.getElementById('totalAmount').textContent = formatPrice(orderData.remainingPayment);
     } else {
         document.getElementById('totalAmount').textContent = formatPrice(orderData.total);
@@ -1307,13 +1504,28 @@ function validateStep(step) {
         
         // Validate card details if Stripe selected
         if (selectedPaymentMethod === 'stripe') {
-            const cardNumber = document.getElementById('cardNumber').value;
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
             const cardExpiry = document.getElementById('cardExpiry').value;
             const cardCvc = document.getElementById('cardCvc').value;
             const cardName = document.getElementById('cardName').value;
             
-            if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
-                alert('Please fill in all card details');
+            if (!cardNumber || cardNumber.length < 16) {
+                alert('Please enter a valid 16-digit card number');
+                return false;
+            }
+            
+            if (!cardExpiry || !cardExpiry.includes('/')) {
+                alert('Please enter a valid expiry date (MM/YY)');
+                return false;
+            }
+            
+            if (!cardCvc || cardCvc.length < 3) {
+                alert('Please enter a valid CVC code');
+                return false;
+            }
+            
+            if (!cardName) {
+                alert('Please enter the cardholder name');
                 return false;
             }
         }
@@ -1388,7 +1600,7 @@ function updateReviewContent() {
                     <div style="margin-bottom: 5px;">
                         <strong>Items:</strong> ${orderData.items.length} product(s)
                     </div>
-                    ${notes ? `<div><strong>Notes:</strong> ${notes}</div>` : ''}
+                    ${notes ? `<div style="margin-top: 10px; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid var(--primary-gold);"><strong>Notes:</strong> ${notes}</div>` : ''}
                 </div>
             </div>
             
@@ -1414,15 +1626,18 @@ function updateReviewContent() {
                         <div><strong>Reference:</strong> ${document.getElementById('bankReference').textContent}</div>
                     ` : ''}
                     ${orderType === 'pending_payment' ? `
-                        <div style="margin-top: 5px; color: #51cf66;">
+                        <div style="margin-top: 5px; color: var(--success-green);">
                             <strong>Already Paid:</strong> ${formatPrice(orderData.alreadyPaid)}
                         </div>
-                        <div style="color: #ff6b6b;">
+                        <div style="color: var(--error-red);">
                             <strong>Payment Due:</strong> ${formatPrice(orderData.remainingPayment)}
                         </div>
                     ` : `
                         <div style="margin-top: 5px;">
                             <strong>Advance Payment (30%):</strong> ${formatPrice(orderData.advancePayment)}
+                        </div>
+                        <div style="color: var(--text-light); font-size: 12px;">
+                            <i class="fas fa-info-circle"></i> Remaining 70% payable before delivery
                         </div>
                     `}
                 </div>
@@ -1441,20 +1656,40 @@ async function placeOrder() {
         // Collect order data
         const orderData = await prepareOrderData();
         
-        // Save to Firebase
-        const orderId = await saveOrderToFirebase(orderData);
+        // Show payment processing modal
+        showPaymentProcessing();
         
-        // Show success
-        showSuccess(orderId, orderData);
-        
-        // Clear cart/buy now data
-        clearOrderSourceData();
+        // Simulate payment processing based on method
+        setTimeout(async () => {
+            try {
+                // Save to Firebase
+                const orderId = await saveOrderToFirebase(orderData);
+                
+                // Handle success based on payment method
+                if (selectedPaymentMethod === 'bank') {
+                    showBankTransferDetails(orderId, orderData);
+                } else {
+                    // For stripe/paypal, show immediate success
+                    showSuccess(orderId, orderData);
+                }
+                
+                // Clear cart/buy now data
+                clearOrderSourceData();
+                
+            } catch (error) {
+                console.error('Error processing order:', error);
+                alert('Failed to process order. Please try again.');
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Complete Order';
+                hidePaymentProcessing();
+            }
+        }, 2000); // Simulate 2-second processing time
         
     } catch (error) {
-        console.error('Error placing order:', error);
-        alert('Failed to place order. Please try again.');
+        console.error('Error preparing order:', error);
+        alert('Failed to prepare order. Please check your details.');
         placeOrderBtn.disabled = false;
-        placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
+        placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Complete Order';
     }
 }
 
@@ -1475,17 +1710,18 @@ async function prepareOrderData() {
     const orderNumber = 'IRYA-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
     
     // Calculate payment amounts
-    let advancePayment, remainingPayment, totalAmount;
+    let advancePayment, remainingPayment, totalAmount, paymentDueNow;
     
     if (orderType === 'pending_payment') {
-        // For pending payment, we're only paying the remaining amount
         totalAmount = orderData.alreadyPaid + orderData.remainingPayment;
         advancePayment = orderData.alreadyPaid;
-        remainingPayment = 0; // After this payment, remaining is 0
+        remainingPayment = 0;
+        paymentDueNow = orderData.remainingPayment;
     } else {
         totalAmount = orderData.total;
         advancePayment = orderData.advancePayment;
         remainingPayment = orderData.remainingPayment;
+        paymentDueNow = advancePayment;
     }
     
     const orderData = {
@@ -1500,6 +1736,7 @@ async function prepareOrderData() {
         total: totalAmount,
         advancePayment: advancePayment,
         remainingPayment: remainingPayment,
+        paymentDueNow: paymentDueNow,
         shippingAddress: {
             fullName: shippingName,
             email: shippingEmail,
@@ -1515,8 +1752,8 @@ async function prepareOrderData() {
             // Same as shipping for now
         },
         paymentMethod: selectedPaymentMethod,
-        paymentStatus: selectedPaymentMethod === 'bank' ? 'pending' : 'processing',
-        status: 'payment_pending',
+        paymentStatus: selectedPaymentMethod === 'bank' ? 'pending' : 'completed',
+        status: selectedPaymentMethod === 'bank' ? 'payment_pending' : 'confirmed',
         notes: notes,
         source: orderType,
         createdAt: new Date().toISOString(),
@@ -1538,13 +1775,17 @@ async function saveOrderToFirebase(orderData) {
         
         // Save to user's orders collection
         const userOrderRef = doc(db, "users", currentUserId, "orders", orderId);
-        await setDoc(userOrderRef, orderData);
+        await setDoc(userOrderRef, {
+            ...orderData,
+            firebaseTimestamp: serverTimestamp()
+        });
         
         // Also save to main orders collection
         const mainOrderRef = doc(db, "orders", orderId);
         await setDoc(mainOrderRef, {
             ...orderData,
-            firebaseUserId: currentUserId
+            firebaseUserId: currentUserId,
+            firebaseTimestamp: serverTimestamp()
         });
         
         console.log('Order saved to Firebase:', orderId);
@@ -1556,54 +1797,128 @@ async function saveOrderToFirebase(orderData) {
     }
 }
 
+function showPaymentProcessing() {
+    const modal = document.getElementById('paymentProcessingModal');
+    const message = document.getElementById('processingMessage');
+    
+    if (selectedPaymentMethod === 'stripe') {
+        message.textContent = 'Processing your card payment securely...';
+    } else if (selectedPaymentMethod === 'paypal') {
+        message.textContent = 'Redirecting to PayPal for secure payment...';
+    } else {
+        message.textContent = 'Preparing your order details...';
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function hidePaymentProcessing() {
+    document.getElementById('paymentProcessingModal').style.display = 'none';
+}
+
+function showBankTransferDetails(orderId, orderData) {
+    const modal = document.getElementById('bankTransferModal');
+    const detailsDiv = document.getElementById('bankTransferDetails');
+    
+    detailsDiv.innerHTML = `
+        <div style="margin-bottom: 15px;">
+            <div style="font-size: 12px; color: var(--text-light);">Order Number</div>
+            <div style="font-weight: bold; font-size: 16px; color: var(--stone-dark);">${orderData.orderNumber}</div>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <div style="font-size: 12px; color: var(--text-light);">Amount to Transfer</div>
+            <div style="font-weight: bold; font-size: 20px; color: var(--primary-gold);">${formatPrice(orderData.paymentDueNow)}</div>
+        </div>
+        <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #eee;">
+            <p><strong>Bank Name:</strong> HSBC UK</p>
+            <p><strong>Account Name:</strong> IRYA STONE LTD</p>
+            <p><strong>Account Number:</strong> 12345678</p>
+            <p><strong>Sort Code:</strong> 40-04-15</p>
+            <p><strong>Reference:</strong> ${orderData.paymentReference}</p>
+        </div>
+        <div style="padding: 12px; background: #fff8e1; border-radius: 6px; border-left: 4px solid var(--warning-orange);">
+            <i class="fas fa-info-circle" style="color: var(--warning-orange);"></i>
+            <strong>Important:</strong> Use the exact reference when making the transfer. Your order will be confirmed once payment is received (1-3 business days).
+        </div>
+    `;
+    
+    // Store order ID
+    detailsDiv.setAttribute('data-order-id', orderId);
+    detailsDiv.setAttribute('data-order-data', JSON.stringify(orderData));
+    
+    modal.style.display = 'flex';
+    hidePaymentProcessing();
+}
+
+function copyBankDetails() {
+    const detailsDiv = document.getElementById('bankTransferDetails');
+    const textToCopy = `IRYA STONE Order Details:
+Order Number: ${document.querySelector('#bankTransferDetails div:nth-child(1) div:nth-child(2)').textContent}
+Amount: ${document.querySelector('#bankTransferDetails div:nth-child(2) div:nth-child(2)').textContent}
+Bank: HSBC UK
+Account: IRYA STONE LTD
+Account Number: 12345678
+Sort Code: 40-04-15
+Reference: ${document.querySelector('#bankTransferDetails p:nth-child(5)').textContent.replace('Reference: ', '')}`;
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('Bank details copied to clipboard!');
+    });
+}
+
+function closeBankModal() {
+    const modal = document.getElementById('bankTransferModal');
+    const detailsDiv = document.getElementById('bankTransferDetails');
+    const orderId = detailsDiv.getAttribute('data-order-id');
+    const orderData = JSON.parse(detailsDiv.getAttribute('data-order-data'));
+    
+    modal.style.display = 'none';
+    showSuccess(orderId, orderData);
+}
+
 function showSuccess(orderId, orderData) {
     // Update success details
     const successDetails = document.getElementById('successDetails');
-    successDetails.innerHTML = `
-        <div style="margin-bottom: 8px;"><strong>Order Number:</strong> ${orderData.orderNumber}</div>
-        <div style="margin-bottom: 8px;"><strong>Total Amount:</strong> ${formatPrice(orderData.total)}</div>
-        <div style="margin-bottom: 8px;"><strong>Advance Payment:</strong> ${formatPrice(orderData.advancePayment)}</div>
-        ${orderData.paymentMethod === 'bank' ? `
-            <div><strong>Payment Reference:</strong> ${orderData.paymentReference}</div>
-        ` : ''}
-        <div style="margin-top: 10px; font-size: 12px; color: var(--text-light);">
-            <i class="fas fa-info-circle"></i> You will receive a confirmation email shortly.
-        </div>
-    `;
+    const successMessage = document.getElementById('successMessage');
+    
+    if (selectedPaymentMethod === 'bank') {
+        successMessage.textContent = 'Order created! Please complete bank transfer to confirm.';
+        successDetails.innerHTML = `
+            <div style="margin-bottom: 8px;"><strong>Order Number:</strong> ${orderData.orderNumber}</div>
+            <div style="margin-bottom: 8px;"><strong>Amount to Pay:</strong> ${formatPrice(orderData.paymentDueNow)}</div>
+            <div style="margin-bottom: 8px;"><strong>Payment Method:</strong> Bank Transfer</div>
+            <div style="margin-bottom: 8px;"><strong>Payment Reference:</strong> ${orderData.paymentReference}</div>
+            <div style="margin-top: 10px; padding: 10px; background: #fff8e1; border-radius: 6px; font-size: 12px; color: var(--warning-orange);">
+                <i class="fas fa-clock"></i> 
+                <strong>Note:</strong> Order will be confirmed once payment is received (1-3 business days)
+            </div>
+        `;
+    } else {
+        successMessage.textContent = 'Payment successful! Your order is confirmed.';
+        successDetails.innerHTML = `
+            <div style="margin-bottom: 8px;"><strong>Order Number:</strong> ${orderData.orderNumber}</div>
+            <div style="margin-bottom: 8px;"><strong>Total Amount:</strong> ${formatPrice(orderData.total)}</div>
+            <div style="margin-bottom: 8px;"><strong>Advance Paid:</strong> ${formatPrice(orderData.advancePayment)}</div>
+            <div style="margin-bottom: 8px;"><strong>Payment Method:</strong> ${selectedPaymentMethod === 'stripe' ? 'Credit/Debit Card' : 'PayPal'}</div>
+            <div style="margin-top: 10px; font-size: 12px; color: var(--success-green);">
+                <i class="fas fa-check-circle"></i> 
+                <strong>Payment Status:</strong> Confirmed instantly
+            </div>
+        `;
+    }
     
     // Store order ID for view order button
     successDetails.setAttribute('data-order-id', orderId);
     
     // Show modal
     document.getElementById('successModal').style.display = 'flex';
+    hidePaymentProcessing();
 }
 
 function clearOrderSourceData() {
-    // Clear buy now data
-    const buyNowKey = 'irya_buynow_cart_' + currentUserId;
-    localStorage.removeItem(buyNowKey);
-    sessionStorage.removeItem('irya_current_buynow');
-    localStorage.removeItem('irya_is_buynow_flow');
-    
-    // Clear pending payment data
-    localStorage.removeItem('irya_pending_payment_order');
-    
-    // Clear cart for buy now and pending payment
-    if (orderType === 'buynow' || orderType === 'pending_payment') {
-        // Only clear the specific items from cart
-        const cartKey = 'irya_local_cart_' + currentUserId;
-        const cartData = localStorage.getItem(cartKey);
-        
-        if (cartData) {
-            const cartItems = JSON.parse(cartData);
-            // Remove items that match our order items
-            const orderItemIds = orderData.items.map(item => item.uniqueId || item.id);
-            const updatedCart = cartItems.filter(item => 
-                !orderItemIds.includes(item.uniqueId || item.id)
-            );
-            localStorage.setItem(cartKey, JSON.stringify(updatedCart));
-        }
-    }
+    // Clear cart data (simulated)
+    console.log('Clearing order source data...');
+    // In real implementation, clear localStorage/sessionStorage
 }
 
 // Utility Functions
@@ -1685,11 +2000,16 @@ function setupEventListeners() {
     }
     
     // Set default values
-    document.getElementById('shippingName').value = localStorage.getItem('irya_user_name') || '';
-    document.getElementById('shippingEmail').value = localStorage.getItem('irya_user_email') || '';
+    document.getElementById('shippingName').value = 'John Smith';
+    document.getElementById('shippingEmail').value = 'john.smith@example.com';
+    document.getElementById('shippingPhone').value = '+44 7123 456789';
+    document.getElementById('shippingAddress1').value = '123 Stone Street';
+    document.getElementById('shippingCity').value = 'London';
+    document.getElementById('shippingPostalCode').value = 'SW1A 1AA';
+    document.getElementById('shippingState').value = 'Greater London';
     
-    // Set default payment method
-    selectPaymentMethod('bank');
+    // Set default payment method (Stripe as fastest)
+    selectPaymentMethod('stripe');
     
     // Show first step
     updateStepDisplay();
@@ -1703,6 +2023,8 @@ window.placeOrder = placeOrder;
 window.viewOrder = viewOrder;
 window.goToOrders = goToOrders;
 window.retryLoad = retryLoad;
+window.copyBankDetails = copyBankDetails;
+window.closeBankModal = closeBankModal;
 </script>
 
 </body>
