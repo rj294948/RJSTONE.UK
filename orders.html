@@ -1317,7 +1317,8 @@ import {
   where,
   limit,
   getDoc,
-  Timestamp
+  Timestamp,
+  addDoc
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // Firebase Configuration
@@ -1834,29 +1835,31 @@ function getAddressHTML(address) {
 // ============================================
 
 function checkNotificationRedirect() {
-  // Check if we were redirected from a notification
-  const notificationRedirect = localStorage.getItem('irya_notification_redirect');
-  if (notificationRedirect) {
+  // Check if we have notification redirect data
+  const notificationData = localStorage.getItem('pending_payment_notification');
+  if (notificationData) {
     try {
-      const redirectData = JSON.parse(notificationRedirect);
-      console.log("📌 Processing notification redirect:", redirectData);
+      const data = JSON.parse(notificationData);
+      console.log("📌 Processing notification redirect:", data);
       
-      // Extract order information
-      const { orderId, orderNumber, notificationType } = redirectData;
+      const { orderId, orderNumber, notificationType } = data;
       
-      if (orderId || orderNumber) {
-        // Scroll to the specific order
+      // Clear the notification data
+      localStorage.removeItem('pending_payment_notification');
+      
+      // Find the order
+      let order = null;
+      if (orderId) {
+        order = orders.find(o => o.id === orderId);
+      }
+      if (!order && orderNumber) {
+        order = orders.find(o => o.orderNumber === orderNumber);
+      }
+      
+      if (order) {
+        // Scroll to the order
         setTimeout(() => {
-          let orderElement;
-          
-          if (orderId) {
-            orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
-          }
-          
-          if (!orderElement && orderNumber) {
-            orderElement = document.querySelector(`[data-order-number="${orderNumber}"]`);
-          }
-          
+          const orderElement = document.querySelector(`[data-order-id="${order.id}"]`);
           if (orderElement) {
             orderElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
             orderElement.style.boxShadow = '0 0 0 3px var(--primary-gold)';
@@ -1864,7 +1867,7 @@ function checkNotificationRedirect() {
               orderElement.style.boxShadow = '';
             }, 3000);
             
-            // If it's a payment notification, highlight the pay button
+            // If it's a payment notification, show payment button
             if (notificationType && notificationType.includes('payment')) {
               const payBtn = orderElement.querySelector('.btn-danger');
               if (payBtn) {
@@ -1872,19 +1875,314 @@ function checkNotificationRedirect() {
                 setTimeout(() => {
                   payBtn.style.animation = '';
                 }, 6000);
+                
+                // Auto-click the pay button after 1 second
+                setTimeout(() => {
+                  payBtn.click();
+                }, 1500);
               }
             }
           }
         }, 1000);
       }
       
-      // Clear the redirect data
-      localStorage.removeItem('irya_notification_redirect');
-      
     } catch (error) {
       console.error("❌ Error processing notification redirect:", error);
-      localStorage.removeItem('irya_notification_redirect');
+      localStorage.removeItem('pending_payment_notification');
     }
+  }
+}
+
+// ============================================
+// PAY REMAINING AMOUNT FUNCTION
+// ============================================
+
+function payRemainingAmount(orderId, orderNumber) {
+  try {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) {
+      showMessage("Order not found");
+      return;
+    }
+    
+    const paidAmount = order.submittedAmount || order.advancePayment || 0;
+    const totalAmount = order.total || 0;
+    const remainingAmount = order.remainingPayment || (totalAmount - paidAmount);
+    
+    if (remainingAmount <= 0) {
+      showMessage("No remaining amount to pay");
+      return;
+    }
+    
+    // Store notification data for redirect
+    const notificationData = {
+      orderId: order.id,
+      orderNumber: order.orderNumber || orderNumber,
+      notificationType: 'payment_remaining',
+      timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('pending_payment_notification', JSON.stringify(notificationData));
+    
+    // Redirect to complete payment page
+    window.location.href = `complete_payment.html?order_id=${order.id}&remaining_amount=${remainingAmount}`;
+    
+  } catch (error) {
+    console.error("❌ Error in pay remaining amount:", error);
+    showMessage("Failed to proceed to payment");
+  }
+}
+
+// ============================================
+// NOTIFICATIONS SYSTEM
+// ============================================
+
+async function loadNotifications() {
+  try {
+    if (!db || !currentUserId) return;
+    
+    const notificationsRef = collection(db, "users", currentUserId, "notifications");
+    const notificationsQuery = query(notificationsRef, orderBy("createdAt", "desc"), limit(20));
+    
+    if (notificationsUnsubscribe) notificationsUnsubscribe();
+    
+    notificationsUnsubscribe = onSnapshot(notificationsQuery,
+      (snapshot) => {
+        notifications = [];
+        const notificationList = document.getElementById("notificationList");
+        notificationList.innerHTML = '';
+        
+        if (snapshot.empty) {
+          notificationList.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-light);">
+              <i class="fas fa-bell-slash" style="font-size: 24px; margin-bottom: 10px;"></i>
+              <p>No notifications yet</p>
+            </div>
+          `;
+          updateNotificationBadge();
+          return;
+        }
+        
+        let unreadCount = 0;
+        
+        snapshot.forEach((doc) => {
+          const note = doc.data();
+          note.id = doc.id;
+          notifications.push(note);
+          
+          if (!note.read) unreadCount++;
+          
+          const noteElement = createNotificationElement(note);
+          notificationList.appendChild(noteElement);
+        });
+        
+        updateNotificationBadge(unreadCount);
+        
+      },
+      (error) => {
+        console.error("❌ Error in notifications listener:", error);
+      }
+    );
+    
+  } catch (error) {
+    console.error("❌ Error loading notifications:", error);
+  }
+}
+
+function createNotificationElement(note) {
+  const div = document.createElement('div');
+  div.className = `notification-item ${note.read ? '' : 'unread'}`;
+  
+  const timeAgo = getTimeAgo(note.createdAt);
+  
+  // Extract order information
+  let orderId = note.orderId;
+  let orderNumber = note.orderNumber;
+  let notificationType = note.type || 'general';
+  
+  // Determine styling
+  let icon = 'fa-bell';
+  let color = '#c9a227';
+  let badgeText = 'Info';
+  let isPaymentNotification = false;
+  
+  if (notificationType === 'payment_remaining' || 
+      note.title?.includes('Payment Pending') ||
+      note.message?.includes('Remaining payment')) {
+    icon = 'fa-exclamation-triangle';
+    color = '#ff6b6b';
+    badgeText = 'Payment';
+    isPaymentNotification = true;
+  } else if (notificationType === 'payment_completed') {
+    icon = 'fa-check-circle';
+    color = '#51cf66';
+    badgeText = 'Payment';
+  } else if (notificationType === 'order_shipped') {
+    icon = 'fa-shipping-fast';
+    color = '#339af0';
+    badgeText = 'Shipping';
+  } else if (notificationType === 'order_delivered') {
+    icon = 'fa-box-check';
+    color = '#40c057';
+    badgeText = 'Delivery';
+  }
+  
+  div.onclick = (event) => {
+    event.stopPropagation();
+    handleNotificationClick(
+      note.id, 
+      orderId, 
+      orderNumber, 
+      notificationType,
+      isPaymentNotification,
+      false,
+      note.message
+    );
+  };
+  
+  div.innerHTML = `
+    <div class="notification-title">
+      <i class="fas ${icon}" style="color: ${color};"></i>
+      ${note.title || 'Notification'}
+      <span style="background: ${color}; color: white; padding: 2px 6px; border-radius: 10px; font-size: 9px; margin-left: 8px;">${badgeText}</span>
+    </div>
+    <div class="notification-message">${note.message || ''}</div>
+    <div class="notification-time">
+      <i class="far fa-clock"></i> ${timeAgo}
+    </div>
+  `;
+  
+  return div;
+}
+
+async function handleNotificationClick(
+  notificationId, 
+  orderId, 
+  orderNumber, 
+  notificationType,
+  isPaymentNotification,
+  isTrackingNotification,
+  message
+) {
+  try {
+    console.log("📌 Notification clicked:", {
+      notificationId,
+      orderId,
+      orderNumber,
+      notificationType,
+      isPaymentNotification,
+      isTrackingNotification
+    });
+    
+    // Mark as read
+    if (db) {
+      const notificationRef = doc(db, "users", currentUserId, "notifications", notificationId);
+      await updateDoc(notificationRef, {
+        read: true,
+        readAt: new Date().toISOString()
+      });
+    }
+    
+    // Close dropdown
+    closeNotifications();
+    
+    // Handle based on type
+    if (isPaymentNotification) {
+      handlePaymentNotificationClick(orderId, orderNumber);
+    } else if (isTrackingNotification) {
+      handleTrackingNotificationClick(orderId, orderNumber);
+    } else {
+      handleGeneralNotificationClick(orderId, orderNumber);
+    }
+    
+  } catch (error) {
+    console.error("❌ Error handling notification:", error);
+    closeNotifications();
+  }
+}
+
+function handlePaymentNotificationClick(orderId, orderNumber) {
+  console.log("💰 Handling payment notification");
+  
+  // Store notification data
+  const notificationData = {
+    orderId: orderId,
+    orderNumber: orderNumber,
+    notificationType: 'payment_remaining',
+    timestamp: new Date().toISOString()
+  };
+  
+  localStorage.setItem('pending_payment_notification', JSON.stringify(notificationData));
+  
+  // Try to find order
+  let order = null;
+  if (orderId) {
+    order = orders.find(o => o.id === orderId);
+  }
+  if (!order && orderNumber) {
+    order = orders.find(o => o.orderNumber === orderNumber);
+  }
+  
+  if (order) {
+    // Calculate remaining amount
+    const paidAmount = order.submittedAmount || order.advancePayment || 0;
+    const totalAmount = order.total || 0;
+    const remainingAmount = order.remainingPayment || (totalAmount - paidAmount);
+    
+    if (remainingAmount > 0) {
+      // Redirect to payment page
+      window.location.href = `complete_payment.html?order_id=${order.id}&remaining_amount=${remainingAmount}`;
+    } else {
+      showMessage("This order is already fully paid.");
+      showOrderDetails(order.id);
+    }
+  } else {
+    // Order not found, redirect to orders page
+    window.location.href = `orders.html?search=${orderNumber || orderId}`;
+  }
+}
+
+function handleTrackingNotificationClick(orderId, orderNumber) {
+  // Similar logic for tracking notifications
+  window.location.href = `orders.html?order_id=${orderId || ''}&search=${orderNumber || ''}`;
+}
+
+function handleGeneralNotificationClick(orderId, orderNumber) {
+  window.location.href = `orders.html?order_id=${orderId || ''}&search=${orderNumber || ''}`;
+}
+
+async function markAllAsRead() {
+  try {
+    if (!db || !currentUserId) return;
+    
+    const unreadNotifications = notifications.filter(n => !n.read);
+    
+    for (const note of unreadNotifications) {
+      const notificationRef = doc(db, "users", currentUserId, "notifications", note.id);
+      await updateDoc(notificationRef, {
+        read: true,
+        readAt: new Date().toISOString()
+      });
+    }
+    
+    showMessage("All notifications marked as read");
+    
+  } catch (error) {
+    console.error("❌ Error marking all as read:", error);
+  }
+}
+
+function updateNotificationBadge(count = null) {
+  const badge = document.getElementById("notificationBadge");
+  if (!badge) return;
+  
+  const unreadCount = count !== null ? count : notifications.filter(n => !n.read).length;
+  
+  if (unreadCount > 0) {
+    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
   }
 }
 
@@ -1981,7 +2279,6 @@ async function showTrackingModal(orderId) {
 
 function createTrackingTimeline(order) {
   const status = order.status || order.orderStatus || 'payment_pending';
-  const statusHistory = order.statusHistory || [];
   
   const timelineSteps = [
     {
@@ -1990,7 +2287,7 @@ function createTrackingTimeline(order) {
       description: 'Your order has been successfully placed',
       icon: 'fa-shopping-cart',
       date: order.createdAt,
-      defaultCompleted: true
+      completed: true
     },
     {
       id: 'payment',
@@ -1998,7 +2295,7 @@ function createTrackingTimeline(order) {
       description: 'Payment verification in progress',
       icon: 'fa-credit-card',
       date: order.paymentConfirmedAt,
-      statusCheck: () => order.paymentStatus === 'fully_paid' || order.paymentStatus === 'advance_paid' || order.submittedAmount > 0
+      completed: order.paymentStatus === 'fully_paid' || order.paymentStatus === 'advance_paid'
     },
     {
       id: 'processing',
@@ -2006,7 +2303,7 @@ function createTrackingTimeline(order) {
       description: 'Your order is being processed',
       icon: 'fa-cogs',
       date: order.processingStartAt,
-      statusCheck: () => ['processing', 'ready_to_ship', 'shipped', 'out_for_delivery', 'delivered'].includes(status)
+      completed: ['processing', 'ready_to_ship', 'shipped', 'out_for_delivery', 'delivered'].includes(status)
     },
     {
       id: 'ready_to_ship',
@@ -2014,7 +2311,7 @@ function createTrackingTimeline(order) {
       description: 'Order is packed and ready for shipping',
       icon: 'fa-box',
       date: order.readyToShipAt,
-      statusCheck: () => ['ready_to_ship', 'shipped', 'out_for_delivery', 'delivered'].includes(status)
+      completed: ['ready_to_ship', 'shipped', 'out_for_delivery', 'delivered'].includes(status)
     },
     {
       id: 'shipped',
@@ -2022,7 +2319,7 @@ function createTrackingTimeline(order) {
       description: order.trackingNumber ? `Shipped via courier - Tracking: ${order.trackingNumber}` : 'Order has been shipped',
       icon: 'fa-shipping-fast',
       date: order.shippedAt,
-      statusCheck: () => ['shipped', 'out_for_delivery', 'delivered'].includes(status)
+      completed: ['shipped', 'out_for_delivery', 'delivered'].includes(status)
     },
     {
       id: 'out_for_delivery',
@@ -2030,7 +2327,7 @@ function createTrackingTimeline(order) {
       description: 'Order is out for delivery',
       icon: 'fa-truck',
       date: order.outForDeliveryAt,
-      statusCheck: () => ['out_for_delivery', 'delivered'].includes(status)
+      completed: ['out_for_delivery', 'delivered'].includes(status)
     },
     {
       id: 'delivered',
@@ -2038,7 +2335,7 @@ function createTrackingTimeline(order) {
       description: 'Order has been delivered successfully',
       icon: 'fa-check-circle',
       date: order.deliveredAt,
-      statusCheck: () => status === 'delivered'
+      completed: status === 'delivered'
     }
   ];
   
@@ -2047,40 +2344,26 @@ function createTrackingTimeline(order) {
   // Find current step
   let currentStepIndex = 0;
   for (let i = 0; i < timelineSteps.length; i++) {
-    const step = timelineSteps[i];
-    if (step.statusCheck ? step.statusCheck() : step.defaultCompleted) {
+    if (timelineSteps[i].completed) {
       currentStepIndex = i;
     } else {
       break;
     }
   }
   
-  // Render timeline steps
+  // Render timeline
   timelineSteps.forEach((step, index) => {
     let stepClass = 'pending';
-    let icon = step.icon;
-    
     if (index < currentStepIndex) {
       stepClass = 'completed';
     } else if (index === currentStepIndex) {
       stepClass = 'active';
     }
     
-    // Check status history for actual dates
-    let actualDate = step.date;
-    if (statusHistory && statusHistory.length > 0) {
-      const historyItem = statusHistory.find(h => 
-        h.status.toLowerCase().replace(/_/g, ' ') === step.title.toLowerCase()
-      );
-      if (historyItem) {
-        actualDate = historyItem.at;
-      }
-    }
-    
     html += `
       <div class="timeline-step ${stepClass}">
         <div class="timeline-icon">
-          <i class="fas ${icon}"></i>
+          <i class="fas ${step.icon}"></i>
         </div>
         <div class="timeline-content">
           <div class="timeline-title">
@@ -2088,9 +2371,9 @@ function createTrackingTimeline(order) {
             ${stepClass === 'active' ? '<span style="color: var(--primary-gold); font-size: 10px; margin-left: 5px;">●</span>' : ''}
           </div>
           <div class="timeline-desc">${step.description}</div>
-          ${actualDate ? `
+          ${step.date ? `
           <div class="timeline-date">
-            <i class="far fa-clock"></i> ${formatDateTime(actualDate)}
+            <i class="far fa-clock"></i> ${formatDateTime(step.date)}
           </div>
           ` : ''}
         </div>
@@ -2102,8 +2385,7 @@ function createTrackingTimeline(order) {
 }
 
 function closeTrackingModal() {
-  const trackingModal = document.getElementById('trackingModal');
-  trackingModal.style.display = 'none';
+  document.getElementById('trackingModal').style.display = 'none';
   document.body.style.overflow = 'auto';
 }
 
@@ -2115,9 +2397,6 @@ function copyTrackingNumber(trackingNumber) {
   
   navigator.clipboard.writeText(trackingNumber).then(() => {
     showMessage("Tracking number copied to clipboard");
-  }).catch(err => {
-    console.error('❌ Failed to copy tracking number:', err);
-    showMessage("Failed to copy tracking number");
   });
 }
 
@@ -2127,64 +2406,11 @@ function trackOnWebsite(trackingNumber) {
     return;
   }
   
-  // You can integrate with actual tracking service
-  showMessage(`Tracking number: ${trackingNumber}\n\nWill redirect to tracking website.`);
-  // window.open(`https://tracking-url.com/${trackingNumber}`, '_blank');
+  showMessage(`Tracking number: ${trackingNumber}`);
 }
 
 // ============================================
-// PAY REMAINING AMOUNT (UPDATED)
-// ============================================
-
-function payRemainingAmount(orderId, orderNumber) {
-  try {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) {
-      showMessage("Order not found");
-      return;
-    }
-    
-    const paidAmount = order.submittedAmount || order.advancePayment || 0;
-    const totalAmount = order.total || 0;
-    const remainingAmount = order.remainingPayment || (totalAmount - paidAmount);
-    
-    if (remainingAmount <= 0) {
-      showMessage("No remaining amount to pay");
-      return;
-    }
-    
-    // Prepare data for checkout page
-    const checkoutData = {
-      orderId: order.id,
-      orderNumber: order.orderNumber || orderNumber,
-      remainingAmount: remainingAmount,
-      totalAmount: totalAmount,
-      paidAmount: paidAmount,
-      orderType: 'existing_order',
-      items: order.items || [],
-      userId: currentUserId,
-      userEmail: userEmail,
-      userName: userName,
-      paymentType: 'remaining_payment',
-      source: 'orders_page'
-    };
-    
-    // Save to localStorage
-    localStorage.setItem('irya_pending_payment_order', JSON.stringify(checkoutData));
-    
-    // Redirect to checkout page with all necessary parameters
-    const checkoutUrl = `checkout.html?order=${order.id}&type=remaining_payment&user=${currentUserId}&amount=${remainingAmount}`;
-    console.log("🔗 Redirecting to checkout:", checkoutUrl);
-    window.location.href = checkoutUrl;
-    
-  } catch (error) {
-    console.error("❌ Error in pay remaining amount:", error);
-    showMessage("Failed to proceed to payment");
-  }
-}
-
-// ============================================
-// ORDER DETAILS
+// ORDER DETAILS FUNCTION
 // ============================================
 
 async function showOrderDetails(orderId) {
@@ -2202,18 +2428,80 @@ async function showOrderDetails(orderId) {
           <h2 style="margin: 0; font-size: 22px; display: flex; align-items: center; gap: 12px;">
             <i class="fas fa-box"></i> Order Details - ${order.orderNumber || order.id.substring(0, 8)}
           </h2>
-          <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">
-            User ID: ${currentUserId}
-          </div>
         </div>
         
         <div style="padding: 30px;">
-          ${createOrderDetailsHTML(order)}
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <div style="background: var(--bg-light); padding: 20px; border-radius: var(--border-radius);">
+              <h3 style="margin: 0 0 15px 0; color: var(--stone-dark); font-size: 16px;">
+                <i class="fas fa-info-circle"></i> Order Information
+              </h3>
+              <div style="font-size: 13px; line-height: 1.8;">
+                <div><strong>Order Number:</strong> ${order.orderNumber || 'N/A'}</div>
+                <div><strong>Order Date:</strong> ${formatDateTime(order.createdAt)}</div>
+                <div><strong>Status:</strong> 
+                  <span class="status-badge ${getStatusClass(order.status || order.orderStatus)}" style="margin-left: 8px;">
+                    ${getStatusText(order.status || order.orderStatus)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div style="background: var(--bg-light); padding: 20px; border-radius: var(--border-radius);">
+              <h3 style="margin: 0 0 15px 0; color: var(--stone-dark); font-size: 16px;">
+                <i class="fas fa-money-bill-wave"></i> Payment Details
+              </h3>
+              <div style="font-size: 13px; line-height: 1.8;">
+                <div><strong>Total Amount:</strong> £${order.total?.toFixed(2) || '0.00'}</div>
+                <div><strong>Amount Paid:</strong> £${(order.submittedAmount || order.advancePayment || 0).toFixed(2)}</div>
+                <div><strong>Remaining:</strong> £${(order.remainingPayment || 0).toFixed(2)}</div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="background: var(--bg-light); padding: 20px; border-radius: var(--border-radius); margin-bottom: 30px;">
+            <h3 style="margin: 0 0 15px 0; color: var(--stone-dark); font-size: 16px;">
+              <i class="fas fa-box-open"></i> Order Items
+            </h3>
+            <div>
+              ${order.items ? order.items.map(item => `
+                <div style="display: flex; gap: 15px; padding: 15px; border-bottom: 1px solid #eee;">
+                  <div style="width: 60px; height: 60px; border-radius: 8px; overflow: hidden; background: white;">
+                    <img src="${item.image || getDefaultImage()}" alt="${item.name || 'Product'}" 
+                         style="width: 100%; height: 100%; object-fit: cover;">
+                  </div>
+                  <div style="flex: 1;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">${item.name || 'Product'}</div>
+                    <div style="font-size: 12px; color: var(--text-light); margin-bottom: 5px;">
+                      Quantity: ${item.quantity || 1} • Price: £${(item.price || 0).toFixed(2)}
+                    </div>
+                    <div style="font-weight: 600; color: var(--primary-gold);">
+                      Total: £${(item.totalPrice || item.calculatedPrice || 0).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              `).join('') : '<div style="text-align: center; padding: 20px; color: var(--text-light);">No items found</div>'}
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button onclick="payRemainingAmount('${order.id}', '${order.orderNumber}')" 
+                    style="background: var(--payment-pending); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer;">
+              <i class="fas fa-money-bill-wave"></i> Pay Remaining
+            </button>
+            <button onclick="window.print()" 
+                    style="background: var(--primary-gold); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer;">
+              <i class="fas fa-print"></i> Print
+            </button>
+            <button onclick="window.close()" 
+                    style="background: #666; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer;">
+              <i class="fas fa-times"></i> Close
+            </button>
+          </div>
         </div>
       </div>
     `;
     
-    // Open in new tab
     const win = window.open("", "_blank");
     win.document.write(`
       <!DOCTYPE html>
@@ -2245,692 +2533,11 @@ async function showOrderDetails(orderId) {
   }
 }
 
-function createOrderDetailsHTML(order) {
-  const orderDate = formatDateTime(order.createdAt);
-  const paymentStatus = order.paymentStatus || '';
-  const orderStatus = order.status || order.orderStatus || 'payment_pending';
-  const paidAmount = order.submittedAmount || order.advancePayment || 0;
-  const totalAmount = order.total || 0;
-  const remainingAmount = order.remainingPayment || (totalAmount - paidAmount);
-  
-  // Payment badge
-  let paymentBadgeClass = 'payment-status pending';
-  let paymentBadgeText = 'Pending';
-  let paymentIcon = 'fa-clock';
-  
-  if (paymentStatus === 'fully_paid' || remainingAmount <= 0) {
-    paymentBadgeClass = 'payment-status full';
-    paymentBadgeText = 'Paid';
-    paymentIcon = 'fa-check-circle';
-  } else if (paymentStatus === 'advance_paid' || paidAmount > 0) {
-    paymentBadgeClass = 'payment-status advance';
-    paymentBadgeText = 'Advance';
-    paymentIcon = 'fa-money-bill-wave';
-  }
-  
-  return `
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
-      <div style="background: var(--bg-light); padding: 20px; border-radius: var(--border-radius);">
-        <h3 style="margin: 0 0 15px 0; color: var(--stone-dark); font-size: 16px; display: flex; align-items: center; gap: 10px;">
-          <i class="fas fa-info-circle"></i> Order Information
-        </h3>
-        <div style="font-size: 13px; line-height: 1.8;">
-          <div><strong>Order Number:</strong> ${order.orderNumber || 'N/A'}</div>
-          <div><strong>Order Date:</strong> ${orderDate}</div>
-          <div><strong>Status:</strong> 
-            <span class="status-badge ${getStatusClass(orderStatus)}" style="margin-left: 8px;">
-              ${getStatusText(orderStatus)}
-            </span>
-          </div>
-          <div><strong>Payment:</strong> 
-            <span class="${paymentBadgeClass}" style="margin-left: 8px;">
-              <i class="fas ${paymentIcon}"></i> ${paymentBadgeText}
-            </span>
-          </div>
-          <div><strong>User ID:</strong> ${order.userId || currentUserId}</div>
-        </div>
-      </div>
-      
-      <div style="background: var(--bg-light); padding: 20px; border-radius: var(--border-radius);">
-        <h3 style="margin: 0 0 15px 0; color: var(--stone-dark); font-size: 16px; display: flex; align-items: center; gap: 10px;">
-          <i class="fas fa-money-bill-wave"></i> Payment Details
-        </h3>
-        <div style="font-size: 13px; line-height: 1.8;">
-          <div><strong>Total Amount:</strong> £${totalAmount.toFixed(2)}</div>
-          <div><strong>Amount Paid:</strong> £${paidAmount.toFixed(2)}</div>
-          <div><strong>Remaining:</strong> £${remainingAmount.toFixed(2)}</div>
-          <div><strong>Payment Method:</strong> ${order.paymentMethod === 'bank' ? 'Bank Transfer' : 
-            order.paymentMethod === 'stripe' ? 'Credit Card' : 
-            order.paymentMethod === 'paypal' ? 'PayPal' : 'N/A'}</div>
-          ${order.transactionReference ? `<div><strong>Transaction Ref:</strong> ${order.transactionReference}</div>` : ''}
-        </div>
-      </div>
-    </div>
-    
-    ${order.shippingAddress || order.billingAddress ? `
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
-      ${order.shippingAddress ? `
-      <div style="background: var(--bg-light); padding: 20px; border-radius: var(--border-radius);">
-        <h3 style="margin: 0 0 15px 0; color: var(--stone-dark); font-size: 16px; display: flex; align-items: center; gap: 10px;">
-          <i class="fas fa-truck"></i> Shipping Address
-        </h3>
-        <div style="font-size: 13px; line-height: 1.6;">
-          ${getAddressHTML(order.shippingAddress)}
-        </div>
-      </div>
-      ` : ''}
-      
-      ${order.billingAddress ? `
-      <div style="background: var(--bg-light); padding: 20px; border-radius: var(--border-radius);">
-        <h3 style="margin: 0 0 15px 0; color: var(--stone-dark); font-size: 16px; display: flex; align-items: center; gap: 10px;">
-          <i class="fas fa-file-invoice-dollar"></i> Billing Address
-        </h3>
-        <div style="font-size: 13px; line-height: 1.6;">
-          ${getAddressHTML(order.billingAddress)}
-        </div>
-      </div>
-      ` : ''}
-    </div>
-    ` : ''}
-    
-    <div style="background: var(--bg-light); padding: 20px; border-radius: var(--border-radius); margin-bottom: 30px;">
-      <h3 style="margin: 0 0 15px 0; color: var(--stone-dark); font-size: 16px; display: flex; align-items: center; gap: 10px;">
-        <i class="fas fa-box-open"></i> Order Items (${order.items ? order.items.length : 1})
-      </h3>
-      <div>
-        ${order.items ? order.items.map(item => `
-          <div style="display: flex; gap: 15px; padding: 15px; border-bottom: 1px solid #eee; align-items: center;">
-            <div style="width: 60px; height: 60px; border-radius: 8px; overflow: hidden; background: white;">
-              <img src="${item.image || getDefaultImage()}" alt="${item.name || 'Product'}" 
-                   style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
-            <div style="flex: 1;">
-              <div style="font-weight: 600; margin-bottom: 5px;">${item.name || item.stoneName || item.productName || 'Product'}</div>
-              ${item.specifications ? `
-                <div style="font-size: 11px; color: #666; margin-bottom: 5px;">
-                  ${Object.entries(item.specifications).slice(0, 2).map(([key, value]) => `
-                    <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; margin-right: 4px; display: inline-block;">
-                      ${key}: ${value}
-                    </span>
-                  `).join('')}
-                </div>
-              ` : ''}
-              <div style="font-size: 12px; color: var(--text-light); margin-bottom: 5px;">
-                Quantity: ${item.quantity || 1} • Price: £${(item.price || 0).toFixed(2)}
-              </div>
-              <div style="font-weight: 600; color: var(--primary-gold);">
-                Total: £${(item.totalPrice || item.calculatedPrice || 0).toFixed(2)}
-              </div>
-            </div>
-          </div>
-        `).join('') : '<div style="text-align: center; padding: 20px; color: var(--text-light);">No items found</div>'}
-      </div>
-    </div>
-    
-    ${order.trackingNumber ? `
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: var(--border-radius); margin-bottom: 30px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-        <div>
-          <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px;">Tracking Number</div>
-          <div style="font-family: monospace; font-size: 18px; font-weight: 600;">${order.trackingNumber}</div>
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <button onclick="copyTrackingNumber('${order.trackingNumber}')" 
-                  style="background: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 8px 15px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-copy"></i> Copy
-          </button>
-        </div>
-      </div>
-    </div>
-    ` : ''}
-    
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px;">
-      ${remainingAmount > 0 ? `
-      <button onclick="payRemainingAmount('${order.id}', '${order.orderNumber || order.id}')" 
-              style="background: var(--payment-pending); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-        <i class="fas fa-money-bill-wave"></i> Pay Remaining £${remainingAmount.toFixed(2)}
-      </button>
-      ` : ''}
-      <button onclick="window.print()" 
-              style="background: var(--primary-gold); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-        <i class="fas fa-print"></i> Print Details
-      </button>
-      <button onclick="downloadInvoice('${order.id}')" 
-              style="background: var(--payment-full); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-        <i class="fas fa-file-invoice"></i> Download Invoice
-      </button>
-      <button onclick="window.close()" 
-              style="background: #666; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-        <i class="fas fa-times"></i> Close
-      </button>
-    </div>
-  `;
-}
-
-// ============================================
-// NOTIFICATIONS - ENHANCED FOR REDIRECTION
-// ============================================
-
-async function loadNotifications() {
-  try {
-    if (!db || !currentUserId) return;
-    
-    const notificationsRef = collection(db, "users", currentUserId, "notifications");
-    const notificationsQuery = query(notificationsRef, orderBy("createdAt", "desc"), limit(20));
-    
-    if (notificationsUnsubscribe) notificationsUnsubscribe();
-    
-    notificationsUnsubscribe = onSnapshot(notificationsQuery,
-      (snapshot) => {
-        notifications = [];
-        const notificationList = document.getElementById("notificationList");
-        notificationList.innerHTML = '';
-        
-        if (snapshot.empty) {
-          notificationList.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: var(--text-light);">
-              <i class="fas fa-bell-slash" style="font-size: 24px; margin-bottom: 10px;"></i>
-              <p>No notifications yet</p>
-            </div>
-          `;
-          updateNotificationBadge();
-          return;
-        }
-        
-        let unreadCount = 0;
-        
-        snapshot.forEach((doc) => {
-          const note = doc.data();
-          note.id = doc.id;
-          notifications.push(note);
-          
-          if (!note.read) unreadCount++;
-          
-          const noteElement = createNotificationElement(note);
-          notificationList.appendChild(noteElement);
-        });
-        
-        updateNotificationBadge(unreadCount);
-        
-      },
-      (error) => {
-        console.error("❌ Error in notifications listener:", error);
-      }
-    );
-    
-  } catch (error) {
-    console.error("❌ Error loading notifications:", error);
-  }
-}
-
-function createNotificationElement(note) {
-  const div = document.createElement('div');
-  div.className = `notification-item ${note.read ? '' : 'unread'}`;
-  
-  const timeAgo = getTimeAgo(note.createdAt);
-  
-  // Extract order information from notification
-  let orderId = note.orderId;
-  let orderNumber = note.orderNumber;
-  let notificationType = note.type || 'general';
-  
-  // If orderId or orderNumber is missing, try to extract from message
-  if (!orderId && !orderNumber && note.message) {
-    const extracted = extractOrderInfoFromMessage(note.message);
-    if (extracted) {
-      orderNumber = extracted.orderNumber;
-      // Try to find order in current list
-      if (orderNumber && orders.length > 0) {
-        const order = orders.find(o => o.orderNumber === orderNumber);
-        if (order) {
-          orderId = order.id;
-        }
-      }
-    }
-  }
-  
-  // Determine notification type and styling
-  let icon = 'fa-bell';
-  let color = '#c9a227';
-  let actionText = '';
-  let badgeText = 'Info';
-  let isPaymentNotification = false;
-  let isTrackingNotification = false;
-  
-  if (notificationType === 'payment_remaining_warning' || 
-      note.title?.includes('Payment Pending') ||
-      note.title?.includes('Remaining Payment') ||
-      note.message?.includes('Remaining payment') ||
-      note.message?.includes('remaining balance') ||
-      note.message?.includes('within 1 hour') ||
-      note.message?.includes('clear the remaining payment')) {
-    icon = 'fa-exclamation-triangle';
-    color = '#ff6b6b';
-    actionText = `<span style="color: var(--payment-pending);">
-      <i class="fas fa-money-bill-wave"></i> Pay Now
-    </span>`;
-    badgeText = 'Payment';
-    notificationType = 'payment_remaining';
-    isPaymentNotification = true;
-  } else if (notificationType === 'payment_updated' ||
-             notificationType === 'payment_completed' ||
-             note.title?.includes('Payment Updated') ||
-             note.title?.includes('Payment Received') ||
-             note.title?.includes('Advance Payment') ||
-             note.title?.includes('Full Payment')) {
-    icon = 'fa-money-bill-wave';
-    color = '#ff922b';
-    actionText = `<span style="color: var(--payment-advance);">
-      <i class="fas fa-eye"></i> View Order
-    </span>`;
-    badgeText = 'Payment';
-    notificationType = 'payment_update';
-  } else if (notificationType === 'order_shipped' ||
-             note.title?.includes('Shipped') ||
-             note.message?.includes('has been shipped')) {
-    icon = 'fa-shipping-fast';
-    color = '#339af0';
-    actionText = `<span style="color: var(--processing);">
-      <i class="fas fa-truck"></i> Track Order
-    </span>`;
-    badgeText = 'Shipping';
-    notificationType = 'order_shipped';
-    isTrackingNotification = true;
-  } else if (notificationType === 'order_out_for_delivery' ||
-             note.title?.includes('Out for Delivery')) {
-    icon = 'fa-truck';
-    color = '#cc5de8';
-    actionText = `<span style="color: var(--out-for-delivery);">
-      <i class="fas fa-truck"></i> Track Order
-    </span>`;
-    badgeText = 'Delivery';
-    notificationType = 'order_out_for_delivery';
-    isTrackingNotification = true;
-  } else if (notificationType === 'order_delivered' ||
-             note.title?.includes('Delivered')) {
-    icon = 'fa-check-double';
-    color = '#40c057';
-    actionText = `<span style="color: var(--delivered);">
-      <i class="fas fa-box-open"></i> View Details
-    </span>`;
-    badgeText = 'Delivery';
-    notificationType = 'order_delivered';
-  } else if (notificationType === 'order_cancelled' ||
-             note.title?.includes('Cancelled')) {
-    icon = 'fa-times-circle';
-    color = '#fa5252';
-    badgeText = 'Cancelled';
-    notificationType = 'order_cancelled';
-  }
-  
-  // Set click handler
-  div.onclick = (event) => {
-    event.stopPropagation();
-    handleNotificationClick(
-      note.id, 
-      orderId, 
-      orderNumber, 
-      notificationType,
-      isPaymentNotification,
-      isTrackingNotification,
-      note.message
-    );
-  };
-  
-  div.innerHTML = `
-    <div class="notification-title">
-      <i class="fas ${icon}" style="color: ${color}; margin-right: 8px;"></i>
-      ${note.title || 'Notification'}
-      <span class="notification-badge" style="background: ${color}; color: white; padding: 2px 6px; border-radius: 10px; font-size: 9px; margin-left: 8px;">${badgeText}</span>
-    </div>
-    <div class="notification-message">${note.message || ''}</div>
-    <div class="notification-time">
-      <i class="far fa-clock"></i> ${timeAgo}
-      ${actionText}
-    </div>
-  `;
-  
-  // Store metadata for debugging
-  div.setAttribute('data-notification-id', note.id);
-  div.setAttribute('data-order-id', orderId || '');
-  div.setAttribute('data-order-number', orderNumber || '');
-  div.setAttribute('data-type', notificationType);
-  div.setAttribute('data-is-payment', isPaymentNotification);
-  div.setAttribute('data-is-tracking', isTrackingNotification);
-  
-  return div;
-}
-
-function extractOrderInfoFromMessage(message) {
-  if (!message) return null;
-  
-  console.log("Extracting order info from message:", message);
-  
-  // Pattern 1: IRYA-数字-数字 (e.g., IRYA-1765748514765-1207)
-  const pattern1 = message.match(/IRYA[-\s]\d+[-\s]\d+/g);
-  if (pattern1 && pattern1[0]) {
-    return { orderNumber: pattern1[0] };
-  }
-  
-  // Pattern 2: IRYA-数字 (simple version)
-  const pattern2 = message.match(/IRYA[-\s]\d+/g);
-  if (pattern2 && pattern2[0]) {
-    return { orderNumber: pattern2[0] };
-  }
-  
-  // Pattern 3: Order # followed by numbers
-  const pattern3 = message.match(/Order[#\s]+\d+/gi);
-  if (pattern3 && pattern3[0]) {
-    const orderNum = pattern3[0].replace(/Order[#\s]+/i, '').trim();
-    return { orderNumber: `IRYA-${orderNum}` };
-  }
-  
-  // Pattern 4: Just find numbers that look like order numbers
-  const pattern4 = message.match(/\b\d{10,}\b/g);
-  if (pattern4 && pattern4[0]) {
-    return { orderNumber: `IRYA-${pattern4[0]}` };
-  }
-  
-  return null;
-}
-
-async function handleNotificationClick(
-  notificationId, 
-  orderId, 
-  orderNumber, 
-  notificationType,
-  isPaymentNotification,
-  isTrackingNotification,
-  message
-) {
-  try {
-    console.log("📌 Notification clicked:", {
-      notificationId,
-      orderId,
-      orderNumber,
-      notificationType,
-      isPaymentNotification,
-      isTrackingNotification,
-      currentUserId
-    });
-    
-    // First mark as read
-    if (db) {
-      const notificationRef = doc(db, "users", currentUserId, "notifications", notificationId);
-      await updateDoc(notificationRef, {
-        read: true,
-        readAt: new Date().toISOString()
-      });
-    }
-    
-    // Close notification dropdown
-    closeNotifications();
-    
-    // Handle based on notification type
-    if (isPaymentNotification) {
-      handlePaymentNotificationClick(orderId, orderNumber, message);
-    } else if (isTrackingNotification) {
-      handleTrackingNotificationClick(orderId, orderNumber);
-    } else {
-      handleGeneralNotificationClick(orderId, orderNumber);
-    }
-    
-  } catch (error) {
-    console.error("❌ Error handling notification click:", error);
-    closeNotifications();
-    showMessage("Error handling notification");
-  }
-}
-
-function handlePaymentNotificationClick(orderId, orderNumber, message) {
-  console.log("💰 Handling payment notification click");
-  
-  // Try to find the order
-  let order = null;
-  
-  if (orderId) {
-    order = orders.find(o => o.id === orderId);
-  } 
-  
-  if (!order && orderNumber) {
-    order = orders.find(o => o.orderNumber === orderNumber);
-  }
-  
-  if (order) {
-    // Check if order has remaining payment
-    const paidAmount = order.submittedAmount || order.advancePayment || 0;
-    const totalAmount = order.total || 0;
-    const remainingAmount = order.remainingPayment || (totalAmount - paidAmount);
-    
-    if (remainingAmount > 0) {
-      // Direct redirect to checkout for remaining payment
-      payRemainingAmount(order.id, order.orderNumber || orderNumber);
-    } else {
-      // No remaining amount, show order details
-      showMessage("This order is already fully paid.");
-      showOrderDetails(order.id);
-    }
-  } else {
-    // Order not found in current list, try to search
-    showMessage(`Order ${orderNumber || orderId} not found. Searching...`);
-    
-    if (orderNumber) {
-      document.getElementById('searchInput').value = orderNumber;
-    } else if (orderId) {
-      document.getElementById('searchInput').value = orderId;
-    }
-    
-    searchOrders();
-    
-    // Try to extract payment info from message
-    const amountMatch = message.match(/£([\d\.]+)/);
-    if (amountMatch && amountMatch[1]) {
-      const paymentAmount = parseFloat(amountMatch[1]);
-      setTimeout(() => {
-        const orderFound = orders.find(o => 
-          o.orderNumber === orderNumber || o.id === orderId
-        );
-        if (orderFound && paymentAmount > 0) {
-          // Still redirect to checkout with extracted amount
-          const checkoutData = {
-            orderId: orderFound.id,
-            orderNumber: orderFound.orderNumber,
-            remainingAmount: paymentAmount,
-            totalAmount: orderFound.total || 0,
-            paidAmount: orderFound.submittedAmount || 0,
-            orderType: 'existing_order',
-            items: orderFound.items || [],
-            userId: currentUserId,
-            userEmail: userEmail,
-            userName: userName,
-            paymentType: 'remaining_payment',
-            source: 'notification'
-          };
-          
-          localStorage.setItem('irya_pending_payment_order', JSON.stringify(checkoutData));
-          window.location.href = `checkout.html?order=${orderFound.id}&type=remaining_payment&user=${currentUserId}&amount=${paymentAmount}`;
-        }
-      }, 1000);
-    }
-  }
-}
-
-function handleTrackingNotificationClick(orderId, orderNumber) {
-  console.log("🚚 Handling tracking notification click");
-  
-  let order = null;
-  
-  if (orderId) {
-    order = orders.find(o => o.id === orderId);
-  }
-  
-  if (!order && orderNumber) {
-    order = orders.find(o => o.orderNumber === orderNumber);
-  }
-  
-  if (order) {
-    if (order.trackingNumber) {
-      showTrackingModal(order.id);
-    } else {
-      showMessage(`Order ${order.orderNumber} doesn't have tracking information yet.`);
-      showOrderDetails(order.id);
-    }
-  } else {
-    showMessage(`Order ${orderNumber || orderId} not found.`);
-    if (orderNumber) {
-      document.getElementById('searchInput').value = orderNumber;
-    } else if (orderId) {
-      document.getElementById('searchInput').value = orderId;
-    }
-    searchOrders();
-  }
-}
-
-function handleGeneralNotificationClick(orderId, orderNumber) {
-  console.log("📦 Handling general notification click");
-  
-  let order = null;
-  
-  if (orderId) {
-    order = orders.find(o => o.id === orderId);
-  }
-  
-  if (!order && orderNumber) {
-    order = orders.find(o => o.orderNumber === orderNumber);
-  }
-  
-  if (order) {
-    showOrderDetails(order.id);
-  } else {
-    showMessage(`Order ${orderNumber || orderId} not found. Searching...`);
-    if (orderNumber) {
-      document.getElementById('searchInput').value = orderNumber;
-    } else if (orderId) {
-      document.getElementById('searchInput').value = orderId;
-    }
-    searchOrders();
-  }
-}
-
-async function markAllAsRead() {
-  try {
-    if (!db || !currentUserId) return;
-    
-    const unreadNotifications = notifications.filter(n => !n.read);
-    
-    for (const note of unreadNotifications) {
-      const notificationRef = doc(db, "users", currentUserId, "notifications", note.id);
-      await updateDoc(notificationRef, {
-        read: true,
-        readAt: new Date().toISOString()
-      });
-    }
-    
-    notifications.forEach(n => n.read = true);
-    updateNotificationBadge(0);
-    
-    document.querySelectorAll('.notification-item.unread').forEach(item => {
-      item.classList.remove('unread');
-    });
-    
-    showMessage("All notifications marked as read");
-    
-  } catch (error) {
-    console.error("❌ Error marking all as read:", error);
-  }
-}
-
-function updateNotificationBadge(count = null) {
-  const badge = document.getElementById("notificationBadge");
-  if (!badge) return;
-  
-  const unreadCount = count !== null ? count : notifications.filter(n => !n.read).length;
-  
-  if (unreadCount > 0) {
-    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-    badge.style.display = 'flex';
-  } else {
-    badge.style.display = 'none';
-  }
-}
-
-// ============================================
-// CART BADGE UPDATE
-// ============================================
-
-function updateCartBadge() {
-  try {
-    const userId = localStorage.getItem('irya_guest_id') || 'guest';
-    const cartKey = 'irya_local_cart_' + userId;
-    const cartData = localStorage.getItem(cartKey);
-    const cartItems = cartData ? JSON.parse(cartData) : [];
-    const count = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
-    
-    const cartBadge = document.getElementById('cartBadge');
-    if (cartBadge) {
-      cartBadge.textContent = count;
-      cartBadge.style.display = count > 0 ? 'flex' : 'none';
-    }
-  } catch (error) {
-    console.error('❌ Error updating cart badge:', error);
-  }
-}
-
-// ============================================
-// SEARCH FUNCTIONALITY
-// ============================================
-
-function searchOrders() {
-  const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-  
-  if (!searchTerm) {
-    displayOrders(orders);
-    return;
-  }
-  
-  const filteredOrders = orders.filter(order => {
-    // Search by order number
-    if (order.orderNumber && order.orderNumber.toLowerCase().includes(searchTerm)) {
-      return true;
-    }
-    
-    // Search by product names in items
-    if (order.items && order.items.some(item => {
-      const itemName = (item.name || item.stoneName || item.productName || '').toLowerCase();
-      return itemName.includes(searchTerm);
-    })) {
-      return true;
-    }
-    
-    // Search by status
-    const statusText = getStatusText(order.status || order.orderStatus).toLowerCase();
-    if (statusText.includes(searchTerm)) {
-      return true;
-    }
-    
-    // Search by order ID
-    if (order.id.toLowerCase().includes(searchTerm)) {
-      return true;
-    }
-    
-    // Search by user ID
-    if (order.userId && order.userId.toLowerCase().includes(searchTerm)) {
-      return true;
-    }
-    
-    return false;
-  });
-  
-  displayOrders(filteredOrders);
-}
-
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
 
 function getStatusClass(status) {
-  if (!status) return 'status-payment-pending';
-  
   const statusMap = {
     'payment_pending': 'status-payment-pending',
     'advance_paid': 'status-payment-advance',
@@ -2948,8 +2555,6 @@ function getStatusClass(status) {
 }
 
 function getStatusText(status) {
-  if (!status) return 'Payment Pending';
-  
   const statusMap = {
     'payment_pending': 'Payment Pending',
     'advance_paid': 'Advance Paid',
@@ -2967,8 +2572,6 @@ function getStatusText(status) {
 }
 
 function getStatusIcon(status) {
-  if (!status) return 'fa-clock';
-  
   const iconMap = {
     'payment_pending': 'fa-clock',
     'advance_paid': 'fa-money-bill-wave',
@@ -2996,7 +2599,6 @@ function getPaymentIcon(paymentStatus, paidAmount, totalAmount) {
 
 function formatDate(dateString) {
   if (!dateString) return 'N/A';
-  
   try {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB', {
@@ -3011,7 +2613,6 @@ function formatDate(dateString) {
 
 function formatDateTime(dateString) {
   if (!dateString) return 'N/A';
-  
   try {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB', {
@@ -3028,7 +2629,6 @@ function formatDateTime(dateString) {
 
 function getTimeAgo(dateString) {
   if (!dateString) return 'Just now';
-  
   try {
     const date = new Date(dateString);
     const now = new Date();
@@ -3079,19 +2679,9 @@ function showMessage(message) {
     animation: slideIn 0.3s ease;
     box-shadow: var(--shadow-lg);
     max-width: 90%;
-    word-wrap: break-word;
   `;
   
   toast.innerHTML = `
-    <style>
-      @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-      }
-      @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    </style>
     <div style="display: flex; align-items: center; gap: 10px;">
       <i class="fas fa-check-circle"></i>
       <span>${message}</span>
@@ -3101,271 +2691,75 @@ function showMessage(message) {
   document.body.appendChild(toast);
   
   setTimeout(() => {
-    toast.style.animation = 'slideOut 0.3s ease';
-    setTimeout(() => {
-      if (toast.parentNode) {
-        document.body.removeChild(toast);
-      }
-    }, 300);
+    toast.remove();
   }, 3000);
 }
 
-async function downloadInvoice(orderId) {
-  try {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) {
-      showMessage("Order not found");
-      return;
+function searchOrders() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+  
+  if (!searchTerm) {
+    displayOrders(orders);
+    return;
+  }
+  
+  const filteredOrders = orders.filter(order => {
+    // Search by order number
+    if (order.orderNumber && order.orderNumber.toLowerCase().includes(searchTerm)) {
+      return true;
     }
     
-    const win = window.open("", "_blank");
-    win.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Invoice - ${order.orderNumber}</title>
-        <style>
-          body { 
-            font-family: 'Poppins', sans-serif; 
-            margin: 40px; 
-            line-height: 1.6;
-            background: #f7f9fc;
-            color: #222222;
-          }
-          @media print {
-            body { margin: 0; padding: 20px; }
-            .no-print { display: none !important; }
-          }
-          .invoice-container {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-          }
-          .invoice-header { 
-            text-align: center; 
-            margin-bottom: 40px; 
-            padding-bottom: 20px;
-            border-bottom: 2px solid #c9a227;
-          }
-          .company { 
-            font-size: 28px; 
-            font-weight: 700; 
-            color: #1a1a1a; 
-            margin-bottom: 10px;
-            font-family: 'Roboto Slab', serif;
-          }
-          .company span { color: #c9a227; }
-          .invoice-title {
-            font-size: 20px;
-            color: #666666;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-          }
-          .invoice-details { 
-            margin: 30px 0; 
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-          }
-          .address-section {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-          }
-          .table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 30px 0; 
-          }
-          .table th, .table td { 
-            border: 1px solid #e0e0e0; 
-            padding: 12px; 
-            text-align: left; 
-          }
-          .table th { 
-            background: #f7f9fc; 
-            color: #222222;
-            font-weight: 600;
-          }
-          .total-row { 
-            font-weight: 600; 
-            background: #f7f9fc; 
-          }
-          .total-row td {
-            border-top: 2px solid #e0e0e0;
-          }
-          .footer { 
-            margin-top: 40px; 
-            padding-top: 20px; 
-            border-top: 2px solid #c9a227; 
-            text-align: center;
-          }
-          .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-          }
-          .actions {
-            margin-top: 30px;
-            text-align: center;
-          }
-          .btn {
-            background: #c9a227;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin: 0 10px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="invoice-container">
-          <div class="invoice-header">
-            <div class="company">IRYA <span>STONE</span></div>
-            <div class="invoice-title">INVOICE</div>
-          </div>
-          
-          <div class="invoice-details">
-            <div>
-              <strong>Invoice Number:</strong> ${order.orderNumber || 'N/A'}<br>
-              <strong>Invoice Date:</strong> ${formatDate(order.createdAt)}<br>
-              <strong>Status:</strong> 
-              <span class="status-badge" style="background: ${getStatusColor(order.status || order.orderStatus)}; color: white;">
-                ${getStatusText(order.status || order.orderStatus)}
-              </span><br>
-              <strong>User ID:</strong> ${currentUserId}
-            </div>
-            <div style="text-align: right;">
-              <strong>Customer:</strong> ${order.userName || userName || 'Customer'}<br>
-              <strong>Payment Method:</strong> 
-              ${order.paymentMethod === 'bank' ? 'Bank Transfer' : 
-                order.paymentMethod === 'stripe' ? 'Credit Card' : 
-                order.paymentMethod === 'paypal' ? 'PayPal' : 'N/A'}<br>
-              <strong>Email:</strong> ${order.userEmail || userEmail || 'N/A'}
-            </div>
-          </div>
-          
-          ${order.shippingAddress ? `
-          <div class="address-section">
-            <h4>Shipping Address</h4>
-            <div style="font-size: 14px; line-height: 1.6;">
-              ${getAddressHTML(order.shippingAddress)}
-            </div>
-          </div>
-          ` : ''}
-          
-          ${order.billingAddress ? `
-          <div class="address-section">
-            <h4>Billing Address</h4>
-            <div style="font-size: 14px; line-height: 1.6;">
-              ${getAddressHTML(order.billingAddress)}
-            </div>
-          </div>
-          ` : ''}
-          
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${order.items ? order.items.map(item => `
-                <tr>
-                  <td>${item.name || item.stoneName || item.productName || 'Product'}</td>
-                  <td>${item.quantity || 1}</td>
-                  <td>£${item.price?.toFixed(2) || '0.00'}</td>
-                  <td>£${item.calculatedPrice?.toFixed(2) || item.totalPrice?.toFixed(2) || '0.00'}</td>
-                </tr>
-              `).join('') : '<tr><td colspan="4">No items</td></tr>'}
-              
-              <tr class="total-row">
-                <td colspan="3" style="text-align: right;">Subtotal:</td>
-                <td>£${order.total?.toFixed(2) || '0.00'}</td>
-              </tr>
-              <tr class="total-row">
-                <td colspan="3" style="text-align: right;">Shipping:</td>
-                <td>£${order.shippingCost?.toFixed(2) || '0.00'}</td>
-              </tr>
-              <tr class="total-row">
-                <td colspan="3" style="text-align: right;">Tax:</td>
-                <td>£${order.tax?.toFixed(2) || '0.00'}</td>
-              </tr>
-              <tr class="total-row">
-                <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
-                <td><strong>£${order.total?.toFixed(2) || '0.00'}</strong></td>
-              </tr>
-              <tr class="total-row">
-                <td colspan="3" style="text-align: right;">Amount Paid:</td>
-                <td>£${(order.submittedAmount || order.advancePayment || 0).toFixed(2)}</td>
-              </tr>
-              <tr class="total-row">
-                <td colspan="3" style="text-align: right;">Balance Due:</td>
-                <td>£${(order.remainingPayment || 0).toFixed(2)}</td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <div class="footer">
-            <p><strong>Thank you for your business!</strong></p>
-            <p>IRYA STONE &copy; ${new Date().getFullYear()}</p>
-            <p>For any queries, contact us at: support@iryastone.com</p>
-          </div>
-          
-          <div class="actions no-print">
-            <button class="btn" onclick="window.print()">
-              <i class="fas fa-print"></i> Print Invoice
-            </button>
-            <button class="btn" onclick="window.close()">
-              <i class="fas fa-times"></i> Close
-            </button>
-          </div>
-        </div>
-      </body>
-      </html>
-    `);
+    // Search by product names
+    if (order.items && order.items.some(item => {
+      const itemName = (item.name || '').toLowerCase();
+      return itemName.includes(searchTerm);
+    })) {
+      return true;
+    }
     
-    win.document.close();
+    // Search by status
+    const statusText = getStatusText(order.status || order.orderStatus).toLowerCase();
+    if (statusText.includes(searchTerm)) {
+      return true;
+    }
     
+    // Search by order ID
+    if (order.id.toLowerCase().includes(searchTerm)) {
+      return true;
+    }
+    
+    return false;
+  });
+  
+  displayOrders(filteredOrders);
+}
+
+function downloadInvoice(orderId) {
+  showMessage("Invoice download feature coming soon");
+}
+
+function cancelOrder(orderId) {
+  if (!confirm('Are you sure you want to cancel this order?')) return;
+  showMessage('Cancellation request submitted');
+}
+
+function updateCartBadge() {
+  try {
+    const userId = localStorage.getItem('irya_guest_id') || 'guest';
+    const cartKey = 'irya_local_cart_' + userId;
+    const cartData = localStorage.getItem(cartKey);
+    const cartItems = cartData ? JSON.parse(cartData) : [];
+    const count = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
+    
+    const cartBadge = document.getElementById('cartBadge');
+    if (cartBadge) {
+      cartBadge.textContent = count;
+      cartBadge.style.display = count > 0 ? 'flex' : 'none';
+    }
   } catch (error) {
-    console.error("❌ Error downloading invoice:", error);
-    showMessage("Failed to generate invoice");
+    console.error('❌ Error updating cart badge:', error);
   }
 }
-
-function getStatusColor(status) {
-  const colorMap = {
-    'payment_pending': '#ff6b6b',
-    'advance_paid': '#ff922b',
-    'fully_paid': '#51cf66',
-    'processing': '#339af0',
-    'ready_to_ship': '#ff922b',
-    'shipped': '#748ffc',
-    'out_for_delivery': '#cc5de8',
-    'delivered': '#40c057',
-    'cancelled': '#fa5252',
-    'returned': '#868e96'
-  };
-  
-  return colorMap[status] || '#ff6b6b';
-}
-
-// ============================================
-// UI FUNCTIONS
-// ============================================
 
 function toggleNotifications() {
   const dropdown = document.getElementById("notificationDropdown");
@@ -3386,28 +2780,6 @@ document.addEventListener('click', function(event) {
 });
 
 // ============================================
-// ORDER CANCELLATION
-// ============================================
-
-async function cancelOrder(orderId) {
-  if (!confirm('Are you sure you want to cancel this order?')) return;
-  
-  try {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) {
-      showMessage("Order not found");
-      return;
-    }
-    
-    showMessage('Order cancellation request submitted. Our team will contact you shortly.');
-    
-  } catch (error) {
-    console.error('❌ Error cancelling order:', error);
-    showMessage('Failed to cancel order. Please contact support.');
-  }
-}
-
-// ============================================
 // INITIALIZATION
 // ============================================
 
@@ -3417,7 +2789,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     await loadOrders();
     
-    // Auto-refresh every 2 minutes
+    // Auto-refresh
     setInterval(() => {
       console.log("🔄 Auto-refreshing orders...");
       loadOrders();
@@ -3433,7 +2805,7 @@ window.addEventListener('beforeunload', () => {
   if (notificationsUnsubscribe) notificationsUnsubscribe();
 });
 
-// Make functions available globally
+// Global functions
 window.searchOrders = searchOrders;
 window.showTrackingModal = showTrackingModal;
 window.closeTrackingModal = closeTrackingModal;
