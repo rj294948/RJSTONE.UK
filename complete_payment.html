@@ -561,7 +561,9 @@ import {
     doc, 
     getDoc,
     updateDoc,
-    serverTimestamp
+    serverTimestamp,
+    collection,
+    addDoc
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -589,6 +591,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         await getUserId();
         await loadPaymentData();
         setupEventListeners();
+        
+        // Check if redirected from notification
+        checkNotificationRedirect();
     } catch (error) {
         console.error('Error:', error);
         showError('Load Error', 'Failed to load payment details. Please try again.');
@@ -621,12 +626,38 @@ async function getUserId() {
     }
 }
 
+function checkNotificationRedirect() {
+    // Check if we have notification redirect data
+    const notificationData = localStorage.getItem('pending_payment_notification');
+    if (notificationData) {
+        try {
+            const data = JSON.parse(notificationData);
+            console.log('Processing notification redirect:', data);
+            
+            // Clear the notification data
+            localStorage.removeItem('pending_payment_notification');
+            
+            // Extract URL parameters if needed
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.get('order_id') && data.orderId) {
+                // If no order_id in URL but we have it in notification, reload with order_id
+                window.location.href = `complete_payment.html?order_id=${data.orderId}`;
+            }
+            
+        } catch (error) {
+            console.error('Error processing notification redirect:', error);
+            localStorage.removeItem('pending_payment_notification');
+        }
+    }
+}
+
 async function loadPaymentData() {
     showLoading(true);
     
     try {
         const urlParams = new URLSearchParams(window.location.search);
         orderId = urlParams.get('order_id');
+        const remainingAmount = urlParams.get('remaining_amount');
         
         if (!orderId) {
             throw new Error('No order ID provided');
@@ -634,6 +665,11 @@ async function loadPaymentData() {
         
         await loadOrderDetails(orderId);
         updatePaymentUI();
+        
+        // If remaining amount is provided in URL, update display
+        if (remainingAmount) {
+            document.getElementById('remainingAmountDisplay').textContent = `£${parseFloat(remainingAmount).toFixed(2)}`;
+        }
         
         showLoading(false);
         document.getElementById('paymentContent').style.display = 'block';
@@ -738,6 +774,7 @@ async function processPayment() {
         setTimeout(async () => {
             try {
                 await updateOrderPayment();
+                await createPaymentNotification();
                 showSuccess();
                 
             } catch (error) {
@@ -801,6 +838,31 @@ async function updateOrderPayment() {
     }
 }
 
+async function createPaymentNotification() {
+    try {
+        // Create notification for successful payment
+        const notificationData = {
+            title: 'Payment Completed',
+            message: `Your remaining payment of £${document.getElementById('remainingAmountDisplay').textContent.replace('£', '')} for order ${currentOrder.orderNumber || currentOrder.id} has been successfully processed.`,
+            type: 'payment_completed',
+            orderId: orderId,
+            orderNumber: currentOrder.orderNumber,
+            read: false,
+            createdAt: new Date().toISOString()
+        };
+        
+        // Add notification to user's notifications collection
+        const notificationsRef = collection(db, "users", currentUserId, "notifications");
+        await addDoc(notificationsRef, notificationData);
+        
+        console.log('Notification created successfully');
+        
+    } catch (error) {
+        console.error('Error creating notification:', error);
+        // Don't throw error here, continue with payment process
+    }
+}
+
 function showProcessingModal() {
     const modal = document.getElementById('processingModal');
     const message = document.getElementById('processingMessage');
@@ -842,14 +904,16 @@ function showSuccess() {
             <div style="margin-bottom: 8px;"><strong>Order Number:</strong> ${currentOrder.orderNumber || currentOrder.id?.substring(0, 12)}</div>
             <div style="margin-bottom: 8px;"><strong>Total Amount:</strong> ${document.getElementById('totalAmountDisplay').textContent}</div>
             <div style="margin-bottom: 8px;"><strong>Payment Method:</strong> ${selectedPaymentMethod === 'stripe' ? 'Credit/Debit Card (Stripe)' : 'PayPal'}</div>
+            <div style="margin-bottom: 8px;"><strong>Amount Paid:</strong> ${document.getElementById('remainingAmountDisplay').textContent}</div>
             <div style="margin-top: 10px; font-size: 12px; color: var(--success-green);">
                 <i class="fas fa-check-circle"></i> 
-                <strong>Status:</strong> Payment completed instantly
+                <strong>Status:</strong> Payment completed successfully
             </div>
         `;
     }
     
     successDetails.setAttribute('data-order-id', orderId);
+    successDetails.setAttribute('data-order-number', currentOrder.orderNumber || '');
     document.getElementById('successModal').style.display = 'flex';
     hideProcessingModal();
 }
@@ -892,6 +956,9 @@ function retryLoad() {
 function viewOrder() {
     const successDetails = document.getElementById('successDetails');
     const orderId = successDetails.getAttribute('data-order-id');
+    const orderNumber = successDetails.getAttribute('data-order-number');
+    
+    // Redirect to orders page with order ID
     window.location.href = `orders.html?order_id=${orderId}`;
 }
 
