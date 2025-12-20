@@ -1,1183 +1,1987 @@
-<!DOCTYPE html> 
-<html lang="en"> 
-<head> 
-    <meta charset="UTF-8"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Checkout | IRYA STONE - Complete Payment System</title> 
-     
-    <!-- Font Awesome --> 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
-     
-    <!-- Google Fonts --> 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet"> 
-     
-    <style> 
-        :root { 
-            --primary-gold: #c9a227; 
-            --gold-light: #f0d77c; 
-            --gold-dark: #9c7c1f; 
-            --stone-dark: #1a1a1a; 
-            --stone-light: #f4f6f4; 
-            --bg-light: #f7f9fc; 
-            --text-dark: #222222; 
-            --text-light: #666666; 
-            --white: #ffffff; 
-            --success-green: #10b981; 
-            --warning-orange: #f59e0b; 
-            --error-red: #ef4444; 
-            --info-blue: #3b82f6; 
-            --shadow-sm: 0 2px 10px rgba(0,0,0,0.1); 
-            --shadow-md: 0 4px 15px rgba(0,0,0,0.1); 
-            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15); 
-            --transition: all 0.3s ease; 
-            --border-radius: 12px; 
-            --border-radius-lg: 20px; 
-        } 
-         
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: 'Poppins', sans-serif; 
-        } 
-         
-        body { 
-            background: var(--bg-light); 
-            color: var(--text-dark); 
-            padding-bottom: 80px; 
-            font-size: 14px; 
-        } 
-         
-        .header { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            background: var(--white); 
-            padding: 12px 16px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            box-shadow: var(--shadow-sm); 
-            z-index: 1000; 
-        } 
-         
-        .logo { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-        } 
-         
-        .logo i { 
-            color: var(--primary-gold); 
-            font-size: 24px; 
-        } 
-         
-        .logo span { 
-            font-size: 18px; 
-            font-weight: 700; 
-            color: var(--stone-dark); 
-            font-family: 'Roboto Slab', serif; 
-        } 
-         
-        .container { 
-            max-width: 1200px; 
-            margin: 80px auto 30px; 
-            padding: 0 16px; 
-        } 
-         
-        .page-header { 
-            text-align: center; 
-            margin-bottom: 30px; 
-            padding: 20px; 
-            background: var(--white); 
-            border-radius: var(--border-radius); 
-            box-shadow: var(--shadow-sm); 
-        } 
-         
-        .page-header h1 { 
-            font-size: 28px; 
-            color: var(--stone-dark); 
-            margin-bottom: 10px; 
-        } 
-         
-        .page-header p { 
-            color: var(--text-light); 
-        } 
-         
-        .checkout-flow { 
-            display: flex; 
-            gap: 30px; 
-            margin-bottom: 30px; 
-        } 
-         
-        .checkout-steps { 
-            flex: 1; 
-        } 
-         
-        .checkout-summary { 
-            width: 350px; 
-            position: sticky; 
-            top: 100px; 
-            align-self: flex-start; 
-        } 
-         
-        .step { 
-            background: var(--white); 
-            border-radius: var(--border-radius); 
-            padding: 25px; 
-            margin-bottom: 20px; 
-            box-shadow: var(--shadow-sm); 
-        } 
-         
-        .step-header { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            margin-bottom: 20px; 
-        } 
-         
-        .step-number { 
-            width: 36px; 
-            height: 36px; 
-            background: var(--primary-gold); 
-            color: white; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: 600; 
-        } 
-         
-        .step-title { 
-            font-size: 18px; 
-            font-weight: 600; 
-            color: var(--stone-dark); 
-        } 
-         
-        .form-group { 
-            margin-bottom: 20px; 
-        } 
-         
-        .form-group label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-weight: 500; 
-            color: var(--stone-dark); 
-        } 
-         
-        .form-group input, 
-        .form-group select, 
-        .form-group textarea { 
-            width: 100%; 
-            padding: 12px 15px; 
-            border: 1px solid #ddd; 
-            border-radius: 8px; 
-            font-size: 14px; 
-            transition: var(--transition); 
-        } 
-         
-        .form-group input:focus, 
-        .form-group select:focus, 
-        .form-group textarea:focus { 
-            outline: none; 
-            border-color: var(--primary-gold); 
-            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.1); 
-        } 
-         
-        .form-row { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-        } 
-         
-        .order-summary-box { 
-            background: var(--white); 
-            border-radius: var(--border-radius); 
-            padding: 25px; 
-            box-shadow: var(--shadow-md); 
-            margin-bottom: 20px; 
-        } 
-         
-        .order-items { 
-            max-height: 300px; 
-            overflow-y: auto; 
-            margin-bottom: 20px; 
-        } 
-         
-        .order-item { 
-            display: flex; 
-            gap: 15px; 
-            padding: 15px 0; 
-            border-bottom: 1px solid #eee; 
-        } 
-         
-        .item-image { 
-            width: 80px; 
-            height: 80px; 
-            border-radius: 8px; 
-            overflow: hidden; 
-            flex-shrink: 0; 
-        } 
-         
-        .item-image img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-        } 
-         
-        .item-details { 
-            flex: 1; 
-        } 
-         
-        .item-name { 
-            font-weight: 600; 
-            margin-bottom: 5px; 
-        } 
-         
-        .item-price { 
-            color: var(--primary-gold); 
-            font-weight: 600; 
-        } 
-         
-        .summary-total { 
-            border-top: 2px solid #eee; 
-            padding-top: 20px; 
-            margin-top: 20px; 
-        } 
-         
-        .total-row { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 10px; 
-        } 
-         
-        .final-total { 
-            font-size: 20px; 
-            font-weight: 700; 
-            color: var(--stone-dark); 
-        } 
-         
-        .payment-method { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            padding: 15px; 
-            border: 2px solid #eee; 
-            border-radius: 10px; 
-            margin-bottom: 10px; 
-            cursor: pointer; 
-            transition: var(--transition); 
-            background: white; 
-            position: relative; 
-        } 
-         
-        .payment-method:hover { 
-            border-color: var(--gold-light); 
-            transform: translateY(-2px); 
-            box-shadow: var(--shadow-sm); 
-        } 
-         
-        .payment-method.selected { 
-            border-color: var(--primary-gold); 
-            background: rgba(201, 162, 39, 0.05); 
-            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.1); 
-        } 
-         
-        .method-icon { 
-            width: 50px; 
-            height: 50px; 
-            background: var(--bg-light); 
-            border-radius: 10px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 24px; 
-            color: var(--primary-gold); 
-            flex-shrink: 0; 
-        } 
-         
-        .method-info h4 { 
-            margin-bottom: 5px; 
-            color: var(--stone-dark); 
-        } 
-         
-        .method-info p { 
-            font-size: 12px; 
-            color: var(--text-light); 
-            margin-bottom: 4px; 
-        } 
-         
-        .method-badge { 
-            display: inline-block; 
-            padding: 3px 8px; 
-            border-radius: 4px; 
-            font-size: 10px; 
-            font-weight: 600; 
-            margin-right: 5px; 
-            margin-top: 2px; 
-        } 
-         
-        .method-badge.fast { background: var(--success-green); color: white; } 
-        .method-badge.instant { background: var(--info-blue); color: white; } 
-        .method-badge.delayed { background: var(--warning-orange); color: white; } 
-         
-        .btn { 
-            padding: 15px 30px; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: 600; 
-            font-size: 16px; 
-            cursor: pointer; 
-            transition: var(--transition); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 10px; 
-        } 
-         
-        .btn-primary { 
-            background: var(--primary-gold); 
-            color: white; 
-            width: 100%; 
-        } 
-         
-        .btn-primary:hover { 
-            background: var(--gold-dark); 
-            transform: translateY(-2px); 
-            box-shadow: var(--shadow-md); 
-        } 
-         
-        .btn-secondary { 
-            background: var(--white); 
-            color: var(--text-dark); 
-            border: 1px solid #ddd; 
-        } 
-         
-        .btn:disabled { 
-            opacity: 0.5; 
-            cursor: not-allowed; 
-            transform: none !important; 
-        } 
-         
-        .loading { 
-            text-align: center; 
-            padding: 40px; 
-        } 
-         
-        .spinner { 
-            width: 40px; 
-            height: 40px; 
-            border: 4px solid #f3f3f3; 
-            border-top: 4px solid var(--primary-gold); 
-            border-radius: 50%; 
-            margin: 0 auto 20px; 
-            animation: spin 1s linear infinite; 
-        } 
-         
-        @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
-        } 
-         
-        .error-box { 
-            background: #fff5f5; 
-            border: 1px solid #ffcccc; 
-            border-radius: 8px; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-            text-align: center; 
-        } 
-         
-        .success-modal { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.8); 
-            display: none; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 10000; 
-            padding: 20px; 
-        } 
-         
-        .success-content { 
-            background: white; 
-            border-radius: var(--border-radius-lg); 
-            padding: 40px; 
-            text-align: center; 
-            max-width: 500px; 
-            width: 100%; 
-        } 
-         
-        .success-icon { 
-            width: 80px; 
-            height: 80px; 
-            background: #51cf66; 
-            color: white; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 40px; 
-            margin: 0 auto 20px; 
-        } 
-         
-        @media (max-width: 992px) { 
-            .checkout-flow { flex-direction: column; } 
-            .checkout-summary { width: 100%; position: static; } 
-        } 
-         
-        @media (max-width: 768px) { 
-            .form-row { grid-template-columns: 1fr; } 
-            .container { margin: 70px auto 20px; } 
-        } 
-         
-        .bank-details-box { 
-            background: #f8f9ff; 
-            padding: 20px; 
-            border-radius: 8px; 
-            border-left: 4px solid var(--info-blue); 
-            margin-top: 15px; 
-        } 
-         
-        .debug-info { 
-            background: #f0f8ff; 
-            padding: 15px; 
-            border-radius: 8px; 
-            font-family: monospace; 
-            font-size: 12px; 
-            margin-top: 20px; 
-            border-left: 4px solid var(--primary-gold); 
-        } 
-    </style> 
-</head> 
-<body> 
- 
-<header class="header"> 
-    <div class="logo"> 
-        <i class="fas fa-gem"></i> 
-        <span>IRYA STONE</span> 
-    </div> 
-    <div style="display: flex; gap: 10px;"> 
-        <a href="cart.html" class="btn-secondary" style="padding: 8px 15px; text-decoration: none;"> 
-            <i class="fas fa-shopping-cart"></i> Cart 
-        </a> 
-    </div> 
-</header> 
- 
-<main class="container"> 
-    <div class="page-header"> 
-        <h1 id="pageTitle">Complete Your Order</h1> 
-        <p id="pageSubtitle">Secure checkout for your stone products</p> 
-    </div> 
-     
-    <div class="loading" id="loadingState"> 
-        <div class="spinner"></div> 
-        <p>Loading your order details...</p> 
-    </div> 
-     
-    <div class="error-box" id="errorState" style="display: none;"> 
-        <i class="fas fa-exclamation-triangle"></i> 
-        <h3 id="errorTitle">Error Loading Order</h3> 
-        <p id="errorMessage">Failed to load order details. Please try again.</p> 
-        <button class="btn-primary" onclick="retryLoad()" style="margin-top: 15px;"> 
-            <i class="fas fa-redo"></i> Retry 
-        </button> 
-    </div> 
-     
-    <div id="checkoutContent" style="display: none;"> 
-        <div class="checkout-flow"> 
-            <div class="checkout-steps"> 
-                <div class="step" id="orderTypeStep"> 
-                    <div class="step-header"> 
-                        <div class="step-number">1</div> 
-                        <h3 class="step-title">Order Type</h3> 
-                    </div> 
-                    <div id="orderTypeContent"></div> 
-                    <div class="form-group" style="margin-top: 20px;"> 
-                        <label>Special Requirements?</label> 
-                        <textarea id="orderNotes" rows="3" placeholder="Add special instructions..."></textarea> 
-                    </div> 
-                </div> 
-                 
-                <div class="step" id="shippingStep" style="display: none;"> 
-                    <div class="step-header"> 
-                        <div class="step-number">2</div> 
-                        <h3 class="step-title">Shipping Details</h3> 
-                    </div> 
-                    <div class="form-row"> 
-                        <div class="form-group"> 
-                            <label>Full Name *</label> 
-                            <input type="text" id="shippingName" required> 
-                        </div> 
-                        <div class="form-group"> 
-                            <label>Email *</label> 
-                            <input type="email" id="shippingEmail" required> 
-                        </div> 
-                    </div> 
-                    <div class="form-row"> 
-                        <div class="form-group"> 
-                            <label>Phone Number *</label> 
-                            <input type="tel" id="shippingPhone" required> 
-                        </div> 
-                        <div class="form-group"> 
-                            <label>Country *</label> 
-                            <select id="shippingCountry" required> 
-                                <option value="">Select Country</option> 
-                                <option value="IN" selected>India</option> 
-                                <option value="GB">United Kingdom</option> 
-                                <option value="US">United States</option> 
-                            </select> 
-                        </div> 
-                    </div> 
-                    <div class="form-group"> 
-                        <label>Address Line 1 *</label> 
-                        <input type="text" id="shippingAddress1" required> 
-                    </div> 
-                    <div class="form-group"> 
-                        <label>Address Line 2</label> 
-                        <input type="text" id="shippingAddress2"> 
-                    </div> 
-                    <div class="form-row"> 
-                        <div class="form-group"> 
-                            <label>City *</label> 
-                            <input type="text" id="shippingCity" required> 
-                        </div> 
-                        <div class="form-group"> 
-                            <label>Postal Code *</label> 
-                            <input type="text" id="shippingPostalCode" required> 
-                        </div> 
-                    </div> 
-                    <div class="form-group"> 
-                        <label>State/Province *</label> 
-                        <input type="text" id="shippingState" required> 
-                    </div> 
-                </div> 
-                 
-                <div class="step" id="paymentStep" style="display: none;"> 
-                    <div class="step-header"> 
-                        <div class="step-number">3</div> 
-                        <h3 class="step-title">Payment Method</h3> 
-                    </div> 
-                    <p style="margin-bottom: 20px; color: var(--text-light);">Select your preferred payment method:</p> 
-                     
-                    <div class="payment-method" onclick="selectPaymentMethod('test-confirm')" id="testConfirmMethod"> 
-                        <div class="method-icon"> 
-                            <i class="fas fa-check-circle"></i> 
-                        </div> 
-                        <div class="method-info"> 
-                            <h4>TEST - Auto Confirm Payment ✅</h4> 
-                            <p>Instant payment confirmation for testing (Firestore data creation)</p> 
-                            <div> 
-                                <span class="method-badge fast">INSTANT CONFIRM</span> 
-                                <span class="method-badge instant">FIRESTORE UPDATE</span> 
-                            </div> 
-                            <small style="color: var(--success-green); display: block; margin-top: 5px;"> 
-                                <i class="fas fa-bolt"></i> Creates payments, addresses, updates order automatically 
-                            </small> 
-                        </div> 
-                    </div> 
-                     
-                    <div class="payment-method" onclick="selectPaymentMethod('bank')" id="bankMethod"> 
-                        <div class="method-icon"> 
-                            <i class="fas fa-university"></i> 
-                        </div> 
-                        <div class="method-info"> 
-                            <h4>Bank Transfer</h4> 
-                            <p>Transfer directly to our bank account</p> 
-                            <div> 
-                                <span class="method-badge delayed">1-3 BUSINESS DAYS</span> 
-                            </div> 
-                        </div> 
-                    </div> 
-                </div> 
-                 
-                <div class="step" id="reviewStep" style="display: none;"> 
-                    <div class="step-header"> 
-                        <div class="step-number">4</div> 
-                        <h3 class="step-title">Review & Confirm</h3> 
-                    </div> 
-                    <div id="reviewContent"></div> 
-                    <div style="margin-top: 30px;"> 
-                        <button class="btn btn-primary" onclick="placeOrder()" id="placeOrderBtn"> 
-                            <i class="fas fa-lock"></i> Place Order & Confirm Payment 
-                        </button> 
-                        <p style="text-align: center; margin-top: 15px; font-size: 12px; color: var(--text-light);"> 
-                            <i class="fas fa-shield-alt"></i> Your payment is secure and encrypted 
-                        </p> 
-                    </div> 
-                </div> 
-            </div> 
-             
-            <div class="checkout-summary"> 
-                <div class="order-summary-box"> 
-                    <h3 style="margin-bottom: 20px; color: var(--stone-dark);">Order Summary</h3> 
-                    <div class="order-items" id="orderItemsSummary"> 
-                        <!-- Items loaded here --> 
-                    </div> 
-                    <div class="summary-total"> 
-                        <div class="total-row"> 
-                            <span>Subtotal:</span> 
-                            <span id="subtotalAmount">₹0.00</span> 
-                        </div> 
-                        <div class="total-row"> 
-                            <span>Shipping:</span> 
-                            <span id="shippingAmount">₹0.00</span> 
-                        </div> 
-                        <div class="total-row"> 
-                            <span>Tax (18%):</span> 
-                            <span id="taxAmount">₹0.00</span> 
-                        </div> 
-                        <div class="total-row final-total"> 
-                            <span>Total:</span> 
-                            <span id="totalAmount">₹0.00</span> 
-                        </div> 
-                        <div class="total-row" style="font-size: 14px; color: var(--success-green); font-weight: 600;"> 
-                            <span>Advance Payment (30%):</span> 
-                            <span id="advanceAmount">₹0.00</span> 
-                        </div> 
-                    </div> 
-                </div> 
-                 
-                <div style="display: flex; gap: 10px;"> 
-                    <button class="btn btn-secondary" onclick="goBack()" id="backBtn"> 
-                        <i class="fas fa-arrow-left"></i> Back 
-                    </button> 
-                    <button class="btn btn-primary" onclick="nextStep()" id="nextBtn"> 
-                        Continue <i class="fas fa-arrow-right"></i> 
-                    </button> 
-                </div> 
-            </div> 
-        </div> 
-    </div> 
-</main> 
- 
-<!-- Success Modal --> 
-<div class="success-modal" id="successModal"> 
-    <div class="success-content"> 
-        <div class="success-icon"> 
-            <i class="fas fa-check"></i> 
-        </div> 
-        <h2 id="successTitle">Order Successful!</h2> 
-        <p id="successMessage">Your order has been placed successfully.</p> 
-        <div id="successDetails"></div> 
-        <div id="debugInfo" class="debug-info" style="display: none;"></div> 
-        <div style="display: flex; gap: 10px; margin-top: 25px;"> 
-            <button class="btn btn-primary" onclick="viewOrder()"> 
-                <i class="fas fa-box"></i> View Order 
-            </button> 
-            <button class="btn btn-secondary" onclick="goToOrders()"> 
-                <i class="fas fa-list"></i> My Orders 
-            </button> 
-        </div> 
-    </div> 
-</div> 
- 
-<script type="module"> 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"; 
-import {  
-    getFirestore,  
-    collection,  
-    doc,  
-    getDoc, setDoc, updateDoc, addDoc, 
-    arrayUnion, serverTimestamp,  
-    query, where, getDocs 
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"; 
- 
-const firebaseConfig = { 
-    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk", 
-    authDomain: "iryastone-uk.firebaseapp.com", 
-    projectId: "iryastone-uk", 
-    storageBucket: "iryastone-uk.firebasestorage.app", 
-    messagingSenderId: "110940910896", 
-    appId: "1:110940910896:web:b25e92127118665e5c84f5" 
-}; 
- 
-const app = initializeApp(firebaseConfig); 
-const db = getFirestore(app); 
- 
-let currentUserId = null; 
-let currentOrder = null; 
-let orderType = 'cart'; 
-let currentStep = 1; 
-let selectedPaymentMethod = 'test-confirm'; 
-let orderData = { 
-    items: [], 
-    subtotal: 0, 
-    shipping: 0, 
-    tax: 0, 
-    total: 0, 
-    advancePayment: 0, 
-    remainingPayment: 0 
-}; 
- 
-// SAMPLE DATA FOR TESTING - REMOVE IN PRODUCTION 
-const sampleItems = [ 
-    { 
-        id: "test-stone-1", 
-        stoneName: "Premium Sandstone", 
-        price: 5000, 
-        quantity: 2, 
-        calculatedPrice: 10000, 
-        image: "https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800" 
-    }, 
-    { 
-        id: "test-stone-2",  
-        stoneName: "Kota Stone Slab", 
-        price: 3500, 
-        quantity: 1, 
-        calculatedPrice: 3500, 
-        image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800" 
-    } 
-]; 
- 
-document.addEventListener('DOMContentLoaded', async function() { 
-    await getUserId(); 
-    await loadTestOrderData(); 
-    setupEventListeners(); 
-    updateOrderTypeUI(); 
-    updateOrderSummary(); 
-    document.getElementById('checkoutContent').style.display = 'block'; 
-    updateStepDisplay(); 
-}); 
- 
-async function getUserId() { 
-    let guestId = localStorage.getItem('irya_guest_id'); 
-    if (!guestId) { 
-        guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); 
-        localStorage.setItem('irya_guest_id', guestId); 
-    } 
-    currentUserId = guestId; 
-} 
- 
-async function loadTestOrderData() { 
-    orderData.items = sampleItems; 
-    calculateOrderTotals(); 
-} 
- 
-function calculateOrderTotals() { 
-    let subtotal = 0; 
-    orderData.items.forEach(item => { 
-        subtotal += item.calculatedPrice || (item.price * item.quantity); 
-    }); 
-     
-    orderData.shipping = subtotal > 20000 ? 0 : 500; 
-    orderData.tax = subtotal * 0.18; 
-    orderData.total = subtotal + orderData.shipping + orderData.tax; 
-    orderData.advancePayment = orderData.total * 0.3; 
-    orderData.remainingPayment = orderData.total * 0.7; 
-     
-    orderData.subtotal = subtotal; 
-} 
- 
-function updateOrderSummary() { 
-    const orderItemsSummary = document.getElementById('orderItemsSummary'); 
-    let itemsHTML = ''; 
-     
-    orderData.items.forEach(item => { 
-        itemsHTML += ` 
-            <div class="order-item"> 
-                <div class="item-image"> 
-                    <img src="${item.image}" alt="${item.stoneName}" onerror="this.src='https://images.unsplash.com/photo-1544931170-3ca1337cce88?w=800'"> 
-                </div> 
-                <div class="item-details"> 
-                    <div class="item-name">${item.stoneName}</div> 
-                    <div style="font-size: 12px; color: var(--text-light); margin-bottom: 5px;"> 
-                        Quantity: ${item.quantity} • ₹${item.price}/unit 
-                    </div> 
-                    <div class="item-price">₹${item.calculatedPrice?.toLocaleString()}</div> 
-                </div> 
-            </div> 
-        `; 
-    }); 
-     
-    orderItemsSummary.innerHTML = itemsHTML; 
-     
-    document.getElementById('subtotalAmount').textContent = `₹${orderData.subtotal.toLocaleString()}`; 
-    document.getElementById('shippingAmount').textContent = `₹${orderData.shipping.toLocaleString()}`; 
-    document.getElementById('taxAmount').textContent = `₹${orderData.tax.toLocaleString('en-IN', {maximumFractionDigits: 0})}`; 
-    document.getElementById('totalAmount').textContent = `₹${orderData.total.toLocaleString('en-IN', {maximumFractionDigits: 0})}`; 
-    document.getElementById('advanceAmount').textContent = `₹${orderData.advancePayment.toLocaleString('en-IN', {maximumFractionDigits: 0})}`; 
-} 
- 
-function updateOrderTypeUI() { 
-    document.getElementById('orderTypeContent').innerHTML = ` 
-        <div style="background: var(--bg-light); padding: 20px; border-radius: 8px;"> 
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;"> 
-                <i class="fas fa-shopping-cart" style="color: var(--primary-gold); font-size: 24px;"></i> 
-                <div> 
-                    <h4 style="margin: 0; color: var(--stone-dark);">Test Order - ${orderData.items.length} items</h4> 
-                    <p style="margin: 5px 0 0 0; color: var(--text-light);"> 
-                        Total: ₹${orderData.total.toLocaleString()} | Advance: ₹${orderData.advancePayment.toLocaleString()} 
-                    </p> 
-                </div> 
-            </div> 
-            <p><strong>TEST MODE:</strong> All payments auto-confirmed. Creates: orders, payments, addresses in Firestore.</p> 
-        </div> 
-    `; 
-} 
- 
-function nextStep() { 
-    if (currentStep === 4) return; 
-    if (!validateStep(currentStep)) return; 
-     
-    currentStep++; 
-    updateStepDisplay(); 
-} 
- 
-function goBack() { 
-    if (currentStep === 1) { 
-        window.history.back(); 
-        return; 
-    } 
-    currentStep--; 
-    updateStepDisplay(); 
-} 
- 
-function updateStepDisplay() { 
-    document.querySelectorAll('.step').forEach(step => { 
-        step.style.display = 'none'; 
-    }); 
-     
-    const stepElements = ['orderTypeStep', 'shippingStep', 'paymentStep', 'reviewStep']; 
-    if (stepElements[currentStep - 1]) { 
-        document.getElementById(stepElements[currentStep - 1]).style.display = 'block'; 
-    } 
-     
-    const backBtn = document.getElementById('backBtn'); 
-    const nextBtn = document.getElementById('nextBtn'); 
-     
-    if (currentStep === 1) { 
-        backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Store'; 
-    } else { 
-        backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Back'; 
-    } 
-     
-    if (currentStep === 4) { 
-        nextBtn.style.display = 'none'; 
-        document.getElementById('placeOrderBtn').style.display = 'block'; 
-        updateReviewContent(); 
-    } else { 
-        nextBtn.style.display = 'block'; 
-        document.getElementById('placeOrderBtn').style.display = 'none'; 
-    } 
-} 
- 
-function validateStep(step) { 
-    if (step === 2) { 
-        const requiredFields = ['shippingName', 'shippingEmail', 'shippingPhone', 'shippingAddress1', 'shippingCity', 'shippingPostalCode', 'shippingState']; 
-        for (const fieldId of requiredFields) { 
-            const field = document.getElementById(fieldId); 
-            if (!field.value.trim()) { 
-                alert(`Please fill in ${field.previousElementSibling.textContent}`); 
-                field.focus(); 
-                return false; 
-            } 
-        } 
-        return isValidEmail(document.getElementById('shippingEmail').value); 
-    } 
-    return true; 
-} 
- 
-function isValidEmail(email) { 
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); 
-} 
- 
-function selectPaymentMethod(method) { 
-    selectedPaymentMethod = method; 
-    document.querySelectorAll('.payment-method').forEach(el => { 
-        el.classList.remove('selected'); 
-        el.querySelector('.fa-check-circle').style.display = 'none'; 
-    }); 
-     
-    const selectedMethod = document.getElementById(method + 'Method'); 
-    selectedMethod.classList.add('selected'); 
-    selectedMethod.querySelector('.fa-check-circle') ?  
-        selectedMethod.querySelector('.fa-check-circle').style.display = 'block' :  
-        selectedMethod.querySelector('i').style.display = 'block'; 
-} 
- 
-function updateReviewContent() { 
-    const reviewContent = document.getElementById('reviewContent'); 
-    const shippingName = document.getElementById('shippingName').value; 
-    const shippingEmail = document.getElementById('shippingEmail').value; 
-    const shippingPhone = document.getElementById('shippingPhone').value; 
-    const shippingAddress = [ 
-        document.getElementById('shippingAddress1').value, 
-        document.getElementById('shippingAddress2').value, 
-        document.getElementById('shippingCity').value + ', ' + document.getElementById('shippingState').value, 
-        document.getElementById('shippingPostalCode').value 
-    ].filter(Boolean).join(', '); 
-     
-    const paymentMethodNames = { 
-        'test-confirm': 'TEST - Auto Confirm Payment ✅', 
-        'bank': 'Bank Transfer' 
-    }; 
-     
-    reviewContent.innerHTML = ` 
-        <div style="display: grid; gap: 20px;"> 
-            <div style="background: var(--bg-light); padding: 15px; border-radius: 8px;"> 
-                <h4 style="margin-bottom: 10px; color: var(--stone-dark);">Order Summary</h4> 
-                <div style="font-size: 14px;"> 
-                    <div><strong>Items:</strong> ${orderData.items.length} products</div> 
-                    <div><strong>Total Amount:</strong> ₹${orderData.total.toLocaleString()}</div> 
-                    <div><strong>Advance Payment (30%):</strong> ₹${orderData.advancePayment.toLocaleString()}</div> 
-                    <div><strong>Remaining (70%):</strong> ₹${orderData.remainingPayment.toLocaleString()}</div> 
-                </div> 
-            </div> 
-            <div style="background: var(--bg-light); padding: 15px; border-radius: 8px;"> 
-                <h4 style="margin-bottom: 10px; color: var(--stone-dark);">Shipping Address</h4> 
-                <div style="font-size: 14px;"> 
-                    <div><strong>${shippingName}</strong></div> 
-                    <div>${shippingEmail} | ${shippingPhone}</div> 
-                    <div>${shippingAddress}</div> 
-                </div> 
-            </div> 
-            <div style="background: var(--bg-light); padding: 15px; border-radius: 8px;"> 
-                <h4 style="margin-bottom: 10px; color: var(--stone-dark);">Payment</h4> 
-                <div style="font-size: 14px;"> 
-                    <div><strong>Method:</strong> ${paymentMethodNames[selectedPaymentMethod]}</div> 
-                    ${selectedPaymentMethod === 'test-confirm' ?  
-                        '<div style="color: var(--success-green);"><i class="fas fa-check-circle"></i> INSTANT CONFIRMATION - Firestore Updated</div>' : 
-                        '<div style="color: var(--warning-orange);"><i class="fas fa-clock"></i> 1-3 Business Days</div>' 
-                    } 
-                    <div><strong>Amount Due Now:</strong> ₹${orderData.advancePayment.toLocaleString()}</div> 
-                </div> 
-            </div> 
-        </div> 
-    `; 
-} 
- 
-async function placeOrder() { 
-    const placeOrderBtn = document.getElementById('placeOrderBtn'); 
-    placeOrderBtn.disabled = true; 
-    placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; 
-     
-    try { 
-        const orderDataToSave = await prepareOrderData(); 
-         
-        // 1. SAVE ADDRESS to users/{userId}/addresses 
-        await saveAddress(orderDataToSave.shippingAddress, 'shipping'); 
-         
-        // 2. SAVE PAYMENT to users/{userId}/payments   
-        const paymentId = await savePayment(orderDataToSave); 
-         
-        // 3. SAVE/UPDATE ORDER with paymentHistory, status updates 
-        const orderId = await saveOrderToFirebase(orderDataToSave, paymentId); 
-         
-        // 4. Show success with debug info 
-        showSuccess(orderId, orderDataToSave, paymentId); 
-         
-        console.log('✅ COMPLETE ORDER PROCESSING SUCCESSFUL'); 
-        console.log('📁 Firestore Data Created:'); 
-        console.log('   → users/' + currentUserId + '/addresses/*'); 
-        console.log('   → users/' + currentUserId + '/payments/' + paymentId); 
-        console.log('   → users/' + currentUserId + '/orders/' + orderId); 
-        console.log('   → orders/' + orderId); 
-         
-    } catch (error) { 
-        console.error('❌ Order Error:', error); 
-        alert('Order failed: ' + error.message); 
-        placeOrderBtn.disabled = false; 
-        placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order & Confirm Payment'; 
-    } 
-} 
- 
-async function prepareOrderData() { 
-    const timestamp = Date.now(); 
-    const orderNumber = `IRYA-${timestamp}-${Math.floor(Math.random() * 1000)}`; 
-     
-    const shippingData = { 
-        fullName: document.getElementById('shippingName').value, 
-        email: document.getElementById('shippingEmail').value, 
-        phone: document.getElementById('shippingPhone').value, 
-        address1: document.getElementById('shippingAddress1').value, 
-        address2: document.getElementById('shippingAddress2').value || '', 
-        city: document.getElementById('shippingCity').value, 
-        state: document.getElementById('shippingState').value, 
-        postalCode: document.getElementById('shippingPostalCode').value, 
-        country: document.getElementById('shippingCountry').value, 
-        saveAddress: true 
-    }; 
-     
-    return { 
-        orderNumber, 
-        userId: currentUserId, 
-        userEmail: shippingData.email, 
-        userName: shippingData.fullName, 
-        items: [...orderData.items], 
-        subtotal: orderData.subtotal, 
-        shipping: orderData.shipping, 
-        tax: orderData.tax, 
-        total: orderData.total, 
-        advancePayment: orderData.advancePayment, 
-        remainingPayment: orderData.remainingPayment, 
-        paymentDueNow: orderData.advancePayment, 
-        shippingAddress: shippingData, 
-        paymentMethod: selectedPaymentMethod, 
-        paymentStatus: selectedPaymentMethod === 'test-confirm' ? 'completed' : 'pending', 
-        status: selectedPaymentMethod === 'test-confirm' ? 'confirmed' : 'payment_pending', 
-        notes: document.getElementById('orderNotes').value || '', 
-        source: 'test-checkout', 
-        createdAt: serverTimestamp(), 
-        updatedAt: serverTimestamp(), 
-        paymentHistory: [], 
-        paymentSubmittedAt: serverTimestamp() 
-    }; 
-} 
- 
-async function saveAddress(addressData, type) { 
-    const addressesRef = collection(db, "users", currentUserId, "addresses"); 
-    const addressDoc = await addDoc(addressesRef, { 
-        ...addressData, 
-        type, 
-        createdAt: serverTimestamp(), 
-        updatedAt: serverTimestamp() 
-    }); 
-    console.log('✅ Address saved:', addressDoc.id); 
-    return addressDoc.id; 
-} 
- 
-async function savePayment(orderData) { 
-    const paymentsRef = collection(db, "users", currentUserId, "payments"); 
-    const paymentDoc = await addDoc(paymentsRef, { 
-        paymentId: 'payment_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9), 
-        orderNumber: orderData.orderNumber, 
-        orderId: null, // Will be updated after order creation 
-        amount: orderData.paymentDueNow, 
-        currency: 'INR', 
-        method: orderData.paymentMethod, 
-        status: orderData.paymentStatus, 
-        reference: orderData.orderNumber + '-PAY', 
-        paymentType: 'advance', 
-        createdAt: serverTimestamp(), 
-        updatedAt: serverTimestamp() 
-    }); 
-    console.log('✅ Payment saved:', paymentDoc.id); 
-    return paymentDoc.id; 
-} 
- 
-async function saveOrderToFirebase(orderData, paymentId) { 
-    const orderId = 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); 
-     
-    // Add payment to history 
-    const paymentEntry = { 
-        amount: orderData.paymentDueNow, 
-        date: serverTimestamp(), 
-        paymentMethod: orderData.paymentMethod, 
-        paymentType: 'advance', 
-        reference: orderData.orderNumber + '-ADV', 
-        status: orderData.paymentStatus, 
-        paymentId: paymentId, 
-        updatedBy: 'system' 
-    }; 
-     
-    const finalOrderData = { 
-        ...orderData, 
-        id: orderId, 
-        paymentHistory: [paymentEntry], 
-        bankTransferDetails: selectedPaymentMethod === 'bank' ? { 
-            accountName: "IRYA STONE LTD", 
-            accountNumber: "12345678", 
-            sortCode: "40-04-15", 
-            iban: "GB29NWBK60161331926819", 
-            swift: "NWBKGB2L", 
-            reference: orderData.orderNumber, 
-            amount: orderData.paymentDueNow, 
-            currency: "INR" 
-        } : null 
-    }; 
-     
-    // Save to user orders 
-    const userOrderRef = doc(db, "users", currentUserId, "orders", orderId); 
-    await setDoc(userOrderRef, finalOrderData); 
-     
-    // Save to main orders   
-    const mainOrderRef = doc(db, "orders", orderId); 
-    await setDoc(mainOrderRef, finalOrderData); 
-     
-    // Update payment with orderId 
-    const paymentRef = doc(db, "users", currentUserId, "payments", paymentId); 
-    await updateDoc(paymentRef, { orderId }); 
-     
-    console.log('✅ Order saved:', orderId); 
-    return orderId; 
-} 
- 
-function showSuccess(orderId, orderData, paymentId) { 
-    document.getElementById('successTitle').textContent = 'Order Confirmed! ✅'; 
-    document.getElementById('successMessage').textContent =  
-        `Order #${orderData.orderNumber} created successfully. Advance payment confirmed!`; 
-     
-    document.getElementById('successDetails').innerHTML = ` 
-        <div style="background: var(--bg-light); padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: left;"> 
-            <div style="font-size: 14px;"> 
-                <div><strong>Order ID:</strong> ${orderId}</div> 
-                <div><strong>Order Number:</strong> ${orderData.orderNumber}</div> 
-                <div><strong>Total Amount:</strong> ₹${orderData.total.toLocaleString()}</div> 
-                <div><strong>Advance Paid:</strong> <span style="color: var(--success-green);">₹${orderData.advancePayment.toLocaleString()}</span></div> 
-                <div><strong>Remaining:</strong> ₹${orderData.remainingPayment.toLocaleString()}</div> 
-                <div><strong>Payment Method:</strong> ${orderData.paymentMethod}</div> 
-                <div><strong>Status:</strong> <span style="color: var(--success-green); font-weight: 600;">${orderData.status}</span></div> 
-            </div> 
-        </div> 
-    `; 
-     
-    // Debug info 
-    document.getElementById('debugInfo').innerHTML = ` 
-        <strong>🔥 FIRESTORE DATA CREATED:</strong><br> 
-        📁 <strong>users/${currentUserId}/</strong><br> 
-        &nbsp;&nbsp;→ addresses/* (Shipping address saved)<br> 
-        &nbsp;&nbsp;→ payments/${paymentId} (Payment record)<br> 
-        &nbsp;&nbsp;→ orders/${orderId} (Order with paymentHistory)<br> 
-        📁 <strong>orders/${orderId}</strong> (Main order copy)<br><br> 
-        <strong>📊 ORDER FIELDS UPDATED:</strong><br> 
-        ✅ paymentStatus: ${orderData.paymentStatus}<br> 
-        ✅ status: ${orderData.status}<br> 
-        ✅ advancePayment: ₹${orderData.advancePayment.toLocaleString()}<br> 
-        ✅ remainingPayment: ₹${orderData.remainingPayment.toLocaleString()}<br> 
-        ✅ paymentHistory: [${paymentId}]<br> 
-        ✅ paymentSubmittedAt: NOW 
-    `; 
-    document.getElementById('debugInfo').style.display = 'block'; 
-     
-    document.getElementById('successModal').style.display = 'flex'; 
-} 
- 
-function viewOrder() { 
-    alert('Check Firestore Console:\nusers/' + currentUserId + '/orders/' +  
-          'order_* & orders/order_*'); 
-} 
- 
-function goToOrders() { 
-    window.location.href = 'orders.html'; 
-} 
- 
-function setupEventListeners() { 
-    // Set default values 
-    document.getElementById('shippingName').value = 'Ravi Jain'; 
-    document.getElementById('shippingEmail').value = 'ravijain236129@gmail.com'; 
-    document.getElementById('shippingPhone').value = '+917737740207'; 
-    document.getElementById('shippingAddress1').value = 'Mayur Kirana Store, Tejaji Choke'; 
-    document.getElementById('shippingCity').value = 'Bijoliya'; 
-    document.getElementById('shippingState').value = 'Rajasthan'; 
-    document.getElementById('shippingPostalCode').value = '311602'; 
-     
-    // Auto select TEST payment 
-    selectPaymentMethod('test-confirm'); 
-} 
- 
-// Global functions 
-window.nextStep = nextStep; 
-window.goBack = goBack; 
-window.selectPaymentMethod = selectPaymentMethod; 
-window.placeOrder = placeOrder; 
-window.viewOrder = viewOrder; 
-window.goToOrders = goToOrders; 
-</script> 
- 
-</body> 
-</html> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | IRYA STONE</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gold: #c9a227;
+            --gold-light: #f0d77c;
+            --gold-dark: #9c7c1f;
+            --stone-dark: #1a1a1a;
+            --stone-light: #f4f6f4;
+            --bg-light: #f7f9fc;
+            --text-dark: #222222;
+            --text-light: #666666;
+            --white: #ffffff;
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --error-red: #ef4444;
+            --info-blue: #3b82f6;
+            --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --border-radius-lg: 20px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding-bottom: 80px;
+            font-size: 14px;
+        }
+        
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+            z-index: 1000;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            color: var(--primary-gold);
+            font-size: 24px;
+        }
+        
+        .logo span {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--stone-dark);
+            font-family: 'Roboto Slab', serif;
+        }
+        
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 80px auto 30px;
+            padding: 0 16px;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .page-header h1 {
+            font-size: 28px;
+            color: var(--stone-dark);
+            margin-bottom: 10px;
+        }
+        
+        .page-header p {
+            color: var(--text-light);
+        }
+        
+        /* Checkout Flow */
+        .checkout-flow {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .checkout-steps {
+            flex: 1;
+        }
+        
+        .checkout-summary {
+            width: 350px;
+            position: sticky;
+            top: 100px;
+            align-self: flex-start;
+        }
+        
+        /* Steps */
+        .step {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-gold);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--stone-dark);
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--stone-dark);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        /* Order Summary */
+        .order-summary-box {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 20px;
+        }
+        
+        .order-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .order-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .item-details {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .item-price {
+            color: var(--primary-gold);
+            font-weight: 600;
+        }
+        
+        .summary-total {
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .final-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--stone-dark);
+        }
+        
+        /* Payment Methods - PROFESSIONAL UPDATE */
+        .payment-method {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+            position: relative;
+        }
+        
+        .payment-method:hover {
+            border-color: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .payment-method.selected {
+            border-color: var(--primary-gold);
+            background: rgba(201, 162, 39, 0.05);
+            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.1);
+        }
+        
+        .method-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary-gold);
+            flex-shrink: 0;
+        }
+        
+        .method-info {
+            flex: 1;
+        }
+        
+        .method-info h4 {
+            margin-bottom: 5px;
+            color: var(--stone-dark);
+        }
+        
+        .method-info p {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+        
+        .method-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-right: 5px;
+            margin-top: 2px;
+        }
+        
+        .method-badge.fast {
+            background: var(--success-green);
+            color: white;
+        }
+        
+        .method-badge.instant {
+            background: var(--info-blue);
+            color: white;
+        }
+        
+        .method-badge.delayed {
+            background: var(--warning-orange);
+            color: white;
+        }
+        
+        /* Payment Processing Status */
+        .payment-status {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            display: none;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: #ddd;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .status-dot.active {
+            background: var(--primary-gold);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-gold);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            background: var(--gold-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-secondary {
+            background: var(--white);
+            color: var(--text-dark);
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-light);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-gold);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error */
+        .error-box {
+            background: #fff5f5;
+            border: 1px solid #ffcccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .error-box i {
+            color: #ff4757;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        /* Success Modal */
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+        
+        .success-content {
+            background: white;
+            border-radius: var(--border-radius-lg);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #51cf66;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .checkout-flow {
+                flex-direction: column;
+            }
+            
+            .checkout-summary {
+                width: 100%;
+                position: static;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 70px auto 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .step {
+                padding: 20px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <div class="logo">
+        <i class="fas fa-gem"></i>
+        <span>IRYA STONE</span>
+    </div>
+    
+    <div style="display: flex; gap: 10px;">
+        <a href="cart.html" class="btn-secondary" style="padding: 8px 15px; text-decoration: none;">
+            <i class="fas fa-shopping-cart"></i>
+            Cart
+        </a>
+        <a href="products.html" class="btn-secondary" style="padding: 8px 15px; text-decoration: none;">
+            <i class="fas fa-store"></i>
+            Shop
+        </a>
+    </div>
+</header>
+
+<!-- Main Container -->
+<main class="container">
+    <div class="page-header">
+        <h1 id="pageTitle">Complete Your Order</h1>
+        <p id="pageSubtitle">Secure checkout for your stone products</p>
+    </div>
+    
+    <!-- Loading State -->
+    <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <p>Loading your order details...</p>
+    </div>
+    
+    <!-- Error State -->
+    <div class="error-box" id="errorState" style="display: none;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3 id="errorTitle">Error Loading Order</h3>
+        <p id="errorMessage">Failed to load order details. Please try again.</p>
+        <button class="btn-primary" onclick="retryLoad()" style="margin-top: 15px;">
+            <i class="fas fa-redo"></i> Retry
+        </button>
+    </div>
+    
+    <!-- Checkout Content -->
+    <div id="checkoutContent" style="display: none;">
+        <!-- Checkout Flow -->
+        <div class="checkout-flow">
+            <!-- Steps -->
+            <div class="checkout-steps">
+                <!-- Step 1: Order Type -->
+                <div class="step" id="orderTypeStep">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <h3 class="step-title">Order Type</h3>
+                    </div>
+                    
+                    <div id="orderTypeContent">
+                        <!-- Content will be loaded dynamically -->
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label>Any special requirements?</label>
+                        <textarea id="orderNotes" rows="3" placeholder="Add any special instructions, custom requirements, or notes about your order..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Shipping Details -->
+                <div class="step" id="shippingStep">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <h3 class="step-title">Shipping Details</h3>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name *</label>
+                            <input type="text" id="shippingName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="shippingEmail" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" id="shippingPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Country *</label>
+                            <select id="shippingCountry" required>
+                                <option value="">Select Country</option>
+                                <option value="GB" selected>United Kingdom</option>
+                                <option value="US">United States</option>
+                                <option value="CA">Canada</option>
+                                <option value="AU">Australia</option>
+                                <option value="IN">India</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Address Line 1 *</label>
+                            <input type="text" id="shippingAddress1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Address Line 2</label>
+                        <input type="text" id="shippingAddress2">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>City *</label>
+                            <input type="text" id="shippingCity" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Postal Code *</label>
+                            <input type="text" id="shippingPostalCode" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>State/Province *</label>
+                            <input type="text" id="shippingState" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><input type="checkbox" id="sameAsBilling"> Billing address same as shipping</label>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Payment Method - PROFESSIONAL UPDATE -->
+                <div class="step" id="paymentStep">
+                    <div class="step-header">
+                        <div class="step-number">3</div>
+                        <h3 class="step-title">Payment Method</h3>
+                    </div>
+                    
+                    <p style="margin-bottom: 20px; color: var(--text-light);">Select your preferred payment method:</p>
+                    
+                    <!-- Stripe - Fastest Method -->
+                    <div class="payment-method" onclick="selectPaymentMethod('stripe')" id="stripeMethod">
+                        <div class="method-icon">
+                            <i class="fab fa-cc-stripe"></i>
+                        </div>
+                        <div class="method-info">
+                            <h4>Credit/Debit Card (Stripe)</h4>
+                            <p>Pay securely with Stripe - Instant confirmation</p>
+                            <div>
+                                <span class="method-badge fast">FAST PAYMENT</span>
+                                <span class="method-badge instant">INSTANT CONFIRMATION</span>
+                            </div>
+                            <small style="color: var(--success-green); display: block; margin-top: 5px;">
+                                <i class="fas fa-bolt"></i> Recommended for fastest processing
+                            </small>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <i class="fas fa-check-circle" style="color: var(--primary-gold); display: none;"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- PayPal - Fast Method -->
+                    <div class="payment-method" onclick="selectPaymentMethod('paypal')" id="paypalMethod">
+                        <div class="method-icon">
+                            <i class="fab fa-paypal"></i>
+                        </div>
+                        <div class="method-info">
+                            <h4>PayPal</h4>
+                            <p>Pay with your PayPal account - Instant processing</p>
+                            <div>
+                                <span class="method-badge fast">FAST PAYMENT</span>
+                                <span class="method-badge instant">INSTANT CONFIRMATION</span>
+                            </div>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <i class="fas fa-check-circle" style="color: var(--primary-gold); display: none;"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Bank Transfer - Delayed Method -->
+                    <div class="payment-method" onclick="selectPaymentMethod('bank')" id="bankMethod">
+                        <div class="method-icon">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <div class="method-info">
+                            <h4>Bank Transfer</h4>
+                            <p>Transfer directly to our bank account</p>
+                            <div>
+                                <span class="method-badge delayed">1-3 BUSINESS DAYS</span>
+                            </div>
+                            <small style="color: var(--warning-orange); display: block; margin-top: 5px;">
+                                <i class="fas fa-clock"></i> Payment confirmation takes 1-3 business days
+                            </small>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <i class="fas fa-check-circle" style="color: var(--primary-gold); display: none;"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Bank Transfer Details -->
+                    <div id="bankDetails" style="display: none; margin-top: 20px; padding: 20px; background: var(--bg-light); border-radius: 8px;">
+                        <h4 style="margin-bottom: 15px;">Bank Account Details</h4>
+                        <div style="line-height: 1.8; font-size: 14px; background: white; padding: 15px; border-radius: 8px;">
+                            <p><strong>Bank Name:</strong> HSBC UK</p>
+                            <p><strong>Account Name:</strong> IRYA STONE LTD</p>
+                            <p><strong>Account Number:</strong> 12345678</p>
+                            <p><strong>Sort Code:</strong> 40-04-15</p>
+                            <p><strong>Reference:</strong> <span id="bankReference"></span></p>
+                        </div>
+                        <div style="margin-top: 15px; color: var(--text-light); font-size: 12px; padding: 12px; background: #fff8e1; border-radius: 8px; border-left: 4px solid var(--warning-orange);">
+                            <i class="fas fa-info-circle" style="color: var(--warning-orange);"></i>
+                            <strong>Important:</strong> 
+                            <span style="color: var(--warning-orange); margin-left: 5px;">
+                                Bank transfers take 1-3 business days to process. Your order will be confirmed once payment is received.
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Details -->
+                    <div id="cardDetails" style="display: none; margin-top: 20px;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Card Number *</label>
+                                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Expiry Date *</label>
+                                <input type="text" id="cardExpiry" placeholder="MM/YY">
+                            </div>
+                            <div class="form-group">
+                                <label>CVC *</label>
+                                <input type="text" id="cardCvc" placeholder="123">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Cardholder Name *</label>
+                            <input type="text" id="cardName" placeholder="John Doe">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 4: Review & Confirm -->
+                <div class="step" id="reviewStep">
+                    <div class="step-header">
+                        <div class="step-number">4</div>
+                        <h3 class="step-title">Review & Confirm</h3>
+                    </div>
+                    
+                    <div id="reviewContent">
+                        <!-- Review content will be loaded here -->
+                    </div>
+                    
+                    <div style="margin-top: 30px;">
+                        <button class="btn btn-primary" onclick="placeOrder()" id="placeOrderBtn">
+                            <i class="fas fa-lock"></i> Place Order
+                        </button>
+                        <p style="text-align: center; margin-top: 15px; font-size: 12px; color: var(--text-light);">
+                            <i class="fas fa-shield-alt"></i> Your payment is secure and encrypted
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="checkout-summary">
+                <div class="order-summary-box">
+                    <h3 style="margin-bottom: 20px; color: var(--stone-dark);">Order Summary</h3>
+                    
+                    <div class="order-items" id="orderItemsSummary">
+                        <!-- Order items will be loaded here -->
+                    </div>
+                    
+                    <div class="summary-total">
+                        <div class="total-row">
+                            <span>Subtotal:</span>
+                            <span id="subtotalAmount">£0.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Shipping:</span>
+                            <span id="shippingAmount">£0.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Tax (20%):</span>
+                            <span id="taxAmount">£0.00</span>
+                        </div>
+                        
+                        <!-- For pending payments -->
+                        <div class="total-row" id="alreadyPaidRow" style="display: none;">
+                            <span>Already Paid:</span>
+                            <span id="alreadyPaidAmount" style="color: #51cf66;">£0.00</span>
+                        </div>
+                        
+                        <!-- For pending payments -->
+                        <div class="total-row" id="remainingPaymentRow" style="display: none;">
+                            <span>Remaining:</span>
+                            <span id="remainingPaymentAmount" style="color: #ff6b6b;">£0.00</span>
+                        </div>
+                        
+                        <div class="total-row final-total">
+                            <span>Total:</span>
+                            <span id="totalAmount">£0.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment Info -->
+                <div id="paymentInfoCard" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: var(--border-radius); margin-bottom: 20px;">
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-size: 12px; opacity: 0.9;">Order Number</div>
+                        <div style="font-weight: bold; font-size: 18px;" id="orderNumberDisplay"></div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; opacity: 0.9;">Payment Due</div>
+                        <div style="font-weight: bold; font-size: 18px;" id="paymentDueAmount">£0.00</div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="goBack()" id="backBtn">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-primary" onclick="nextStep()" id="nextBtn">
+                        Continue <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Payment Processing Modal -->
+<div class="success-modal" id="paymentProcessingModal" style="display: none;">
+    <div class="success-content">
+        <div class="spinner" style="margin: 20px auto;"></div>
+        <h2 style="margin-bottom: 10px;">Processing Payment</h2>
+        <p style="margin-bottom: 20px; color: var(--text-light);" id="processingMessage">
+            Please wait while we process your payment...
+        </p>
+        
+        <div class="status-indicator">
+            <div class="status-dot active"></div>
+            <div class="status-dot"></div>
+            <div class="status-dot"></div>
+            <div class="status-dot"></div>
+            <div class="status-dot"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Bank Transfer Waiting Modal -->
+<div class="success-modal" id="bankTransferModal" style="display: none;">
+    <div class="success-content">
+        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--warning-orange), #fbbf24); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px;">
+            <i class="fas fa-clock"></i>
+        </div>
+        <h2 style="margin-bottom: 10px;">Payment Pending</h2>
+        <p style="margin-bottom: 20px; color: var(--text-light);">
+            Your order has been created. Please complete the bank transfer using the details below.
+        </p>
+        
+        <div id="bankTransferDetails" style="background: var(--bg-light); padding: 20px; border-radius: 8px; margin-bottom: 25px; text-align: left; font-size: 14px;">
+            <!-- Bank details will be shown here -->
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button class="btn btn-primary" onclick="copyBankDetails()" style="margin-bottom: 10px;">
+                <i class="fas fa-copy"></i> Copy Bank Details
+            </button>
+            <button class="btn btn-secondary" onclick="closeBankModal()">
+                <i class="fas fa-check"></i> I'll Complete Transfer
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="success-modal" id="successModal">
+    <div class="success-content">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h2 style="margin-bottom: 10px;">Order Successful!</h2>
+        <p style="margin-bottom: 20px; color: var(--text-light);" id="successMessage">
+            Your order has been placed successfully.
+        </p>
+        
+        <div id="successDetails" style="background: var(--bg-light); padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: left; font-size: 14px;">
+            <!-- Success details -->
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary" onclick="viewOrder()">
+                <i class="fas fa-box"></i> View Order
+            </button>
+            <button class="btn btn-secondary" onclick="goToOrders()">
+                <i class="fas fa-list"></i> My Orders
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+// Firebase Import
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { 
+    getFirestore, 
+    collection, 
+    doc, 
+    getDoc,
+    setDoc,
+    updateDoc,
+    arrayUnion,
+    serverTimestamp,
+    query,
+    where,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+    authDomain: "iryastone-uk.firebaseapp.com",
+    projectId: "iryastone-uk",
+    storageBucket: "iryastone-uk.firebasestorage.app",
+    messagingSenderId: "110940910896",
+    appId: "1:110940910896:web:b25e92127118665e5c84f5",
+    measurementId: "G-6YM1FLYN48"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Global Variables
+let currentUserId = null;
+let currentOrder = null;
+let orderType = null; // 'buynow', 'cart', 'pending_payment'
+let currentStep = 1;
+let selectedPaymentMethod = 'stripe'; // Changed to stripe as default (fastest)
+let orderData = {
+    items: [],
+    subtotal: 0,
+    shipping: 0,
+    tax: 0,
+    total: 0,
+    advancePayment: 0,
+    remainingPayment: 0,
+    alreadyPaid: 0,
+    notes: ''
+};
+
+// Initialize Page
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Checkout page initializing...');
+    
+    try {
+        await getUserId();
+        await loadOrderData();
+        setupEventListeners();
+    } catch (error) {
+        console.error('Initialization error:', error);
+        showError('Page Error', 'Failed to initialize checkout. Please refresh.');
+    }
+});
+
+// Get User ID
+async function getUserId() {
+    try {
+        // Check localStorage for user
+        const savedUser = localStorage.getItem('irya_stone_auth_user');
+        if (savedUser) {
+            const user = JSON.parse(savedUser);
+            currentUserId = user.uid;
+            return currentUserId;
+        }
+
+        // Check for guest user
+        let guestId = localStorage.getItem('irya_guest_id');
+        if (!guestId) {
+            guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('irya_guest_id', guestId);
+        }
+        
+        currentUserId = guestId;
+        return currentUserId;
+        
+    } catch (error) {
+        console.error('Error getting user ID:', error);
+        currentUserId = 'guest_' + Date.now();
+        return currentUserId;
+    }
+}
+
+// Load Order Data
+async function loadOrderData() {
+    showLoading(true);
+    
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order');
+        const isBuyNow = urlParams.get('buynow') === 'true';
+        const isPendingPayment = urlParams.get('type') === 'remaining_payment';
+        
+        console.log('URL Params:', { orderId, isBuyNow, isPendingPayment });
+        
+        // Determine order type
+        if (isPendingPayment && orderId) {
+            orderType = 'pending_payment';
+            await loadPendingPaymentOrder(orderId);
+        } else if (isBuyNow) {
+            orderType = 'buynow';
+            await loadBuyNowOrder();
+        } else {
+            orderType = 'cart';
+            await loadCartOrder();
+        }
+        
+        // Update UI based on order type
+        updateOrderTypeUI();
+        updateOrderSummary();
+        
+        showLoading(false);
+        document.getElementById('checkoutContent').style.display = 'block';
+        
+    } catch (error) {
+        console.error('Error loading order data:', error);
+        showError('Load Error', 'Failed to load order data. Please try again.');
+        showLoading(false);
+    }
+}
+
+// Load Pending Payment Order
+async function loadPendingPaymentOrder(orderId) {
+    try {
+        // Check localStorage for payment data
+        const storedPayment = localStorage.getItem('irya_pending_payment_order');
+        if (storedPayment) {
+            currentOrder = JSON.parse(storedPayment);
+            orderData.alreadyPaid = currentOrder.paidAmount || 0;
+            orderData.remainingPayment = currentOrder.remainingAmount || 0;
+            
+            // Load order details from Firebase
+            await loadOrderDetails(currentOrder.orderId);
+            return;
+        }
+        
+        // Load from Firebase
+        await loadOrderDetails(orderId);
+        
+        const paidAmount = currentOrder.submittedAmount || currentOrder.advancePayment || 0;
+        const totalAmount = currentOrder.total || 0;
+        const remainingAmount = currentOrder.remainingPayment || (totalAmount - paidAmount);
+        
+        orderData.alreadyPaid = paidAmount;
+        orderData.remainingPayment = remainingAmount;
+        
+        // Update page title for pending payment
+        document.getElementById('pageTitle').textContent = 'Complete Payment';
+        document.getElementById('pageSubtitle').textContent = 'Pay the remaining amount for your order';
+        
+    } catch (error) {
+        console.error('Error loading pending payment order:', error);
+        throw error;
+    }
+}
+
+// Load Buy Now Order
+async function loadBuyNowOrder() {
+    try {
+        const userId = currentUserId;
+        const buyNowKey = 'irya_buynow_cart_' + userId;
+        const buyNowData = localStorage.getItem(buyNowKey);
+        
+        if (buyNowData) {
+            const buyNowItems = JSON.parse(buyNowData);
+            
+            // Convert buy now items to order data
+            orderData.items = buyNowItems.map(item => ({
+                ...item,
+                type: 'buynow'
+            }));
+            
+            // Calculate totals
+            calculateOrderTotals();
+            
+            // Update page title
+            document.getElementById('pageTitle').textContent = 'Buy Now Checkout';
+            
+        } else {
+            // Check session storage
+            const sessionBuyNow = sessionStorage.getItem('irya_current_buynow');
+            if (sessionBuyNow) {
+                const item = JSON.parse(sessionBuyNow);
+                orderData.items = [item];
+                calculateOrderTotals();
+            } else {
+                throw new Error('No buy now items found');
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error loading buy now order:', error);
+        throw error;
+    }
+}
+
+// Load Cart Order
+async function loadCartOrder() {
+    try {
+        const userId = currentUserId;
+        const cartKey = 'irya_local_cart_' + userId;
+        const cartData = localStorage.getItem(cartKey);
+        
+        if (cartData) {
+            const cartItems = JSON.parse(cartData);
+            
+            // Filter out buy now items
+            orderData.items = cartItems.filter(item => !item.isBuyNow);
+            
+            if (orderData.items.length === 0) {
+                throw new Error('Cart is empty');
+            }
+            
+            // Calculate totals
+            calculateOrderTotals();
+            
+        } else {
+            throw new Error('Cart is empty');
+        }
+        
+    } catch (error) {
+        console.error('Error loading cart order:', error);
+        throw error;
+    }
+}
+
+// Load Order Details from Firebase
+async function loadOrderDetails(orderId) {
+    try {
+        // Try user-specific collection first
+        try {
+            const orderDoc = await getDoc(doc(db, "users", currentUserId, "orders", orderId));
+            if (orderDoc.exists()) {
+                currentOrder = orderDoc.data();
+                currentOrder.id = orderDoc.id;
+                return;
+            }
+        } catch (error) {
+            console.log('Trying main orders collection...');
+        }
+        
+        // Try main orders collection
+        const ordersRef = collection(db, "orders");
+        const orderQuery = query(ordersRef, where("__name__", "==", orderId));
+        const orderSnapshot = await getDocs(orderQuery);
+        
+        if (!orderSnapshot.empty) {
+            currentOrder = orderSnapshot.docs[0].data();
+            currentOrder.id = orderSnapshot.docs[0].id;
+            return;
+        }
+        
+        throw new Error('Order not found');
+        
+    } catch (error) {
+        console.error('Error loading order details:', error);
+        throw error;
+    }
+}
+
+// Calculate Order Totals
+function calculateOrderTotals() {
+    let subtotal = 0;
+    
+    orderData.items.forEach(item => {
+        const itemTotal = item.calculatedPrice || (item.price * (item.quantity || 1));
+        subtotal += itemTotal;
+    });
+    
+    // Shipping - basic calculation
+    orderData.shipping = subtotal > 500 ? 0 : 25;
+    
+    // Tax - 20% VAT
+    orderData.tax = subtotal * 0.2;
+    
+    // Total
+    orderData.total = subtotal + orderData.shipping + orderData.tax;
+    
+    // Advance payment (30%)
+    orderData.advancePayment = orderData.total * 0.3;
+    
+    // Remaining payment (70%)
+    orderData.remainingPayment = orderData.total * 0.7;
+}
+
+// Update Order Type UI
+function updateOrderTypeUI() {
+    const orderTypeContent = document.getElementById('orderTypeContent');
+    const paymentInfoCard = document.getElementById('paymentInfoCard');
+    const alreadyPaidRow = document.getElementById('alreadyPaidRow');
+    const remainingPaymentRow = document.getElementById('remainingPaymentRow');
+    
+    if (orderType === 'pending_payment') {
+        orderTypeContent.innerHTML = `
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 4px solid #2196f3;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <i class="fas fa-money-bill-wave" style="color: #2196f3; font-size: 24px;"></i>
+                    <div>
+                        <h4 style="margin: 0; color: #0d47a1;">Complete Payment for Order</h4>
+                        <p style="margin: 5px 0 0 0; color: #1976d2;">
+                            Order: ${currentOrder.orderNumber || currentOrder.id?.substring(0, 8)}
+                        </p>
+                    </div>
+                </div>
+                <p>You are completing the remaining payment for your existing order. The order details are already confirmed.</p>
+            </div>
+        `;
+        
+        paymentInfoCard.style.display = 'block';
+        document.getElementById('orderNumberDisplay').textContent = 
+            currentOrder.orderNumber || currentOrder.id?.substring(0, 8);
+        document.getElementById('paymentDueAmount').textContent = 
+            formatPrice(orderData.remainingPayment);
+            
+        alreadyPaidRow.style.display = 'flex';
+        remainingPaymentRow.style.display = 'flex';
+        
+    } else if (orderType === 'buynow') {
+        orderTypeContent.innerHTML = `
+            <div style="background: #fff8e1; padding: 20px; border-radius: 8px; border-left: 4px solid var(--primary-gold);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <i class="fas fa-bolt" style="color: var(--primary-gold); font-size: 24px;"></i>
+                    <div>
+                        <h4 style="margin: 0; color: var(--stone-dark);">Buy Now Checkout</h4>
+                        <p style="margin: 5px 0 0 0; color: var(--text-light);">
+                            Express checkout for selected product
+                        </p>
+                    </div>
+                </div>
+                <p>You are using the Buy Now option for immediate checkout. This is a single product purchase.</p>
+            </div>
+        `;
+        
+    } else {
+        orderTypeContent.innerHTML = `
+            <div style="background: var(--bg-light); padding: 20px; border-radius: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <i class="fas fa-shopping-cart" style="color: var(--primary-gold); font-size: 24px;"></i>
+                    <div>
+                        <h4 style="margin: 0; color: var(--stone-dark);">Cart Checkout</h4>
+                        <p style="margin: 5px 0 0 0; color: var(--text-light);">
+                            Checkout for ${orderData.items.length} item(s) from your cart
+                        </p>
+                    </div>
+                </div>
+                <p>You are checking out items from your shopping cart. Review your items below.</p>
+            </div>
+        `;
+    }
+}
+
+// Update Order Summary
+function updateOrderSummary() {
+    const orderItemsSummary = document.getElementById('orderItemsSummary');
+    
+    // Update order items display
+    if (orderData.items.length > 0) {
+        let itemsHTML = '';
+        
+        orderData.items.forEach(item => {
+            const itemName = item.stoneName || item.name || 'Stone Product';
+            const itemQuantity = item.quantity || 1;
+            const itemPrice = item.calculatedPrice || (item.price * itemQuantity);
+            const itemImage = item.image || getDefaultImage(item.category);
+            
+            itemsHTML += `
+                <div class="order-item">
+                    <div class="item-image">
+                        <img src="${itemImage}" alt="${itemName}" 
+                             onerror="this.src='${getDefaultImage('stone')}'">
+                    </div>
+                    <div class="item-details">
+                        <div class="item-name">${itemName}</div>
+                        <div style="font-size: 12px; color: var(--text-light); margin-bottom: 5px;">
+                            Quantity: ${itemQuantity}
+                            ${item.calculationData ? ` • ${item.calculationData.unit || 'piece'}` : ''}
+                        </div>
+                        <div class="item-price">${formatPrice(itemPrice)}</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        orderItemsSummary.innerHTML = itemsHTML;
+    } else {
+        orderItemsSummary.innerHTML = '<p style="text-align: center; color: var(--text-light);">No items</p>';
+    }
+    
+    // Update amounts
+    document.getElementById('subtotalAmount').textContent = formatPrice(orderData.subtotal);
+    document.getElementById('shippingAmount').textContent = formatPrice(orderData.shipping);
+    document.getElementById('taxAmount').textContent = formatPrice(orderData.tax);
+    document.getElementById('alreadyPaidAmount').textContent = formatPrice(orderData.alreadyPaid);
+    document.getElementById('remainingPaymentAmount').textContent = formatPrice(orderData.remainingPayment);
+    
+    // Update total based on order type
+    if (orderType === 'pending_payment') {
+        document.getElementById('totalAmount').textContent = formatPrice(orderData.remainingPayment);
+    } else {
+        document.getElementById('totalAmount').textContent = formatPrice(orderData.total);
+    }
+}
+
+// Step Navigation
+function nextStep() {
+    if (currentStep === 4) return;
+    
+    // Validate current step
+    if (!validateStep(currentStep)) {
+        return;
+    }
+    
+    currentStep++;
+    updateStepDisplay();
+}
+
+function goBack() {
+    if (currentStep === 1) {
+        window.history.back();
+        return;
+    }
+    
+    currentStep--;
+    updateStepDisplay();
+}
+
+function updateStepDisplay() {
+    // Hide all steps
+    document.querySelectorAll('.step').forEach(step => {
+        step.style.display = 'none';
+    });
+    
+    // Show current step
+    const stepElements = [
+        'orderTypeStep',
+        'shippingStep',
+        'paymentStep',
+        'reviewStep'
+    ];
+    
+    if (stepElements[currentStep - 1]) {
+        document.getElementById(stepElements[currentStep - 1]).style.display = 'block';
+    }
+    
+    // Update buttons
+    const backBtn = document.getElementById('backBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if (currentStep === 1) {
+        backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Store';
+    } else {
+        backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Back';
+    }
+    
+    if (currentStep === 4) {
+        nextBtn.style.display = 'none';
+        document.getElementById('placeOrderBtn').style.display = 'block';
+    } else {
+        nextBtn.style.display = 'block';
+        document.getElementById('placeOrderBtn').style.display = 'none';
+    }
+    
+    // Update review content on step 4
+    if (currentStep === 4) {
+        updateReviewContent();
+    }
+}
+
+function validateStep(step) {
+    if (step === 2) {
+        // Validate shipping details
+        const requiredFields = [
+            'shippingName',
+            'shippingEmail',
+            'shippingPhone',
+            'shippingAddress1',
+            'shippingCity',
+            'shippingPostalCode',
+            'shippingState'
+        ];
+        
+        for (const fieldId of requiredFields) {
+            const field = document.getElementById(fieldId);
+            if (!field.value.trim()) {
+                alert(`Please fill in ${field.previousElementSibling.textContent}`);
+                field.focus();
+                return false;
+            }
+        }
+        
+        // Validate email
+        const email = document.getElementById('shippingEmail').value;
+        if (!isValidEmail(email)) {
+            alert('Please enter a valid email address');
+            return false;
+        }
+        
+    } else if (step === 3) {
+        // Validate payment method selection
+        if (!selectedPaymentMethod) {
+            alert('Please select a payment method');
+            return false;
+        }
+        
+        // Validate card details if Stripe selected
+        if (selectedPaymentMethod === 'stripe') {
+            const cardNumber = document.getElementById('cardNumber').value;
+            const cardExpiry = document.getElementById('cardExpiry').value;
+            const cardCvc = document.getElementById('cardCvc').value;
+            const cardName = document.getElementById('cardName').value;
+            
+            if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
+                alert('Please fill in all card details');
+                return false;
+            }
+        }
+    }
+    
+    return true;
+}
+
+function isValidEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+// Payment Method Selection
+function selectPaymentMethod(method) {
+    selectedPaymentMethod = method;
+    
+    // Update UI
+    document.querySelectorAll('.payment-method').forEach(el => {
+        el.classList.remove('selected');
+        el.querySelector('.fa-check-circle').style.display = 'none';
+    });
+    
+    const selectedMethod = document.getElementById(method + 'Method');
+    selectedMethod.classList.add('selected');
+    selectedMethod.querySelector('.fa-check-circle').style.display = 'block';
+    
+    // Show relevant details
+    document.getElementById('bankDetails').style.display = method === 'bank' ? 'block' : 'none';
+    document.getElementById('cardDetails').style.display = method === 'stripe' ? 'block' : 'none';
+    
+    // Generate bank reference if bank transfer
+    if (method === 'bank') {
+        const reference = `IRYA-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        document.getElementById('bankReference').textContent = reference;
+    }
+}
+
+// Update Review Content
+function updateReviewContent() {
+    const reviewContent = document.getElementById('reviewContent');
+    
+    const shippingName = document.getElementById('shippingName').value;
+    const shippingEmail = document.getElementById('shippingEmail').value;
+    const shippingPhone = document.getElementById('shippingPhone').value;
+    const shippingAddress = [
+        document.getElementById('shippingAddress1').value,
+        document.getElementById('shippingAddress2').value,
+        document.getElementById('shippingCity').value,
+        document.getElementById('shippingState').value,
+        document.getElementById('shippingPostalCode').value
+    ].filter(Boolean).join(', ');
+    
+    const paymentMethodNames = {
+        'bank': 'Bank Transfer',
+        'stripe': 'Credit/Debit Card (Stripe)',
+        'paypal': 'PayPal'
+    };
+    
+    const notes = document.getElementById('orderNotes').value;
+    
+    reviewContent.innerHTML = `
+        <div style="display: grid; gap: 20px;">
+            <!-- Order Details -->
+            <div style="background: var(--bg-light); padding: 15px; border-radius: 8px;">
+                <h4 style="margin-bottom: 10px; color: var(--stone-dark);">Order Details</h4>
+                <div style="font-size: 14px;">
+                    <div style="margin-bottom: 5px;">
+                        <strong>Type:</strong> ${orderType === 'pending_payment' ? 'Complete Payment' : 
+                                               orderType === 'buynow' ? 'Buy Now' : 'Cart Checkout'}
+                    </div>
+                    <div style="margin-bottom: 5px;">
+                        <strong>Items:</strong> ${orderData.items.length} product(s)
+                    </div>
+                    ${notes ? `<div><strong>Notes:</strong> ${notes}</div>` : ''}
+                </div>
+            </div>
+            
+            <!-- Shipping Details -->
+            <div style="background: var(--bg-light); padding: 15px; border-radius: 8px;">
+                <h4 style="margin-bottom: 10px; color: var(--stone-dark);">Shipping Details</h4>
+                <div style="font-size: 14px;">
+                    <div style="margin-bottom: 5px;"><strong>Name:</strong> ${shippingName}</div>
+                    <div style="margin-bottom: 5px;"><strong>Email:</strong> ${shippingEmail}</div>
+                    <div style="margin-bottom: 5px;"><strong>Phone:</strong> ${shippingPhone}</div>
+                    <div><strong>Address:</strong> ${shippingAddress}</div>
+                </div>
+            </div>
+            
+            <!-- Payment Details -->
+            <div style="background: var(--bg-light); padding: 15px; border-radius: 8px;">
+                <h4 style="margin-bottom: 10px; color: var(--stone-dark);">Payment Details</h4>
+                <div style="font-size: 14px;">
+                    <div style="margin-bottom: 5px;">
+                        <strong>Method:</strong> ${paymentMethodNames[selectedPaymentMethod]}
+                    </div>
+                    ${selectedPaymentMethod === 'bank' ? `
+                        <div><strong>Reference:</strong> ${document.getElementById('bankReference').textContent}</div>
+                        <div style="color: var(--warning-orange); margin-top: 5px;">
+                            <i class="fas fa-clock"></i> Confirmation in 1-3 business days
+                        </div>
+                    ` : `
+                        <div style="color: var(--success-green); margin-top: 5px;">
+                            <i class="fas fa-bolt"></i> Instant confirmation
+                        </div>
+                    `}
+                    ${orderType === 'pending_payment' ? `
+                        <div style="margin-top: 5px; color: var(--success-green);">
+                            <strong>Already Paid:</strong> ${formatPrice(orderData.alreadyPaid)}
+                        </div>
+                        <div style="color: var(--error-red);">
+                            <strong>Payment Due:</strong> ${formatPrice(orderData.remainingPayment)}
+                        </div>
+                    ` : `
+                        <div style="margin-top: 5px;">
+                            <strong>Advance Payment (30%):</strong> ${formatPrice(orderData.advancePayment)}
+                        </div>
+                        <div style="color: var(--text-light); font-size: 12px;">
+                            <i class="fas fa-info-circle"></i> Remaining 70% payable before delivery
+                        </div>
+                    `}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Place Order
+async function placeOrder() {
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    placeOrderBtn.disabled = true;
+    placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    
+    try {
+        // Collect order data
+        const orderData = await prepareOrderData();
+        
+        // Show payment processing modal
+        showPaymentProcessing();
+        
+        // Simulate payment processing based on method
+        setTimeout(async () => {
+            try {
+                // Save to Firebase
+                const orderId = await saveOrderToFirebase(orderData);
+                
+                // Handle success based on payment method
+                if (selectedPaymentMethod === 'bank') {
+                    showBankTransferDetails(orderId, orderData);
+                } else {
+                    // For stripe/paypal, show immediate success
+                    showSuccess(orderId, orderData);
+                }
+                
+                // Clear cart/buy now data
+                clearOrderSourceData();
+                
+            } catch (error) {
+                console.error('Error processing order:', error);
+                alert('Failed to process order. Please try again.');
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
+                hidePaymentProcessing();
+            }
+        }, 2000); // Simulate 2-second processing time
+        
+    } catch (error) {
+        console.error('Error preparing order:', error);
+        alert('Failed to prepare order. Please check your details.');
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
+    }
+}
+
+async function prepareOrderData() {
+    // Collect all data
+    const shippingName = document.getElementById('shippingName').value;
+    const shippingEmail = document.getElementById('shippingEmail').value;
+    const shippingPhone = document.getElementById('shippingPhone').value;
+    const shippingAddress1 = document.getElementById('shippingAddress1').value;
+    const shippingAddress2 = document.getElementById('shippingAddress2').value;
+    const shippingCity = document.getElementById('shippingCity').value;
+    const shippingState = document.getElementById('shippingState').value;
+    const shippingPostalCode = document.getElementById('shippingPostalCode').value;
+    const shippingCountry = document.getElementById('shippingCountry').value;
+    const notes = document.getElementById('orderNotes').value;
+    
+    // Generate order number
+    const orderNumber = 'IRYA-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    
+    // Calculate payment amounts
+    let advancePayment, remainingPayment, totalAmount, paymentDueNow;
+    
+    if (orderType === 'pending_payment') {
+        totalAmount = orderData.alreadyPaid + orderData.remainingPayment;
+        advancePayment = orderData.alreadyPaid;
+        remainingPayment = 0;
+        paymentDueNow = orderData.remainingPayment;
+    } else {
+        totalAmount = orderData.total;
+        advancePayment = orderData.advancePayment;
+        remainingPayment = orderData.remainingPayment;
+        paymentDueNow = advancePayment;
+    }
+    
+    const orderData = {
+        orderNumber: orderNumber,
+        userId: currentUserId,
+        userEmail: shippingEmail,
+        userName: shippingName,
+        items: this.orderData.items,
+        subtotal: this.orderData.subtotal,
+        shipping: this.orderData.shipping,
+        tax: this.orderData.tax,
+        total: totalAmount,
+        advancePayment: advancePayment,
+        remainingPayment: remainingPayment,
+        paymentDueNow: paymentDueNow,
+        shippingAddress: {
+            fullName: shippingName,
+            email: shippingEmail,
+            phone: shippingPhone,
+            address1: shippingAddress1,
+            address2: shippingAddress2,
+            city: shippingCity,
+            state: shippingState,
+            postalCode: shippingPostalCode,
+            country: shippingCountry
+        },
+        billingAddress: document.getElementById('sameAsBilling').checked ? null : {
+            // Same as shipping for now
+        },
+        paymentMethod: selectedPaymentMethod,
+        paymentStatus: selectedPaymentMethod === 'bank' ? 'pending' : 'completed',
+        status: selectedPaymentMethod === 'bank' ? 'payment_pending' : 'confirmed',
+        notes: notes,
+        source: orderType,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
+    
+    // Add payment reference for bank transfer
+    if (selectedPaymentMethod === 'bank') {
+        orderData.paymentReference = document.getElementById('bankReference').textContent;
+    }
+    
+    return orderData;
+}
+
+async function saveOrderToFirebase(orderData) {
+    try {
+        // Generate order ID
+        const orderId = 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // Save to user's orders collection
+        const userOrderRef = doc(db, "users", currentUserId, "orders", orderId);
+        await setDoc(userOrderRef, orderData);
+        
+        // Also save to main orders collection
+        const mainOrderRef = doc(db, "orders", orderId);
+        await setDoc(mainOrderRef, {
+            ...orderData,
+            firebaseUserId: currentUserId
+        });
+        
+        console.log('Order saved to Firebase:', orderId);
+        return orderId;
+        
+    } catch (error) {
+        console.error('Error saving order to Firebase:', error);
+        throw error;
+    }
+}
+
+function showPaymentProcessing() {
+    const modal = document.getElementById('paymentProcessingModal');
+    const message = document.getElementById('processingMessage');
+    
+    if (selectedPaymentMethod === 'stripe') {
+        message.textContent = 'Processing your card payment securely with Stripe...';
+    } else if (selectedPaymentMethod === 'paypal') {
+        message.textContent = 'Redirecting to PayPal for secure payment...';
+    } else {
+        message.textContent = 'Preparing your bank transfer details...';
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function hidePaymentProcessing() {
+    document.getElementById('paymentProcessingModal').style.display = 'none';
+}
+
+function showBankTransferDetails(orderId, orderData) {
+    const modal = document.getElementById('bankTransferModal');
+    const detailsDiv = document.getElementById('bankTransferDetails');
+    
+    detailsDiv.innerHTML = `
+        <div style="margin-bottom: 15px;">
+            <div style="font-size: 12px; color: var(--text-light);">Order Number</div>
+            <div style="font-weight: bold; font-size: 16px; color: var(--stone-dark);">${orderData.orderNumber}</div>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <div style="font-size: 12px; color: var(--text-light);">Amount to Transfer</div>
+            <div style="font-weight: bold; font-size: 20px; color: var(--primary-gold);">${formatPrice(orderData.paymentDueNow)}</div>
+        </div>
+        <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #eee;">
+            <p><strong>Bank Name:</strong> HSBC UK</p>
+            <p><strong>Account Name:</strong> IRYA STONE LTD</p>
+            <p><strong>Account Number:</strong> 12345678</p>
+            <p><strong>Sort Code:</strong> 40-04-15</p>
+            <p><strong>Reference:</strong> ${orderData.paymentReference}</p>
+        </div>
+        <div style="padding: 12px; background: #fff8e1; border-radius: 6px; border-left: 4px solid var(--warning-orange);">
+            <i class="fas fa-info-circle" style="color: var(--warning-orange);"></i>
+            <strong>Important:</strong> Use the exact reference when making the transfer. Your order will be confirmed once payment is received (1-3 business days).
+        </div>
+    `;
+    
+    // Store order ID
+    detailsDiv.setAttribute('data-order-id', orderId);
+    detailsDiv.setAttribute('data-order-data', JSON.stringify(orderData));
+    
+    modal.style.display = 'flex';
+    hidePaymentProcessing();
+}
+
+function copyBankDetails() {
+    const detailsDiv = document.getElementById('bankTransferDetails');
+    const textToCopy = `IRYA STONE Order Details:
+Order Number: ${document.querySelector('#bankTransferDetails div:nth-child(1) div:nth-child(2)').textContent}
+Amount: ${document.querySelector('#bankTransferDetails div:nth-child(2) div:nth-child(2)').textContent}
+Bank: HSBC UK
+Account: IRYA STONE LTD
+Account Number: 12345678
+Sort Code: 40-04-15
+Reference: ${document.querySelector('#bankTransferDetails p:nth-child(5)').textContent.replace('Reference: ', '')}`;
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('Bank details copied to clipboard!');
+    });
+}
+
+function closeBankModal() {
+    const modal = document.getElementById('bankTransferModal');
+    const detailsDiv = document.getElementById('bankTransferDetails');
+    const orderId = detailsDiv.getAttribute('data-order-id');
+    const orderData = JSON.parse(detailsDiv.getAttribute('data-order-data'));
+    
+    modal.style.display = 'none';
+    showSuccess(orderId, orderData);
+}
+
+function showSuccess(orderId, orderData) {
+    // Update success details
+    const successDetails = document.getElementById('successDetails');
+    const successMessage = document.getElementById('successMessage');
+    
+    if (selectedPaymentMethod === 'bank') {
+        successMessage.textContent = 'Order created! Please complete bank transfer to confirm.';
+        successDetails.innerHTML = `
+            <div style="margin-bottom: 8px;"><strong>Order Number:</strong> ${orderData.orderNumber}</div>
+            <div style="margin-bottom: 8px;"><strong>Amount to Pay:</strong> ${formatPrice(orderData.paymentDueNow)}</div>
+            <div style="margin-bottom: 8px;"><strong>Payment Method:</strong> Bank Transfer</div>
+            <div style="margin-bottom: 8px;"><strong>Payment Reference:</strong> ${orderData.paymentReference}</div>
+            <div style="margin-top: 10px; padding: 10px; background: #fff8e1; border-radius: 6px; font-size: 12px; color: var(--warning-orange);">
+                <i class="fas fa-clock"></i> 
+                <strong>Note:</strong> Order will be confirmed once payment is received (1-3 business days)
+            </div>
+        `;
+    } else {
+        successMessage.textContent = 'Payment successful! Your order is confirmed.';
+        successDetails.innerHTML = `
+            <div style="margin-bottom: 8px;"><strong>Order Number:</strong> ${orderData.orderNumber}</div>
+            <div style="margin-bottom: 8px;"><strong>Total Amount:</strong> ${formatPrice(orderData.total)}</div>
+            <div style="margin-bottom: 8px;"><strong>Advance Paid:</strong> ${formatPrice(orderData.advancePayment)}</div>
+            <div style="margin-bottom: 8px;"><strong>Payment Method:</strong> ${selectedPaymentMethod === 'stripe' ? 'Credit/Debit Card (Stripe)' : 'PayPal'}</div>
+            <div style="margin-top: 10px; font-size: 12px; color: var(--success-green);">
+                <i class="fas fa-check-circle"></i> 
+                <strong>Payment Status:</strong> Confirmed instantly
+            </div>
+        `;
+    }
+    
+    // Store order ID for view order button
+    successDetails.setAttribute('data-order-id', orderId);
+    
+    // Show modal
+    document.getElementById('successModal').style.display = 'flex';
+    hidePaymentProcessing();
+}
+
+function clearOrderSourceData() {
+    // Clear buy now data
+    const buyNowKey = 'irya_buynow_cart_' + currentUserId;
+    localStorage.removeItem(buyNowKey);
+    sessionStorage.removeItem('irya_current_buynow');
+    localStorage.removeItem('irya_is_buynow_flow');
+    
+    // Clear pending payment data
+    localStorage.removeItem('irya_pending_payment_order');
+    
+    // Clear cart for buy now and pending payment
+    if (orderType === 'buynow' || orderType === 'pending_payment') {
+        // Only clear the specific items from cart
+        const cartKey = 'irya_local_cart_' + currentUserId;
+        const cartData = localStorage.getItem(cartKey);
+        
+        if (cartData) {
+            const cartItems = JSON.parse(cartData);
+            // Remove items that match our order items
+            const orderItemIds = orderData.items.map(item => item.uniqueId || item.id);
+            const updatedCart = cartItems.filter(item => 
+                !orderItemIds.includes(item.uniqueId || item.id)
+            );
+            localStorage.setItem(cartKey, JSON.stringify(updatedCart));
+        }
+    }
+}
+
+// Utility Functions
+function formatPrice(price) {
+    if (!price && price !== 0) return '£0.00';
+    return `£${parseFloat(price).toFixed(2)}`;
+}
+
+function getDefaultImage(category) {
+    const categoryLower = (category || '').toLowerCase();
+    
+    if (categoryLower.includes('sand')) {
+        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('kota')) {
+        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800';
+    } else if (categoryLower.includes('granite')) {
+        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800';
+    }
+    
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800';
+}
+
+function showLoading(show) {
+    document.getElementById('loadingState').style.display = show ? 'block' : 'none';
+    document.getElementById('checkoutContent').style.display = show ? 'none' : 'block';
+    document.getElementById('errorState').style.display = 'none';
+}
+
+function showError(title, message) {
+    document.getElementById('errorTitle').textContent = title;
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('errorState').style.display = 'block';
+    document.getElementById('loadingState').style.display = 'none';
+}
+
+function retryLoad() {
+    showLoading(true);
+    setTimeout(() => {
+        loadOrderData();
+    }, 1000);
+}
+
+function viewOrder() {
+    const successDetails = document.getElementById('successDetails');
+    const orderId = successDetails.getAttribute('data-order-id');
+    window.location.href = `orders.html?order_id=${orderId}`;
+}
+
+function goToOrders() {
+    window.location.href = 'orders.html';
+}
+
+// Setup Event Listeners
+function setupEventListeners() {
+    // Card input formatting
+    const cardNumberInput = document.getElementById('cardNumber');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formatted = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += value[i];
+            }
+            e.target.value = formatted.substring(0, 19);
+        });
+    }
+    
+    const expiryInput = document.getElementById('cardExpiry');
+    if (expiryInput) {
+        expiryInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/gi, '');
+            if (value.length >= 2) {
+                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                e.target.value = value;
+            }
+        });
+    }
+    
+    // Set default values
+    document.getElementById('shippingName').value = localStorage.getItem('irya_user_name') || '';
+    document.getElementById('shippingEmail').value = localStorage.getItem('irya_user_email') || '';
+    
+    // Set default payment method to Stripe (fastest)
+    selectPaymentMethod('stripe');
+    
+    // Show first step
+    updateStepDisplay();
+}
+
+// Make functions available globally
+window.nextStep = nextStep;
+window.goBack = goBack;
+window.selectPaymentMethod = selectPaymentMethod;
+window.placeOrder = placeOrder;
+window.viewOrder = viewOrder;
+window.goToOrders = goToOrders;
+window.retryLoad = retryLoad;
+window.copyBankDetails = copyBankDetails;
+window.closeBankModal = closeBankModal;
+</script>
+
+</body>
+</html>
