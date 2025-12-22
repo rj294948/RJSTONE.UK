@@ -30,13 +30,17 @@
     --border-radius: 12px;
     --border-radius-lg: 20px;
     
-    /* Notification colors */
-    --info: #339af0;
-    --success: #51cf66;
-    --warning: #ff922b;
-    --danger: #ff6b6b;
-    --payment: #cc5de8;
-    --shipping: #748ffc;
+    /* Order status colors */
+    --payment-pending: #ff6b6b;
+    --payment-advance: #ff922b;
+    --payment-full: #51cf66;
+    --processing: #339af0;
+    --ready-to-ship: #ff922b;
+    --shipped: #748ffc;
+    --out-for-delivery: #cc5de8;
+    --delivered: #40c057;
+    --cancelled: #fa5252;
+    --returned: #868e96;
 }
 
 * {
@@ -332,28 +336,65 @@ body {
     letter-spacing: 0.5px;
 }
 
-.notification-type.payment {
-    background: rgba(204, 93, 232, 0.1);
-    color: var(--payment);
-    border: 1px solid rgba(204, 93, 232, 0.2);
+/* Notification Type Colors Based on Order Status */
+.notification-type.payment-pending {
+    background: rgba(255, 107, 107, 0.1);
+    color: var(--payment-pending);
+    border: 1px solid rgba(255, 107, 107, 0.2);
 }
 
-.notification-type.order {
-    background: rgba(116, 143, 252, 0.1);
-    color: var(--shipping);
-    border: 1px solid rgba(116, 143, 252, 0.2);
+.notification-type.payment-advance {
+    background: rgba(255, 146, 43, 0.1);
+    color: var(--payment-advance);
+    border: 1px solid rgba(255, 146, 43, 0.2);
 }
 
-.notification-type.system {
+.notification-type.payment-full {
+    background: rgba(81, 207, 102, 0.1);
+    color: var(--payment-full);
+    border: 1px solid rgba(81, 207, 102, 0.2);
+}
+
+.notification-type.processing {
     background: rgba(51, 154, 240, 0.1);
-    color: var(--info);
+    color: var(--processing);
     border: 1px solid rgba(51, 154, 240, 0.2);
 }
 
-.notification-type.promotion {
+.notification-type.ready-to-ship {
     background: rgba(255, 146, 43, 0.1);
-    color: var(--warning);
+    color: var(--ready-to-ship);
     border: 1px solid rgba(255, 146, 43, 0.2);
+}
+
+.notification-type.shipped {
+    background: rgba(116, 143, 252, 0.1);
+    color: var(--shipped);
+    border: 1px solid rgba(116, 143, 252, 0.2);
+}
+
+.notification-type.out-for-delivery {
+    background: rgba(204, 93, 232, 0.1);
+    color: var(--out-for-delivery);
+    border: 1px solid rgba(204, 93, 232, 0.2);
+}
+
+.notification-type.delivered {
+    background: rgba(64, 192, 87, 0.1);
+    color: var(--delivered);
+    border: 1px solid rgba(64, 192, 87, 0.2);
+}
+
+.notification-type.cancelled {
+    background: rgba(250, 82, 82, 0.1);
+    color: var(--cancelled);
+    border: 1px solid rgba(250, 82, 82, 0.2);
+}
+
+.notification-type.returned {
+    background: rgba(134, 142, 150, 0.1);
+    color: var(--returned);
+    border: 1px solid rgba(134, 142, 150, 0.2);
 }
 
 .notification-time {
@@ -452,9 +493,9 @@ body {
 }
 
 .action-btn-small.success {
-    background: var(--success);
+    background: var(--payment-full);
     color: var(--white);
-    border-color: var(--success);
+    border-color: var(--payment-full);
 }
 
 .action-btn-small.success:hover {
@@ -462,13 +503,23 @@ body {
 }
 
 .action-btn-small.danger {
-    background: var(--danger);
+    background: var(--payment-pending);
     color: var(--white);
-    border-color: var(--danger);
+    border-color: var(--payment-pending);
 }
 
 .action-btn-small.danger:hover {
     background: #fa5252;
+}
+
+.action-btn-small.info {
+    background: var(--processing);
+    color: var(--white);
+    border-color: var(--processing);
+}
+
+.action-btn-small.info:hover {
+    background: #228be6;
 }
 
 /* ===== EMPTY STATE ===== */
@@ -689,7 +740,7 @@ body {
     </div>
   </div>
   
-  <!-- Notification Filter -->
+  <!-- Notification Filter - Status Based -->
   <div class="notification-filter">
     <button class="filter-btn active" onclick="filterNotifications('all')">
       <i class="fas fa-bell"></i> All
@@ -697,14 +748,17 @@ body {
     <button class="filter-btn" onclick="filterNotifications('unread')">
       <i class="fas fa-envelope"></i> Unread
     </button>
-    <button class="filter-btn" onclick="filterNotifications('payment')">
-      <i class="fas fa-money-bill-wave"></i> Payments
+    <button class="filter-btn" onclick="filterNotifications('payment_pending')">
+      <i class="fas fa-clock"></i> Payment Pending
     </button>
-    <button class="filter-btn" onclick="filterNotifications('order')">
-      <i class="fas fa-box"></i> Orders
+    <button class="filter-btn" onclick="filterNotifications('payment_advance')">
+      <i class="fas fa-money-bill-wave"></i> Advance Paid
     </button>
-    <button class="filter-btn" onclick="filterNotifications('system')">
-      <i class="fas fa-cog"></i> System
+    <button class="filter-btn" onclick="filterNotifications('payment_full')">
+      <i class="fas fa-check-circle"></i> Payment Completed
+    </button>
+    <button class="filter-btn" onclick="filterNotifications('shipping')">
+      <i class="fas fa-truck"></i> Shipping Updates
     </button>
   </div>
   
@@ -784,7 +838,6 @@ let currentUserEmail = null;
 
 async function getUserId() {
   try {
-    // Check if we have a saved user
     const savedUser = localStorage.getItem('irya_stone_auth_user');
     if (savedUser) {
       const user = JSON.parse(savedUser);
@@ -795,7 +848,6 @@ async function getUserId() {
       return currentUserId;
     }
 
-    // Check for guest user
     let guestId = localStorage.getItem('irya_guest_id');
     if (!guestId) {
       guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -845,7 +897,6 @@ async function setupNotificationsListener() {
   
   if (notificationsUnsubscribe) notificationsUnsubscribe();
   
-  // Show loading state
   notificationsList.innerHTML = `
     <div class="loading">
       <div class="loading-spinner"></div>
@@ -854,7 +905,6 @@ async function setupNotificationsListener() {
   `;
   
   try {
-    // Try user-specific notifications collection
     const notificationsRef = collection(db, "users", currentUserId, "notifications");
     const notificationsQuery = query(notificationsRef, orderBy("createdAt", "desc"));
     
@@ -868,31 +918,30 @@ async function setupNotificationsListener() {
           return;
         }
         
-        // Process each notification
         const notificationPromises = [];
         
         for (const docSnapshot of snapshot.docs) {
           const notification = docSnapshot.data();
           notification.id = docSnapshot.id;
           
-          // Add missing fields for backward compatibility
+          // Determine notification type based on order status
           if (!notification.type) {
             notification.type = determineNotificationType(notification);
           }
           
-          if (!notification.priority) {
-            notification.priority = determinePriority(notification);
+          // Set notification status based on order status
+          if (!notification.status) {
+            notification.status = determineNotificationStatus(notification);
           }
           
           // Fetch product images if productId is available
-          if (notification.productId) {
+          if (notification.productId || notification.orderId) {
             notificationPromises.push(fetchProductImage(notification));
           }
           
           notifications.push(notification);
         }
         
-        // Wait for all product images to load
         if (notificationPromises.length > 0) {
           await Promise.all(notificationPromises);
         }
@@ -900,7 +949,6 @@ async function setupNotificationsListener() {
         console.log(`✅ Loaded ${notifications.length} notifications for user: ${currentUserId}`);
         displayNotifications(notifications);
         
-        // Update badges
         const unreadCount = notifications.filter(n => !n.read).length;
         updateBadges(unreadCount);
         
@@ -926,58 +974,155 @@ async function setupNotificationsListener() {
   }
 }
 
+function determineNotificationType(notification) {
+  const title = notification.title || '';
+  const message = notification.message || '';
+  const orderStatus = notification.orderStatus || '';
+  const paymentStatus = notification.paymentStatus || '';
+  
+  // First check for order status based notifications
+  if (orderStatus) {
+    return orderStatus; // payment_pending, advance_paid, fully_paid, processing, shipped, etc.
+  }
+  
+  // Then check for payment status
+  if (paymentStatus === 'pending') return 'payment_pending';
+  if (paymentStatus === 'advance_paid') return 'payment_advance';
+  if (paymentStatus === 'fully_paid') return 'payment_full';
+  
+  // Fallback to content analysis
+  if (title.toLowerCase().includes('payment') || 
+      message.toLowerCase().includes('payment') ||
+      message.toLowerCase().includes('£') ||
+      message.toLowerCase().includes('remaining')) {
+    return 'payment_pending';
+  }
+  
+  if (title.toLowerCase().includes('shipped') || 
+      message.toLowerCase().includes('shipped') ||
+      message.toLowerCase().includes('tracking')) {
+    return 'shipped';
+  }
+  
+  if (title.toLowerCase().includes('delivered') || 
+      message.toLowerCase().includes('delivered')) {
+    return 'delivered';
+  }
+  
+  if (title.toLowerCase().includes('cancelled') || 
+      message.toLowerCase().includes('cancelled')) {
+    return 'cancelled';
+  }
+  
+  if (title.toLowerCase().includes('processing') || 
+      message.toLowerCase().includes('processing')) {
+    return 'processing';
+  }
+  
+  return 'system';
+}
+
+function determineNotificationStatus(notification) {
+  const type = notification.type || '';
+  
+  const statusMap = {
+    'payment_pending': 'Payment Pending',
+    'payment_advance': 'Advance Payment Received',
+    'payment_full': 'Payment Completed',
+    'processing': 'Processing',
+    'ready_to_ship': 'Ready to Ship',
+    'shipped': 'Shipped',
+    'out_for_delivery': 'Out for Delivery',
+    'delivered': 'Delivered',
+    'cancelled': 'Cancelled',
+    'returned': 'Returned',
+    'system': 'System Update'
+  };
+  
+  return statusMap[type] || 'Notification';
+}
+
 // Fetch product image from Firestore
 async function fetchProductImage(notification) {
   try {
-    if (!notification.productId) return;
+    let productId = notification.productId;
     
-    const productDoc = await getDoc(doc(db, "products", notification.productId));
-    
-    if (productDoc.exists()) {
-      const productData = productDoc.data();
-      
-      // Extract image URL from images array
-      if (productData.images && Array.isArray(productData.images) && productData.images.length > 0) {
-        if (typeof productData.images[0] === 'string') {
-          notification.productImage = productData.images[0];
-        } else if (productData.images[0].url) {
-          notification.productImage = productData.images[0].url;
-        } else if (productData.images[0].imageUrl) {
-          notification.productImage = productData.images[0].imageUrl;
-        }
-      } else if (productData.imageUrl) {
-        notification.productImage = productData.imageUrl;
-      } else if (productData.image) {
-        notification.productImage = productData.image;
-      }
-      
-      // Set product details
-      notification.productName = productData.name || productData.title || "Stone Product";
-      notification.productCategory = productData.category || "Stone";
-      notification.productPrice = productData.price || productData.startingPrice || 0;
-    }
-    
-    // If still no image, try stone collection
-    if (!notification.productImage) {
+    // If no productId but has orderId, try to fetch order details first
+    if (!productId && notification.orderId) {
       try {
-        const stoneDoc = await getDoc(doc(db, "stone", notification.productId));
-        if (stoneDoc.exists()) {
-          const stoneData = stoneDoc.data();
-          notification.productImage = stoneData.imageUrl || stoneData.image;
+        // Try to get order from users collection
+        const userOrderRef = doc(db, "users", currentUserId, "orders", notification.orderId);
+        const orderDoc = await getDoc(userOrderRef);
+        
+        if (orderDoc.exists()) {
+          const orderData = orderDoc.data();
+          if (orderData.items && orderData.items.length > 0) {
+            productId = orderData.items[0].productId || orderData.items[0].id;
+            notification.productName = orderData.items[0].name;
+            notification.productPrice = orderData.items[0].price || orderData.items[0].totalPrice;
+          }
         }
-      } catch (stoneError) {
-        console.log("Stone collection में image नहीं मिली");
+      } catch (error) {
+        console.log("Order details not found, trying main orders collection");
       }
     }
     
-    // Set default image if none found
-    if (!notification.productImage) {
-      notification.productImage = getDefaultImage(notification.productCategory);
+    if (!productId) return;
+    
+    // Try products collection first
+    try {
+      const productDoc = await getDoc(doc(db, "products", productId));
+      
+      if (productDoc.exists()) {
+        const productData = productDoc.data();
+        
+        if (productData.images && Array.isArray(productData.images) && productData.images.length > 0) {
+          if (typeof productData.images[0] === 'string') {
+            notification.productImage = productData.images[0];
+          } else if (productData.images[0].url) {
+            notification.productImage = productData.images[0].url;
+          } else if (productData.images[0].imageUrl) {
+            notification.productImage = productData.images[0].imageUrl;
+          }
+        } else if (productData.imageUrl) {
+          notification.productImage = productData.imageUrl;
+        } else if (productData.image) {
+          notification.productImage = productData.image;
+        }
+        
+        notification.productName = notification.productName || productData.name || productData.title || "Stone Product";
+        notification.productCategory = productData.category || "Stone";
+        notification.productPrice = notification.productPrice || productData.price || productData.startingPrice || 0;
+        
+        return;
+      }
+    } catch (productError) {
+      console.log("Products collection में नहीं मिला, stone collection try कर रहा हूं");
+    }
+    
+    // Try stone collection
+    try {
+      const stoneDoc = await getDoc(doc(db, "stone", productId));
+      if (stoneDoc.exists()) {
+        const stoneData = stoneDoc.data();
+        notification.productImage = stoneData.imageUrl || stoneData.image || stoneData.imgUrl;
+        notification.productName = notification.productName || stoneData.stoneName || stoneData.name || "Stone Product";
+        notification.productCategory = stoneData.category || "Stone";
+        notification.productPrice = notification.productPrice || stoneData.price || stoneData.startingPrice || 0;
+        
+        return;
+      }
+    } catch (stoneError) {
+      console.log("Stone collection में भी नहीं मिला");
     }
     
   } catch (error) {
     console.warn("⚠️ Product image fetch error:", error);
-    notification.productImage = getDefaultImage();
+  }
+  
+  // Set default image if none found
+  if (!notification.productImage) {
+    notification.productImage = getDefaultImage(notification.productCategory);
   }
 }
 
@@ -997,61 +1142,6 @@ function getDefaultImage(category) {
   return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800&q=80';
 }
 
-function determineNotificationType(notification) {
-  const title = notification.title || '';
-  const message = notification.message || '';
-  const type = notification.type || '';
-  
-  if (type) return type;
-  
-  if (title.toLowerCase().includes('payment') || 
-      message.toLowerCase().includes('payment') ||
-      message.toLowerCase().includes('paid') ||
-      message.toLowerCase().includes('amount') ||
-      message.toLowerCase().includes('£') ||
-      message.toLowerCase().includes('$') ||
-      title.toLowerCase().includes('remaining')) {
-    return 'payment';
-  }
-  
-  if (title.toLowerCase().includes('order') || 
-      message.toLowerCase().includes('order') ||
-      message.toLowerCase().includes('shipped') ||
-      message.toLowerCase().includes('delivered') ||
-      message.toLowerCase().includes('tracking')) {
-    return 'order';
-  }
-  
-  if (title.toLowerCase().includes('offer') || 
-      message.toLowerCase().includes('offer') ||
-      message.toLowerCase().includes('discount') ||
-      message.toLowerCase().includes('promo')) {
-    return 'promotion';
-  }
-  
-  return 'system';
-}
-
-function determinePriority(notification) {
-  const title = notification.title || '';
-  const message = notification.message || '';
-  
-  if (title.toLowerCase().includes('urgent') || 
-      title.toLowerCase().includes('important') ||
-      message.toLowerCase().includes('urgent') ||
-      message.toLowerCase().includes('important') ||
-      title.toLowerCase().includes('warning')) {
-    return 'high';
-  }
-  
-  if (title.toLowerCase().includes('remaining') || 
-      message.toLowerCase().includes('remaining')) {
-    return 'medium';
-  }
-  
-  return 'low';
-}
-
 function displayNotifications(notificationsList) {
   const notificationsListDiv = document.getElementById("notificationsList");
   
@@ -1067,24 +1157,39 @@ function displayNotifications(notificationsList) {
     case 'unread':
       filteredNotifications = notificationsList.filter(n => !n.read);
       break;
-    case 'payment':
+    case 'payment_pending':
       filteredNotifications = notificationsList.filter(n => 
-        n.type === 'payment' || 
-        (n.title && n.title.toLowerCase().includes('payment')) ||
-        (n.message && n.message.toLowerCase().includes('payment'))
+        n.type === 'payment_pending' || 
+        (n.title && n.title.toLowerCase().includes('payment pending')) ||
+        (n.message && (n.message.toLowerCase().includes('payment pending') || 
+                       n.message.toLowerCase().includes('remaining payment')))
       );
       break;
-    case 'order':
+    case 'payment_advance':
       filteredNotifications = notificationsList.filter(n => 
-        n.type === 'order' ||
-        (n.title && n.title.toLowerCase().includes('order')) ||
-        (n.message && n.message.toLowerCase().includes('order'))
+        n.type === 'payment_advance' || 
+        n.type === 'advance_paid' ||
+        (n.title && (n.title.toLowerCase().includes('advance') || 
+                     n.title.toLowerCase().includes('partial payment')))
       );
       break;
-    case 'system':
+    case 'payment_full':
       filteredNotifications = notificationsList.filter(n => 
-        n.type === 'system' ||
-        (!n.type && !n.title?.toLowerCase().includes('payment') && !n.title?.toLowerCase().includes('order'))
+        n.type === 'payment_full' || 
+        n.type === 'fully_paid' ||
+        (n.title && n.title.toLowerCase().includes('payment completed')) ||
+        (n.message && n.message.toLowerCase().includes('full payment'))
+      );
+      break;
+    case 'shipping':
+      filteredNotifications = notificationsList.filter(n => 
+        n.type === 'shipped' || 
+        n.type === 'out_for_delivery' ||
+        n.type === 'delivered' ||
+        n.type === 'ready_to_ship' ||
+        (n.title && (n.title.toLowerCase().includes('shipped') || 
+                     n.title.toLowerCase().includes('delivered') ||
+                     n.title.toLowerCase().includes('tracking')))
       );
       break;
     case 'all':
@@ -1096,7 +1201,7 @@ function displayNotifications(notificationsList) {
     notificationsListDiv.innerHTML = `
       <div class="empty-state">
         <i class="fas fa-bell-slash"></i>
-        <h3>No ${currentFilter === 'all' ? '' : currentFilter} notifications</h3>
+        <h3>No ${currentFilter === 'all' ? '' : getFilterText(currentFilter)} notifications</h3>
         <p>${getEmptyMessageForFilter(currentFilter)}</p>
       </div>
     `;
@@ -1108,24 +1213,55 @@ function displayNotifications(notificationsList) {
   filteredNotifications.forEach((notification) => {
     const timeAgo = getTimeAgo(notification.createdAt);
     const isUnread = !notification.read;
-    const typeClass = `notification-type ${notification.type || 'system'}`;
-    const typeText = getTypeText(notification.type);
+    const notificationType = notification.type || 'system';
+    const typeClass = `notification-type ${notificationType.replace(/_/g, '-')}`;
+    const typeText = getTypeText(notificationType);
     
     // Extract order info
     const orderInfo = extractOrderInfo(notification);
     
     // Check if it's a payment remaining notification
-    const isPaymentRemaining = notification.type === 'payment' && 
-                              (notification.title?.toLowerCase().includes('remaining') ||
-                               notification.message?.toLowerCase().includes('remaining'));
+    const isPaymentRemaining = notificationType === 'payment_pending' || 
+                              (notification.title && notification.title.toLowerCase().includes('remaining')) ||
+                              (notification.message && notification.message.toLowerCase().includes('remaining'));
+    
+    // Check if it's a payment completed notification
+    const isPaymentCompleted = notificationType === 'payment_full' || 
+                               notificationType === 'fully_paid' ||
+                               (notification.message && notification.message.toLowerCase().includes('full payment'));
+    
+    // Check if it's a shipping notification
+    const isShippingNotification = ['shipped', 'out_for_delivery', 'delivered', 'ready_to_ship'].includes(notificationType);
+    
+    // Determine action button text and class
+    let actionButtonHTML = '';
+    if (isPaymentRemaining) {
+      actionButtonHTML = `
+        <button class="action-btn-small danger" onclick="event.stopPropagation(); handlePaymentAction('${notification.id}', '${orderInfo.orderId}', '${orderInfo.orderNumber}', '${orderInfo.amount}')">
+          <i class="fas fa-money-bill-wave"></i> Pay Now
+        </button>
+      `;
+    } else if (isShippingNotification) {
+      actionButtonHTML = `
+        <button class="action-btn-small info" onclick="event.stopPropagation(); handleShippingAction('${notification.id}', '${orderInfo.orderId}', '${orderInfo.orderNumber}')">
+          <i class="fas fa-truck"></i> Track Order
+        </button>
+      `;
+    } else if (isPaymentCompleted) {
+      actionButtonHTML = `
+        <button class="action-btn-small success" onclick="event.stopPropagation(); handleOrderDetailsAction('${notification.id}', '${orderInfo.orderId}', '${orderInfo.orderNumber}')">
+          <i class="fas fa-eye"></i> View Order
+        </button>
+      `;
+    }
     
     notificationsHTML += `
       <div class="notification-item ${isUnread ? 'unread' : ''}" 
            data-id="${notification.id}"
-           data-type="${notification.type}"
+           data-type="${notificationType}"
            data-order-id="${orderInfo.orderId}"
            data-order-number="${orderInfo.orderNumber}"
-           onclick="handleNotificationClick('${notification.id}', '${notification.type}', '${orderInfo.orderId}', '${orderInfo.orderNumber}', ${isPaymentRemaining})">
+           onclick="handleNotificationClick('${notification.id}', '${notificationType}', '${orderInfo.orderId}', '${orderInfo.orderNumber}', ${isPaymentRemaining})">
         <div class="notification-header">
           <div class="notification-title">
             ${notification.title || 'Notification'}
@@ -1138,6 +1274,8 @@ function displayNotifications(notificationsList) {
         
         <div class="notification-message">
           ${notification.message || ''}
+          ${notification.orderNumber ? `<br><small><strong>Order:</strong> ${notification.orderNumber}</small>` : ''}
+          ${orderInfo.amount > 0 ? `<br><small><strong>Amount:</strong> £${orderInfo.amount.toFixed(2)}</small>` : ''}
         </div>
         
         ${notification.productImage ? `
@@ -1164,6 +1302,8 @@ function displayNotifications(notificationsList) {
             <i class="fas fa-check"></i> Mark as read
           </button>
           ` : ''}
+          
+          ${actionButtonHTML}
           
           <button class="action-btn-small" onclick="event.stopPropagation(); deleteNotification('${notification.id}')">
             <i class="fas fa-trash"></i> Delete
@@ -1208,26 +1348,22 @@ function extractOrderInfo(notification) {
 function extractOrderInfoFromMessage(message) {
   if (!message) return null;
   
-  // Pattern 1: IRYA-数字-数字 (e.g., IRYA-1765748514765-1207)
   const pattern1 = message.match(/IRYA[-\s]\d+[-\s]\d+/g);
   if (pattern1 && pattern1[0]) {
     return { orderNumber: pattern1[0] };
   }
   
-  // Pattern 2: IRYA-数字 (simple version)
   const pattern2 = message.match(/IRYA[-\s]\d+/g);
   if (pattern2 && pattern2[0]) {
     return { orderNumber: pattern2[0] };
   }
   
-  // Pattern 3: Order # followed by numbers
   const pattern3 = message.match(/Order[#\s]+\d+/gi);
   if (pattern3 && pattern3[0]) {
     const orderNum = pattern3[0].replace(/Order[#\s]+/i, '').trim();
     return { orderNumber: `IRYA-${orderNum}` };
   }
   
-  // Pattern 4: Just find numbers that look like order numbers
   const pattern4 = message.match(/\b\d{10,}\b/g);
   if (pattern4 && pattern4[0]) {
     return { orderNumber: `IRYA-${pattern4[0]}` };
@@ -1238,43 +1374,64 @@ function extractOrderInfoFromMessage(message) {
 
 function getTypeText(type) {
   const typeMap = {
-    'payment': 'Payment',
-    'order': 'Order',
-    'system': 'System',
-    'promotion': 'Promotion'
+    'payment_pending': 'Payment Pending',
+    'payment_advance': 'Advance Paid',
+    'payment_full': 'Payment Completed',
+    'processing': 'Processing',
+    'ready_to_ship': 'Ready to Ship',
+    'shipped': 'Shipped',
+    'out_for_delivery': 'Out for Delivery',
+    'delivered': 'Delivered',
+    'cancelled': 'Cancelled',
+    'returned': 'Returned',
+    'system': 'System'
   };
   
-  return typeMap[type] || 'Notification';
+  return typeMap[type] || type.replace(/_/g, ' ').toUpperCase();
+}
+
+function getFilterText(filter) {
+  const filterMap = {
+    'all': '',
+    'unread': 'unread',
+    'payment_pending': 'payment pending',
+    'payment_advance': 'advance payment',
+    'payment_full': 'payment completed',
+    'shipping': 'shipping'
+  };
+  
+  return filterMap[filter] || filter;
 }
 
 function getEmptyMessageForFilter(filter) {
   const messages = {
     'all': 'You will see notifications here when you have new updates.',
     'unread': 'You have no unread notifications.',
-    'payment': 'No payment notifications yet.',
-    'order': 'No order notifications yet.',
-    'system': 'No system notifications yet.'
+    'payment_pending': 'No payment pending notifications.',
+    'payment_advance': 'No advance payment notifications.',
+    'payment_full': 'No payment completed notifications.',
+    'shipping': 'No shipping notifications.'
   };
   
   return messages[filter] || messages['all'];
 }
 
 // ============================================
-// NOTIFICATION ACTIONS - UPDATED FOR DIRECT REDIRECT
+// NOTIFICATION ACTIONS HANDLERS
 // ============================================
 
 async function handleNotificationClick(notificationId, type, orderId, orderNumber, isPaymentRemaining) {
   try {
-    // First mark as read if unread
+    // First mark as read
     await markAsRead(notificationId);
     
     // Handle based on type
-    if (type === 'payment' || isPaymentRemaining) {
-      // Payment type notifications: Redirect to notification-checkout.html
+    if (type === 'payment_pending' || isPaymentRemaining) {
       redirectToNotificationCheckout(orderId, orderNumber);
+    } else if (['shipped', 'out_for_delivery', 'delivered', 'ready_to_ship', 'processing'].includes(type)) {
+      redirectToOrdersPage(orderId, orderNumber, true); // true means open tracking modal
     } else {
-      // Order and other notifications: Redirect to orders.html
-      redirectToOrdersPage(orderId, orderNumber);
+      redirectToOrdersPage(orderId, orderNumber, false); // false means just go to orders page
     }
     
   } catch (error) {
@@ -1283,32 +1440,75 @@ async function handleNotificationClick(notificationId, type, orderId, orderNumbe
   }
 }
 
+async function handlePaymentAction(notificationId, orderId, orderNumber, amount) {
+  try {
+    // Mark as read
+    await markAsRead(notificationId);
+    
+    // Redirect to checkout
+    redirectToNotificationCheckout(orderId, orderNumber, amount);
+    
+  } catch (error) {
+    console.error("❌ Error in payment action:", error);
+  }
+}
+
+async function handleShippingAction(notificationId, orderId, orderNumber) {
+  try {
+    // Mark as read
+    await markAsRead(notificationId);
+    
+    // Redirect to orders page with tracking
+    redirectToOrdersPage(orderId, orderNumber, true);
+    
+  } catch (error) {
+    console.error("❌ Error in shipping action:", error);
+  }
+}
+
+async function handleOrderDetailsAction(notificationId, orderId, orderNumber) {
+  try {
+    // Mark as read
+    await markAsRead(notificationId);
+    
+    // Redirect to orders page
+    redirectToOrdersPage(orderId, orderNumber, false);
+    
+  } catch (error) {
+    console.error("❌ Error in order details action:", error);
+  }
+}
+
 // ============================================
 // REDIRECT FUNCTIONS
 // ============================================
 
-function redirectToNotificationCheckout(orderId, orderNumber) {
-  console.log("💰 Redirecting to notification checkout:", { orderId, orderNumber });
+function redirectToNotificationCheckout(orderId, orderNumber, amount = 0) {
+  console.log("💰 Redirecting to notification checkout:", { orderId, orderNumber, amount });
   
-  // Save order info for notification-checkout page
   const redirectData = {
     orderId: orderId,
     orderNumber: orderNumber,
+    amount: amount,
+    notificationType: 'payment_pending',
     source: 'notifications_page',
     timestamp: new Date().toISOString()
   };
   
   localStorage.setItem('irya_notification_redirect', JSON.stringify(redirectData));
   
-  // Redirect to notification-checkout.html
   let checkoutUrl = 'notification-checkout.html';
   
   if (orderId) {
-    checkoutUrl += `?order_id=${orderId}&type=payment_notification`;
+    checkoutUrl += `?order_id=${orderId}&type=payment_remaining`;
   } else if (orderNumber) {
-    checkoutUrl += `?order_number=${encodeURIComponent(orderNumber)}&type=payment_notification`;
+    checkoutUrl += `?order_number=${encodeURIComponent(orderNumber)}&type=payment_remaining`;
   } else {
-    checkoutUrl += '?type=payment_notification';
+    checkoutUrl += '?type=payment_remaining';
+  }
+  
+  if (amount > 0) {
+    checkoutUrl += `&amount=${amount}`;
   }
   
   console.log("🔗 Redirecting to:", checkoutUrl);
@@ -1319,30 +1519,35 @@ function redirectToNotificationCheckout(orderId, orderNumber) {
   }, 500);
 }
 
-function redirectToOrdersPage(orderId, orderNumber) {
-  console.log("📦 Redirecting to orders page:", { orderId, orderNumber });
+function redirectToOrdersPage(orderId, orderNumber, trackOrder = false) {
+  console.log("📦 Redirecting to orders page:", { orderId, orderNumber, trackOrder });
   
-  // Save order info for orders page
   const redirectData = {
     orderId: orderId,
     orderNumber: orderNumber,
-    notificationType: 'order_notification',
+    notificationType: trackOrder ? 'order_tracking' : 'order_notification',
+    trackOrder: trackOrder,
     timestamp: new Date().toISOString()
   };
   
   localStorage.setItem('irya_notification_redirect', JSON.stringify(redirectData));
   
-  // Redirect to orders.html
   let ordersUrl = 'orders.html';
   
   if (orderId) {
     ordersUrl += `?order_id=${orderId}`;
+    if (trackOrder) {
+      ordersUrl += `&track=true`;
+    }
   } else if (orderNumber) {
     ordersUrl += `?search=${encodeURIComponent(orderNumber)}`;
+    if (trackOrder) {
+      ordersUrl += `&track=true`;
+    }
   }
   
   console.log("🔗 Redirecting to:", ordersUrl);
-  showMessage("Redirecting to order details...");
+  showMessage(trackOrder ? "Redirecting to track order..." : "Redirecting to order details...");
   
   setTimeout(() => {
     window.location.href = ordersUrl;
@@ -1363,25 +1568,21 @@ async function markAsRead(notificationId) {
       readAt: new Date().toISOString()
     });
     
-    // Update local state
     const notification = notifications.find(n => n.id === notificationId);
     if (notification) {
       notification.read = true;
     }
     
-    // Update UI
     const notificationElement = document.querySelector(`[data-id="${notificationId}"]`);
     if (notificationElement) {
       notificationElement.classList.remove('unread');
       
-      // Update the mark as read button
       const markAsReadBtn = notificationElement.querySelector('.action-btn-small.success');
       if (markAsReadBtn) {
         markAsReadBtn.remove();
       }
     }
     
-    // Update badges
     const unreadCount = notifications.filter(n => !n.read).length;
     updateBadges(unreadCount);
     
@@ -1407,11 +1608,9 @@ async function markAllAsRead() {
       notification.read = true;
     }
     
-    // Update all UI elements
     document.querySelectorAll('.notification-item.unread').forEach(item => {
       item.classList.remove('unread');
       
-      // Remove mark as read buttons
       const markAsReadBtn = item.querySelector('.action-btn-small.success');
       if (markAsReadBtn) {
         markAsReadBtn.remove();
@@ -1436,14 +1635,11 @@ async function deleteNotification(notificationId) {
     const notificationRef = doc(db, "users", currentUserId, "notifications", notificationId);
     await deleteDoc(notificationRef);
     
-    // Remove from local array
     notifications = notifications.filter(n => n.id !== notificationId);
     
-    // Update badges
     const unreadCount = notifications.filter(n => !n.read).length;
     updateBadges(unreadCount);
     
-    // Re-display notifications
     displayNotifications(notifications);
     
     showMessage("Notification deleted");
@@ -1489,14 +1685,12 @@ async function clearAllNotifications() {
 function filterNotifications(filter) {
   currentFilter = filter;
   
-  // Update filter buttons
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.classList.remove('active');
   });
   
   event?.target.classList.add('active');
   
-  // Display filtered notifications
   displayNotifications(notifications);
 }
 
@@ -1505,7 +1699,6 @@ function filterNotifications(filter) {
 // ============================================
 
 function updateBadges(unreadCount) {
-  // Update notification badge in bottom nav
   const bottomNavBadge = document.getElementById('bottomNavBadge');
   
   if (bottomNavBadge) {
@@ -1517,7 +1710,6 @@ function updateBadges(unreadCount) {
     }
   }
   
-  // Also update in localStorage for other pages
   localStorage.setItem('irya_unread_notifications', unreadCount.toString());
 }
 
@@ -1583,7 +1775,6 @@ function getTimeAgo(dateString) {
 }
 
 function showMessage(message) {
-  // Remove existing toast
   const existingToast = document.querySelector('.toast');
   if (existingToast) {
     existingToast.remove();
@@ -1620,13 +1811,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     await loadNotifications();
     
-    // Check if we have a search order number from redirect
     const searchOrderNumber = localStorage.getItem('irya_search_order_number');
     if (searchOrderNumber) {
-      // Clear it after using
       localStorage.removeItem('irya_search_order_number');
       
-      // Filter to show notifications for this order
       const orderNotifications = notifications.filter(n => {
         const orderInfo = extractOrderInfo(n);
         return orderInfo.orderNumber === searchOrderNumber;
@@ -1655,6 +1843,9 @@ window.markAllAsRead = markAllAsRead;
 window.deleteNotification = deleteNotification;
 window.clearAllNotifications = clearAllNotifications;
 window.handleNotificationClick = handleNotificationClick;
+window.handlePaymentAction = handlePaymentAction;
+window.handleShippingAction = handleShippingAction;
+window.handleOrderDetailsAction = handleOrderDetailsAction;
 window.redirectToNotificationCheckout = redirectToNotificationCheckout;
 window.redirectToOrdersPage = redirectToOrdersPage;
 </script>
