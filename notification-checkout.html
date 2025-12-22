@@ -1,1234 +1,1998 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complete Payment | IRYA STONE</title>
+<meta charset="UTF-8">
+<title>Notifications | IRYA STONE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===== VARIABLES ===== */
+:root {
+    --primary-gold: #c9a227;
+    --gold-light: #f0d77c;
+    --gold-dark: #9c7c1f;
+    --stone-dark: #1a1a1a;
+    --stone-light: #f4f6f4;
+    --bg-light: #f7f9fc;
+    --text-dark: #222222;
+    --text-light: #666666;
+    --white: #ffffff;
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+    --transition: all 0.3s ease;
+    --border-radius: 12px;
+    --border-radius-lg: 20px;
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    /* Order status colors */
+    --payment-pending: #ff6b6b;
+    --payment-advance: #ff922b;
+    --payment-full: #51cf66;
+    --processing: #339af0;
+    --ready-to-ship: #ff922b;
+    --shipped: #748ffc;
+    --out-for-delivery: #cc5de8;
+    --delivered: #40c057;
+    --cancelled: #fa5252;
+    --returned: #868e96;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    padding-bottom: 80px;
+    font-size: 14px;
+}
+
+/* ===== HEADER ===== */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    z-index: 1000;
+    gap: 10px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    min-width: 140px;
+}
+
+.logo i {
+    color: var(--primary-gold);
+    font-size: 24px;
+}
+
+.logo span {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--stone-dark);
+    font-family: 'Roboto Slab', serif;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-light);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    background: var(--primary-gold);
+    color: var(--white);
+}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid #eee;
+    z-index: 999;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-btn {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 10px;
+    min-width: 70px;
+    text-decoration: none;
+}
+
+.nav-btn:hover {
+    color: var(--primary-gold);
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.nav-btn.active {
+    color: var(--primary-gold);
+}
+
+.nav-btn i {
+    font-size: 18px;
+}
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb {
+    padding: 90px 16px 20px;
+    background: var(--white);
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.breadcrumb-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.breadcrumb-item a {
+    color: var(--text-light);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary-gold);
+}
+
+.breadcrumb-item.active {
+    color: var(--primary-gold);
+    font-weight: 500;
+}
+
+.breadcrumb-divider {
+    color: var(--text-light);
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 16px;
+}
+
+.page-header {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--stone-dark);
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.header-actions-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ===== NOTIFICATION FILTER ===== */
+.notification-filter {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: 2px solid #e0e0e0;
+    background: var(--white);
+    color: var(--text-dark);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-btn:hover {
+    border-color: var(--primary-gold);
+    color: var(--primary-gold);
+}
+
+.filter-btn.active {
+    background: var(--primary-gold);
+    color: var(--white);
+    border-color: var(--primary-gold);
+}
+
+.filter-btn i {
+    font-size: 12px;
+}
+
+/* ===== NOTIFICATIONS LIST ===== */
+.notifications-list {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.notification-item {
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.notification-item:hover {
+    background: var(--bg-light);
+}
+
+.notification-item.unread {
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.notification-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification-type {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Notification Type Colors Based on Order Status */
+.notification-type.payment-pending {
+    background: rgba(255, 107, 107, 0.1);
+    color: var(--payment-pending);
+    border: 1px solid rgba(255, 107, 107, 0.2);
+}
+
+.notification-type.payment-advance {
+    background: rgba(255, 146, 43, 0.1);
+    color: var(--payment-advance);
+    border: 1px solid rgba(255, 146, 43, 0.2);
+}
+
+.notification-type.payment-full {
+    background: rgba(81, 207, 102, 0.1);
+    color: var(--payment-full);
+    border: 1px solid rgba(81, 207, 102, 0.2);
+}
+
+.notification-type.processing {
+    background: rgba(51, 154, 240, 0.1);
+    color: var(--processing);
+    border: 1px solid rgba(51, 154, 240, 0.2);
+}
+
+.notification-type.ready-to-ship {
+    background: rgba(255, 146, 43, 0.1);
+    color: var(--ready-to-ship);
+    border: 1px solid rgba(255, 146, 43, 0.2);
+}
+
+.notification-type.shipped {
+    background: rgba(116, 143, 252, 0.1);
+    color: var(--shipped);
+    border: 1px solid rgba(116, 143, 252, 0.2);
+}
+
+.notification-type.out-for-delivery {
+    background: rgba(204, 93, 232, 0.1);
+    color: var(--out-for-delivery);
+    border: 1px solid rgba(204, 93, 232, 0.2);
+}
+
+.notification-type.delivered {
+    background: rgba(64, 192, 87, 0.1);
+    color: var(--delivered);
+    border: 1px solid rgba(64, 192, 87, 0.2);
+}
+
+.notification-type.cancelled {
+    background: rgba(250, 82, 82, 0.1);
+    color: var(--cancelled);
+    border: 1px solid rgba(250, 82, 82, 0.2);
+}
+
+.notification-type.returned {
+    background: rgba(134, 142, 150, 0.1);
+    color: var(--returned);
+    border: 1px solid rgba(134, 142, 150, 0.2);
+}
+
+.notification-time {
+    font-size: 12px;
+    color: var(--text-light);
+    white-space: nowrap;
+}
+
+.notification-message {
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+/* ===== NOTIFICATION HIGHLIGHT ===== */
+.notification-highlight {
+    background: rgba(255, 107, 107, 0.05);
+    border-left: 4px solid var(--payment-pending);
+    padding: 12px 15px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+}
+
+.notification-highlight .highlight-title {
+    font-weight: 600;
+    color: var(--payment-pending);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification-highlight .highlight-amount {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--payment-pending);
+    margin: 8px 0;
+}
+
+.notification-highlight .highlight-deadline {
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+}
+
+/* ===== PRODUCT IMAGE IN NOTIFICATION ===== */
+.notification-product {
+    display: flex;
+    gap: 15px;
+    margin: 15px 0;
+    padding: 15px;
+    background: var(--bg-light);
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+}
+
+.product-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-details {
+    flex: 1;
+}
+
+.product-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--stone-dark);
+}
+
+.product-meta {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.product-price {
+    font-weight: 600;
+    color: var(--primary-gold);
+    font-size: 14px;
+}
+
+/* ===== NOTIFICATION ACTIONS ===== */
+.notification-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.action-btn-small {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #e0e0e0;
+    background: var(--white);
+}
+
+.action-btn-small:hover {
+    background: var(--bg-light);
+}
+
+.action-btn-small.primary {
+    background: var(--primary-gold);
+    color: var(--white);
+    border-color: var(--primary-gold);
+}
+
+.action-btn-small.primary:hover {
+    background: var(--gold-dark);
+}
+
+.action-btn-small.success {
+    background: var(--payment-full);
+    color: var(--white);
+    border-color: var(--payment-full);
+}
+
+.action-btn-small.success:hover {
+    background: #40c057;
+}
+
+.action-btn-small.danger {
+    background: var(--payment-pending);
+    color: var(--white);
+    border-color: var(--payment-pending);
+}
+
+.action-btn-small.danger:hover {
+    background: #fa5252;
+}
+
+.action-btn-small.info {
+    background: var(--processing);
+    color: var(--white);
+    border-color: var(--processing);
+}
+
+.action-btn-small.info:hover {
+    background: #228be6;
+}
+
+/* ===== PAY NOW BUTTON SPECIAL ===== */
+.pay-now-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ff4757);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.pay-now-btn:hover {
+    background: linear-gradient(135deg, #ff4757, #ff3838);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.pay-now-btn:active {
+    transform: translateY(0);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    border: 1px solid #f0f0f0;
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: var(--text-light);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.empty-state p {
+    color: var(--text-light);
+    margin-bottom: 20px;
+}
+
+/* ===== LOADING ===== */
+.loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-light);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(201, 162, 39, 0.1);
+    border-top-color: var(--primary-gold);
+    border-radius: 50%;
+    animation: spin 1s ease-in-out infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== CART BADGE ===== */
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 600;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== TOAST MESSAGE ===== */
+.toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: var(--primary-gold);
+    color: var(--white);
+    padding: 12px 20px;
+    border-radius: var(--border-radius);
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+    box-shadow: var(--shadow-lg);
+    max-width: 90%;
+    word-wrap: break-word;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .breadcrumb {
+        padding: 80px 16px 20px;
+    }
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+    .container {
+        margin: 20px auto;
+    }
     
-    <style>
-        :root {
-            --primary-gold: #c9a227;
-            --gold-light: #f0d77c;
-            --gold-dark: #9c7c1f;
-            --stone-dark: #1a1a1a;
-            --stone-light: #f4f6f4;
-            --bg-light: #f7f9fc;
-            --text-dark: #222222;
-            --text-light: #666666;
-            --white: #ffffff;
-            --success-green: #10b981;
-            --warning-orange: #f59e0b;
-            --error-red: #ef4444;
-            --info-blue: #3b82f6;
-            --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
-            --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
-            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
-            --transition: all 0.3s ease;
-            --border-radius: 12px;
-            --border-radius-lg: 20px;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        body {
-            background: var(--bg-light);
-            color: var(--text-dark);
-            padding-bottom: 80px;
-            font-size: 14px;
-        }
-        
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: var(--white);
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: var(--shadow-sm);
-            z-index: 1000;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .logo i {
-            color: var(--primary-gold);
-            font-size: 24px;
-        }
-        
-        .logo span {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--stone-dark);
-            font-family: 'Roboto Slab', serif;
-        }
-        
-        /* Main Container */
-        .container {
-            max-width: 800px;
-            margin: 80px auto 30px;
-            padding: 0 16px;
-        }
-        
-        .page-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .page-header h1 {
-            font-size: 28px;
-            color: var(--stone-dark);
-            margin-bottom: 10px;
-        }
-        
-        .page-header p {
-            color: var(--text-light);
-        }
-        
-        /* Checkout Card */
-        .checkout-card {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            box-shadow: var(--shadow-md);
-            margin-bottom: 20px;
-        }
-        
-        .order-info {
-            background: #e3f2fd;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #2196f3;
-            margin-bottom: 30px;
-        }
-        
-        .order-info-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .order-info-header i {
-            color: #2196f3;
-            font-size: 24px;
-        }
-        
-        .order-info-header h3 {
-            margin: 0;
-            color: #0d47a1;
-        }
-        
-        .order-details-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .order-detail-item {
-            background: var(--white);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .order-detail-item .label {
-            font-size: 12px;
-            color: var(--text-light);
-            margin-bottom: 5px;
-        }
-        
-        .order-detail-item .value {
-            font-weight: 600;
-            font-size: 16px;
-            color: var(--stone-dark);
-        }
-        
-        .payment-amount-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: var(--border-radius);
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .payment-amount-card .label {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 5px;
-        }
-        
-        .payment-amount-card .amount {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        
-        .payment-amount-card .order-number {
-            font-size: 18px;
-            font-weight: 600;
-            opacity: 0.9;
-        }
-        
-        /* Form Styles */
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--stone-dark);
-        }
-        
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: var(--transition);
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--primary-gold);
-            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.1);
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        /* Payment Methods */
-        .payment-methods {
-            margin: 25px 0;
-        }
-        
-        .payment-method {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            border: 2px solid #eee;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: var(--transition);
-            background: white;
-            position: relative;
-        }
-        
-        .payment-method:hover {
-            border-color: var(--gold-light);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .payment-method.selected {
-            border-color: var(--primary-gold);
-            background: rgba(201, 162, 39, 0.05);
-            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.1);
-        }
-        
-        .method-icon {
-            width: 50px;
-            height: 50px;
-            background: var(--bg-light);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: var(--primary-gold);
-            flex-shrink: 0;
-        }
-        
-        .method-info {
-            flex: 1;
-        }
-        
-        .method-info h4 {
-            margin-bottom: 5px;
-            color: var(--stone-dark);
-        }
-        
-        .method-info p {
-            font-size: 12px;
-            color: var(--text-light);
-            margin-bottom: 4px;
-        }
-        
-        .method-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 600;
-            margin-right: 5px;
-            margin-top: 2px;
-        }
-        
-        .method-badge.fast {
-            background: var(--success-green);
-            color: white;
-        }
-        
-        .method-badge.instant {
-            background: var(--info-blue);
-            color: white;
-        }
-        
-        .method-badge.delayed {
-            background: var(--warning-orange);
-            color: white;
-        }
-        
-        /* Buttons */
-        .btn {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-        }
-        
-        .btn-primary {
-            background: var(--primary-gold);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: var(--gold-dark);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .btn-secondary {
-            background: var(--white);
-            color: var(--text-dark);
-            border: 1px solid #ddd;
-        }
-        
-        .btn-secondary:hover {
-            background: var(--bg-light);
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 40px;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-gold);
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Error */
-        .error-box {
-            background: #fff5f5;
-            border: 1px solid #ffcccc;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .error-box i {
-            color: #ff4757;
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-        
-        /* Success Modal */
-        .success-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            padding: 20px;
-        }
-        
-        .success-content {
-            background: white;
-            border-radius: var(--border-radius-lg);
-            padding: 40px;
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
-        }
-        
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: #51cf66;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            margin: 0 auto 20px;
-        }
-        
-        /* Bank Transfer Details */
-        .bank-details-box {
-            background: var(--bg-light);
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .bank-details-box h4 {
-            margin-bottom: 15px;
-            color: var(--stone-dark);
-        }
-        
-        .bank-details-box p {
-            margin-bottom: 8px;
-            line-height: 1.6;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .order-details-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .container {
-                margin: 70px auto 20px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .checkout-card {
-                padding: 20px;
-            }
-            
-            .btn {
-                padding: 12px 20px;
-                font-size: 14px;
-            }
-        }
-    </style>
+    .notification-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .notification-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .notification-time {
+        align-self: flex-start;
+    }
+    
+    .notification-product {
+        flex-direction: column;
+    }
+    
+    .product-image {
+        width: 100%;
+        height: 150px;
+    }
+    
+    .notification-actions {
+        flex-direction: column;
+    }
+    
+    .action-btn-small, .pay-now-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 10px 12px;
+    }
+    
+    .logo span {
+        font-size: 16px;
+    }
+    
+    .page-header h1 {
+        font-size: 24px;
+    }
+    
+    .notification-item {
+        padding: 15px;
+    }
+    
+    .notification-title {
+        font-size: 14px;
+    }
+}
+</style>
 </head>
+
 <body>
 
 <!-- Header -->
 <header class="header">
-    <div class="logo">
-        <i class="fas fa-gem"></i>
-        <span>IRYA STONE</span>
-    </div>
-    
-    <div style="display: flex; gap: 10px;">
-        <a href="notification.html" class="btn-secondary" style="padding: 8px 15px; text-decoration: none;">
-            <i class="fas fa-arrow-left"></i>
-            Back to Notifications
-        </a>
-    </div>
+  <a href="index.html" class="action-btn">
+    <i class="fas fa-arrow-left"></i>
+  </a>
+  
+  <div class="logo">
+    <i class="fa-solid fa-gem"></i>
+    <span>IRYA STONE</span>
+  </div>
+  
+  <div class="header-actions">
+    <a href="account.html" class="action-btn" title="Account">
+      <i class="fas fa-user"></i>
+    </a>
+    <a href="cart.html" class="action-btn" title="Cart" style="position: relative;">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="cart-badge" id="cartBadge">0</span>
+    </a>
+  </div>
 </header>
+
+<!-- Breadcrumb -->
+<section class="breadcrumb">
+  <div class="breadcrumb-content">
+    <div class="breadcrumb-item">
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+    </div>
+    <div class="breadcrumb-divider">
+      <i class="fas fa-chevron-right"></i>
+    </div>
+    <div class="breadcrumb-item active">
+      Notifications
+    </div>
+  </div>
+</section>
 
 <!-- Main Container -->
 <main class="container">
-    <div class="page-header">
-        <h1 id="pageTitle">Complete Payment</h1>
-        <p id="pageSubtitle">Pay the remaining amount for your order</p>
+  <div class="page-header">
+    <div>
+      <h1>Notifications</h1>
+      <p>Stay updated with your orders and activities</p>
     </div>
-    
-    <!-- Loading State -->
-    <div class="loading" id="loadingState">
-        <div class="spinner"></div>
-        <p>Loading payment details...</p>
+    <div class="header-actions-container">
+      <button class="filter-btn" onclick="markAllAsRead()">
+        <i class="fas fa-check-double"></i> Mark all read
+      </button>
+      <button class="filter-btn" onclick="clearAllNotifications()">
+        <i class="fas fa-trash"></i> Clear all
+      </button>
     </div>
-    
-    <!-- Error State -->
-    <div class="error-box" id="errorState" style="display: none;">
-        <i class="fas fa-exclamation-triangle"></i>
-        <h3 id="errorTitle">Error Loading Payment</h3>
-        <p id="errorMessage">Failed to load payment details. Please try again.</p>
-        <button class="btn-primary" onclick="retryLoad()" style="margin-top: 15px;">
-            <i class="fas fa-redo"></i> Retry
-        </button>
+  </div>
+  
+  <!-- Notification Filter -->
+  <div class="notification-filter">
+    <button class="filter-btn active" onclick="filterNotifications('all')">
+      <i class="fas fa-bell"></i> All
+    </button>
+    <button class="filter-btn" onclick="filterNotifications('unread')">
+      <i class="fas fa-envelope"></i> Unread
+    </button>
+    <button class="filter-btn" onclick="filterNotifications('payment')">
+      <i class="fas fa-money-bill-wave"></i> Payments
+    </button>
+    <button class="filter-btn" onclick="filterNotifications('shipping')">
+      <i class="fas fa-truck"></i> Shipping
+    </button>
+    <button class="filter-btn" onclick="filterNotifications('order')">
+      <i class="fas fa-box"></i> Orders
+    </button>
+  </div>
+  
+  <!-- Notifications List -->
+  <div class="notifications-list" id="notificationsList">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Loading notifications...</p>
     </div>
-    
-    <!-- Checkout Content -->
-    <div id="checkoutContent" style="display: none;">
-        <div class="checkout-card">
-            <!-- Order Information -->
-            <div class="order-info">
-                <div class="order-info-header">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <h3>Complete Payment for Order</h3>
-                </div>
-                <p>You are completing the remaining payment for your existing order. The order details are already confirmed.</p>
-            </div>
-            
-            <!-- Payment Amount -->
-            <div class="payment-amount-card">
-                <div class="label">Amount Due</div>
-                <div class="amount" id="paymentAmount">£0.00</div>
-                <div class="order-number" id="orderNumberDisplay">Order: Loading...</div>
-            </div>
-            
-            <!-- Order Details -->
-            <div class="order-details-grid">
-                <div class="order-detail-item">
-                    <div class="label">Order Date</div>
-                    <div class="value" id="orderDate">Loading...</div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="label">Already Paid</div>
-                    <div class="value" id="alreadyPaid">£0.00</div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="label">Original Total</div>
-                    <div class="value" id="originalTotal">£0.00</div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="label">Payment Type</div>
-                    <div class="value">Remaining Payment</div>
-                </div>
-            </div>
-            
-            <!-- Payment Method Selection -->
-            <h3 style="margin-bottom: 15px; color: var(--stone-dark);">Select Payment Method</h3>
-            <div class="payment-methods">
-                <!-- Stripe - Fastest Method -->
-                <div class="payment-method" onclick="selectPaymentMethod('stripe')" id="stripeMethod">
-                    <div class="method-icon">
-                        <i class="fab fa-cc-stripe"></i>
-                    </div>
-                    <div class="method-info">
-                        <h4>Credit/Debit Card (Stripe)</h4>
-                        <p>Pay securely with Stripe - Instant confirmation</p>
-                        <div>
-                            <span class="method-badge fast">FAST PAYMENT</span>
-                            <span class="method-badge instant">INSTANT CONFIRMATION</span>
-                        </div>
-                    </div>
-                    <div style="margin-left: auto;">
-                        <i class="fas fa-check-circle" style="color: var(--primary-gold); display: none;"></i>
-                    </div>
-                </div>
-                
-                <!-- PayPal - Fast Method -->
-                <div class="payment-method" onclick="selectPaymentMethod('paypal')" id="paypalMethod">
-                    <div class="method-icon">
-                        <i class="fab fa-paypal"></i>
-                    </div>
-                    <div class="method-info">
-                        <h4>PayPal</h4>
-                        <p>Pay with your PayPal account - Instant processing</p>
-                        <div>
-                            <span class="method-badge fast">FAST PAYMENT</span>
-                            <span class="method-badge instant">INSTANT CONFIRMATION</span>
-                        </div>
-                    </div>
-                    <div style="margin-left: auto;">
-                        <i class="fas fa-check-circle" style="color: var(--primary-gold); display: none;"></i>
-                    </div>
-                </div>
-                
-                <!-- Bank Transfer - Delayed Method -->
-                <div class="payment-method" onclick="selectPaymentMethod('bank')" id="bankMethod">
-                    <div class="method-icon">
-                        <i class="fas fa-university"></i>
-                    </div>
-                    <div class="method-info">
-                        <h4>Bank Transfer</h4>
-                        <p>Transfer directly to our bank account</p>
-                        <div>
-                            <span class="method-badge delayed">1-3 BUSINESS DAYS</span>
-                        </div>
-                    </div>
-                    <div style="margin-left: auto;">
-                        <i class="fas fa-check-circle" style="color: var(--primary-gold); display: none;"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Bank Transfer Details (Hidden by default) -->
-            <div id="bankDetails" style="display: none; margin-top: 20px;">
-                <div class="bank-details-box">
-                    <h4>Bank Account Details</h4>
-                    <p><strong>Bank Name:</strong> HSBC UK</p>
-                    <p><strong>Account Name:</strong> IRYA STONE LTD</p>
-                    <p><strong>Account Number:</strong> 12345678</p>
-                    <p><strong>Sort Code:</strong> 40-04-15</p>
-                    <p><strong>Reference:</strong> <span id="bankReference"></span></p>
-                    
-                    <div style="margin-top: 15px; padding: 12px; background: #fff8e1; border-radius: 6px; border-left: 4px solid var(--warning-orange);">
-                        <i class="fas fa-info-circle" style="color: var(--warning-orange;"></i>
-                        <strong>Important:</strong> Bank transfers take 1-3 business days to process. Your order will be confirmed once payment is received.
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Card Details (Hidden by default) -->
-            <div id="cardDetails" style="display: none; margin-top: 20px;">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Card Number *</label>
-                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Expiry Date *</label>
-                        <input type="text" id="cardExpiry" placeholder="MM/YY">
-                    </div>
-                    <div class="form-group">
-                        <label>CVC *</label>
-                        <input type="text" id="cardCvc" placeholder="123">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Cardholder Name *</label>
-                    <input type="text" id="cardName" placeholder="John Doe">
-                </div>
-            </div>
-            
-            <!-- Action Buttons -->
-            <div style="margin-top: 30px;">
-                <button class="btn btn-primary" onclick="processPayment()" id="processPaymentBtn">
-                    <i class="fas fa-lock"></i> Complete Payment
-                </button>
-                <p style="text-align: center; margin-top: 15px; font-size: 12px; color: var(--text-light);">
-                    <i class="fas fa-shield-alt"></i> Your payment is secure and encrypted
-                </p>
-            </div>
-        </div>
-    </div>
+  </div>
 </main>
 
-<!-- Payment Processing Modal -->
-<div class="success-modal" id="paymentProcessingModal" style="display: none;">
-    <div class="success-content">
-        <div class="spinner" style="margin: 20px auto;"></div>
-        <h2 style="margin-bottom: 10px;">Processing Payment</h2>
-        <p style="margin-bottom: 20px; color: var(--text-light);" id="processingMessage">
-            Please wait while we process your payment...
-        </p>
-    </div>
-</div>
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-btn">
+    <i class="fas fa-home"></i>
+    <span>Home</span>
+  </a>
+  <a href="products.html" class="nav-btn">
+    <i class="fas fa-th-large"></i>
+    <span>Products</span>
+  </a>
+  <a href="orders.html" class="nav-btn">
+    <i class="fas fa-box"></i>
+    <span>Orders</span>
+  </a>
+  <a href="notifications.html" class="nav-btn active">
+    <i class="fas fa-bell"></i>
+    <span>Alerts</span>
+    <span class="cart-badge" id="bottomNavBadge" style="position: absolute; top: -2px; right: 15px;">0</span>
+  </a>
+  <a href="account.html" class="nav-btn">
+    <i class="fas fa-user"></i>
+    <span>Account</span>
+  </a>
+</nav>
 
-<!-- Bank Transfer Waiting Modal -->
-<div class="success-modal" id="bankTransferModal" style="display: none;">
-    <div class="success-content">
-        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--warning-orange), #fbbf24); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px;">
-            <i class="fas fa-clock"></i>
-        </div>
-        <h2 style="margin-bottom: 10px;">Payment Pending</h2>
-        <p style="margin-bottom: 20px; color: var(--text-light);">
-            Please complete the bank transfer using the details below.
-        </p>
-        
-        <div id="bankTransferDetails" style="background: var(--bg-light); padding: 20px; border-radius: 8px; margin-bottom: 25px; text-align: left; font-size: 14px;">
-            <!-- Bank details will be shown here -->
-        </div>
-        
-        <div style="margin-top: 20px;">
-            <button class="btn btn-primary" onclick="copyBankDetails()" style="margin-bottom: 10px;">
-                <i class="fas fa-copy"></i> Copy Bank Details
-            </button>
-            <button class="btn btn-secondary" onclick="closeBankModal()">
-                <i class="fas fa-check"></i> I'll Complete Transfer
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Success Modal -->
-<div class="success-modal" id="successModal">
-    <div class="success-content">
-        <div class="success-icon">
-            <i class="fas fa-check"></i>
-        </div>
-        <h2 style="margin-bottom: 10px;">Payment Successful!</h2>
-        <p style="margin-bottom: 20px; color: var(--text-light);" id="successMessage">
-            Your payment has been processed successfully.
-        </p>
-        
-        <div id="successDetails" style="background: var(--bg-light); padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: left; font-size: 14px;">
-            <!-- Success details -->
-        </div>
-        
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-primary" onclick="viewOrder()">
-                <i class="fas fa-box"></i> View Order
-            </button>
-            <button class="btn btn-secondary" onclick="goToNotifications()">
-                <i class="fas fa-bell"></i> Back to Notifications
-            </button>
-        </div>
-    </div>
-</div>
-
+<!-- Firebase SDK -->
 <script type="module">
-// Firebase Import
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { 
-    getFirestore, 
-    collection, 
-    doc, 
-    getDoc,
-    updateDoc,
-    arrayUnion,
-    query,
-    where,
-    getDocs
+  getFirestore, 
+  collection, 
+  query, 
+  orderBy, 
+  onSnapshot,
+  updateDoc,
+  doc,
+  deleteDoc,
+  where,
+  getDocs,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // Firebase Configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-    authDomain: "iryastone-uk.firebaseapp.com",
-    projectId: "iryastone-uk",
-    storageBucket: "iryastone-uk.firebasestorage.app",
-    messagingSenderId: "110940910896",
-    appId: "1:110940910896:web:b25e92127118665e5c84f5",
-    measurementId: "G-6YM1FLYN48"
+  apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+  authDomain: "iryastone-uk.firebaseapp.com",
+  projectId: "iryastone-uk",
+  storageBucket: "iryastone-uk.firebasestorage.app",
+  messagingSenderId: "110940910896",
+  appId: "1:110940910896:web:b25e92127118665e5c84f5",
+  measurementId: "G-6YM1FLYN48"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Global Variables
+// ============================================
+// USER ID MANAGEMENT
+// ============================================
+
 let currentUserId = null;
-let currentOrder = null;
-let selectedPaymentMethod = 'stripe';
-let paymentAmount = 0;
+let currentUserName = null;
+let currentUserEmail = null;
 
-// Initialize Page
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log('Notification checkout page initializing...');
-    
-    try {
-        await getUserId();
-        await loadPaymentData();
-        setupEventListeners();
-    } catch (error) {
-        console.error('Initialization error:', error);
-        showError('Page Error', 'Failed to initialize payment page. Please refresh.');
-    }
-});
-
-// Get User ID
 async function getUserId() {
+  try {
+    const savedUser = localStorage.getItem('irya_stone_auth_user');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      currentUserId = user.uid;
+      currentUserName = user.name || user.displayName;
+      currentUserEmail = user.email;
+      console.log("✅ Authenticated user detected:", currentUserId);
+      return currentUserId;
+    }
+
+    let guestId = localStorage.getItem('irya_guest_id');
+    if (!guestId) {
+      guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('irya_guest_id', guestId);
+    }
+    
+    currentUserId = guestId;
+    console.log("👤 Guest user detected:", currentUserId);
+    
+    return currentUserId;
+    
+  } catch (error) {
+    console.error("❌ Error getting user ID:", error);
+    currentUserId = 'guest_' + Date.now();
+    return currentUserId;
+  }
+}
+
+// ============================================
+// GLOBAL VARIABLES
+// ============================================
+
+let notifications = [];
+let currentFilter = 'all';
+let notificationsUnsubscribe = null;
+
+// ============================================
+// NOTIFICATIONS MANAGEMENT
+// ============================================
+
+async function loadNotifications() {
+  try {
+    const userId = await getUserId();
+    console.log("📱 Loading notifications for user:", userId);
+    
+    setupNotificationsListener();
+    updateCartBadge();
+    
+  } catch (error) {
+    console.error("❌ Error loading notifications:", error);
+    showEmptyState("Failed to load notifications. Please try again.");
+  }
+}
+
+async function setupNotificationsListener() {
+  const notificationsList = document.getElementById("notificationsList");
+  
+  if (notificationsUnsubscribe) notificationsUnsubscribe();
+  
+  notificationsList.innerHTML = `
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Loading notifications...</p>
+    </div>
+  `;
+  
+  try {
+    const notificationsRef = collection(db, "users", currentUserId, "notifications");
+    const notificationsQuery = query(notificationsRef, orderBy("createdAt", "desc"));
+    
+    notificationsUnsubscribe = onSnapshot(notificationsQuery,
+      async (snapshot) => {
+        notifications = [];
+        
+        if (snapshot.empty) {
+          showEmptyState("No notifications yet");
+          updateBadges(0);
+          return;
+        }
+        
+        const notificationPromises = [];
+        
+        for (const docSnapshot of snapshot.docs) {
+          const notification = docSnapshot.data();
+          notification.id = docSnapshot.id;
+          
+          // Determine notification type based on content
+          if (!notification.type) {
+            notification.type = determineNotificationType(notification);
+          }
+          
+          // Extract payment information from message
+          const extractedInfo = extractPaymentInfoFromMessage(notification.message || '');
+          if (extractedInfo.amount > 0) {
+            notification.remainingAmount = extractedInfo.amount;
+            notification.deadline = extractedInfo.deadline;
+          }
+          
+          // Set notification status based on content
+          if (!notification.status) {
+            notification.status = determineNotificationStatus(notification);
+          }
+          
+          // Fetch product images if productId is available
+          if (notification.productId || notification.orderId) {
+            notificationPromises.push(fetchProductImage(notification));
+          }
+          
+          notifications.push(notification);
+        }
+        
+        if (notificationPromises.length > 0) {
+          await Promise.all(notificationPromises);
+        }
+        
+        console.log(`✅ Loaded ${notifications.length} notifications for user: ${currentUserId}`);
+        displayNotifications(notifications);
+        
+        const unreadCount = notifications.filter(n => !n.read).length;
+        updateBadges(unreadCount);
+        
+      },
+      (error) => {
+        console.error("❌ Error in notifications listener:", error);
+        notificationsList.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Connection Error</h3>
+            <p>Please check your internet connection</p>
+            <button class="filter-btn active" onclick="loadNotifications()" style="margin-top: 20px;">
+              <i class="fas fa-redo"></i> Retry
+            </button>
+          </div>
+        `;
+      }
+    );
+    
+  } catch (error) {
+    console.error("❌ Setup error:", error);
+    showEmptyState("Failed to setup notifications. Please refresh.");
+  }
+}
+
+function determineNotificationType(notification) {
+  const title = notification.title || '';
+  const message = notification.message || '';
+  const orderStatus = notification.orderStatus || '';
+  const paymentStatus = notification.paymentStatus || '';
+  
+  // Check for payment pending notifications
+  if (message.includes('remaining payment') || 
+      message.includes('clear the remaining payment') ||
+      message.includes('within 1 hour') ||
+      message.includes('remaining balance') ||
+      message.includes('IMPORTANT: Please clear')) {
+    return 'payment_pending';
+  }
+  
+  // Check for other payment status
+  if (paymentStatus === 'advance_paid') {
+    return 'payment_advance';
+  }
+  
+  if (paymentStatus === 'fully_paid') {
+    return 'payment_full';
+  }
+  
+  // Check for order status
+  if (orderStatus === 'shipped' || 
+      title.toLowerCase().includes('shipped') ||
+      message.toLowerCase().includes('has been shipped')) {
+    return 'shipped';
+  }
+  
+  if (orderStatus === 'delivered' || 
+      title.toLowerCase().includes('delivered')) {
+    return 'delivered';
+  }
+  
+  if (orderStatus === 'out_for_delivery' || 
+      title.toLowerCase().includes('out for delivery')) {
+    return 'out_for_delivery';
+  }
+  
+  if (orderStatus === 'processing' || 
+      title.toLowerCase().includes('processing')) {
+    return 'processing';
+  }
+  
+  if (orderStatus === 'cancelled' || 
+      title.toLowerCase().includes('cancelled')) {
+    return 'cancelled';
+  }
+  
+  if (orderStatus === 'ready_to_ship' || 
+      title.toLowerCase().includes('ready to ship')) {
+    return 'ready_to_ship';
+  }
+  
+  // Generic categories based on content
+  if (title.toLowerCase().includes('order') || 
+      message.toLowerCase().includes('order')) {
+    return 'order';
+  }
+  
+  if (title.toLowerCase().includes('shipping') || 
+      message.toLowerCase().includes('shipping') ||
+      message.toLowerCase().includes('tracking')) {
+    return 'shipping';
+  }
+  
+  return 'system';
+}
+
+function extractPaymentInfoFromMessage(message) {
+  const result = {
+    amount: 0,
+    deadline: null
+  };
+  
+  if (!message) return result;
+  
+  // Extract amount (e.g., £59.50)
+  const amountMatch = message.match(/£([\d\.]+)/);
+  if (amountMatch && amountMatch[1]) {
+    result.amount = parseFloat(amountMatch[1]);
+  }
+  
+  // Extract deadline (e.g., within 1 hour)
+  if (message.includes('within 1 hour')) {
+    result.deadline = '1 hour';
+  } else if (message.includes('within 24 hours')) {
+    result.deadline = '24 hours';
+  } else if (message.includes('within 48 hours')) {
+    result.deadline = '48 hours';
+  }
+  
+  return result;
+}
+
+function determineNotificationStatus(notification) {
+  const type = notification.type || '';
+  
+  const statusMap = {
+    'payment_pending': 'Payment Pending',
+    'payment_advance': 'Advance Payment',
+    'payment_full': 'Payment Completed',
+    'processing': 'Order Processing',
+    'ready_to_ship': 'Ready to Ship',
+    'shipped': 'Shipped',
+    'out_for_delivery': 'Out for Delivery',
+    'delivered': 'Delivered',
+    'cancelled': 'Cancelled',
+    'order': 'Order Update',
+    'shipping': 'Shipping Update',
+    'system': 'System Update'
+  };
+  
+  return statusMap[type] || 'Notification';
+}
+
+// Fetch product image from Firestore
+async function fetchProductImage(notification) {
+  try {
+    let productId = notification.productId;
+    
+    if (!productId && notification.orderId) {
+      try {
+        // Try to get order from users collection
+        const userOrderRef = doc(db, "users", currentUserId, "orders", notification.orderId);
+        const orderDoc = await getDoc(userOrderRef);
+        
+        if (orderDoc.exists()) {
+          const orderData = orderDoc.data();
+          if (orderData.items && orderData.items.length > 0) {
+            productId = orderData.items[0].productId || orderData.items[0].id;
+            notification.productName = orderData.items[0].name;
+            notification.productPrice = orderData.items[0].price || orderData.items[0].totalPrice;
+          }
+        }
+      } catch (error) {
+        console.log("Order details not found in users collection");
+      }
+    }
+    
+    if (!productId) return;
+    
+    // Try products collection first
     try {
-        const savedUser = localStorage.getItem('irya_stone_auth_user');
-        if (savedUser) {
-            const user = JSON.parse(savedUser);
-            currentUserId = user.uid;
-            return currentUserId;
-        }
-
-        let guestId = localStorage.getItem('irya_guest_id');
-        if (!guestId) {
-            guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('irya_guest_id', guestId);
+      const productDoc = await getDoc(doc(db, "products", productId));
+      
+      if (productDoc.exists()) {
+        const productData = productDoc.data();
+        
+        if (productData.images && Array.isArray(productData.images) && productData.images.length > 0) {
+          if (typeof productData.images[0] === 'string') {
+            notification.productImage = productData.images[0];
+          } else if (productData.images[0].url) {
+            notification.productImage = productData.images[0].url;
+          } else if (productData.images[0].imageUrl) {
+            notification.productImage = productData.images[0].imageUrl;
+          }
+        } else if (productData.imageUrl) {
+          notification.productImage = productData.imageUrl;
+        } else if (productData.image) {
+          notification.productImage = productData.image;
         }
         
-        currentUserId = guestId;
-        return currentUserId;
+        notification.productName = notification.productName || productData.name || productData.title || "Stone Product";
+        notification.productCategory = productData.category || "Stone";
+        notification.productPrice = notification.productPrice || productData.price || productData.startingPrice || 0;
         
-    } catch (error) {
-        console.error('Error getting user ID:', error);
-        currentUserId = 'guest_' + Date.now();
-        return currentUserId;
+        return;
+      }
+    } catch (productError) {
+      console.log("Products collection में नहीं मिला");
     }
-}
-
-// Load Payment Data
-async function loadPaymentData() {
-    showLoading(true);
     
+    // Try stone collection
     try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('order_id');
+      const stoneDoc = await getDoc(doc(db, "stone", productId));
+      if (stoneDoc.exists()) {
+        const stoneData = stoneDoc.data();
+        notification.productImage = stoneData.imageUrl || stoneData.image || stoneData.imgUrl;
+        notification.productName = notification.productName || stoneData.stoneName || stoneData.name || "Stone Product";
+        notification.productCategory = stoneData.category || "Stone";
+        notification.productPrice = notification.productPrice || stoneData.price || stoneData.startingPrice || 0;
         
-        if (!orderId) {
-            throw new Error('No order ID provided');
-        }
-        
-        await loadOrderDetails(orderId);
-        displayOrderDetails();
-        
-        showLoading(false);
-        document.getElementById('checkoutContent').style.display = 'block';
-        
-    } catch (error) {
-        console.error('Error loading payment data:', error);
-        showError('Load Error', 'Failed to load payment details. Please try again.');
-        showLoading(false);
-    }
-}
-
-// Load Order Details from Firebase
-async function loadOrderDetails(orderId) {
-    try {
-        // Try user's orders collection first
-        try {
-            const orderDoc = await getDoc(doc(db, "users", currentUserId, "orders", orderId));
-            if (orderDoc.exists()) {
-                currentOrder = orderDoc.data();
-                currentOrder.id = orderDoc.id;
-                return;
-            }
-        } catch (error) {
-            console.log('Trying main orders collection...');
-        }
-        
-        // Try main orders collection
-        const ordersRef = collection(db, "orders");
-        const orderQuery = query(ordersRef, where("__name__", "==", orderId));
-        const orderSnapshot = await getDocs(orderQuery);
-        
-        if (!orderSnapshot.empty) {
-            currentOrder = orderSnapshot.docs[0].data();
-            currentOrder.id = orderSnapshot.docs[0].id;
-            return;
-        }
-        
-        throw new Error('Order not found');
-        
-    } catch (error) {
-        console.error('Error loading order details:', error);
-        throw error;
-    }
-}
-
-// Display Order Details
-function displayOrderDetails() {
-    if (!currentOrder) return;
-    
-    // Calculate payment amount
-    paymentAmount = currentOrder.remainingPayment || 0;
-    if (paymentAmount <= 0) {
-        paymentAmount = currentOrder.total - (currentOrder.submittedAmount || currentOrder.advancePayment || 0);
+        return;
+      }
+    } catch (stoneError) {
+      console.log("Stone collection में भी नहीं मिला");
     }
     
-    // Format dates
-    const orderDate = currentOrder.createdAt ? 
-        new Date(currentOrder.createdAt).toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric'
-        }) : 'N/A';
-    
-    const alreadyPaid = currentOrder.submittedAmount || currentOrder.advancePayment || 0;
-    const originalTotal = currentOrder.total || 0;
-    
-    // Update UI
-    document.getElementById('paymentAmount').textContent = formatPrice(paymentAmount);
-    document.getElementById('orderNumberDisplay').textContent = `Order: ${currentOrder.orderNumber || currentOrder.id?.substring(0, 8)}`;
-    document.getElementById('orderDate').textContent = orderDate;
-    document.getElementById('alreadyPaid').textContent = formatPrice(alreadyPaid);
-    document.getElementById('originalTotal').textContent = formatPrice(originalTotal);
+  } catch (error) {
+    console.warn("⚠️ Product image fetch error:", error);
+  }
+  
+  // Set default image if none found
+  if (!notification.productImage) {
+    notification.productImage = getDefaultImage(notification.productCategory);
+  }
 }
 
-// Select Payment Method
-function selectPaymentMethod(method) {
-    selectedPaymentMethod = method;
+function getDefaultImage(category) {
+  const categoryLower = (category || '').toLowerCase();
+  
+  if (categoryLower.includes('sand')) {
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800&q=80';
+  } else if (categoryLower.includes('kota')) {
+    return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80';
+  } else if (categoryLower.includes('granite')) {
+    return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&q=80';
+  } else if (categoryLower.includes('marble')) {
+    return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80';
+  }
+  
+  return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=800&q=80';
+}
+
+function displayNotifications(notificationsList) {
+  const notificationsListDiv = document.getElementById("notificationsList");
+  
+  if (!notificationsList || notificationsList.length === 0) {
+    showEmptyState("No notifications yet");
+    return;
+  }
+  
+  // Apply filter
+  let filteredNotifications = notificationsList;
+  
+  switch(currentFilter) {
+    case 'unread':
+      filteredNotifications = notificationsList.filter(n => !n.read);
+      break;
+    case 'payment':
+      filteredNotifications = notificationsList.filter(n => 
+        n.type === 'payment_pending' || 
+        n.type === 'payment_advance' ||
+        n.type === 'payment_full' ||
+        (n.title && n.title.toLowerCase().includes('payment')) ||
+        (n.message && (n.message.toLowerCase().includes('payment') || 
+                       n.message.toLowerCase().includes('£') ||
+                       n.message.toLowerCase().includes('amount')))
+      );
+      break;
+    case 'shipping':
+      filteredNotifications = notificationsList.filter(n => 
+        n.type === 'shipped' || 
+        n.type === 'out_for_delivery' ||
+        n.type === 'delivered' ||
+        n.type === 'ready_to_ship' ||
+        (n.title && (n.title.toLowerCase().includes('shipped') || 
+                     n.title.toLowerCase().includes('delivered') ||
+                     n.title.toLowerCase().includes('tracking') ||
+                     n.title.toLowerCase().includes('shipping')))
+      );
+      break;
+    case 'order':
+      filteredNotifications = notificationsList.filter(n => 
+        n.type === 'order' ||
+        n.type === 'processing' ||
+        n.type === 'cancelled' ||
+        (n.title && n.title.toLowerCase().includes('order')) ||
+        (n.message && n.message.toLowerCase().includes('order'))
+      );
+      break;
+    case 'all':
+    default:
+      filteredNotifications = notificationsList;
+  }
+  
+  if (filteredNotifications.length === 0) {
+    notificationsListDiv.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-bell-slash"></i>
+        <h3>No ${currentFilter === 'all' ? '' : currentFilter} notifications</h3>
+        <p>${getEmptyMessageForFilter(currentFilter)}</p>
+      </div>
+    `;
+    return;
+  }
+  
+  let notificationsHTML = '';
+  
+  filteredNotifications.forEach((notification) => {
+    const timeAgo = getTimeAgo(notification.createdAt);
+    const isUnread = !notification.read;
+    const notificationType = notification.type || 'system';
+    const typeClass = `notification-type ${notificationType.replace(/_/g, '-')}`;
+    const typeText = getTypeText(notificationType);
     
-    // Update UI
-    document.querySelectorAll('.payment-method').forEach(el => {
-        el.classList.remove('selected');
-        el.querySelector('.fa-check-circle').style.display = 'none';
-    });
+    // Extract order info
+    const orderInfo = extractOrderInfo(notification);
     
-    const selectedMethod = document.getElementById(method + 'Method');
-    selectedMethod.classList.add('selected');
-    selectedMethod.querySelector('.fa-check-circle').style.display = 'block';
+    // Check if it's a payment pending notification
+    const isPaymentPending = notificationType === 'payment_pending' || 
+                            (notification.message && 
+                             (notification.message.includes('remaining payment') ||
+                              notification.message.includes('clear the remaining payment')));
     
-    // Show/hide details sections
-    document.getElementById('bankDetails').style.display = method === 'bank' ? 'block' : 'none';
-    document.getElementById('cardDetails').style.display = method === 'stripe' ? 'block' : 'none';
-    
-    // Generate bank reference if needed
-    if (method === 'bank') {
-        const reference = `IRYA-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        document.getElementById('bankReference').textContent = reference;
+    // Determine action button
+    let actionButtonHTML = '';
+    if (isPaymentPending && notification.remainingAmount) {
+      actionButtonHTML = `
+        <div class="notification-highlight">
+          <div class="highlight-title">
+            <i class="fas fa-exclamation-circle"></i> Payment Required
+          </div>
+          <div class="highlight-amount">£${notification.remainingAmount.toFixed(2)}</div>
+          ${notification.deadline ? `
+          <div class="highlight-deadline">
+            <i class="far fa-clock"></i> Due ${notification.deadline}
+          </div>
+          ` : ''}
+        </div>
+        <button class="pay-now-btn" onclick="event.stopPropagation(); handlePaymentAction('${notification.id}', '${orderInfo.orderId}', '${orderInfo.orderNumber}', ${notification.remainingAmount})">
+          <i class="fas fa-bolt"></i> PAY NOW
+        </button>
+      `;
+    } else if (notificationType === 'payment_advance' || notificationType === 'payment_full') {
+      actionButtonHTML = `
+        <button class="action-btn-small success" onclick="event.stopPropagation(); handleOrderDetailsAction('${notification.id}', '${orderInfo.orderId}', '${orderInfo.orderNumber}')">
+          <i class="fas fa-eye"></i> View Order
+        </button>
+      `;
+    } else {
+      actionButtonHTML = `
+        <button class="action-btn-small info" onclick="event.stopPropagation(); handleTrackOrderAction('${notification.id}', '${orderInfo.orderId}', '${orderInfo.orderNumber}')">
+          <i class="fas fa-truck"></i> Track Order
+        </button>
+      `;
     }
-}
-
-// Process Payment
-async function processPayment() {
-    const processBtn = document.getElementById('processPaymentBtn');
-    processBtn.disabled = true;
-    processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     
-    try {
-        // Validate payment method
-        if (!selectedPaymentMethod) {
-            alert('Please select a payment method');
-            processBtn.disabled = false;
-            processBtn.innerHTML = '<i class="fas fa-lock"></i> Complete Payment';
-            return;
-        }
+    notificationsHTML += `
+      <div class="notification-item ${isUnread ? 'unread' : ''}" 
+           data-id="${notification.id}"
+           data-type="${notificationType}"
+           data-order-id="${orderInfo.orderId}"
+           data-order-number="${orderInfo.orderNumber}"
+           onclick="handleNotificationClick('${notification.id}', '${notificationType}', '${orderInfo.orderId}', '${orderInfo.orderNumber}')">
+        <div class="notification-header">
+          <div class="notification-title">
+            ${notification.title || 'Notification'}
+            <span class="${typeClass}">${typeText}</span>
+          </div>
+          <div class="notification-time">
+            <i class="far fa-clock"></i> ${timeAgo}
+          </div>
+        </div>
         
-        // Validate card details if stripe is selected
-        if (selectedPaymentMethod === 'stripe') {
-            const cardNumber = document.getElementById('cardNumber').value;
-            const cardExpiry = document.getElementById('cardExpiry').value;
-            const cardCvc = document.getElementById('cardCvc').value;
-            const cardName = document.getElementById('cardName').value;
-            
-            if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
-                alert('Please fill in all card details');
-                processBtn.disabled = false;
-                processBtn.innerHTML = '<i class="fas fa-lock"></i> Complete Payment';
-                return;
-            }
-        }
+        <div class="notification-message">
+          ${notification.message || ''}
+          ${notification.orderNumber ? `<br><small><strong>Order:</strong> ${notification.orderNumber}</small>` : ''}
+        </div>
         
-        // Show processing modal
-        showPaymentProcessing();
+        ${actionButtonHTML}
         
-        // Simulate payment processing
-        setTimeout(async () => {
-            try {
-                // Update order in Firebase
-                await updateOrderAfterPayment();
-                
-                // Handle success based on payment method
-                if (selectedPaymentMethod === 'bank') {
-                    showBankTransferDetails();
-                } else {
-                    showSuccess();
-                }
-                
-            } catch (error) {
-                console.error('Error processing payment:', error);
-                alert('Failed to process payment. Please try again.');
-                processBtn.disabled = false;
-                processBtn.innerHTML = '<i class="fas fa-lock"></i> Complete Payment';
-                hidePaymentProcessing();
-            }
-        }, 2000);
+        ${notification.productImage ? `
+        <div class="notification-product">
+          <div class="product-image">
+            <img src="${notification.productImage}" 
+                 alt="${notification.productName || 'Product'}" 
+                 loading="lazy"
+                 onerror="this.src='${getDefaultImage()}'">
+          </div>
+          <div class="product-details">
+            <div class="product-name">${notification.productName || 'Product'}</div>
+            <div class="product-meta">${notification.productCategory || 'Stone Product'}</div>
+            ${notification.productPrice ? `
+            <div class="product-price">£${notification.productPrice.toFixed(2)}</div>
+            ` : ''}
+          </div>
+        </div>
+        ` : ''}
         
-    } catch (error) {
-        console.error('Error in payment process:', error);
-        alert('An error occurred. Please try again.');
-        processBtn.disabled = false;
-        processBtn.innerHTML = '<i class="fas fa-lock"></i> Complete Payment';
-    }
+        <div class="notification-actions">
+          ${isUnread ? `
+          <button class="action-btn-small success" onclick="event.stopPropagation(); markAsRead('${notification.id}')">
+            <i class="fas fa-check"></i> Mark as read
+          </button>
+          ` : ''}
+          
+          <button class="action-btn-small" onclick="event.stopPropagation(); deleteNotification('${notification.id}')">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    `;
+  });
+  
+  notificationsListDiv.innerHTML = notificationsHTML;
 }
 
-// Update Order After Payment
-async function updateOrderAfterPayment() {
-    try {
-        if (!currentOrder || !currentOrder.id) {
-            throw new Error('No order data available');
-        }
+function extractOrderInfo(notification) {
+  const title = notification.title || '';
+  const message = notification.message || '';
+  const orderId = notification.orderId || '';
+  const orderNumber = notification.orderNumber || '';
+  
+  // Extract order number from message if not provided
+  let extractedOrderNumber = orderNumber;
+  if (!extractedOrderNumber) {
+    const extracted = extractOrderInfoFromMessage(message);
+    if (extracted && extracted.orderNumber) {
+      extractedOrderNumber = extracted.orderNumber;
+    }
+  }
+  
+  return {
+    orderId: orderId,
+    orderNumber: extractedOrderNumber
+  };
+}
+
+function extractOrderInfoFromMessage(message) {
+  if (!message) return null;
+  
+  const pattern1 = message.match(/IRYA[-\s]\d+[-\s]\d+/g);
+  if (pattern1 && pattern1[0]) {
+    return { orderNumber: pattern1[0] };
+  }
+  
+  const pattern2 = message.match(/IRYA[-\s]\d+/g);
+  if (pattern2 && pattern2[0]) {
+    return { orderNumber: pattern2[0] };
+  }
+  
+  const pattern3 = message.match(/Order[#\s]+\d+/gi);
+  if (pattern3 && pattern3[0]) {
+    const orderNum = pattern3[0].replace(/Order[#\s]+/i, '').trim();
+    return { orderNumber: `IRYA-${orderNum}` };
+  }
+  
+  const pattern4 = message.match(/\b\d{10,}\b/g);
+  if (pattern4 && pattern4[0]) {
+    return { orderNumber: `IRYA-${pattern4[0]}` };
+  }
+  
+  return null;
+}
+
+function getTypeText(type) {
+  const typeMap = {
+    'payment_pending': 'Payment Pending',
+    'payment_advance': 'Advance Paid',
+    'payment_full': 'Payment Completed',
+    'processing': 'Processing',
+    'ready_to_ship': 'Ready to Ship',
+    'shipped': 'Shipped',
+    'out_for_delivery': 'Out for Delivery',
+    'delivered': 'Delivered',
+    'cancelled': 'Cancelled',
+    'order': 'Order Update',
+    'shipping': 'Shipping Update',
+    'system': 'System'
+  };
+  
+  return typeMap[type] || type.replace(/_/g, ' ').toUpperCase();
+}
+
+function getEmptyMessageForFilter(filter) {
+  const messages = {
+    'all': 'You will see notifications here when you have new updates.',
+    'unread': 'You have no unread notifications.',
+    'payment': 'No payment notifications.',
+    'shipping': 'No shipping notifications.',
+    'order': 'No order notifications.'
+  };
+  
+  return messages[filter] || messages['all'];
+}
+
+// ============================================
+// NOTIFICATION ACTIONS HANDLERS
+// ============================================
+
+async function handleNotificationClick(notificationId, type, orderId, orderNumber) {
+  try {
+    // First mark as read
+    await markAsRead(notificationId);
+    
+    // Check if it's a payment pending notification
+    const isPaymentPending = type === 'payment_pending' || 
+                            (type && type.includes('payment_pending'));
+    
+    if (isPaymentPending) {
+      // Payment pending notifications go to checkout
+      handlePaymentAction(notificationId, orderId, orderNumber);
+    } else if (type === 'payment_advance' || type === 'payment_full') {
+      // Payment completed notifications go to order details
+      handleOrderDetailsAction(notificationId, orderId, orderNumber);
+    } else {
+      // ALL other notifications go to orders.html with tracking
+      handleTrackOrderAction(notificationId, orderId, orderNumber);
+    }
+    
+  } catch (error) {
+    console.error("❌ Error handling notification click:", error);
+    showMessage("Failed to process notification");
+  }
+}
+
+async function handlePaymentAction(notificationId, orderId, orderNumber, amount = 0) {
+  try {
+    // Mark as read
+    await markAsRead(notificationId);
+    
+    // Redirect to checkout
+    redirectToNotificationCheckout(orderId, orderNumber, amount);
+    
+  } catch (error) {
+    console.error("❌ Error in payment action:", error);
+  }
+}
+
+async function handleTrackOrderAction(notificationId, orderId, orderNumber) {
+  try {
+    // Mark as read
+    await markAsRead(notificationId);
+    
+    // Redirect to orders page with tracking
+    redirectToOrdersPage(orderId, orderNumber, true);
+    
+  } catch (error) {
+    console.error("❌ Error in track order action:", error);
+  }
+}
+
+async function handleOrderDetailsAction(notificationId, orderId, orderNumber) {
+  try {
+    // Mark as read
+    await markAsRead(notificationId);
+    
+    // Redirect to orders page
+    redirectToOrdersPage(orderId, orderNumber, false);
+    
+  } catch (error) {
+    console.error("❌ Error in order details action:", error);
+  }
+}
+
+// ============================================
+// REDIRECT FUNCTIONS
+// ============================================
+
+function redirectToNotificationCheckout(orderId, orderNumber, amount = 0) {
+  console.log("💰 Redirecting to notification checkout:", { orderId, orderNumber, amount });
+  
+  // First, try to get the actual order from Firestore to get exact remaining amount
+  try {
+    // Try to get order from Firestore
+    const orderRef = doc(db, "users", currentUserId, "orders", orderId);
+    getDoc(orderRef).then(orderDoc => {
+      if (orderDoc.exists()) {
+        const orderData = orderDoc.data();
+        const paidAmount = orderData.submittedAmount || orderData.advancePayment || 0;
+        const totalAmount = orderData.total || 0;
+        const actualRemaining = orderData.remainingPayment || (totalAmount - paidAmount);
         
-        // Calculate new values
-        const currentSubmittedAmount = currentOrder.submittedAmount || currentOrder.advancePayment || 0;
-        const newSubmittedAmount = currentSubmittedAmount + paymentAmount;
-        const newRemainingPayment = Math.max(0, (currentOrder.remainingPayment || 0) - paymentAmount);
+        // Use actual amount from order if available, otherwise use extracted amount
+        const finalAmount = actualRemaining > 0 ? actualRemaining : amount;
         
-        // Determine payment status
-        const paymentStatus = selectedPaymentMethod === 'bank' ? 'pending' : 'confirmed';
-        const orderStatus = paymentStatus === 'confirmed' ? 'confirmed' : currentOrder.status;
-        
-        // Create payment entry
-        const paymentEntry = {
-            amount: paymentAmount,
-            date: new Date().toISOString(),
-            method: selectedPaymentMethod,
-            paymentId: 'payment_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-            reference: selectedPaymentMethod === 'bank' ? document.getElementById('bankReference').textContent : `IRYA-${Date.now()}`,
-            status: paymentStatus,
-            type: 'remaining_payment'
+        const redirectData = {
+          orderId: orderId,
+          orderNumber: orderNumber,
+          amount: finalAmount,
+          totalAmount: totalAmount,
+          paidAmount: paidAmount,
+          notificationType: 'payment_pending',
+          source: 'notifications_page',
+          timestamp: new Date().toISOString()
         };
         
-        // Update user's order
-        const userOrderRef = doc(db, "users", currentUserId, "orders", currentOrder.id);
+        localStorage.setItem('irya_pending_payment_order', JSON.stringify(redirectData));
         
-        await updateDoc(userOrderRef, {
-            remainingPayment: newRemainingPayment,
-            submittedAmount: newSubmittedAmount,
-            paymentHistory: arrayUnion(paymentEntry),
-            paymentStatus: paymentStatus,
-            status: orderStatus,
-            updatedAt: new Date().toISOString(),
-            statusHistory: arrayUnion({
-                status: orderStatus,
-                at: new Date().toISOString(),
-                notes: `Remaining payment ${paymentStatus} via ${selectedPaymentMethod}`
-            })
-        });
+        let checkoutUrl = `notification-checkout.html?order_id=${orderId}&type=remaining_payment&amount=${finalAmount}`;
         
-        // Update main orders collection
-        const mainOrderRef = doc(db, "orders", currentOrder.id);
-        await updateDoc(mainOrderRef, {
-            remainingPayment: newRemainingPayment,
-            submittedAmount: newSubmittedAmount,
-            paymentStatus: paymentStatus,
-            status: orderStatus,
-            updatedAt: new Date().toISOString()
-        });
+        console.log("🔗 Redirecting to:", checkoutUrl);
+        showMessage("Redirecting to payment page...");
         
-        console.log('Order updated successfully');
-        
-    } catch (error) {
-        console.error('Error updating order:', error);
-        throw error;
-    }
-}
-
-// Show Payment Processing Modal
-function showPaymentProcessing() {
-    const modal = document.getElementById('paymentProcessingModal');
-    const message = document.getElementById('processingMessage');
-    
-    if (selectedPaymentMethod === 'stripe') {
-        message.textContent = 'Processing your card payment securely with Stripe...';
-    } else if (selectedPaymentMethod === 'paypal') {
-        message.textContent = 'Redirecting to PayPal for secure payment...';
-    } else {
-        message.textContent = 'Preparing your bank transfer details...';
-    }
-    
-    modal.style.display = 'flex';
-}
-
-function hidePaymentProcessing() {
-    document.getElementById('paymentProcessingModal').style.display = 'none';
-}
-
-// Show Bank Transfer Details
-function showBankTransferDetails() {
-    const modal = document.getElementById('bankTransferModal');
-    const detailsDiv = document.getElementById('bankTransferDetails');
-    
-    const reference = document.getElementById('bankReference').textContent;
-    
-    detailsDiv.innerHTML = `
-        <div style="margin-bottom: 15px;">
-            <div style="font-size: 12px; color: var(--text-light);">Order Number</div>
-            <div style="font-weight: bold; font-size: 16px; color: var(--stone-dark);">${currentOrder.orderNumber || currentOrder.id?.substring(0, 8)}</div>
-        </div>
-        <div style="margin-bottom: 15px;">
-            <div style="font-size: 12px; color: var(--text-light);">Amount to Transfer</div>
-            <div style="font-weight: bold; font-size: 20px; color: var(--primary-gold);">${formatPrice(paymentAmount)}</div>
-        </div>
-        <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #eee;">
-            <p><strong>Bank Name:</strong> HSBC UK</p>
-            <p><strong>Account Name:</strong> IRYA STONE LTD</p>
-            <p><strong>Account Number:</strong> 12345678</p>
-            <p><strong>Sort Code:</strong> 40-04-15</p>
-            <p><strong>Reference:</strong> ${reference}</p>
-        </div>
-        <div style="padding: 12px; background: #fff8e1; border-radius: 6px; border-left: 4px solid var(--warning-orange);">
-            <i class="fas fa-info-circle" style="color: var(--warning-orange;"></i>
-            <strong>Important:</strong> Use the exact reference when making the transfer. Your order will be confirmed once payment is received (1-3 business days).
-        </div>
-    `;
-    
-    modal.style.display = 'flex';
-    hidePaymentProcessing();
-}
-
-function copyBankDetails() {
-    const textToCopy = `IRYA STONE Payment Details:
-Order Number: ${currentOrder.orderNumber || currentOrder.id?.substring(0, 8)}
-Amount: ${formatPrice(paymentAmount)}
-Bank: HSBC UK
-Account: IRYA STONE LTD
-Account Number: 12345678
-Sort Code: 40-04-15
-Reference: ${document.getElementById('bankReference').textContent}`;
-    
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        alert('Bank details copied to clipboard!');
+        setTimeout(() => {
+          window.location.href = checkoutUrl;
+        }, 500);
+      }
+    }).catch(error => {
+      // Fallback to extracted amount if order not found
+      console.log("Order not found, using extracted amount");
+      proceedWithExtractedAmount();
     });
-}
-
-function closeBankModal() {
-    const modal = document.getElementById('bankTransferModal');
-    modal.style.display = 'none';
-    showSuccess();
-}
-
-// Show Success
-function showSuccess() {
-    const successDetails = document.getElementById('successDetails');
-    const successMessage = document.getElementById('successMessage');
+  } catch (error) {
+    console.log("Error fetching order, using extracted amount");
+    proceedWithExtractedAmount();
+  }
+  
+  function proceedWithExtractedAmount() {
+    const redirectData = {
+      orderId: orderId,
+      orderNumber: orderNumber,
+      amount: amount,
+      notificationType: 'payment_pending',
+      source: 'notifications_page',
+      timestamp: new Date().toISOString()
+    };
     
-    // Determine payment confirmation status
-    const isPaymentConfirmed = selectedPaymentMethod !== 'bank';
+    localStorage.setItem('irya_pending_payment_order', JSON.stringify(redirectData));
     
-    if (!isPaymentConfirmed) {
-        successMessage.textContent = 'Payment pending! Please complete bank transfer.';
-        successDetails.innerHTML = `
-            <div style="margin-bottom: 8px;"><strong>Order Number:</strong> ${currentOrder.orderNumber || currentOrder.id?.substring(0, 8)}</div>
-            <div style="margin-bottom: 8px;"><strong>Amount to Pay:</strong> ${formatPrice(paymentAmount)}</div>
-            <div style="margin-bottom: 8px;"><strong>Payment Method:</strong> Bank Transfer</div>
-            <div style="margin-bottom: 8px;"><strong>Payment Reference:</strong> ${document.getElementById('bankReference').textContent}</div>
-            <div style="margin-top: 10px; padding: 10px; background: #fff8e1; border-radius: 6px; font-size: 12px; color: var(--warning-orange);">
-                <i class="fas fa-clock"></i> 
-                <strong>Note:</strong> Order will be updated once payment is received (1-3 business days)
-            </div>
-        `;
+    let checkoutUrl = 'notification-checkout.html';
+    
+    if (orderId) {
+      checkoutUrl += `?order_id=${orderId}&type=remaining_payment`;
+    } else if (orderNumber) {
+      checkoutUrl += `?order_number=${encodeURIComponent(orderNumber)}&type=remaining_payment`;
     } else {
-        successMessage.textContent = 'Payment successful! Your order has been updated.';
-        successDetails.innerHTML = `
-            <div style="margin-bottom: 8px;"><strong>Order Number:</strong> ${currentOrder.orderNumber || currentOrder.id?.substring(0, 8)}</div>
-            <div style="margin-bottom: 8px;"><strong>Amount Paid:</strong> ${formatPrice(paymentAmount)}</div>
-            <div style="margin-bottom: 8px;"><strong>Payment Method:</strong> ${selectedPaymentMethod === 'stripe' ? 'Credit/Debit Card (Stripe)' : 'PayPal'}</div>
-            <div style="margin-top: 10px; font-size: 12px; color: var(--success-green);">
-                <i class="fas fa-check-circle"></i> 
-                <strong>Payment Status:</strong> Confirmed instantly
-            </div>
-        `;
+      checkoutUrl += '?type=remaining_payment';
     }
     
-    document.getElementById('successModal').style.display = 'flex';
-    hidePaymentProcessing();
-}
-
-// Utility Functions
-function formatPrice(price) {
-    if (!price && price !== 0) return '£0.00';
-    return `£${parseFloat(price).toFixed(2)}`;
-}
-
-function showLoading(show) {
-    document.getElementById('loadingState').style.display = show ? 'block' : 'none';
-    document.getElementById('checkoutContent').style.display = show ? 'none' : 'block';
-    document.getElementById('errorState').style.display = 'none';
-}
-
-function showError(title, message) {
-    document.getElementById('errorTitle').textContent = title;
-    document.getElementById('errorMessage').textContent = message;
-    document.getElementById('errorState').style.display = 'block';
-    document.getElementById('loadingState').style.display = 'none';
-}
-
-function retryLoad() {
-    showLoading(true);
+    if (amount > 0) {
+      checkoutUrl += `&amount=${amount}`;
+    }
+    
+    console.log("🔗 Redirecting to:", checkoutUrl);
+    showMessage("Redirecting to payment page...");
+    
     setTimeout(() => {
-        loadPaymentData();
-    }, 1000);
+      window.location.href = checkoutUrl;
+    }, 500);
+  }
 }
 
-function viewOrder() {
-    window.location.href = `orders.html?order_id=${currentOrder.id}`;
+function redirectToOrdersPage(orderId, orderNumber, trackOrder = false) {
+  console.log("📦 Redirecting to orders page:", { orderId, orderNumber, trackOrder });
+  
+  const redirectData = {
+    orderId: orderId,
+    orderNumber: orderNumber,
+    notificationType: trackOrder ? 'order_tracking' : 'order_notification',
+    trackOrder: trackOrder,
+    timestamp: new Date().toISOString()
+  };
+  
+  localStorage.setItem('irya_notification_redirect', JSON.stringify(redirectData));
+  
+  let ordersUrl = 'orders.html';
+  
+  if (orderId) {
+    ordersUrl += `?order_id=${orderId}`;
+    if (trackOrder) {
+      ordersUrl += `&track=true`;
+    }
+  } else if (orderNumber) {
+    ordersUrl += `?search=${encodeURIComponent(orderNumber)}`;
+    if (trackOrder) {
+      ordersUrl += `&track=true`;
+    }
+  }
+  
+  console.log("🔗 Redirecting to:", ordersUrl);
+  showMessage(trackOrder ? "Redirecting to track order..." : "Redirecting to order details...");
+  
+  setTimeout(() => {
+    window.location.href = ordersUrl;
+  }, 500);
 }
 
-function goToNotifications() {
-    window.location.href = 'notification.html';
-}
+// ============================================
+// NOTIFICATION MANAGEMENT FUNCTIONS
+// ============================================
 
-// Setup Event Listeners
-function setupEventListeners() {
-    const cardNumberInput = document.getElementById('cardNumber');
-    if (cardNumberInput) {
-        cardNumberInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-            let formatted = '';
-            for (let i = 0; i < value.length; i++) {
-                if (i > 0 && i % 4 === 0) formatted += ' ';
-                formatted += value[i];
-            }
-            e.target.value = formatted.substring(0, 19);
-        });
+async function markAsRead(notificationId) {
+  try {
+    if (!db || !currentUserId) return;
+    
+    const notificationRef = doc(db, "users", currentUserId, "notifications", notificationId);
+    await updateDoc(notificationRef, {
+      read: true,
+      readAt: new Date().toISOString()
+    });
+    
+    const notification = notifications.find(n => n.id === notificationId);
+    if (notification) {
+      notification.read = true;
     }
     
-    const expiryInput = document.getElementById('cardExpiry');
-    if (expiryInput) {
-        expiryInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/[^0-9]/gi, '');
-            if (value.length >= 2) {
-                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
-            } else {
-                e.target.value = value;
-            }
-        });
+    const notificationElement = document.querySelector(`[data-id="${notificationId}"]`);
+    if (notificationElement) {
+      notificationElement.classList.remove('unread');
+      
+      const markAsReadBtn = notificationElement.querySelector('.action-btn-small.success');
+      if (markAsReadBtn) {
+        markAsReadBtn.remove();
+      }
     }
     
-    // Select default payment method
-    selectPaymentMethod('stripe');
+    const unreadCount = notifications.filter(n => !n.read).length;
+    updateBadges(unreadCount);
+    
+  } catch (error) {
+    console.error("❌ Error marking as read:", error);
+    showMessage("Failed to mark as read");
+  }
 }
+
+async function markAllAsRead() {
+  try {
+    if (!db || !currentUserId) return;
+    
+    const unreadNotifications = notifications.filter(n => !n.read);
+    
+    for (const notification of unreadNotifications) {
+      const notificationRef = doc(db, "users", currentUserId, "notifications", notification.id);
+      await updateDoc(notificationRef, {
+        read: true,
+        readAt: new Date().toISOString()
+      });
+      
+      notification.read = true;
+    }
+    
+    document.querySelectorAll('.notification-item.unread').forEach(item => {
+      item.classList.remove('unread');
+      
+      const markAsReadBtn = item.querySelector('.action-btn-small.success');
+      if (markAsReadBtn) {
+        markAsReadBtn.remove();
+      }
+    });
+    
+    updateBadges(0);
+    showMessage("All notifications marked as read");
+    
+  } catch (error) {
+    console.error("❌ Error marking all as read:", error);
+    showMessage("Failed to mark all as read");
+  }
+}
+
+async function deleteNotification(notificationId) {
+  if (!confirm('Are you sure you want to delete this notification?')) return;
+  
+  try {
+    if (!db || !currentUserId) return;
+    
+    const notificationRef = doc(db, "users", currentUserId, "notifications", notificationId);
+    await deleteDoc(notificationRef);
+    
+    notifications = notifications.filter(n => n.id !== notificationId);
+    
+    const unreadCount = notifications.filter(n => !n.read).length;
+    updateBadges(unreadCount);
+    
+    displayNotifications(notifications);
+    
+    showMessage("Notification deleted");
+    
+  } catch (error) {
+    console.error("❌ Error deleting notification:", error);
+    showMessage("Failed to delete notification");
+  }
+}
+
+async function clearAllNotifications() {
+  if (!confirm('Are you sure you want to clear all notifications? This cannot be undone.')) return;
+  
+  try {
+    if (!db || !currentUserId) return;
+    
+    const notificationsRef = collection(db, "users", currentUserId, "notifications");
+    const snapshot = await getDocs(notificationsRef);
+    
+    const deletePromises = [];
+    snapshot.forEach((doc) => {
+      deletePromises.push(deleteDoc(doc.ref));
+    });
+    
+    await Promise.all(deletePromises);
+    
+    notifications = [];
+    updateBadges(0);
+    showEmptyState("All notifications cleared");
+    
+    showMessage("All notifications cleared");
+    
+  } catch (error) {
+    console.error("❌ Error clearing all notifications:", error);
+    showMessage("Failed to clear notifications");
+  }
+}
+
+// ============================================
+// FILTER FUNCTIONS
+// ============================================
+
+function filterNotifications(filter) {
+  currentFilter = filter;
+  
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  event?.target.classList.add('active');
+  
+  displayNotifications(notifications);
+}
+
+// ============================================
+// BADGE MANAGEMENT
+// ============================================
+
+function updateBadges(unreadCount) {
+  const bottomNavBadge = document.getElementById('bottomNavBadge');
+  
+  if (bottomNavBadge) {
+    if (unreadCount > 0) {
+      bottomNavBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+      bottomNavBadge.style.display = 'flex';
+    } else {
+      bottomNavBadge.style.display = 'none';
+    }
+  }
+  
+  localStorage.setItem('irya_unread_notifications', unreadCount.toString());
+}
+
+function updateCartBadge() {
+  try {
+    const userId = localStorage.getItem('irya_guest_id') || 'guest';
+    const cartKey = 'irya_local_cart_' + userId;
+    const cartData = localStorage.getItem(cartKey);
+    const cartItems = cartData ? JSON.parse(cartData) : [];
+    const count = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
+    
+    const cartBadge = document.getElementById('cartBadge');
+    if (cartBadge) {
+      cartBadge.textContent = count;
+      cartBadge.style.display = count > 0 ? 'flex' : 'none';
+    }
+  } catch (error) {
+    console.error('❌ Error updating cart badge:', error);
+  }
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+function showEmptyState(message) {
+  const notificationsList = document.getElementById("notificationsList");
+  notificationsList.innerHTML = `
+    <div class="empty-state">
+      <i class="fas fa-bell-slash"></i>
+      <h3>${message}</h3>
+      <p>You will see notifications here when you have new updates.</p>
+      <button class="filter-btn active" onclick="loadNotifications()" style="margin-top: 20px;">
+        <i class="fas fa-redo"></i> Refresh
+      </button>
+    </div>
+  `;
+}
+
+function getTimeAgo(dateString) {
+  if (!dateString) return 'Just now';
+  
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short'
+    });
+  } catch (error) {
+    return dateString;
+  }
+}
+
+function showMessage(message) {
+  const existingToast = document.querySelector('.toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+  
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="fas fa-check-circle"></i>
+      <span>${message}</span>
+    </div>
+  `;
+  
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        document.body.removeChild(toast);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
+document.addEventListener('DOMContentLoaded', async function() {
+  try {
+    console.log("📱 Notifications page loaded");
+    
+    await loadNotifications();
+    
+    const searchOrderNumber = localStorage.getItem('irya_search_order_number');
+    if (searchOrderNumber) {
+      localStorage.removeItem('irya_search_order_number');
+      
+      const orderNotifications = notifications.filter(n => {
+        const orderInfo = extractOrderInfo(n);
+        return orderInfo.orderNumber === searchOrderNumber;
+      });
+      
+      if (orderNotifications.length > 0) {
+        currentFilter = 'all';
+        displayNotifications(orderNotifications);
+        showMessage(`Showing notifications for order ${searchOrderNumber}`);
+      }
+    }
+    
+  } catch (error) {
+    console.error("❌ Error initializing:", error);
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  if (notificationsUnsubscribe) notificationsUnsubscribe();
+});
 
 // Make functions available globally
-window.selectPaymentMethod = selectPaymentMethod;
-window.processPayment = processPayment;
-window.viewOrder = viewOrder;
-window.goToNotifications = goToNotifications;
-window.retryLoad = retryLoad;
-window.copyBankDetails = copyBankDetails;
-window.closeBankModal = closeBankModal;
+window.filterNotifications = filterNotifications;
+window.markAsRead = markAsRead;
+window.markAllAsRead = markAllAsRead;
+window.deleteNotification = deleteNotification;
+window.clearAllNotifications = clearAllNotifications;
+window.handleNotificationClick = handleNotificationClick;
+window.handlePaymentAction = handlePaymentAction;
+window.handleTrackOrderAction = handleTrackOrderAction;
+window.handleOrderDetailsAction = handleOrderDetailsAction;
+window.redirectToNotificationCheckout = redirectToNotificationCheckout;
+window.redirectToOrdersPage = redirectToOrdersPage;
 </script>
+
 </body>
 </html>
