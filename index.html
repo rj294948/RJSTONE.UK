@@ -659,65 +659,73 @@ section.hero,
 }
 
 /* Specific section backgrounds with STONE/MINING images */
+/* ============================================
+   SHOP BY CATEGORY TITLE SECTION - COMPACT
+   ============================================ */
 .categories-section .section-title-wrapper {
     background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.5)),
         url('https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=1600&q=80');
+    background-size: cover;
+    background-position: center 40%; /* Better crop for title */
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* Parallax effect */
+    padding: 20px 15px !important; /* Reduced padding */
+    min-height: 120px; /* Compact height for title section */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
 }
 
-.uses-section .section-title-wrapper {
-    background-image: 
-        url('https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');
+.categories-section .section-title-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(0,0,0,0.7) 0%, rgba(201, 162, 39, 0.2) 100%);
+    z-index: 0;
 }
 
-.products .section-title-wrapper {
-    background-image: 
-        url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1600&q=80');
-}
-
-/* Title text styling - SMALLER AND COOLER */
-.section-title-wrapper h2 {
-    font-size: 20px !important;
-    font-weight: 600 !important;
-    margin-bottom: 6px !important;
+.categories-section .section-title-wrapper h2 {
+    font-size: 18px !important; /* Smaller font */
+    font-weight: 700 !important;
+    margin-bottom: 4px !important;
     color: var(--white);
     font-family: 'Roboto Slab', serif;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
-    letter-spacing: 0.5px;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+    letter-spacing: 1px;
     text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+    padding: 0 10px;
 }
 
-.section-title-wrapper .subtitle {
-    font-size: 13px !important;
+.categories-section .section-title-wrapper .subtitle {
+    font-size: 11px !important; /* Smaller subtitle */
     color: rgba(255, 255, 255, 0.9);
-    max-width: 700px;
+    max-width: 600px;
     margin: 0 auto;
-    line-height: 1.4;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-    font-weight: 400;
+    line-height: 1.3;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    font-weight: 300;
     opacity: 0.9;
+    position: relative;
+    z-index: 1;
+    padding: 0 15px;
 }
 
-/* Remove gaps between sections */
-.categories-section,
-.uses-section,
-.products {
-    margin-top: 0;
-    padding-top: 0;
-}
-
-/* ============================================
-   CATEGORIES SECTION - NORMAL HEIGHT
-   ============================================ */
-.categories-section {
-    background: var(--white);
-}
-
-/* Categories Slider Container */
+/* CATEGORIES SLIDER - 3 ROWS LAYOUT */
 .categories-slider-container {
     position: relative;
     overflow: hidden;
-    padding: 20px 0 25px;
-    background: var(--bg-light);
+    padding: 15px 0 20px;
+    background: var(--white);
     width: 100%;
 }
 
@@ -727,19 +735,20 @@ section.hero,
     width: 100%;
 }
 
-/* Each slide: 1 row × 2 columns grid - NORMAL HEIGHT */
+/* Each slide: 1 row × 3 columns grid - COMPACT 3 COLUMN LAYOUT */
 .categories-slide {
     flex: 0 0 100%;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns */
+    grid-template-rows: repeat(2, 1fr); /* 2 rows = Total 6 items per slide */
+    gap: 12px;
     box-sizing: border-box;
     width: 100%;
-    padding: 0 15px;
+    padding: 0 12px;
     margin: 0;
 }
 
-/* Category card styling - NORMAL HEIGHT */
+/* Category card styling - COMPACT FOR 3 COLUMN LAYOUT */
 .category-card {
     background: var(--white);
     overflow: hidden;
@@ -750,17 +759,19 @@ section.hero,
     color: inherit;
     display: block;
     position: relative;
-    height: 200px; /* NORMAL HEIGHT (previously 280px) */
+    height: 160px; /* More compact for 3-column layout */
     margin: 0;
     padding: 0;
     width: 100%;
-    border-radius: 10px;
-    box-shadow: var(--shadow-sm);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f0f0f0;
 }
 
 .category-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    border-color: var(--primary-gold);
 }
 
 .category-image {
@@ -768,7 +779,7 @@ section.hero,
     height: 100%;
     overflow: hidden;
     position: relative;
-    border-radius: 10px;
+    border-radius: 8px;
 }
 
 .category-image img {
@@ -776,11 +787,11 @@ section.hero,
     height: 100%;
     object-fit: cover;
     object-position: center;
-    transition: transform 0.5s ease;
+    transition: transform 0.4s ease;
 }
 
 .category-card:hover .category-image img {
-    transform: scale(1.05);
+    transform: scale(1.07);
 }
 
 .category-overlay {
@@ -788,48 +799,159 @@ section.hero,
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.4) 50%, transparent);
     color: white;
-    padding: 12px 10px 8px;
-    border-radius: 0 0 10px 10px;
+    padding: 10px 8px 6px;
+    border-radius: 0 0 8px 8px;
 }
 
 .category-name {
-    font-size: 15px;
+    font-size: 13px; /* Smaller for compact layout */
     font-weight: 600;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
     font-family: 'Roboto Slab', serif;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
 }
 
 .category-count {
-    font-size: 12px;
+    font-size: 10px; /* Smaller */
     opacity: 0.9;
+    text-align: center;
+    display: block;
 }
 
-/* Slider Navigation */
+/* Responsive adjustments for 3-column layout */
+@media (min-width: 992px) {
+    .categories-section .section-title-wrapper {
+        padding: 25px 20px !important;
+        min-height: 130px;
+    }
+    
+    .categories-section .section-title-wrapper h2 {
+        font-size: 20px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .categories-section .section-title-wrapper .subtitle {
+        font-size: 12px !important;
+    }
+    
+    .categories-slide {
+        gap: 15px;
+        padding: 0 20px;
+    }
+    
+    .category-card {
+        height: 180px; /* Slightly taller on desktop */
+    }
+    
+    .category-name {
+        font-size: 14px;
+    }
+    
+    .category-count {
+        font-size: 11px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .categories-slide {
+        grid-template-columns: repeat(3, 1fr); /* Still 3 columns */
+        grid-template-rows: repeat(2, 1fr);
+        gap: 10px;
+        padding: 0 15px;
+    }
+    
+    .category-card {
+        height: 150px;
+    }
+}
+
+@media (max-width: 767px) {
+    .categories-section .section-title-wrapper {
+        min-height: 100px;
+        padding: 15px 12px !important;
+        background-attachment: scroll; /* Remove fixed on mobile */
+    }
+    
+    .categories-section .section-title-wrapper h2 {
+        font-size: 16px !important;
+        letter-spacing: 0.5px;
+    }
+    
+    .categories-section .section-title-wrapper .subtitle {
+        font-size: 10px !important;
+        max-width: 90%;
+    }
+    
+    /* Mobile: Switch to 2 columns */
+    .categories-slide {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+        grid-template-rows: repeat(3, 1fr); /* 3 rows = Total 6 items */
+        gap: 10px;
+        padding: 0 10px;
+    }
+    
+    .category-card {
+        height: 140px; /* Compact on mobile */
+    }
+    
+    .category-overlay {
+        padding: 8px 6px 4px;
+    }
+    
+    .category-name {
+        font-size: 12px;
+    }
+    
+    .category-count {
+        font-size: 9px;
+    }
+}
+
+@media (max-width: 480px) {
+    .categories-slide {
+        gap: 8px;
+        padding: 0 8px;
+    }
+    
+    .category-card {
+        height: 130px; /* Even more compact on small mobile */
+    }
+    
+    .category-name {
+        font-size: 11px;
+    }
+    
+    .category-count {
+        font-size: 8px;
+    }
+}
+
+/* Slider Navigation - Adjusted for compact layout */
 .cat-slider-nav {
     display: flex;
     justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
+    gap: 6px;
+    margin-top: 15px;
     padding: 0 15px;
 }
 
 .cat-slider-dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.15);
     cursor: pointer;
     transition: var(--transition);
 }
 
 .cat-slider-dot.active {
     background: var(--primary-gold);
-    transform: scale(1.2);
+    transform: scale(1.3);
 }
 
 .cat-slider-prev,
@@ -837,8 +959,8 @@ section.hero,
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 50%;
     display: flex;
@@ -847,9 +969,9 @@ section.hero,
     cursor: pointer;
     border: none;
     color: var(--stone-dark);
-    font-size: 13px;
+    font-size: 12px;
     transition: var(--transition);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     z-index: 10;
 }
 
@@ -857,15 +979,15 @@ section.hero,
 .cat-slider-next:hover {
     background: var(--primary-gold);
     color: white;
-    transform: translateY(-50%) scale(1.05);
+    transform: translateY(-50%) scale(1.1);
 }
 
 .cat-slider-prev {
-    left: 10px;
+    left: 5px;
 }
 
 .cat-slider-next {
-    right: 10px;
+    right: 5px;
 }
 
 /* Responsive adjustments for normal height */
