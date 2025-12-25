@@ -51,31 +51,31 @@ body {
 }
 
 /* ============================================
-   HEADER - REDUCED SHADOW AND HEIGHT
+   HEADER - FULL TRANSPARENT WITH SCROLL EFFECT
    ============================================ */
 header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    background: rgba(0, 0, 0, 0.25); /* Less dark */
+    background: rgba(0, 0, 0, 0.25);
     backdrop-filter: blur(8px);
-    padding: 6px 12px; /* Further reduced padding */
+    padding: 6px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     z-index: 1000;
-    gap: 6px; /* Reduced gap further */
+    gap: 6px;
     transform: translateY(0);
     transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08); /* Lighter border */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Reduced shadow */
-    min-height: 48px; /* Fixed height */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    min-height: 48px;
 }
 
 header.scrolled {
-    background: rgba(0, 0, 0, 0.35); /* Less dark on scroll */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15); /* Reduced shadow */
+    background: rgba(0, 0, 0, 0.35);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
 header.hidden {
@@ -89,41 +89,41 @@ header.show {
 .logo {
     display: flex;
     align-items: center;
-    gap: 5px; /* Reduced */
+    gap: 5px;
     font-weight: 600;
-    min-width: 100px; /* Smaller */
-    height: 36px; /* Fixed height */
+    min-width: 100px;
+    height: 36px;
 }
 
 .logo i {
     color: var(--primary-gold);
-    font-size: 16px; /* Smaller */
+    font-size: 16px;
 }
 
 .logo span {
-    font-size: 14px; /* Smaller */
+    font-size: 14px;
     font-weight: 700;
     color: var(--white);
     font-family: 'Roboto Slab', serif;
 }
 
-/* Search Box - Adjusted */
+/* Search Box */
 .search-box {
     flex: 1;
-    margin: 0 6px; /* Reduced */
+    margin: 0 6px;
     position: relative;
-    max-width: 420px; /* Smaller */
-    height: 36px; /* Fixed height */
+    max-width: 420px;
+    height: 36px;
 }
 
 .search-box input {
     width: 100%;
     height: 100%;
-    padding: 6px 30px 6px 10px; /* Reduced */
-    border-radius: 16px; /* Smaller */
+    padding: 6px 30px 6px 10px;
+    border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.12);
-    font-size: 11px; /* Smaller */
+    font-size: 11px;
     transition: var(--transition);
     color: var(--white);
 }
@@ -132,54 +132,248 @@ header.show {
     outline: none;
     border-color: var(--primary-gold);
     background: rgba(0, 0, 0, 0.3);
-    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.15); /* Reduced shadow */
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.15);
 }
 
-/* User Profile - Adjusted */
+.search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-box i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 1001;
+    display: none;
+    margin-top: 4px;
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-result-item {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--white);
+    text-decoration: none;
+}
+
+.search-result-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.search-result-image {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-result-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.search-result-info {
+    flex: 1;
+}
+
+.search-result-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 2px;
+}
+
+.search-result-category {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.search-result-price {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary-gold);
+    white-space: nowrap;
+}
+
+.no-results {
+    padding: 12px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+}
+
+/* User Profile */
 .user-profile {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 4px; /* Reduced */
-    height: 36px; /* Fixed height */
+    gap: 4px;
+    height: 36px;
 }
 
 .profile-btn {
     display: flex;
     align-items: center;
-    gap: 4px; /* Reduced */
+    gap: 4px;
     background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
     color: var(--white);
-    padding: 6px 10px; /* Reduced */
-    border-radius: 16px; /* Smaller */
-    font-size: 11px; /* Smaller */
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 11px;
     font-weight: 500;
     cursor: pointer;
     border: none;
     transition: var(--transition);
     white-space: nowrap;
-    min-width: 60px; /* Smaller */
-    height: 32px; /* Fixed height */
+    min-width: 60px;
+    height: 32px;
 }
 
+.profile-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-btn i {
+    font-size: 10px;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    min-width: 170px;
+    z-index: 1001;
+    display: none;
+    margin-top: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-dropdown.active {
+    display: block;
+}
+
+.profile-info {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-info .user-name {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 3px;
+    color: var(--white);
+}
+
+.profile-info .user-email {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.dropdown-menu {
+    padding: 6px 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    color: var(--white);
+    text-decoration: none;
+    transition: var(--transition);
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--primary-gold);
+}
+
+.dropdown-item i {
+    width: 16px;
+    text-align: center;
+    color: var(--primary-gold);
+    font-size: 13px;
+}
+
+.signout-btn {
+    color: #ff4757 !important;
+}
+
+.signout-btn:hover {
+    background: #ff4757 !important;
+    color: white !important;
+}
+
+.signout-btn:hover i {
+    color: white !important;
+}
+
+/* Buttons */
 .signin-btn {
     background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
     color: var(--white);
-    padding: 6px 10px; /* Reduced */
-    border-radius: 16px; /* Smaller */
-    font-size: 11px; /* Smaller */
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 11px;
     font-weight: 500;
     cursor: pointer;
     border: none;
     transition: var(--transition);
     white-space: nowrap;
-    min-width: 60px; /* Smaller */
-    height: 32px; /* Fixed height */
+    min-width: 60px;
+    height: 32px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.signin-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
 .action-btn {
-    width: 30px; /* Smaller */
-    height: 30px; /* Smaller */
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.12);
     border: none;
@@ -187,15 +381,160 @@ header.show {
     align-items: center;
     justify-content: center;
     color: var(--white);
-    font-size: 12px; /* Smaller */
+    font-size: 12px;
     cursor: pointer;
     transition: var(--transition);
     position: relative;
     text-decoration: none;
 }
 
+.action-btn:hover {
+    background: var(--primary-gold);
+    color: var(--white);
+    transform: scale(1.05);
+}
+
 /* ============================================
-   CATEGORIES SECTION - TALLER IMAGE BOXES
+   HERO SECTION
+   ============================================ */
+.hero {
+    padding: 80px 15px 25px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 55vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)),
+        url('https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: var(--white);
+    margin-top: 0;
+    transition: margin-top 0.3s ease;
+}
+
+.hero-content {
+    max-width: 700px;
+    padding: 0 15px;
+    z-index: 2;
+}
+
+.hero h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    font-family: 'Roboto Slab', serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    line-height: 1.2;
+}
+
+.hero p {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 25px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.4;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.hero-buttons .signin-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+    height: auto;
+}
+
+/* ============================================
+   SECTION TITLES - REDUCED PADDING
+   ============================================ */
+
+.section-title-wrapper {
+    position: relative;
+    padding: 25px 15px !important;
+    margin: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 0;
+    overflow: hidden;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Overlay for better text readability */
+.section-title-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+/* Specific section backgrounds with STONE/MINING images */
+.categories-section .section-title-wrapper {
+    background-image: 
+        url('https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=1600&q=80');
+}
+
+.uses-section .section-title-wrapper {
+    background-image: 
+        url('https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');
+}
+
+.products .section-title-wrapper {
+    background-image: 
+        url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1600&q=80');
+}
+
+/* Title text styling - SMALLER AND COOLER */
+.section-title-wrapper h2 {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    margin-bottom: 6px !important;
+    color: var(--white);
+    font-family: 'Roboto Slab', serif;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.section-title-wrapper .subtitle {
+    font-size: 13px !important;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.4;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+/* Remove gaps between sections */
+.categories-section,
+.uses-section,
+.products {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+/* ============================================
+   CATEGORIES SECTION - TALLER VERTICAL IMAGES
    ============================================ */
 
 .categories-section {
@@ -206,7 +545,7 @@ header.show {
 .categories-slider-container {
     position: relative;
     overflow: hidden;
-    padding: 15px 0; /* Reduced padding */
+    padding: 15px 0;
     background: var(--bg-light);
     width: 100%;
 }
@@ -222,14 +561,14 @@ header.show {
     flex: 0 0 100%;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px; /* Slightly increased gap */
+    gap: 10px;
     box-sizing: border-box;
     width: 100%;
     padding: 0 12px;
     margin: 0;
 }
 
-/* Category card styling - MUCH TALLER VERTICAL */
+/* Category card styling - TALLER VERTICAL */
 .category-card {
     background: var(--white);
     overflow: hidden;
@@ -240,7 +579,7 @@ header.show {
     color: inherit;
     display: block;
     position: relative;
-    height: 280px; /* SIGNIFICANTLY INCREASED HEIGHT */
+    height: 280px;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -264,13 +603,13 @@ header.show {
 .category-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Ensures full coverage */
-    object-position: center; /* Centers the image */
+    object-fit: cover;
+    object-position: center;
     transition: transform 0.5s ease;
 }
 
 .category-card:hover .category-image img {
-    transform: scale(1.08); /* Slightly increased zoom */
+    transform: scale(1.08);
 }
 
 .category-overlay {
@@ -280,12 +619,12 @@ header.show {
     right: 0;
     background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
     color: white;
-    padding: 15px 12px 10px; /* Increased padding */
+    padding: 15px 12px 10px;
     border-radius: 0 0 12px 12px;
 }
 
 .category-name {
-    font-size: 16px; /* Increased */
+    font-size: 16px;
     font-weight: 600;
     margin-bottom: 4px;
     font-family: 'Roboto Slab', serif;
@@ -295,12 +634,71 @@ header.show {
 }
 
 .category-count {
-    font-size: 13px; /* Increased */
+    font-size: 13px;
     opacity: 0.9;
 }
 
+/* Slider Navigation */
+.cat-slider-nav {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 15px;
+    padding: 0 15px;
+}
+
+.cat-slider-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.cat-slider-dot.active {
+    background: var(--primary-gold);
+    transform: scale(1.2);
+}
+
+.cat-slider-prev,
+.cat-slider-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    color: var(--stone-dark);
+    font-size: 12px;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+    z-index: 10;
+}
+
+.cat-slider-prev:hover,
+.cat-slider-next:hover {
+    background: var(--primary-gold);
+    color: white;
+    transform: translateY(-50%) scale(1.05);
+}
+
+.cat-slider-prev {
+    left: 8px;
+}
+
+.cat-slider-next {
+    right: 8px;
+}
+
 /* ============================================
-   STONE USES SECTION - TALLER IMAGE BOXES
+   STONE USES SECTION - TALLER VERTICAL IMAGES
    ============================================ */
 
 .uses-section {
@@ -327,7 +725,7 @@ header.show {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    gap: 12px; /* Increased gap */
+    gap: 12px;
     padding: 0 10px;
     box-sizing: border-box;
     width: 100%;
@@ -345,7 +743,7 @@ header.show {
     color: inherit;
     display: block;
     position: relative;
-    height: 200px; /* SIGNIFICANTLY INCREASED HEIGHT */
+    height: 200px;
     overflow: hidden;
 }
 
@@ -365,16 +763,16 @@ header.show {
 .use-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Full coverage */
-    object-position: center; /* Center the image */
+    object-fit: cover;
+    object-position: center;
     transition: transform 0.5s ease;
 }
 
 .use-card:hover .use-image {
-    transform: scale(1.1); /* Increased zoom */
+    transform: scale(1.1);
 }
 
-/* Use Info Overlay */
+/* Use Info Overlay - CLEAR VISIBILITY */
 .use-info-overlay {
     position: absolute;
     bottom: 0;
@@ -387,7 +785,7 @@ header.show {
 }
 
 .use-name {
-    font-size: 13px; /* Slightly larger */
+    font-size: 13px;
     font-weight: 600;
     margin-bottom: 3px;
     font-family: 'Roboto Slab', serif;
@@ -397,15 +795,36 @@ header.show {
 }
 
 .use-count {
-    font-size: 11px; /* Slightly larger */
+    font-size: 11px;
     opacity: 0.9;
 }
 
-/* Slider Navigation - Adjusted positions for taller cards */
+/* Slider Navigation */
+.use-slider-nav {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 15px;
+}
+
+.use-slider-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.use-slider-dot.active {
+    background: var(--primary-gold);
+    transform: scale(1.2);
+}
+
 .use-slider-prev,
 .use-slider-next {
     position: absolute;
-    top: calc(50% - 20px); /* Adjusted for taller cards */
+    top: 50%;
     transform: translateY(-50%);
     width: 28px;
     height: 28px;
@@ -423,6 +842,245 @@ header.show {
     z-index: 10;
 }
 
+.use-slider-prev:hover,
+.use-slider-next:hover {
+    background: var(--primary-gold);
+    color: white;
+}
+
+.use-slider-prev {
+    left: 10px;
+}
+
+.use-slider-next {
+    right: 10px;
+}
+
+/* ============================================
+   PRODUCTS SECTION
+   ============================================ */
+
+.products {
+    background: var(--white);
+}
+
+/* Products Content */
+.products-content {
+    padding: 20px 10px;
+}
+
+.section-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.section-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.section-header h2 i {
+    color: var(--primary-gold);
+    font-size: 13px;
+}
+
+/* Product Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.image-card {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: 1px solid #f0f0f0;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 180px;
+}
+
+.image-card:hover {
+    border-color: var(--primary-gold);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+}
+
+.card-image-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    background: #f5f5f5;
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.5s ease;
+}
+
+.image-card:hover .card-image {
+    transform: scale(1.08);
+}
+
+/* Add to Cart Icon */
+.add-cart-icon {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: 28px;
+    background: var(--primary-gold);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+    z-index: 2;
+    border: none;
+    box-shadow: var(--shadow-sm);
+    font-size: 12px;
+}
+
+.image-card:hover .add-cart-icon {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.add-cart-icon:hover {
+    background: var(--gold-dark);
+    transform: scale(1.05) !important;
+}
+
+/* Wishlist Icon */
+.wishlist-icon {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 28px;
+    height: 28px;
+    background: var(--white);
+    color: var(--text-dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+    z-index: 2;
+    border: none;
+    box-shadow: var(--shadow-sm);
+    font-size: 12px;
+}
+
+.image-card:hover .wishlist-icon {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.wishlist-icon:hover {
+    color: #ff4757;
+    transform: scale(1.05) !important;
+}
+
+.wishlist-icon.active {
+    color: #ff4757;
+}
+
+/* Product Info Overlay */
+.product-info-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    color: white;
+    padding: 12px 8px 8px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    border-radius: 0 0 10px 10px;
+}
+
+.image-card:hover .product-info-overlay {
+    transform: translateY(0);
+}
+
+.product-name {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-family: 'Roboto Slab', serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-price {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold-light);
+    font-family: 'Roboto Slab', serif;
+}
+
+/* Filter Controls */
+.filter-controls {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 3px 0 10px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.filter-controls::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-select {
+    padding: 7px 10px;
+    border-radius: 15px;
+    border: 1px solid #e0e0e0;
+    background: var(--white);
+    color: var(--text-dark);
+    font-size: 11px;
+    cursor: pointer;
+    min-width: 110px;
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.1);
+}
+
+.filter-select:hover {
+    border-color: var(--primary-gold);
+}
+
 /* ============================================
    BOTTOM NAVIGATION - REDUCED SHADOW
    ============================================ */
@@ -431,22 +1089,22 @@ header.show {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.25); /* Less dark */
+    background: rgba(0, 0, 0, 0.25);
     backdrop-filter: blur(8px);
     display: flex;
     justify-content: space-around;
-    padding: 6px 0; /* Reduced */
-    border-top: 1px solid rgba(255, 255, 255, 0.08); /* Lighter border */
+    padding: 6px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     z-index: 999;
-    box-shadow: 0 -1px 3px rgba(0,0,0,0.1); /* Reduced shadow */
+    box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
     transform: translateY(0);
     transition: all 0.3s ease;
-    min-height: 56px; /* Fixed height */
+    min-height: 56px;
 }
 
 .bottom-nav.scrolled {
-    background: rgba(0, 0, 0, 0.35); /* Less dark on scroll */
-    box-shadow: 0 -1px 4px rgba(0,0,0,0.15); /* Reduced shadow */
+    background: rgba(0, 0, 0, 0.35);
+    box-shadow: 0 -1px 4px rgba(0,0,0,0.15);
 }
 
 .bottom-nav.hidden {
@@ -471,54 +1129,158 @@ header.show {
     border-radius: 8px;
     min-width: 48px;
     text-decoration: none;
-    height: 44px; /* Fixed height */
+    height: 44px;
     justify-content: center;
 }
 
-/* ============================================
-   PRODUCT CARDS - ADJUSTED FOR TALLER LAYOUT
-   ============================================ */
-
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Slightly larger */
-    gap: 12px;
-    margin-bottom: 20px;
+.nav-btn:hover {
+    color: var(--primary-gold);
+    background: rgba(255, 255, 255, 0.1);
 }
 
-.image-card {
-    background: var(--white);
-    border-radius: 10px;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-    border: 1px solid #f0f0f0;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
+.nav-btn.active {
+    color: var(--primary-gold);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-btn i {
+    font-size: 15px;
+}
+
+/* Cart Badge */
+.cart-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    background: #ff4757;
+    color: var(--white);
+    font-size: 8px;
+    font-weight: 600;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Loading Animation */
+.loading-spinner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 35px;
+    height: 35px;
+    border: 3px solid rgba(201, 162, 39, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-gold);
+    animation: spin 1s ease-in-out infinite;
+    z-index: 9999;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Notification */
+.notification {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    background: var(--primary-gold);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    box-shadow: var(--shadow-md);
+    z-index: 9999;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    max-width: 220px;
+    display: none;
+    font-size: 12px;
+}
+
+.notification.show {
+    transform: translateX(0);
     display: block;
-    height: 180px; /* Increased height */
 }
 
-.card-image-container {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    position: relative;
-    background: #f5f5f5;
+/* Error Message */
+.error-message {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff4757;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    box-shadow: var(--shadow-md);
+    z-index: 9999;
+    display: none;
+    max-width: 220px;
+    text-align: center;
+    font-size: 12px;
 }
 
-.card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Full coverage */
-    object-position: center;
-    transition: transform 0.5s ease;
+/* Scroll to Top Button */
+.scroll-top {
+    position: fixed;
+    bottom: 65px;
+    right: 12px;
+    width: 35px;
+    height: 35px;
+    background: var(--primary-gold);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 998;
+    opacity: 0;
+    transform: translateY(15px);
+    box-shadow: var(--shadow-sm);
+    font-size: 14px;
 }
 
-.image-card:hover .card-image {
-    transform: scale(1.08);
+.scroll-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.scroll-top:hover {
+    background: var(--gold-dark);
+    transform: translateY(-3px);
+}
+
+/* View All Button */
+.view-all-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.view-all-btn {
+    display: inline-block;
+    padding: 8px 20px;
+    background: var(--primary-gold);
+    color: white;
+    border-radius: 18px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    border: 1px solid var(--primary-gold);
+    font-size: 12px;
+}
+
+.view-all-btn:hover {
+    background: transparent;
+    color: var(--primary-gold);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
 
 /* ============================================
@@ -547,21 +1309,57 @@ header.show {
     
     .search-box {
         height: 40px;
+        max-width: 480px;
+    }
+    
+    .search-box input {
+        font-size: 12px;
+        padding: 8px 35px 8px 12px;
     }
     
     .profile-btn, .signin-btn {
         height: 36px;
         font-size: 12px;
+        padding: 7px 12px;
+        min-width: 70px;
     }
     
     .action-btn {
         width: 34px;
         height: 34px;
+        font-size: 13px;
+    }
+    
+    /* Hero adjustments */
+    .hero {
+        padding: 100px 20px 30px;
+        min-height: 65vh;
+    }
+    
+    .hero h1 {
+        font-size: 32px;
+    }
+    
+    .hero p {
+        font-size: 16px;
+    }
+    
+    /* Section title adjustments */
+    .section-title-wrapper {
+        padding: 30px 20px !important;
+    }
+    
+    .section-title-wrapper h2 {
+        font-size: 22px !important;
+    }
+    
+    .section-title-wrapper .subtitle {
+        font-size: 14px !important;
     }
     
     /* Taller category cards on desktop */
     .category-card {
-        height: 320px; /* Even taller on desktop */
+        height: 320px;
     }
     
     .category-name {
@@ -574,7 +1372,7 @@ header.show {
     
     /* Taller use cards on desktop */
     .use-card {
-        height: 240px; /* Even taller on desktop */
+        height: 240px;
     }
     
     .use-name {
@@ -586,18 +1384,52 @@ header.show {
     }
     
     /* Product cards on desktop */
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 15px;
+    }
+    
     .image-card {
         height: 200px;
+    }
+    
+    .product-name {
+        font-size: 13px;
+    }
+    
+    .product-price {
+        font-size: 14px;
     }
     
     /* Bottom nav on desktop */
     .bottom-nav {
         min-height: 60px;
+        padding: 8px 0;
     }
     
     .nav-btn {
         height: 48px;
         min-width: 52px;
+        font-size: 10px;
+    }
+    
+    .nav-btn i {
+        font-size: 16px;
+    }
+    
+    /* Slider navigation adjustments */
+    .cat-slider-prev,
+    .cat-slider-next {
+        width: 34px;
+        height: 34px;
+        font-size: 13px;
+    }
+    
+    .use-slider-prev,
+    .use-slider-next {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
     }
 }
 
@@ -633,6 +1465,11 @@ header.show {
         padding: 5px 26px 5px 8px;
     }
     
+    .search-box i {
+        font-size: 10px;
+        right: 8px;
+    }
+    
     .profile-btn, .signin-btn {
         height: 28px;
         font-size: 10px;
@@ -646,14 +1483,34 @@ header.show {
         font-size: 11px;
     }
     
+    /* Hero adjustments for mobile */
+    .hero {
+        padding: 70px 12px 20px;
+        min-height: 50vh;
+    }
+    
+    .hero h1 {
+        font-size: 22px;
+    }
+    
+    .hero p {
+        font-size: 13px;
+    }
+    
+    .hero-buttons .signin-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    
     /* Tall category cards on mobile */
     .category-card {
-        height: 220px; /* Still tall on mobile */
+        height: 220px;
     }
     
     .categories-slide {
-        grid-template-columns: 1fr; /* Single column */
+        grid-template-columns: 1fr;
         gap: 8px;
+        padding: 0 8px;
     }
     
     .category-overlay {
@@ -670,7 +1527,7 @@ header.show {
     
     /* Tall use cards on mobile */
     .use-card {
-        height: 160px; /* Still tall on mobile */
+        height: 160px;
     }
     
     .uses-slide {
@@ -733,6 +1590,32 @@ header.show {
         height: 160px;
     }
     
+    .add-cart-icon,
+    .wishlist-icon {
+        width: 26px;
+        height: 26px;
+        font-size: 11px;
+    }
+    
+    .product-info-overlay {
+        padding: 10px 6px 6px;
+    }
+    
+    .product-name {
+        font-size: 11px;
+    }
+    
+    .product-price {
+        font-size: 12px;
+    }
+    
+    /* Filter controls on mobile */
+    .filter-select {
+        padding: 6px 8px;
+        font-size: 10px;
+        min-width: 100px;
+    }
+    
     /* Bottom nav on mobile */
     .bottom-nav {
         min-height: 52px;
@@ -743,52 +1626,47 @@ header.show {
         height: 40px;
         min-width: 42px;
         padding: 4px;
+        font-size: 8px;
     }
     
     .nav-btn i {
         font-size: 14px;
     }
     
-    .nav-btn span {
-        font-size: 7px;
+    /* Section title adjustments for mobile */
+    .section-title-wrapper {
+        padding: 20px 12px !important;
     }
-}
-
-/* ============================================
-   HERO SECTION ADJUSTMENT FOR SMALLER HEADER
-   ============================================ */
-
-.hero {
-    padding: 80px 15px 25px; /* Reduced top padding for smaller header */
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    min-height: 55vh; /* Slightly smaller */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: 
-        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)),
-        url('https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    color: var(--white);
-    margin-top: 0;
-    transition: margin-top 0.3s ease;
-}
-
-@media (min-width: 768px) {
-    .hero {
-        padding: 100px 20px 30px;
-        min-height: 65vh;
+    
+    .section-title-wrapper h2 {
+        font-size: 18px !important;
     }
-}
-
-@media (max-width: 480px) {
-    .hero {
-        padding: 70px 12px 20px;
-        min-height: 50vh;
+    
+    .section-title-wrapper .subtitle {
+        font-size: 12px !important;
+    }
+    
+    /* View all button on mobile */
+    .view-all-btn {
+        padding: 7px 16px;
+        font-size: 11px;
+    }
+    
+    /* Scroll to top button on mobile */
+    .scroll-top {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+        bottom: 60px;
+        right: 10px;
+    }
+    
+    /* Notification and error message on mobile */
+    .notification,
+    .error-message {
+        max-width: 200px;
+        font-size: 11px;
+        padding: 7px 10px;
     }
 }
 </style>
