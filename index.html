@@ -1592,6 +1592,9 @@ header.show {
 
 <body>
 
+<!-- All HTML structure remains the same -->
+<!-- Copy your entire HTML body from original file -->
+
 <!-- Loading Spinner -->
 <div class="loading-spinner" id="loadingSpinner"></div>
 
@@ -1625,6 +1628,7 @@ header.show {
         <!-- Wishlist icon -->
         <a href="wishlist.html" class="action-btn wishlist-btn" title="Wishlist">
             <i class="far fa-heart"></i>
+            <span class="wishlist-badge" id="wishlistBadge">0</span>
         </a>
         
         <a href="cart.html" class="action-btn" style="position: relative;">
@@ -1785,6 +1789,8 @@ const firebaseConfig = {
 let firebaseApp, firebaseDB, firebaseAuth;
 let allProducts = [];
 let cartSystem = null;
+let wishlistSystem = null;
+let authSystem = null;
 let currentCategory = 'all';
 let currentPriceFilter = 'all';
 let currentUsageFilter = 'all';
@@ -1797,18 +1803,86 @@ let availableUses = [];
 let availableColors = [];
 
 // ============================================
-// IMPROVED SCROLL VARIABLES
+// IMPROVED SCROLL HANDLING
 // ============================================
+
 let lastScrollTop = 0;
 let scrollTimeout;
-let isScrolling = false;
-let lastScrollTime = 0;
-let scrollThreshold = 5;
-let fastScrollThreshold = 100;
-let lastScrollPosition = 0;
+let isHeaderVisible = true;
+let scrollThreshold = 100;
+let debounceTimeout;
+
+// Smooth scroll handling like WPS
+function handleScroll() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const header = document.getElementById('mainHeader');
+    const bottomNav = document.getElementById('bottomNav');
+    
+    if (!header || !bottomNav) return;
+    
+    // Clear any existing timeout
+    if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+    }
+    
+    // Debounce the scroll event
+    debounceTimeout = setTimeout(() => {
+        // Always show when near top
+        if (scrollTop < 50) {
+            header.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+            header.classList.add('show');
+            bottomNav.classList.add('show');
+            isHeaderVisible = true;
+            return;
+        }
+        
+        // Determine scroll direction
+        if (scrollTop > lastScrollTop) {
+            // Scrolling DOWN - hide
+            if (scrollTop > scrollThreshold && isHeaderVisible) {
+                header.classList.add('hidden');
+                bottomNav.classList.add('hidden');
+                header.classList.remove('show');
+                bottomNav.classList.remove('show');
+                isHeaderVisible = false;
+            }
+        } else {
+            // Scrolling UP - show smoothly
+            if (!isHeaderVisible) {
+                header.classList.remove('hidden');
+                bottomNav.classList.remove('hidden');
+                header.classList.add('show');
+                bottomNav.classList.add('show');
+                isHeaderVisible = true;
+            }
+        }
+        
+        // Add scrolled class when not at top
+        if (scrollTop > 100) {
+            header.classList.add('scrolled');
+            bottomNav.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+            bottomNav.classList.remove('scrolled');
+        }
+        
+        lastScrollTop = scrollTop;
+        
+        // Update scroll to top button
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        if (scrollTopBtn) {
+            if (scrollTop > 300) {
+                scrollTopBtn.classList.add('visible');
+            } else {
+                scrollTopBtn.classList.remove('visible');
+            }
+        }
+    }, 100); // 100ms debounce for smoother experience
+}
 
 // ============================================
-// AUTHENTICATION SYSTEM
+// AUTHENTICATION SYSTEM - FIXED
 // ============================================
 
 class AuthSystem {
@@ -1841,9 +1915,10 @@ class AuthSystem {
                     
                     this.saveUserToLocalStorage();
                     
-                    if (cartSystem) {
-                        cartSystem.loadCart();
-                    }
+                    // Sync cart and wishlist when user logs in
+                    if (cartSystem) cartSystem.syncWithFirebase();
+                    if (wishlistSystem) wishlistSystem.syncWithFirebase();
+                    
                 } else {
                     this.currentUser = this.getUserFromLocalStorage();
                 }
@@ -2006,12 +2081,12 @@ class AuthSystem {
 }
 
 // ============================================
-// FIXED CART SYSTEM - NO DUPLICATES
+// FIXED CART SYSTEM
 // ============================================
 
 class CartSystem {
     constructor() {
-        this.localCartKey = 'irya_local_cart_';
+        this.localCartKey = 'irya_cart';
         this.cartItems = [];
     }
     
@@ -2022,18 +2097,30 @@ class CartSystem {
     }
     
     getUserId() {
-        return window.authSystem ? window.authSystem.getUserId() : 'guest';
+        return authSystem ? authSystem.getUserId() : 'guest';
     }
     
     async loadCart() {
         try {
             const userId = this.getUserId();
+            const cartKey = `${this.localCartKey}_${userId}`;
             
-            if (window.authSystem && window.authSystem.isLoggedIn() && firebaseDB) {
-                await this.loadFromFirebase(userId);
+            // Load from localStorage
+            const cartData = localStorage.getItem(cartKey);
+            
+            if (cartData) {
+                this.cartItems = JSON.parse(cartData) || [];
             } else {
-                this.loadFromLocalStorage(userId);
+                this.cartItems = [];
             }
+            
+            // If logged in, sync with Firebase
+            if (authSystem && authSystem.isLoggedIn() && firebaseDB) {
+                await this.syncWithFirebase(userId);
+            }
+            
+            // Clean any duplicates
+            this.removeDuplicates();
             
             return this.cartItems;
         } catch (error) {
@@ -2043,39 +2130,67 @@ class CartSystem {
         }
     }
     
-    async loadFromFirebase(userId) {
+    async syncWithFirebase(userId) {
         try {
             const cartDoc = await firebaseDB.collection('userCarts').doc(userId).get();
             
             if (cartDoc.exists) {
-                const data = cartDoc.data();
-                this.cartItems = data.items || [];
-                this.saveToLocalStorage(userId);
-            } else {
-                this.loadFromLocalStorage(userId);
+                const firebaseData = cartDoc.data();
+                const firebaseItems = firebaseData.items || [];
                 
-                if (this.cartItems.length > 0) {
-                    await this.saveToFirebase(userId);
-                }
+                // Merge with local cart
+                this.mergeCarts(firebaseItems);
+            } else if (this.cartItems.length > 0) {
+                // Save local cart to Firebase
+                await this.saveToFirebase(userId);
             }
         } catch (error) {
-            console.error('Error loading cart from Firebase:', error);
-            this.loadFromLocalStorage(userId);
+            console.error('Error syncing cart with Firebase:', error);
         }
     }
     
-    loadFromLocalStorage(userId) {
-        const cartKey = this.localCartKey + userId;
-        const cartData = localStorage.getItem(cartKey);
-        this.cartItems = cartData ? JSON.parse(cartData) : [];
+    mergeCarts(firebaseItems) {
+        const mergedItems = [...firebaseItems];
+        const existingIds = new Set(firebaseItems.map(item => item.id));
+        
+        // Add local items that don't exist in Firebase
+        this.cartItems.forEach(item => {
+            if (!existingIds.has(item.id)) {
+                mergedItems.push(item);
+                existingIds.add(item.id);
+            }
+        });
+        
+        this.cartItems = mergedItems;
+        this.saveToLocalStorage();
+    }
+    
+    removeDuplicates() {
+        const uniqueItems = [];
+        const seenIds = new Set();
+        
+        for (const item of this.cartItems) {
+            if (!seenIds.has(item.id)) {
+                seenIds.add(item.id);
+                uniqueItems.push(item);
+            }
+        }
+        
+        this.cartItems = uniqueItems;
+        this.saveToLocalStorage();
     }
     
     async saveCart() {
         const userId = this.getUserId();
         
-        this.saveToLocalStorage(userId);
+        // Remove duplicates before saving
+        this.removeDuplicates();
         
-        if (window.authSystem && window.authSystem.isLoggedIn() && firebaseDB) {
+        // Save to localStorage
+        this.saveToLocalStorage();
+        
+        // Save to Firebase if logged in
+        if (authSystem && authSystem.isLoggedIn() && firebaseDB) {
             await this.saveToFirebase(userId);
         }
         
@@ -2083,8 +2198,10 @@ class CartSystem {
         return this.cartItems;
     }
     
-    saveToLocalStorage(userId) {
-        const cartKey = this.localCartKey + userId;
+    saveToLocalStorage() {
+        const userId = this.getUserId();
+        const cartKey = `${this.localCartKey}_${userId}`;
+        
         localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
     }
     
@@ -2094,7 +2211,7 @@ class CartSystem {
                 userId: userId,
                 items: this.cartItems,
                 updatedAt: new Date().toISOString(),
-                itemCount: this.cartItems.reduce((sum, item) => sum + item.quantity, 0),
+                itemCount: this.cartItems.length,
                 totalAmount: this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
             }, { merge: true });
         } catch (error) {
@@ -2105,15 +2222,15 @@ class CartSystem {
     async addToCart(product) {
         try {
             // Check if product already exists in cart
-            const existingItemIndex = this.cartItems.findIndex(item => item.id === product.id);
+            const existingIndex = this.cartItems.findIndex(item => item.id === product.id);
             
-            if (existingItemIndex !== -1) {
+            if (existingIndex !== -1) {
                 // Update quantity if exists
-                this.cartItems[existingItemIndex].quantity += 1;
-                this.cartItems[existingItemIndex].updatedAt = new Date().toISOString();
+                this.cartItems[existingIndex].quantity += 1;
+                this.cartItems[existingIndex].updatedAt = new Date().toISOString();
             } else {
-                // Add new item
-                this.cartItems.push({
+                // Add new item with minimal data
+                const newItem = {
                     id: product.id,
                     name: product.stone_name || 'Stone Product',
                     stoneName: product.stone_name,
@@ -2125,9 +2242,10 @@ class CartSystem {
                     description: product.description || '',
                     quantity: 1,
                     addedAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    userId: this.getUserId()
-                });
+                    updatedAt: new Date().toISOString()
+                };
+                
+                this.cartItems.push(newItem);
             }
             
             await this.saveCart();
@@ -2173,73 +2291,190 @@ class CartSystem {
 }
 
 // ============================================
-// IMPROVED WISHLIST SYSTEM
+// FIXED WISHLIST SYSTEM
 // ============================================
 
 class WishlistSystem {
     constructor() {
-        this.wishlistKey = 'irya_wishlist_';
+        this.localWishlistKey = 'irya_wishlist';
         this.wishlistItems = [];
     }
     
-    init() {
-        this.loadWishlist();
+    async init() {
+        await this.loadWishlist();
         this.updateWishlistUI();
         return this;
     }
     
     getUserId() {
-        return window.authSystem ? window.authSystem.getUserId() : 'guest';
+        return authSystem ? authSystem.getUserId() : 'guest';
     }
     
-    loadWishlist() {
+    async loadWishlist() {
+        try {
+            const userId = this.getUserId();
+            const wishlistKey = `${this.localWishlistKey}_${userId}`;
+            
+            // Load from localStorage
+            const wishlistData = localStorage.getItem(wishlistKey);
+            
+            if (wishlistData) {
+                this.wishlistItems = JSON.parse(wishlistData) || [];
+            } else {
+                this.wishlistItems = [];
+            }
+            
+            // If logged in, sync with Firebase
+            if (authSystem && authSystem.isLoggedIn() && firebaseDB) {
+                await this.syncWithFirebase(userId);
+            }
+            
+            // Clean any duplicates
+            this.removeDuplicates();
+            
+            return this.wishlistItems;
+        } catch (error) {
+            console.error('Error loading wishlist:', error);
+            this.wishlistItems = [];
+            return [];
+        }
+    }
+    
+    async syncWithFirebase(userId) {
+        try {
+            const wishlistDoc = await firebaseDB.collection('userWishlists').doc(userId).get();
+            
+            if (wishlistDoc.exists) {
+                const firebaseData = wishlistDoc.data();
+                const firebaseItems = firebaseData.items || [];
+                
+                // Merge with local wishlist
+                this.mergeWishlists(firebaseItems);
+            } else if (this.wishlistItems.length > 0) {
+                // Save local wishlist to Firebase
+                await this.saveToFirebase(userId);
+            }
+        } catch (error) {
+            console.error('Error syncing wishlist with Firebase:', error);
+        }
+    }
+    
+    mergeWishlists(firebaseItems) {
+        const mergedItems = [...firebaseItems];
+        const existingIds = new Set(firebaseItems.map(item => item.id));
+        
+        // Add local items that don't exist in Firebase
+        this.wishlistItems.forEach(item => {
+            if (!existingIds.has(item.id)) {
+                mergedItems.push(item);
+                existingIds.add(item.id);
+            }
+        });
+        
+        this.wishlistItems = mergedItems;
+        this.saveToLocalStorage();
+    }
+    
+    removeDuplicates() {
+        const uniqueItems = [];
+        const seenIds = new Set();
+        
+        for (const item of this.wishlistItems) {
+            if (!seenIds.has(item.id)) {
+                seenIds.add(item.id);
+                uniqueItems.push(item);
+            }
+        }
+        
+        this.wishlistItems = uniqueItems;
+        this.saveToLocalStorage();
+    }
+    
+    async saveWishlist() {
         const userId = this.getUserId();
-        const wishlistKey = this.wishlistKey + userId;
-        const wishlistData = localStorage.getItem(wishlistKey);
-        this.wishlistItems = wishlistData ? JSON.parse(wishlistData) : [];
+        
+        // Remove duplicates before saving
+        this.removeDuplicates();
+        
+        // Save to localStorage
+        this.saveToLocalStorage();
+        
+        // Save to Firebase if logged in
+        if (authSystem && authSystem.isLoggedIn() && firebaseDB) {
+            await this.saveToFirebase(userId);
+        }
+        
+        this.updateWishlistUI();
         return this.wishlistItems;
     }
     
-    saveWishlist() {
+    saveToLocalStorage() {
         const userId = this.getUserId();
-        const wishlistKey = this.wishlistKey + userId;
+        const wishlistKey = `${this.localWishlistKey}_${userId}`;
+        
         localStorage.setItem(wishlistKey, JSON.stringify(this.wishlistItems));
-        this.updateWishlistUI();
     }
     
-    addToWishlist(product) {
-        const existingItem = this.wishlistItems.find(item => item.id === product.id);
-        
-        if (!existingItem) {
-            this.wishlistItems.push({
-                id: product.id,
-                stone_name: product.stone_name,
-                category: product.category,
-                price: parseFloat(product.price) || 0,
-                price_unit: product.price_unit,
-                image: (product.images && product.images.length > 0) ? product.images[0] : 
-                       (product.image || getDefaultImage(product.category)),
-                addedAt: new Date().toISOString()
-            });
+    async saveToFirebase(userId) {
+        try {
+            await firebaseDB.collection('userWishlists').doc(userId).set({
+                userId: userId,
+                items: this.wishlistItems,
+                updatedAt: new Date().toISOString(),
+                itemCount: this.wishlistItems.length
+            }, { merge: true });
+        } catch (error) {
+            console.error('Error saving wishlist to Firebase:', error);
+        }
+    }
+    
+    async addToWishlist(product) {
+        try {
+            // Check if product already exists in wishlist
+            const existingItem = this.wishlistItems.find(item => item.id === product.id);
             
-            this.saveWishlist();
-            showNotification(`${product.stone_name} added to wishlist!`);
-            return true;
+            if (!existingItem) {
+                // Add new item
+                this.wishlistItems.push({
+                    id: product.id,
+                    stone_name: product.stone_name,
+                    category: product.category,
+                    price: parseFloat(product.price) || 0,
+                    price_unit: product.price_unit,
+                    image: (product.images && product.images.length > 0) ? product.images[0] : 
+                           (product.image || getDefaultImage(product.category)),
+                    addedAt: new Date().toISOString()
+                });
+                
+                await this.saveWishlist();
+                showNotification(`${product.stone_name} added to wishlist!`);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error adding to wishlist:', error);
+            showError('Failed to add to wishlist. Please try again.');
+            return false;
         }
-        return false;
     }
     
-    removeFromWishlist(productId) {
-        const index = this.wishlistItems.findIndex(item => item.id === productId);
-        
-        if (index !== -1) {
-            const productName = this.wishlistItems[index].stone_name;
-            this.wishlistItems.splice(index, 1);
-            this.saveWishlist();
-            showNotification(`${productName} removed from wishlist`);
-            return true;
+    async removeFromWishlist(productId) {
+        try {
+            const index = this.wishlistItems.findIndex(item => item.id === productId);
+            
+            if (index !== -1) {
+                const productName = this.wishlistItems[index].stone_name;
+                this.wishlistItems.splice(index, 1);
+                
+                await this.saveWishlist();
+                showNotification(`${productName} removed from wishlist`);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error removing from wishlist:', error);
+            return false;
         }
-        return false;
     }
     
     isInWishlist(productId) {
@@ -2251,12 +2486,13 @@ class WishlistSystem {
     }
     
     updateWishlistUI() {
+        const count = this.getWishlistCount();
         const wishlistBtn = document.querySelector('.wishlist-btn');
-        const wishlistCount = this.getWishlistCount();
+        const wishlistBadge = document.getElementById('wishlistBadge');
         
         if (wishlistBtn) {
             const heartIcon = wishlistBtn.querySelector('i');
-            if (wishlistCount > 0) {
+            if (count > 0) {
                 heartIcon.classList.remove('far');
                 heartIcon.classList.add('fas');
                 wishlistBtn.classList.add('active');
@@ -2266,10 +2502,11 @@ class WishlistSystem {
                 wishlistBtn.classList.remove('active');
             }
         }
-    }
-    
-    getWishlistItems() {
-        return this.wishlistItems;
+        
+        if (wishlistBadge) {
+            wishlistBadge.textContent = count > 99 ? '99+' : count;
+            wishlistBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
     }
 }
 
@@ -2303,7 +2540,7 @@ function initializeFirebase() {
 }
 
 // ============================================
-// IMPROVED PRODUCT LOADING - NO DUPLICATES
+// PRODUCT LOADING FROM FIREBASE - FIXED
 // ============================================
 
 async function loadProductsFromFirebase() {
@@ -2325,35 +2562,37 @@ async function loadProductsFromFirebase() {
         // Reset products array
         allProducts = [];
         
-        // Use a Set to track unique product IDs
-        const uniqueProductIds = new Set();
-        
         try {
-            const querySnapshot = await firebaseDB.collection("products")
-                .limit(50)
-                .get();
+            console.log('Fetching products from Firebase...');
+            const querySnapshot = await firebaseDB.collection("products").get();
             
             if (querySnapshot.empty) {
+                console.log('No products found in Firestore');
                 showNoProducts();
                 showLoading(false);
                 return;
             }
             
+            console.log(`Found ${querySnapshot.size} products`);
+            
+            // Use Map to ensure uniqueness by product ID
+            const productMap = new Map();
+            
             querySnapshot.forEach((doc) => {
                 const productId = doc.id;
+                const data = doc.data();
                 
-                // Skip if we already have this product ID
-                if (uniqueProductIds.has(productId)) {
+                console.log(`Processing product: ${productId}`, data);
+                
+                // Skip if we already have this product
+                if (productMap.has(productId)) {
                     console.log(`Skipping duplicate product ID: ${productId}`);
                     return;
                 }
                 
-                const data = doc.data();
-                uniqueProductIds.add(productId);
-                
                 const product = {
                     id: productId,
-                    stone_name: data.stone_name || 'Stone Product',
+                    stone_name: data.stone_name || data.name || 'Stone Product',
                     category: data.category || 'Natural Stone',
                     description: data.description || '',
                     price: parseFloat(data.price) || 0,
@@ -2376,11 +2615,14 @@ async function loadProductsFromFirebase() {
                 
                 // Only add active products
                 if (product.is_active) {
-                    allProducts.push(product);
+                    productMap.set(productId, product);
                 }
             });
             
-            console.log(`Loaded ${allProducts.length} unique products`);
+            // Convert Map to array
+            allProducts = Array.from(productMap.values());
+            
+            console.log(`Loaded ${allProducts.length} unique products from Firebase`);
             
             if (allProducts.length === 0) {
                 showNoProducts();
@@ -2391,6 +2633,7 @@ async function loadProductsFromFirebase() {
             
         } catch (error) {
             console.error('Firestore query error:', error);
+            showError('Error loading products: ' + error.message);
             showDefaultProducts();
         }
         
@@ -2404,127 +2647,6 @@ async function loadProductsFromFirebase() {
 }
 
 // ============================================
-// SMART FILTER SYSTEM
-// ============================================
-
-async function loadSmartFilters() {
-    try {
-        if (!firebaseDB) {
-            const initialized = initializeFirebase();
-            if (!initialized) return;
-        }
-        
-        const querySnapshot = await firebaseDB.collection("products").limit(100).get();
-        
-        if (querySnapshot.empty) {
-            populateDefaultFilters();
-            return;
-        }
-        
-        const categoriesSet = new Set();
-        const usesSet = new Set();
-        const colorsSet = new Set();
-        
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            
-            // Collect categories
-            if (data.category && data.category.trim() !== '') {
-                categoriesSet.add(data.category);
-            }
-            
-            // Collect uses from "usage" field
-            const usage = data.usage;
-            if (usage && usage.trim() !== '') {
-                usesSet.add(usage);
-            }
-            
-            // Collect colors
-            if (data.color && data.color.trim() !== '') {
-                colorsSet.add(data.color);
-            }
-        });
-        
-        // Update global arrays
-        availableCategories = Array.from(categoriesSet).sort();
-        availableUses = Array.from(usesSet).sort();
-        availableColors = Array.from(colorsSet).sort();
-        
-        // Populate filter dropdowns
-        populateFilterOptions();
-        
-    } catch (error) {
-        console.error('Error loading smart filters:', error);
-        populateDefaultFilters();
-    }
-}
-
-function populateFilterOptions() {
-    // Category filter
-    const categoryFilter = document.getElementById('categoryFilter');
-    if (categoryFilter) {
-        // Clear existing options (keep "All Categories")
-        while (categoryFilter.options.length > 1) {
-            categoryFilter.remove(1);
-        }
-        
-        // Add categories
-        availableCategories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
-            categoryFilter.appendChild(option);
-        });
-    }
-    
-    // Usage filter
-    const usageFilter = document.getElementById('usageFilter');
-    if (usageFilter) {
-        // Clear existing options (keep "All Uses")
-        while (usageFilter.options.length > 1) {
-            usageFilter.remove(1);
-        }
-        
-        // Add uses
-        availableUses.forEach(use => {
-            const option = document.createElement('option');
-            option.value = use;
-            option.textContent = use;
-            usageFilter.appendChild(option);
-        });
-    }
-    
-    // Color filter
-    const colorFilter = document.getElementById('colorFilter');
-    if (colorFilter) {
-        // Clear existing options (keep "All Colors")
-        while (colorFilter.options.length > 1) {
-            colorFilter.remove(1);
-        }
-        
-        // Add colors
-        availableColors.forEach(color => {
-            const option = document.createElement('option');
-            option.value = color;
-            option.textContent = color;
-            colorFilter.appendChild(option);
-        });
-    }
-}
-
-function populateDefaultFilters() {
-    const defaultCategories = ['Sand Stone', 'Kota Stone', 'Granite', 'Marble', 'Limestone', 'Slate'];
-    const defaultUses = ['Flooring', 'Wall Cladding', 'Kitchen Countertops', 'Staircase', 'Garden Paving', 'Pool Surround'];
-    const defaultColors = ['Gray', 'Brown', 'Black', 'White', 'Green', 'Blue', 'Red', 'Yellow'];
-    
-    availableCategories = defaultCategories;
-    availableUses = defaultUses;
-    availableColors = defaultColors;
-    
-    populateFilterOptions();
-}
-
-// ============================================
 // FILTER FUNCTIONS
 // ============================================
 
@@ -2535,6 +2657,8 @@ function applyAllFiltersClientSide() {
     }
     
     let filteredProducts = [...allProducts];
+    
+    console.log('Applying filters to', allProducts.length, 'products');
     
     // Apply category filter
     if (currentCategory !== 'all') {
@@ -2590,6 +2714,7 @@ function applyAllFiltersClientSide() {
         filteredProducts.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
     }
     
+    console.log('After filtering:', filteredProducts.length, 'products');
     displayProducts(filteredProducts);
 }
 
@@ -2643,83 +2768,6 @@ function displayProducts(products) {
     container.innerHTML = productsHTML;
 }
 
-function getProductImage(product) {
-    if (product.images && product.images.length > 0) {
-        return product.images[0];
-    }
-    
-    if (product.image) {
-        return product.image;
-    }
-    
-    return getDefaultImage(product.category);
-}
-
-// ============================================
-// WISHLIST FUNCTIONS
-// ============================================
-
-let wishlistSystem;
-
-function toggleWishlist(productId) {
-    const product = allProducts.find(p => p.id === productId);
-    
-    if (!product) {
-        showError('Product not found');
-        return;
-    }
-    
-    if (wishlistSystem.isInWishlist(productId)) {
-        wishlistSystem.removeFromWishlist(productId);
-        updateWishlistIcon(productId, false);
-    } else {
-        wishlistSystem.addToWishlist(product);
-        updateWishlistIcon(productId, true);
-    }
-}
-
-function updateWishlistIcon(productId, isInWishlist) {
-    const wishlistIcons = document.querySelectorAll(`.wishlist-icon`);
-    
-    wishlistIcons.forEach(icon => {
-        const productCard = icon.closest('.image-card');
-        if (productCard && productCard.href.includes(productId)) {
-            const heartIcon = icon.querySelector('i');
-            if (isInWishlist) {
-                icon.classList.add('active');
-                heartIcon.classList.remove('far');
-                heartIcon.classList.add('fas');
-            } else {
-                icon.classList.remove('active');
-                heartIcon.classList.remove('fas');
-                heartIcon.classList.add('far');
-            }
-        }
-    });
-}
-
-// ============================================
-// CART FUNCTIONS
-// ============================================
-
-async function addToCartDirect(productId, event = null) {
-    if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
-    
-    try {
-        const product = allProducts.find(p => p.id === productId);
-        
-        if (product && cartSystem) {
-            await cartSystem.addToCart(product);
-        }
-    } catch (error) {
-        console.error('Error adding to cart:', error);
-        showError('Failed to add to cart');
-    }
-}
-
 // ============================================
 // CATEGORIES AND USES LOADING
 // ============================================
@@ -2738,7 +2786,8 @@ async function loadCategories() {
             }
         }
         
-        const querySnapshot = await firebaseDB.collection("products").limit(50).get();
+        console.log('Loading categories from Firebase...');
+        const querySnapshot = await firebaseDB.collection("products").get();
         
         if (!querySnapshot.empty) {
             const categoryMap = new Map();
@@ -2768,10 +2817,14 @@ async function loadCategories() {
                 }
             });
             
+            // Store categories for filter
+            availableCategories = Array.from(categoryMap.keys());
+            
             // Sort by count
             const allCategories = Array.from(categoryMap.values())
                 .sort((a, b) => b.count - a.count);
             
+            console.log('Loaded categories:', allCategories.length);
             displayCategories(allCategories);
         } else {
             loadDefaultCategories();
@@ -2857,7 +2910,8 @@ async function loadStoneUses() {
             }
         }
         
-        const querySnapshot = await firebaseDB.collection("products").limit(50).get();
+        console.log('Loading stone uses from Firebase...');
+        const querySnapshot = await firebaseDB.collection("products").get();
         
         if (!querySnapshot.empty) {
             const usesMap = new Map();
@@ -2889,10 +2943,14 @@ async function loadStoneUses() {
                 }
             });
             
+            // Store uses for filter
+            availableUses = Array.from(usesMap.keys());
+            
             // Sort by count
             const uses = Array.from(usesMap.values())
                 .sort((a, b) => b.count - a.count);
             
+            console.log('Loaded uses:', uses.length);
             displayUses(uses);
         } else {
             loadDefaultUses();
@@ -2956,6 +3014,134 @@ function loadDefaultUses() {
     ];
     
     displayUses(defaultUses);
+}
+
+// ============================================
+// SMART FILTER SYSTEM
+// ============================================
+
+async function loadSmartFilters() {
+    try {
+        if (!firebaseDB) {
+            const initialized = initializeFirebase();
+            if (!initialized) return;
+        }
+        
+        console.log('Loading smart filters from Firebase...');
+        const querySnapshot = await firebaseDB.collection("products").get();
+        
+        if (querySnapshot.empty) {
+            populateDefaultFilters();
+            return;
+        }
+        
+        const categoriesSet = new Set();
+        const usesSet = new Set();
+        const colorsSet = new Set();
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            
+            // Collect categories
+            if (data.category && data.category.trim() !== '') {
+                categoriesSet.add(data.category);
+            }
+            
+            // Collect uses from "usage" field
+            const usage = data.usage;
+            if (usage && usage.trim() !== '') {
+                usesSet.add(usage);
+            }
+            
+            // Collect colors
+            if (data.color && data.color.trim() !== '') {
+                colorsSet.add(data.color);
+            }
+        });
+        
+        // Update global arrays
+        availableCategories = Array.from(categoriesSet).sort();
+        availableUses = Array.from(usesSet).sort();
+        availableColors = Array.from(colorsSet).sort();
+        
+        console.log('Filters loaded:', {
+            categories: availableCategories.length,
+            uses: availableUses.length,
+            colors: availableColors.length
+        });
+        
+        // Populate filter dropdowns
+        populateFilterOptions();
+        
+    } catch (error) {
+        console.error('Error loading smart filters:', error);
+        populateDefaultFilters();
+    }
+}
+
+function populateFilterOptions() {
+    // Category filter
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+        // Clear existing options (keep "All Categories")
+        while (categoryFilter.options.length > 1) {
+            categoryFilter.remove(1);
+        }
+        
+        // Add categories
+        availableCategories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categoryFilter.appendChild(option);
+        });
+    }
+    
+    // Usage filter
+    const usageFilter = document.getElementById('usageFilter');
+    if (usageFilter) {
+        // Clear existing options (keep "All Uses")
+        while (usageFilter.options.length > 1) {
+            usageFilter.remove(1);
+        }
+        
+        // Add uses
+        availableUses.forEach(use => {
+            const option = document.createElement('option');
+            option.value = use;
+            option.textContent = use;
+            usageFilter.appendChild(option);
+        });
+    }
+    
+    // Color filter
+    const colorFilter = document.getElementById('colorFilter');
+    if (colorFilter) {
+        // Clear existing options (keep "All Colors")
+        while (colorFilter.options.length > 1) {
+            colorFilter.remove(1);
+        }
+        
+        // Add colors
+        availableColors.forEach(color => {
+            const option = document.createElement('option');
+            option.value = color;
+            option.textContent = color;
+            colorFilter.appendChild(option);
+        });
+    }
+}
+
+function populateDefaultFilters() {
+    const defaultCategories = ['Sand Stone', 'Kota Stone', 'Granite', 'Marble', 'Limestone', 'Slate'];
+    const defaultUses = ['Flooring', 'Wall Cladding', 'Kitchen Countertops', 'Staircase', 'Garden Paving', 'Pool Surround'];
+    const defaultColors = ['Gray', 'Brown', 'Black', 'White', 'Green', 'Blue', 'Red', 'Yellow'];
+    
+    availableCategories = defaultCategories;
+    availableUses = defaultUses;
+    availableColors = defaultColors;
+    
+    populateFilterOptions();
 }
 
 // ============================================
@@ -3023,6 +3209,18 @@ function getDefaultUseImage(use) {
     return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
 }
 
+function getProductImage(product) {
+    if (product.images && product.images.length > 0) {
+        return product.images[0];
+    }
+    
+    if (product.image) {
+        return product.image;
+    }
+    
+    return getDefaultImage(product.category);
+}
+
 function formatPrice(price, unit = 'piece') {
     if (!price && price !== 0) return 'Price on request';
     
@@ -3051,6 +3249,17 @@ function showDefaultProducts() {
             price_unit: 'sqft',
             color: 'Brown',
             usage: 'Flooring'
+        },
+        {
+            id: 'default2',
+            stone_name: 'Kota Blue Stone',
+            category: 'Kota Stone',
+            description: 'Beautiful blue kota stone for flooring',
+            price: 35.00,
+            images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300'],
+            price_unit: 'sqft',
+            color: 'Blue',
+            usage: 'Flooring'
         }
     ];
     
@@ -3068,6 +3277,23 @@ function showNoProducts() {
             <p>Try selecting different filters or check back later for new products</p>
         </div>
     `;
+}
+
+function hideSearchResults() {
+    const searchResultsDiv = document.getElementById('searchResults');
+    if (searchResultsDiv) {
+        searchResultsDiv.classList.remove('active');
+    }
+}
+
+function applyFilters() {
+    currentCategory = document.getElementById('categoryFilter').value;
+    currentPriceFilter = document.getElementById('priceFilter').value;
+    currentUsageFilter = document.getElementById('usageFilter').value;
+    currentColorFilter = document.getElementById('colorFilter').value;
+    currentSort = document.getElementById('sortFilter').value;
+    
+    applyAllFiltersClientSide();
 }
 
 // ============================================
@@ -3120,128 +3346,95 @@ function searchProducts(query) {
     searchResults.classList.add('active');
 }
 
-function hideSearchResults() {
-    const searchResultsDiv = document.getElementById('searchResults');
-    if (searchResultsDiv) {
-        searchResultsDiv.classList.remove('active');
-    }
-}
-
-function applyFilters() {
-    currentCategory = document.getElementById('categoryFilter').value;
-    currentPriceFilter = document.getElementById('priceFilter').value;
-    currentUsageFilter = document.getElementById('usageFilter').value;
-    currentColorFilter = document.getElementById('colorFilter').value;
-    currentSort = document.getElementById('sortFilter').value;
-    
-    applyAllFiltersClientSide();
-}
-
 // ============================================
-// SCROLL HANDLING
+// CART AND WISHLIST FUNCTIONS
 // ============================================
 
-function handleScroll() {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const currentTime = Date.now();
-    
-    // Calculate scroll speed
-    const scrollDistance = Math.abs(scrollTop - lastScrollPosition);
-    const timeDiff = currentTime - lastScrollTime;
-    const scrollSpeed = timeDiff > 0 ? scrollDistance / (timeDiff / 1000) : 0;
-    
-    // Determine scroll direction
-    const scrollDirection = scrollTop > lastScrollPosition ? 'down' : 'up';
-    
-    const header = document.getElementById('mainHeader');
-    const bottomNav = document.getElementById('bottomNav');
-    
-    if (!header || !bottomNav) return;
-    
-    // Always show when near top
-    if (scrollTop < 50) {
-        header.classList.remove('hidden');
-        bottomNav.classList.remove('hidden');
-        header.classList.add('show');
-        bottomNav.classList.add('show');
-        return;
+async function addToCartDirect(productId, event = null) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
     }
     
-    // Add scrolled class when not at top
-    if (scrollTop > 100) {
-        header.classList.add('scrolled');
-        bottomNav.classList.add('scrolled');
-    } else {
-        header.classList.remove('scrolled');
-        bottomNav.classList.remove('scrolled');
-    }
-    
-    // Handle scrolling DOWN (hide on both slow and fast)
-    if (scrollDirection === 'down' && scrollDistance > scrollThreshold) {
-        header.classList.add('hidden');
-        bottomNav.classList.add('hidden');
-        header.classList.remove('show');
-        bottomNav.classList.remove('show');
-    }
-    
-    // Handle scrolling UP (only show on fast scroll)
-    else if (scrollDirection === 'up' && scrollDistance > scrollThreshold) {
-        if (scrollSpeed > fastScrollThreshold) {
-            header.classList.remove('hidden');
-            bottomNav.classList.remove('hidden');
-            header.classList.add('show');
-            bottomNav.classList.add('show');
+    try {
+        const product = allProducts.find(p => p.id === productId);
+        
+        if (product && cartSystem) {
+            await cartSystem.addToCart(product);
         }
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        showError('Failed to add to cart');
     }
-    
-    // Update scroll position for next calculation
-    lastScrollPosition = scrollTop;
-    lastScrollTime = currentTime;
-    
-    // Update scroll to top button
-    const scrollTopBtn = document.getElementById('scrollTopBtn');
-    if (scrollTopBtn) {
-        if (scrollTop > 300) {
-            scrollTopBtn.classList.add('visible');
+}
+
+async function toggleWishlist(productId) {
+    try {
+        const product = allProducts.find(p => p.id === productId);
+        
+        if (!product) {
+            showError('Product not found');
+            return;
+        }
+        
+        if (wishlistSystem.isInWishlist(productId)) {
+            await wishlistSystem.removeFromWishlist(productId);
+            updateWishlistIcon(productId, false);
         } else {
-            scrollTopBtn.classList.remove('visible');
+            await wishlistSystem.addToWishlist(product);
+            updateWishlistIcon(productId, true);
         }
+    } catch (error) {
+        console.error('Error toggling wishlist:', error);
+        showError('Failed to update wishlist');
     }
+}
+
+function updateWishlistIcon(productId, isInWishlist) {
+    const wishlistIcons = document.querySelectorAll(`.wishlist-icon`);
+    
+    wishlistIcons.forEach(icon => {
+        const productCard = icon.closest('.image-card');
+        if (productCard && productCard.href.includes(productId)) {
+            const heartIcon = icon.querySelector('i');
+            if (isInWishlist) {
+                icon.classList.add('active');
+                heartIcon.classList.remove('far');
+                heartIcon.classList.add('fas');
+            } else {
+                icon.classList.remove('active');
+                heartIcon.classList.remove('fas');
+                heartIcon.classList.add('far');
+            }
+        }
+    });
 }
 
 // ============================================
 // INITIALIZATION
 // ============================================
 
-let authSystem;
-
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('IRYA STONE Home Page initialized');
     
-    // Initialize Firebase first
-    const firebaseInitialized = initializeFirebase();
+    // Initialize Firebase
+    initializeFirebase();
     
-    if (!firebaseInitialized) {
-        console.warn('Firebase initialization failed, using offline mode');
-        showError('Connection issue. Showing limited features.');
-    }
-    
-    // Initialize systems
+    // Initialize auth system
     authSystem = new AuthSystem();
     await authSystem.init();
     
+    // Initialize cart system
     cartSystem = new CartSystem();
     await cartSystem.init();
     
+    // Initialize wishlist system
     wishlistSystem = new WishlistSystem();
-    wishlistSystem.init();
+    await wishlistSystem.init();
     
     // Load data
     try {
-        // Load smart filters first
         await loadSmartFilters();
-        
-        // Then load other data
         await loadCategories();
         await loadStoneUses();
         await loadProductsFromFirebase();
@@ -3332,15 +3525,7 @@ function setupEventListeners() {
     }
     
     // Improved scroll handling
-    let scrollTimeout;
-    window.addEventListener('scroll', () => {
-        if (!scrollTimeout) {
-            scrollTimeout = setTimeout(() => {
-                handleScroll();
-                scrollTimeout = null;
-            }, 50);
-        }
-    }, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
     
     // Initial scroll check
     handleScroll();
