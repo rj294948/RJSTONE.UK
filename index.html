@@ -1977,13 +1977,14 @@ class AuthSystem {
 }
 
 // ============================================
-// FIREBASE CART SYSTEM - FIXED
+// FIREBASE CART SYSTEM - FULLY UPDATED & SAFE
 // ============================================
 
 class CartSystem {
     constructor() {
         this.localCartKey = 'irya_local_cart_';
         this.cartItems = [];
+        this.isAdding = false; // 🔒 lock to prevent auto / double add
     }
     
     async init() {
@@ -1992,15 +1993,21 @@ class CartSystem {
         return this;
     }
     
+    // ------------------------------------------
+    // USER ID
+    // ------------------------------------------
     getUserId() {
         return window.authSystem ? window.authSystem.getUserId() : 'guest';
     }
     
+    // ------------------------------------------
+    // LOAD CART
+    // ------------------------------------------
     async loadCart() {
         try {
             const userId = this.getUserId();
             
-            if (window.authSystem && window.authSystem.isLoggedIn() && firebaseDB) {
+            if (window.authSystem && window.authSystem.isLoggedIn() && window.firebaseDB) {
                 await this.loadFromFirebase(userId);
             } else {
                 this.loadFromLocalStorage(userId);
@@ -2023,7 +2030,6 @@ class CartSystem {
                 this.saveToLocalStorage(userId);
             } else {
                 this.loadFromLocalStorage(userId);
-                
                 if (this.cartItems.length > 0) {
                     await this.saveToFirebase(userId);
                 }
@@ -2040,12 +2046,14 @@ class CartSystem {
         this.cartItems = cartData ? JSON.parse(cartData) : [];
     }
     
+    // ------------------------------------------
+    // SAVE CART
+    // ------------------------------------------
     async saveCart() {
         const userId = this.getUserId();
-        
         this.saveToLocalStorage(userId);
         
-        if (window.authSystem && window.authSystem.isLoggedIn() && firebaseDB) {
+        if (window.authSystem && window.authSystem.isLoggedIn() && window.firebaseDB) {
             await this.saveToFirebase(userId);
         }
         
@@ -2061,34 +2069,44 @@ class CartSystem {
     async saveToFirebase(userId) {
         try {
             await firebaseDB.collection('userCarts').doc(userId).set({
-                userId: userId,
+                userId,
                 items: this.cartItems,
                 updatedAt: new Date().toISOString(),
-                itemCount: this.cartItems.reduce((sum, item) => sum + item.quantity, 0),
-                totalAmount: this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+                itemCount: this.cartItems.reduce((s, i) => s + i.quantity, 0),
+                totalAmount: this.cartItems.reduce((s, i) => s + (i.price * i.quantity), 0)
             }, { merge: true });
         } catch (error) {
             console.error('Error saving cart to Firebase:', error);
         }
     }
     
+    // ------------------------------------------
+    // ADD TO CART (FIXED)
+    // ------------------------------------------
     async addToCart(product) {
+        if (this.isAdding) return false; // 🔒 prevent double add
+        this.isAdding = true;
+
         try {
-            const existingItem = this.cartItems.find(item => item.id === product.id);
+            const productId = String(product.id);
+
+            const existingItem = this.cartItems.find(
+                item => String(item.id) === productId
+            );
             
             if (existingItem) {
                 existingItem.quantity += 1;
                 existingItem.updatedAt = new Date().toISOString();
             } else {
                 this.cartItems.push({
-                    id: product.id,
-                    name: product.stone_name || product.name,
-                    stoneName: product.stone_name,
-                    price: product.price,
+                    id: productId,
+                    name: product.stone_name || product.name || 'Product',
+                    stoneName: product.stone_name || product.name,
+                    price: Number(product.price) || 0,
                     priceUnit: product.price_unit || 'piece',
-                    image: product.images && product.images.length > 0 ? product.images[0] : '',
-                    category: product.category,
-                    description: product.description,
+                    image: product.images?.[0] || '',
+                    category: product.category || '',
+                    description: product.description || '',
                     quantity: 1,
                     addedAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
@@ -2098,37 +2116,45 @@ class CartSystem {
             
             await this.saveCart();
             
-            showNotification(`${product.stone_name} added to cart!`);
+            showNotification(`${product.stone_name || product.name} added to cart`);
             
             const cartBtn = document.querySelector('a[href="cart.html"]');
             if (cartBtn) {
                 cartBtn.style.transform = 'scale(1.1)';
-                setTimeout(() => {
-                    cartBtn.style.transform = 'scale(1)';
-                }, 300);
+                setTimeout(() => cartBtn.style.transform = 'scale(1)', 300);
             }
             
             return true;
+
         } catch (error) {
             console.error('Error adding to cart:', error);
             showError('Failed to add to cart. Please try again.');
             return false;
+
+        } finally {
+            setTimeout(() => {
+                this.isAdding = false; // 🔓 unlock
+            }, 300);
         }
     }
     
+    // ------------------------------------------
+    // BADGE
+    // ------------------------------------------
     getCartCount() {
         return this.cartItems.reduce((total, item) => total + item.quantity, 0);
     }
     
     updateCartBadge() {
-        const count = this.getCartCount();
         const cartBadge = document.getElementById('cartBadge');
-        if (cartBadge) {
-            cartBadge.textContent = count;
-            cartBadge.style.display = count > 0 ? 'flex' : 'none';
-        }
+        if (!cartBadge) return;
+
+        const count = this.getCartCount();
+        cartBadge.textContent = count;
+        cartBadge.style.display = count > 0 ? 'flex' : 'none';
     }
 }
+
 
 // ============================================
 // WISHLIST SYSTEM
