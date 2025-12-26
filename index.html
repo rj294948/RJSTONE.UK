@@ -1977,13 +1977,14 @@ class AuthSystem {
 }
 
 // ============================================
-// FIREBASE CART SYSTEM - FIXED
+// FIREBASE CART SYSTEM - UPDATED FOR BETTER PRODUCT HANDLING
 // ============================================
 
 class CartSystem {
     constructor() {
         this.localCartKey = 'irya_local_cart_';
         this.cartItems = [];
+        this.uniqueProductIds = new Set(); // Track unique product IDs
     }
     
     async init() {
@@ -2006,10 +2007,14 @@ class CartSystem {
                 this.loadFromLocalStorage(userId);
             }
             
+            // Update unique IDs set
+            this.uniqueProductIds = new Set(this.cartItems.map(item => item.id));
+            
             return this.cartItems;
         } catch (error) {
             console.error('Error loading cart:', error);
             this.cartItems = [];
+            this.uniqueProductIds = new Set();
             return [];
         }
     }
@@ -2019,7 +2024,12 @@ class CartSystem {
             const cartDoc = await firebaseDB.collection('userCarts').doc(userId).get();
             
             if (cartDoc.exists) {
-                this.cartItems = cartDoc.data().items || [];
+                const data = cartDoc.data();
+                this.cartItems = data.items || [];
+                
+                // Remove duplicates if any
+                this.removeDuplicates();
+                
                 this.saveToLocalStorage(userId);
             } else {
                 this.loadFromLocalStorage(userId);
@@ -2038,10 +2048,30 @@ class CartSystem {
         const cartKey = this.localCartKey + userId;
         const cartData = localStorage.getItem(cartKey);
         this.cartItems = cartData ? JSON.parse(cartData) : [];
+        
+        // Remove duplicates
+        this.removeDuplicates();
+    }
+    
+    removeDuplicates() {
+        const uniqueItems = [];
+        const seenIds = new Set();
+        
+        for (const item of this.cartItems) {
+            if (!seenIds.has(item.id)) {
+                seenIds.add(item.id);
+                uniqueItems.push(item);
+            }
+        }
+        
+        this.cartItems = uniqueItems;
     }
     
     async saveCart() {
         const userId = this.getUserId();
+        
+        // Remove duplicates before saving
+        this.removeDuplicates();
         
         this.saveToLocalStorage(userId);
         
@@ -2065,7 +2095,8 @@ class CartSystem {
                 items: this.cartItems,
                 updatedAt: new Date().toISOString(),
                 itemCount: this.cartItems.reduce((sum, item) => sum + item.quantity, 0),
-                totalAmount: this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+                totalAmount: this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                uniqueProductCount: this.cartItems.length
             }, { merge: true });
         } catch (error) {
             console.error('Error saving cart to Firebase:', error);
@@ -2074,32 +2105,41 @@ class CartSystem {
     
     async addToCart(product) {
         try {
-            const existingItem = this.cartItems.find(item => item.id === product.id);
+            // Check if product already exists
+            const existingItemIndex = this.cartItems.findIndex(item => item.id === product.id);
             
-            if (existingItem) {
-                existingItem.quantity += 1;
-                existingItem.updatedAt = new Date().toISOString();
+            if (existingItemIndex !== -1) {
+                // Update quantity if exists
+                this.cartItems[existingItemIndex].quantity += 1;
+                this.cartItems[existingItemIndex].updatedAt = new Date().toISOString();
             } else {
-                this.cartItems.push({
+                // Add new item
+                const newItem = {
                     id: product.id,
-                    name: product.stone_name || product.name,
-                    stoneName: product.stone_name,
-                    price: product.price,
+                    name: product.stone_name || product.name || 'Stone Product',
+                    stoneName: product.stone_name || product.name,
+                    price: parseFloat(product.price) || 0,
                     priceUnit: product.price_unit || 'piece',
-                    image: product.images && product.images.length > 0 ? product.images[0] : '',
-                    category: product.category,
-                    description: product.description,
+                    image: (product.images && product.images.length > 0) ? product.images[0] : 
+                           (product.image || getDefaultImage(product.category)),
+                    category: product.category || 'Natural Stone',
+                    description: product.description || '',
                     quantity: 1,
                     addedAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
-                    userId: this.getUserId()
-                });
+                    userId: this.getUserId(),
+                    productData: product // Store complete product data for reference
+                };
+                
+                this.cartItems.push(newItem);
+                this.uniqueProductIds.add(product.id);
             }
             
             await this.saveCart();
             
-            showNotification(`${product.stone_name} added to cart!`);
+            showNotification(`${product.stone_name || product.name} added to cart!`);
             
+            // Visual feedback
             const cartBtn = document.querySelector('a[href="cart.html"]');
             if (cartBtn) {
                 cartBtn.style.transform = 'scale(1.1)';
@@ -2116,18 +2156,438 @@ class CartSystem {
         }
     }
     
+    async removeFromCart(productId) {
+        try {
+            const index = this.cartItems.findIndex(item => item.id === productId);
+            
+            if (index !== -1) {
+                const productName = this.cartItems[index].stoneName;
+                this.cartItems.splice(index, 1);
+                this.uniqueProductIds.delete(productId);
+                
+                await this.saveCart();
+                showNotification(`${productName} removed from cart`);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error removing from cart:', error);
+            return false;
+        }
+    }
+    
     getCartCount() {
         return this.cartItems.reduce((total, item) => total + item.quantity, 0);
+    }
+    
+    getUniqueProductCount() {
+        return this.cartItems.length;
     }
     
     updateCartBadge() {
         const count = this.getCartCount();
         const cartBadge = document.getElementById('cartBadge');
         if (cartBadge) {
-            cartBadge.textContent = count;
+            cartBadge.textContent = count > 99 ? '99+' : count;
             cartBadge.style.display = count > 0 ? 'flex' : 'none';
         }
     }
+}
+// ============================================
+// IMPROVED PRODUCT LOADING - PREVENT DUPLICATES
+// ============================================
+
+async function loadProductsFromFirebase() {
+    const container = document.getElementById('productGrid');
+    
+    if (!container) return;
+    
+    try {
+        showLoading(true);
+        
+        if (!firebaseDB) {
+            const initialized = initializeFirebase();
+            if (!initialized) {
+                showDefaultProducts();
+                return;
+            }
+        }
+        
+        // Reset products array
+        allProducts = [];
+        
+        // Get products with error handling
+        let querySnapshot;
+        try {
+            querySnapshot = await firebaseDB.collection("products")
+                .orderBy("created_at", "desc")
+                .limit(50)
+                .get();
+        } catch (error) {
+            // If ordering fails, try without order
+            console.log("Falling back to unordered query:", error);
+            querySnapshot = await firebaseDB.collection("products")
+                .limit(50)
+                .get();
+        }
+        
+        if (querySnapshot.empty) {
+            showNoProducts();
+            showLoading(false);
+            return;
+        }
+        
+        // Use Set to ensure uniqueness by product ID
+        const uniqueProducts = new Map();
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const productId = doc.id;
+            
+            // Skip if we already have this product ID
+            if (uniqueProducts.has(productId)) {
+                console.log(`Duplicate product ID found: ${productId}`);
+                return;
+            }
+            
+            const product = {
+                id: productId,
+                stone_name: data.stone_name || 'Stone Product',
+                category: data.category || 'Natural Stone',
+                description: data.description || '',
+                price: parseFloat(data.price) || 0,
+                price_unit: data.price_unit || 'piece',
+                finish: data.finish || '',
+                size: data.size || '',
+                thickness: data.thickness || '',
+                color: data.color || '',
+                usage: data.usage || '',
+                type: data.type || '',
+                sub_category: data.sub_category || '',
+                length: data.length || '',
+                width: data.width || '',
+                images: Array.isArray(data.images) ? data.images : 
+                       (data.image ? [data.image] : []),
+                image: data.image || '',
+                created_at: data.created_at || new Date().toISOString(),
+                is_active: data.is_active !== undefined ? data.is_active : true
+            };
+            
+            // Only add active products
+            if (product.is_active) {
+                uniqueProducts.set(productId, product);
+            }
+        });
+        
+        // Convert Map to array
+        allProducts = Array.from(uniqueProducts.values());
+        
+        console.log(`Loaded ${allProducts.length} unique products`);
+        
+        if (allProducts.length === 0) {
+            showNoProducts();
+        } else {
+            // Apply all filters client-side
+            applyAllFiltersClientSide();
+        }
+        
+    } catch (error) {
+        console.error('Error loading products:', error);
+        showError('Failed to load products. Please try again.');
+        showDefaultProducts();
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
+// IMPROVED FILTER SYSTEM
+// ============================================
+
+function applyAllFiltersClientSide() {
+    if (allProducts.length === 0) {
+        showNoProducts();
+        return;
+    }
+    
+    let filteredProducts = [...allProducts];
+    
+    // Log filter criteria
+    console.log('Applying filters:', {
+        category: currentCategory,
+        usage: currentUsageFilter,
+        color: currentColorFilter,
+        price: currentPriceFilter,
+        sort: currentSort,
+        totalProducts: allProducts.length
+    });
+    
+    // Apply category filter
+    if (currentCategory !== 'all') {
+        filteredProducts = filteredProducts.filter(product => 
+            product.category && product.category === currentCategory
+        );
+    }
+    
+    // Apply usage filter
+    if (currentUsageFilter !== 'all') {
+        filteredProducts = filteredProducts.filter(product => 
+            product.usage && product.usage === currentUsageFilter
+        );
+    }
+    
+    // Apply color filter
+    if (currentColorFilter !== 'all') {
+        filteredProducts = filteredProducts.filter(product => 
+            product.color && product.color === currentColorFilter
+        );
+    }
+    
+    // Apply price filter
+    if (currentPriceFilter !== 'all') {
+        filteredProducts = filteredProducts.filter(product => {
+            const price = product.price || 0;
+            
+            switch(currentPriceFilter) {
+                case '0-25':
+                    return price >= 0 && price <= 25;
+                case '25-50':
+                    return price > 25 && price <= 50;
+                case '50-100':
+                    return price > 50 && price <= 100;
+                case '100-250':
+                    return price > 100 && price <= 250;
+                case '250+':
+                    return price > 250;
+                default:
+                    return true;
+            }
+        });
+    }
+    
+    // Apply sorting
+    if (currentSort === 'price_low') {
+        filteredProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (currentSort === 'price_high') {
+        filteredProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
+    } else if (currentSort === 'name') {
+        filteredProducts.sort((a, b) => (a.stone_name || '').localeCompare(b.stone_name || ''));
+    } else if (currentSort === 'newest') {
+        filteredProducts.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    }
+    
+    console.log(`After filtering: ${filteredProducts.length} products`);
+    
+    displayProducts(filteredProducts);
+}
+
+// ============================================
+// IMPROVED PRODUCT DISPLAY
+// ============================================
+
+function displayProducts(products) {
+    const container = document.getElementById('productGrid');
+    if (!container) return;
+    
+    if (products.length === 0) {
+        showNoProducts();
+        return;
+    }
+    
+    // Limit display to reasonable number
+    const displayProducts = products.slice(0, 100); // Max 100 products
+    
+    const productsHTML = displayProducts.map(product => {
+        const formattedPrice = formatPrice(product.price, product.price_unit);
+        const isInWishlist = wishlistSystem ? wishlistSystem.isInWishlist(product.id) : false;
+        
+        // Get product image
+        let productImage = getProductImage(product);
+        
+        return `
+            <div class="product-card-container">
+                <a href="product.html?id=${encodeURIComponent(product.id)}" class="image-card">
+                    <div class="card-image-container">
+                        <img src="${productImage}" 
+                             alt="${product.stone_name}" 
+                             class="card-image" 
+                             onerror="this.src='${getDefaultImage(product.category)}'"
+                             loading="lazy">
+                        
+                        <!-- Wishlist Button -->
+                        <button class="wishlist-icon ${isInWishlist ? 'active' : ''}" 
+                                onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${product.id}')">
+                            <i class="${isInWishlist ? 'fas' : 'far'} fa-heart"></i>
+                        </button>
+                        
+                        <!-- Add to Cart Button -->
+                        <button class="add-cart-icon" 
+                                onclick="event.preventDefault(); event.stopPropagation(); addToCartDirect('${product.id}')">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="product-info-overlay">
+                        <div class="product-name">${product.stone_name}</div>
+                        <div class="product-price">${formattedPrice}</div>
+                        ${product.category ? `<div class="product-category">${product.category}</div>` : ''}
+                    </div>
+                </a>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = productsHTML;
+}
+
+function getProductImage(product) {
+    if (product.images && product.images.length > 0) {
+        return product.images[0];
+    }
+    
+    if (product.image) {
+        return product.image;
+    }
+    
+    return getDefaultImage(product.category);
+}
+
+// ============================================
+// IMPROVED INITIALIZATION
+// ============================================
+
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('IRYA STONE Home Page initialized');
+    
+    // Initialize Firebase first
+    const firebaseInitialized = initializeFirebase();
+    
+    if (!firebaseInitialized) {
+        console.warn('Firebase initialization failed, using offline mode');
+        showError('Connection issue. Showing limited features.');
+    }
+    
+    // Initialize systems
+    authSystem = new AuthSystem();
+    await authSystem.init();
+    
+    cartSystem = new CartSystem();
+    await cartSystem.init();
+    
+    wishlistSystem = new WishlistSystem();
+    wishlistSystem.init();
+    updateWishlistUI();
+    
+    // Load data
+    try {
+        // Load smart filters first
+        await loadSmartFilters();
+        
+        // Then load other data in parallel
+        await Promise.all([
+            loadCategories(),
+            loadStoneUses(),
+            loadProductsFromFirebase()
+        ]);
+        
+        console.log('All data loaded successfully');
+        
+    } catch (error) {
+        console.error('Error loading data:', error);
+        showError('Error loading products. Please refresh.');
+    }
+    
+    // Setup event listeners
+    setupEventListeners();
+    
+    // Make systems available globally
+    window.authSystem = authSystem;
+    window.cartSystem = cartSystem;
+    window.wishlistSystem = wishlistSystem;
+    window.toggleWishlist = toggleWishlist;
+    window.addToCartDirect = addToCartDirect;
+    window.applyFilters = applyFilters;
+    window.handleScroll = handleScroll;
+});
+
+function setupEventListeners() {
+    // Filter event listeners
+    const filterIds = ['categoryFilter', 'priceFilter', 'usageFilter', 'colorFilter', 'sortFilter'];
+    
+    filterIds.forEach(filterId => {
+        const filter = document.getElementById(filterId);
+        if (filter) {
+            filter.addEventListener('change', applyFilters);
+        }
+    });
+    
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const searchIcon = document.getElementById('searchIcon');
+    const searchResults = document.getElementById('searchResults');
+    
+    if (searchInput && searchIcon) {
+        searchIcon.addEventListener('click', () => {
+            if (searchInput.value.trim()) {
+                searchProducts(searchInput.value);
+            } else {
+                hideSearchResults();
+            }
+        });
+        
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim()) {
+                searchProducts(searchInput.value);
+            }
+        });
+        
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length >= 2) {
+                searchTimeout = setTimeout(() => {
+                    searchProducts(query);
+                }, 300);
+            } else {
+                hideSearchResults();
+            }
+        });
+    }
+    
+    // Close search results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (searchResults && searchInput && 
+            !searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            hideSearchResults();
+        }
+    });
+    
+    // Scroll to top button
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    if (scrollTopBtn) {
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+    
+    // Improved scroll handling
+    let scrollTimeout;
+    window.addEventListener('scroll', () => {
+        if (!scrollTimeout) {
+            scrollTimeout = setTimeout(() => {
+                handleScroll();
+                scrollTimeout = null;
+            }, 50);
+        }
+    }, { passive: true });
+    
+    // Initial scroll check
+    handleScroll();
 }
 
 // ============================================
