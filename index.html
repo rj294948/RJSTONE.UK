@@ -67,7 +67,7 @@ header {
     z-index: 1000;
     gap: 8px;
     transform: translateY(0);
-    transition: all 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     height: 60px;
@@ -83,6 +83,7 @@ header.hidden {
 
 header.show {
     transform: translateY(0);
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .logo {
@@ -196,7 +197,8 @@ header.show {
 .search-result-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    background: #f5f5f5;
 }
 
 .search-result-info {
@@ -450,7 +452,7 @@ header.show {
 }
 
 /* ============================================
-   SHOP BY CATEGORY SECTION - COMPACT 3-COLUMN
+   SHOP BY CATEGORY SECTION - MOBILE 2 COLUMNS
    ============================================ */
 
 .categories-section {
@@ -459,7 +461,7 @@ header.show {
     margin-top: 0;
 }
 
-/* Title Section - Compact */
+/* Title Section */
 .categories-section .section-title-wrapper {
     background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.6));
     padding: 20px 15px !important;
@@ -497,35 +499,16 @@ header.show {
     opacity: 0.9;
 }
 
-/* Categories Slider Container */
-.categories-slider-container {
-    position: relative;
-    overflow: hidden;
-    padding: 15px 0 20px;
-    background: var(--bg-light);
-    width: 100%;
-}
-
-.categories-slider-wrapper {
-    display: flex;
-    transition: transform 0.5s ease;
-    width: 100%;
-}
-
-/* Each slide: 2 rows × 3 columns grid */
-.categories-slide {
-    flex: 0 0 100%;
+/* Categories Grid - Mobile 2 columns */
+.categories-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 150px);
-    gap: 10px;
-    box-sizing: border-box;
-    width: 100%;
-    padding: 0 12px;
-    margin: 0;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 15px 12px;
+    background: var(--bg-light);
 }
 
-/* Category card styling - Compact */
+/* Category card styling */
 .category-card {
     background: var(--white);
     overflow: hidden;
@@ -535,13 +518,10 @@ header.show {
     text-decoration: none;
     color: inherit;
     display: block;
-    position: relative;
-    height: 150px;
-    min-height: 150px;
-    max-height: 150px;
-    width: 100%;
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: var(--shadow-sm);
+    height: 180px;
+    position: relative;
 }
 
 .category-card:hover {
@@ -549,44 +529,45 @@ header.show {
     box-shadow: var(--shadow-md);
 }
 
-.category-image {
+.category-image-container {
     width: 100%;
-    height: 150px;
-    min-height: 150px;
-    max-height: 150px;
+    height: 120px;
     overflow: hidden;
     position: relative;
-    border-radius: 8px;
+    background: #f8f9fa;
+    border-radius: 12px 12px 0 0;
 }
 
-.category-image img {
+.category-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center;
+    object-fit: contain;
+    padding: 8px;
     transition: transform 0.5s ease;
 }
 
-.category-card:hover .category-image img {
+.category-card:hover .category-image {
     transform: scale(1.05);
 }
 
-.category-overlay {
+.category-content {
+    padding: 10px;
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
     color: white;
-    padding: 10px 8px 6px;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 12px 12px;
 }
 
 .category-name {
     font-size: 13px;
     font-weight: 600;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
     font-family: 'Roboto Slab', serif;
+    color: var(--white);
+    line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -594,70 +575,11 @@ header.show {
 
 .category-count {
     font-size: 11px;
-    opacity: 0.9;
-}
-
-/* Slider Navigation */
-.cat-slider-nav {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 15px;
-    padding: 0 15px;
-}
-
-.cat-slider-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.cat-slider-dot.active {
-    background: var(--primary-gold);
-    transform: scale(1.2);
-}
-
-.cat-slider-prev,
-.cat-slider-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 28px;
-    height: 28px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border: none;
-    color: var(--stone-dark);
-    font-size: 12px;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
-    z-index: 10;
-}
-
-.cat-slider-prev:hover,
-.cat-slider-next:hover {
-    background: var(--primary-gold);
-    color: white;
-    transform: translateY(-50%) scale(1.05);
-}
-
-.cat-slider-prev {
-    left: 8px;
-}
-
-.cat-slider-next {
-    right: 8px;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 /* ============================================
-   STONE USES SECTION - FIT CONTENT DISPLAY
+   STONE USES SECTION - MOBILE 3 COLUMNS
    ============================================ */
 
 .uses-section {
@@ -704,36 +626,19 @@ header.show {
     opacity: 0.9;
 }
 
-/* Uses Slider Container */
-.uses-slider-container {
-    position: relative;
-    overflow: hidden;
-    padding: 15px 0 20px;
-    background: var(--white);
-}
-
-.uses-slider-wrapper {
-    display: flex;
-    transition: transform 0.5s ease;
-    width: 100%;
-}
-
-/* Each slide: 2 rows × 3 columns grid - FIT CONTENT LAYOUT */
-.uses-slide {
-    flex: 0 0 100%;
+/* Uses Grid - Mobile 3 columns */
+.uses-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
     gap: 10px;
-    padding: 0 12px;
-    box-sizing: border-box;
-    width: 100%;
+    padding: 15px 12px;
+    background: var(--white);
 }
 
-/* Use card styling - FIT CONTENT DISPLAY */
+/* Use card styling */
 .use-card {
     background: var(--white);
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: var(--shadow-sm);
     transition: var(--transition);
     border: 1px solid #f0f0f0;
@@ -741,9 +646,8 @@ header.show {
     text-decoration: none;
     color: inherit;
     display: block;
-    position: relative;
     height: 160px;
-    min-height: 160px;
+    position: relative;
     overflow: hidden;
 }
 
@@ -755,113 +659,53 @@ header.show {
 
 .use-image-container {
     width: 100%;
-    height: 100%;
+    height: 110px;
     overflow: hidden;
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 10px 10px 0 0;
 }
 
 .use-image {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* FIT CONTENT - Shows full image */
-    object-position: center;
+    object-fit: contain;
+    padding: 8px;
     transition: transform 0.5s ease;
-    background: #f8f9fa;
 }
 
 .use-card:hover .use-image {
     transform: scale(1.05);
 }
 
-/* Use Info Overlay - FIXED POSITION */
-.use-info-overlay {
+.use-content {
+    padding: 8px 6px;
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.4) 50%, transparent);
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
     color: white;
-    padding: 10px 8px 6px;
-    border-radius: 0 0 8px 8px;
-    z-index: 2;
+    border-radius: 0 0 10px 10px;
 }
 
 .use-name {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     margin-bottom: 2px;
     font-family: 'Roboto Slab', serif;
+    color: var(--white);
+    line-height: 1.2;
+    text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: center;
 }
 
 .use-count {
-    font-size: 10px;
-    opacity: 0.9;
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.9);
     text-align: center;
-    display: block;
-}
-
-/* Slider Navigation */
-.use-slider-nav {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 15px;
-}
-
-.use-slider-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.use-slider-dot.active {
-    background: var(--primary-gold);
-    transform: scale(1.2);
-}
-
-.use-slider-prev,
-.use-slider-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 28px;
-    height: 28px;
-    background: var(--white);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border: none;
-    color: var(--stone-dark);
-    font-size: 11px;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
-    z-index: 10;
-}
-
-.use-slider-prev:hover,
-.use-slider-next:hover {
-    background: var(--primary-gold);
-    color: white;
-}
-
-.use-slider-prev {
-    left: 10px;
-}
-
-.use-slider-next {
-    right: 10px;
 }
 
 /* ============================================
@@ -947,17 +791,17 @@ header.show {
     font-size: 13px;
 }
 
-/* Product Grid */
+/* Product Grid - Mobile 2 columns */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-bottom: 20px;
 }
 
 .image-card {
     background: var(--white);
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: var(--shadow-sm);
     transition: var(--transition);
     border: 1px solid #f0f0f0;
@@ -967,7 +811,7 @@ header.show {
     text-decoration: none;
     color: inherit;
     display: block;
-    height: 170px;
+    height: 220px;
 }
 
 .image-card:hover {
@@ -978,7 +822,7 @@ header.show {
 
 .card-image-container {
     width: 100%;
-    height: 100%;
+    height: 140px;
     overflow: hidden;
     position: relative;
     background: #f5f5f5;
@@ -987,8 +831,10 @@ header.show {
 .card-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    padding: 10px;
     transition: transform 0.5s ease;
+    background: #f8f9fa;
 }
 
 .image-card:hover .card-image {
@@ -1071,30 +917,27 @@ header.show {
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
     color: white;
-    padding: 10px 6px 6px;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-    border-radius: 0 0 8px 8px;
-}
-
-.image-card:hover .product-info-overlay {
+    padding: 10px 8px;
     transform: translateY(0);
+    transition: transform 0.3s ease;
+    border-radius: 0 0 10px 10px;
 }
 
 .product-name {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     font-family: 'Roboto Slab', serif;
+    line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .product-price {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--gold-light);
     font-family: 'Roboto Slab', serif;
@@ -1115,16 +958,24 @@ header.show {
 }
 
 .filter-select {
-    padding: 7px 10px;
+    padding: 7px 12px;
     border-radius: 15px;
     border: 1px solid #e0e0e0;
     background: var(--white);
     color: var(--text-dark);
     font-size: 11px;
     cursor: pointer;
-    min-width: 110px;
+    min-width: 120px;
     flex-shrink: 0;
     transition: var(--transition);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+    padding-right: 30px;
 }
 
 .filter-select:focus {
@@ -1154,7 +1005,7 @@ header.show {
     z-index: 999;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
     transform: translateY(0);
-    transition: all 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     height: 65px;
 }
 
@@ -1168,6 +1019,7 @@ header.show {
 
 .bottom-nav.show {
     transform: translateY(0);
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .nav-btn {
@@ -1338,6 +1190,34 @@ header.show {
     box-shadow: var(--shadow-sm);
 }
 
+/* No Results Message */
+.no-products {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+}
+
+.no-products i {
+    font-size: 40px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+    color: var(--primary-gold);
+}
+
+.no-products h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: var(--stone-dark);
+}
+
+.no-products p {
+    font-size: 13px;
+    max-width: 300px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
 /* ============================================
    RESPONSIVE ADJUSTMENTS
    ============================================ */
@@ -1391,7 +1271,7 @@ header.show {
         font-size: 14px;
     }
     
-    /* Categories */
+    /* Title Sections */
     .categories-section .section-title-wrapper,
     .uses-section .section-title-wrapper,
     .products .section-title-wrapper {
@@ -1412,54 +1292,56 @@ header.show {
         font-size: 13px !important;
     }
     
-    .categories-slide {
-        grid-template-rows: repeat(2, 170px);
+    /* Categories - Desktop 4 columns */
+    .categories-grid {
+        grid-template-columns: repeat(4, 1fr);
         gap: 15px;
-        padding: 0 20px;
+        padding: 20px;
     }
     
-    .category-card,
-    .category-image {
-        height: 170px;
-        min-height: 170px;
-        max-height: 170px;
+    .category-card {
+        height: 200px;
+    }
+    
+    .category-image-container {
+        height: 140px;
     }
     
     .category-name {
         font-size: 14px;
     }
     
-    .category-count {
-        font-size: 12px;
-    }
-    
-    /* Uses */
-    .uses-slide {
+    /* Uses - Desktop 4 columns */
+    .uses-grid {
+        grid-template-columns: repeat(4, 1fr);
         gap: 12px;
-        padding: 0 20px;
+        padding: 20px;
     }
     
     .use-card {
         height: 180px;
-        min-height: 180px;
+    }
+    
+    .use-image-container {
+        height: 120px;
     }
     
     .use-name {
-        font-size: 13px;
+        font-size: 12px;
     }
     
-    .use-count {
-        font-size: 11px;
-    }
-    
-    /* Products */
+    /* Products - Desktop 3 columns */
     .product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 15px;
     }
     
     .image-card {
-        height: 190px;
+        height: 240px;
+    }
+    
+    .card-image-container {
+        height: 160px;
     }
     
     /* Bottom Nav */
@@ -1478,57 +1360,20 @@ header.show {
     }
 }
 
-@media (max-width: 767px) {
-    /* Categories - Switch to 2 columns on mobile */
-    .categories-slide {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(3, 140px);
-        gap: 8px;
-        padding: 0 10px;
+@media (min-width: 1024px) {
+    /* Categories - Desktop 6 columns */
+    .categories-grid {
+        grid-template-columns: repeat(6, 1fr);
     }
     
-    .category-card,
-    .category-image {
-        height: 140px;
-        min-height: 140px;
-        max-height: 140px;
+    /* Uses - Desktop 6 columns */
+    .uses-grid {
+        grid-template-columns: repeat(6, 1fr);
     }
     
-    .category-overlay {
-        padding: 8px 6px 4px;
-    }
-    
-    .category-name {
-        font-size: 12px;
-    }
-    
-    .category-count {
-        font-size: 10px;
-    }
-    
-    /* Uses - Switch to 2 columns on mobile */
-    .uses-slide {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(3, 1fr);
-        gap: 8px;
-        padding: 0 10px;
-    }
-    
-    .use-card {
-        height: 140px;
-        min-height: 140px;
-    }
-    
-    .use-info-overlay {
-        padding: 8px 6px 4px;
-    }
-    
-    .use-name {
-        font-size: 11px;
-    }
-    
-    .use-count {
-        font-size: 9px;
+    /* Products - Desktop 4 columns */
+    .product-grid {
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 
@@ -1622,31 +1467,47 @@ header.show {
     }
     
     /* Categories */
-    .categories-slide {
-        grid-template-rows: repeat(3, 130px);
-        gap: 6px;
-        padding: 0 8px;
+    .categories-grid {
+        gap: 8px;
+        padding: 12px 8px;
     }
     
-    .category-card,
-    .category-image {
-        height: 130px;
-        min-height: 130px;
-        max-height: 130px;
+    .category-card {
+        height: 160px;
+    }
+    
+    .category-image-container {
+        height: 100px;
+    }
+    
+    .category-content {
+        padding: 8px;
     }
     
     .category-name {
-        font-size: 11px;
+        font-size: 12px;
     }
     
     .category-count {
-        font-size: 9px;
+        font-size: 10px;
     }
     
     /* Uses */
+    .uses-grid {
+        gap: 8px;
+        padding: 12px 8px;
+    }
+    
     .use-card {
-        height: 130px;
-        min-height: 130px;
+        height: 140px;
+    }
+    
+    .use-image-container {
+        height: 90px;
+    }
+    
+    .use-content {
+        padding: 6px 4px;
     }
     
     .use-name {
@@ -1659,12 +1520,23 @@ header.show {
     
     /* Products */
     .product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 10px;
+        gap: 8px;
     }
     
     .image-card {
-        height: 150px;
+        height: 200px;
+    }
+    
+    .card-image-container {
+        height: 120px;
+    }
+    
+    .product-name {
+        font-size: 11px;
+    }
+    
+    .product-price {
+        font-size: 12px;
     }
     
     /* Bottom Nav */
@@ -1758,19 +1630,9 @@ header.show {
         <p class="subtitle">Browse our premium collection of natural stones</p>
     </div>
     
-    <div class="categories-slider-container">
-        <button class="cat-slider-prev">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <div class="categories-slider-wrapper" id="categoriesSliderWrapper">
-            <!-- Slides will be loaded here -->
-        </div>
-        <button class="cat-slider-next">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-        <div class="cat-slider-nav" id="categoriesSliderNav">
-            <!-- Dots will be added here -->
-        </div>
+    <!-- Categories Grid - Mobile 2 columns -->
+    <div class="categories-grid" id="categoriesGrid">
+        <!-- Categories will load here from Firebase -->
     </div>
 </section>
 
@@ -1781,19 +1643,9 @@ header.show {
         <p class="subtitle">Discover the versatile applications of our premium natural stones</p>
     </div>
     
-    <div class="uses-slider-container">
-        <button class="use-slider-prev">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <div class="uses-slider-wrapper" id="usesSliderWrapper">
-            <!-- Slides will be loaded here -->
-        </div>
-        <button class="use-slider-next">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-        <div class="use-slider-nav" id="usesSliderNav">
-            <!-- Dots will be added here -->
-        </div>
+    <!-- Uses Grid - Mobile 3 columns -->
+    <div class="uses-grid" id="usesGrid">
+        <!-- Uses will load here from Firebase -->
     </div>
 </section>
 
@@ -1813,30 +1665,26 @@ header.show {
             <div class="filter-controls">
                 <select id="categoryFilter" class="filter-select">
                     <option value="all">All Categories</option>
-                    <option value="Sand Stone">Sand Stone</option>
-                    <option value="Kota Stone">Kota Stone</option>
-                    <option value="Granite">Granite</option>
-                    <option value="Limestone">Limestone</option>
-                    <option value="Marble">Marble</option>
-                    <option value="Slate">Slate</option>
+                    <!-- Categories will be populated dynamically -->
                 </select>
                 
                 <select id="priceFilter" class="filter-select">
                     <option value="all">All Prices</option>
-                    <option value="0-30">Under £30</option>
-                    <option value="30-60">£30 - £60</option>
-                    <option value="60-100">£60 - £100</option>
-                    <option value="100+">Over £100</option>
+                    <option value="0-25">Under £25</option>
+                    <option value="25-50">£25 - £50</option>
+                    <option value="50-100">£50 - £100</option>
+                    <option value="100-250">£100 - £250</option>
+                    <option value="250+">Over £250</option>
                 </select>
                 
                 <select id="usageFilter" class="filter-select">
                     <option value="all">All Uses</option>
-                    <option value="Wall Cladding">Wall Cladding</option>
-                    <option value="Flooring">Flooring</option>
-                    <option value="Kitchen Countertops">Kitchen Countertops</option>
-                    <option value="Garden Paving">Garden Paving</option>
-                    <option value="Pool Surround">Pool Surround</option>
-                    <option value="Patio Flooring">Patio Flooring</option>
+                    <!-- Uses will be populated dynamically -->
+                </select>
+                
+                <select id="colorFilter" class="filter-select">
+                    <option value="all">All Colors</option>
+                    <!-- Colors will be populated dynamically -->
                 </select>
                 
                 <select id="sortFilter" class="filter-select">
@@ -1848,7 +1696,7 @@ header.show {
             </div>
         </div>
         
-        <!-- Products Grid -->
+        <!-- Products Grid - Mobile 2 columns -->
         <div class="product-grid" id="productGrid">
             <!-- Products will load here from Firebase -->
         </div>
@@ -1907,8 +1755,14 @@ let cartSystem = null;
 let currentCategory = 'all';
 let currentPriceFilter = 'all';
 let currentUsageFilter = 'all';
+let currentColorFilter = 'all';
 let currentSort = 'newest';
 let wishlistItems = [];
+
+// Smart filter data
+let availableCategories = [];
+let availableUses = [];
+let availableColors = [];
 
 // ============================================
 // AUTHENTICATION SYSTEM
@@ -2218,7 +2072,7 @@ class CartSystem {
                     stoneName: product.stone_name,
                     price: product.price,
                     priceUnit: product.price_unit || 'piece',
-                    image: product.image,
+                    image: product.images && product.images.length > 0 ? product.images[0] : '',
                     category: product.category,
                     description: product.description,
                     quantity: 1,
@@ -2304,7 +2158,7 @@ class WishlistSystem {
                 category: product.category,
                 price: product.price,
                 price_unit: product.price_unit,
-                image: product.image,
+                image: product.images && product.images.length > 0 ? product.images[0] : '',
                 addedAt: new Date().toISOString()
             });
             
@@ -2367,331 +2221,19 @@ function initializeFirebase() {
 }
 
 // ============================================
-// CATEGORIES SLIDER - 3 COLUMNS LAYOUT
-// ============================================
-
-let categoriesSlider = {
-    currentSlide: 0,
-    totalSlides: 0,
-    autoSlideInterval: null,
-    slideDuration: 5000,
-    
-    init: function(categories) {
-        this.createSlides(categories);
-        this.setupNavigation();
-        this.startAutoSlide();
-        this.setupSwipe();
-    },
-    
-    createSlides: function(categories) {
-        const wrapper = document.getElementById('categoriesSliderWrapper');
-        const nav = document.getElementById('categoriesSliderNav');
-        
-        wrapper.innerHTML = '';
-        nav.innerHTML = '';
-        
-        const itemsPerSlide = 6; // 3 columns × 2 rows = 6 items per slide
-        const slides = [];
-        
-        for (let i = 0; i < categories.length; i += itemsPerSlide) {
-            slides.push(categories.slice(i, i + itemsPerSlide));
-        }
-        
-        this.totalSlides = slides.length;
-        
-        slides.forEach((slideCategories, slideIndex) => {
-            const slide = document.createElement('div');
-            slide.className = 'categories-slide';
-            slide.setAttribute('data-slide', slideIndex);
-            
-            const categoriesHTML = slideCategories.map(category => `
-                <a href="products.html?category=${encodeURIComponent(category.name)}" class="category-card">
-                    <div class="category-image">
-                        <img src="${category.image}" alt="${category.name}" 
-                             onerror="this.src='${getDefaultImage(category.name)}'">
-                        <div class="category-overlay">
-                            <div class="category-name">${category.name}</div>
-                            <div class="category-count">${category.count} products</div>
-                        </div>
-                    </div>
-                </a>
-            `).join('');
-            
-            slide.innerHTML = categoriesHTML;
-            wrapper.appendChild(slide);
-            
-            const dot = document.createElement('div');
-            dot.className = `cat-slider-dot ${slideIndex === 0 ? 'active' : ''}`;
-            dot.setAttribute('data-slide', slideIndex);
-            dot.addEventListener('click', () => this.goToSlide(slideIndex));
-            nav.appendChild(dot);
-        });
-        
-        this.updateSlider();
-    },
-    
-    setupNavigation: function() {
-        const prevBtn = document.querySelector('.cat-slider-prev');
-        const nextBtn = document.querySelector('.cat-slider-next');
-        
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => this.prevSlide());
-        }
-        
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => this.nextSlide());
-        }
-    },
-    
-    setupSwipe: function() {
-        const wrapper = document.getElementById('categoriesSliderWrapper');
-        let startX = 0;
-        let endX = 0;
-        
-        wrapper.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-        }, false);
-        
-        wrapper.addEventListener('touchmove', (e) => {
-            endX = e.touches[0].clientX;
-        }, false);
-        
-        wrapper.addEventListener('touchend', () => {
-            const threshold = 50;
-            const diff = startX - endX;
-            
-            if (Math.abs(diff) > threshold) {
-                if (diff > 0) {
-                    this.nextSlide();
-                } else {
-                    this.prevSlide();
-                }
-            }
-        }, false);
-    },
-    
-    nextSlide: function() {
-        this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
-        this.updateSlider();
-        this.restartAutoSlide();
-    },
-    
-    prevSlide: function() {
-        this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
-        this.updateSlider();
-        this.restartAutoSlide();
-    },
-    
-    goToSlide: function(slideIndex) {
-        this.currentSlide = slideIndex;
-        this.updateSlider();
-        this.restartAutoSlide();
-    },
-    
-    updateSlider: function() {
-        const wrapper = document.getElementById('categoriesSliderWrapper');
-        const dots = document.querySelectorAll('.cat-slider-dot');
-        const slideWidth = 100;
-        
-        wrapper.style.transform = `translateX(-${this.currentSlide * slideWidth}%)`;
-        
-        dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === this.currentSlide);
-        });
-    },
-    
-    startAutoSlide: function() {
-        if (this.totalSlides > 1) {
-            this.autoSlideInterval = setInterval(() => {
-                this.nextSlide();
-            }, this.slideDuration);
-        }
-    },
-    
-    restartAutoSlide: function() {
-        if (this.autoSlideInterval) {
-            clearInterval(this.autoSlideInterval);
-        }
-        this.startAutoSlide();
-    },
-    
-    stopAutoSlide: function() {
-        if (this.autoSlideInterval) {
-            clearInterval(this.autoSlideInterval);
-        }
-    }
-};
-
-// ============================================
-// USES SLIDER - FIT CONTENT DISPLAY
-// ============================================
-
-let usesSlider = {
-    currentSlide: 0,
-    totalSlides: 0,
-    autoSlideInterval: null,
-    slideDuration: 4000,
-    
-    init: function(uses) {
-        this.createSlides(uses);
-        this.setupNavigation();
-        this.startAutoSlide();
-        this.setupSwipe();
-    },
-    
-    createSlides: function(uses) {
-        const wrapper = document.getElementById('usesSliderWrapper');
-        const nav = document.getElementById('usesSliderNav');
-        
-        wrapper.innerHTML = '';
-        nav.innerHTML = '';
-        
-        const itemsPerSlide = 6; // 3 columns × 2 rows = 6 items per slide
-        const slides = [];
-        
-        for (let i = 0; i < uses.length; i += itemsPerSlide) {
-            slides.push(uses.slice(i, i + itemsPerSlide));
-        }
-        
-        this.totalSlides = slides.length;
-        
-        slides.forEach((slideUses, slideIndex) => {
-            const slide = document.createElement('div');
-            slide.className = 'uses-slide';
-            slide.setAttribute('data-slide', slideIndex);
-            
-            const usesHTML = slideUses.map(use => `
-                <a href="products.html?usage=${encodeURIComponent(use.name)}" class="use-card">
-                    <div class="use-image-container">
-                        <img src="${use.image}" alt="${use.name}" class="use-image"
-                             onerror="this.src='${getDefaultUseImage(use.name)}'">
-                        <div class="use-info-overlay">
-                            <div class="use-name">${use.name}</div>
-                            <div class="use-count">${use.count} products</div>
-                        </div>
-                    </div>
-                </a>
-            `).join('');
-            
-            slide.innerHTML = usesHTML;
-            wrapper.appendChild(slide);
-            
-            const dot = document.createElement('div');
-            dot.className = `use-slider-dot ${slideIndex === 0 ? 'active' : ''}`;
-            dot.setAttribute('data-slide', slideIndex);
-            dot.addEventListener('click', () => this.goToSlide(slideIndex));
-            nav.appendChild(dot);
-        });
-        
-        this.updateSlider();
-    },
-    
-    setupNavigation: function() {
-        const prevBtn = document.querySelector('.use-slider-prev');
-        const nextBtn = document.querySelector('.use-slider-next');
-        
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => this.prevSlide());
-        }
-        
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => this.nextSlide());
-        }
-    },
-    
-    setupSwipe: function() {
-        const wrapper = document.getElementById('usesSliderWrapper');
-        let startX = 0;
-        let endX = 0;
-        
-        wrapper.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-        }, false);
-        
-        wrapper.addEventListener('touchmove', (e) => {
-            endX = e.touches[0].clientX;
-        }, false);
-        
-        wrapper.addEventListener('touchend', () => {
-            const threshold = 50;
-            const diff = startX - endX;
-            
-            if (Math.abs(diff) > threshold) {
-                if (diff > 0) {
-                    this.nextSlide();
-                } else {
-                    this.prevSlide();
-                }
-            }
-        }, false);
-    },
-    
-    nextSlide: function() {
-        this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
-        this.updateSlider();
-        this.restartAutoSlide();
-    },
-    
-    prevSlide: function() {
-        this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
-        this.updateSlider();
-        this.restartAutoSlide();
-    },
-    
-    goToSlide: function(slideIndex) {
-        this.currentSlide = slideIndex;
-        this.updateSlider();
-        this.restartAutoSlide();
-    },
-    
-    updateSlider: function() {
-        const wrapper = document.getElementById('usesSliderWrapper');
-        const dots = document.querySelectorAll('.use-slider-dot');
-        const slideWidth = 100;
-        
-        wrapper.style.transform = `translateX(-${this.currentSlide * slideWidth}%)`;
-        
-        dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === this.currentSlide);
-        });
-    },
-    
-    startAutoSlide: function() {
-        if (this.totalSlides > 1) {
-            this.autoSlideInterval = setInterval(() => {
-                this.nextSlide();
-            }, this.slideDuration);
-        }
-    },
-    
-    restartAutoSlide: function() {
-        if (this.autoSlideInterval) {
-            clearInterval(this.autoSlideInterval);
-        }
-        this.startAutoSlide();
-    },
-    
-    stopAutoSlide: function() {
-        if (this.autoSlideInterval) {
-            clearInterval(this.autoSlideInterval);
-        }
-    }
-};
-
-// ============================================
 // LOAD CATEGORIES FROM FIREBASE
 // ============================================
 
-async function loadCategoriesSlider() {
-    const sliderWrapper = document.getElementById('categoriesSliderWrapper');
+async function loadCategories() {
+    const container = document.getElementById('categoriesGrid');
     
-    if (!sliderWrapper) return;
+    if (!container) return;
     
     try {
         if (!firebaseDB) {
             const initialized = initializeFirebase();
             if (!initialized) {
-                loadDefaultCategoriesSlider();
+                loadDefaultCategories();
                 return;
             }
         }
@@ -2705,9 +2247,11 @@ async function loadCategoriesSlider() {
                 const data = doc.data();
                 const category = data.category || 'Natural Stone';
                 
-                let image = data.image || '';
-                if (!image && data.images && Array.isArray(data.images) && data.images.length > 0) {
+                let image = '';
+                if (data.images && Array.isArray(data.images) && data.images.length > 0) {
                     image = data.images[0];
+                } else if (typeof data.image === 'string') {
+                    image = data.image;
                 }
                 if (!image) {
                     image = getDefaultImage(category);
@@ -2724,97 +2268,98 @@ async function loadCategoriesSlider() {
                 }
             });
             
+            // Store categories for filter
+            availableCategories = Array.from(categoryMap.keys());
+            
+            // Sort by count
             const allCategories = Array.from(categoryMap.values())
                 .sort((a, b) => b.count - a.count);
             
-            categoriesSlider.init(allCategories);
+            displayCategories(allCategories);
         } else {
-            loadDefaultCategoriesSlider();
+            loadDefaultCategories();
         }
         
     } catch (error) {
         console.error('Error loading categories:', error);
-        loadDefaultCategoriesSlider();
+        loadDefaultCategories();
     }
 }
 
-function loadDefaultCategoriesSlider() {
+function displayCategories(categories) {
+    const container = document.getElementById('categoriesGrid');
+    if (!container) return;
+    
+    if (categories.length === 0) {
+        container.innerHTML = `
+            <div class="no-products">
+                <i class="fas fa-box-open"></i>
+                <h3>No Categories Found</h3>
+                <p>Categories will appear when products are added</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const categoriesHTML = categories.map(category => `
+        <a href="products.html?category=${encodeURIComponent(category.name)}" class="category-card">
+            <div class="category-image-container">
+                <img src="${category.image}" alt="${category.name}" 
+                     class="category-image"
+                     onerror="this.src='${getDefaultImage(category.name)}'"
+                     loading="lazy">
+            </div>
+            <div class="category-content">
+                <div class="category-name">${category.name}</div>
+                <div class="category-count">${category.count} products</div>
+            </div>
+        </a>
+    `).join('');
+    
+    container.innerHTML = categoriesHTML;
+}
+
+function loadDefaultCategories() {
     const defaultCategories = [
         {
             name: 'Sand Stone',
             image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300',
-            count: 25
+            count: 12
         },
         {
             name: 'Kota Stone',
             image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300',
-            count: 18
+            count: 8
         },
         {
             name: 'Granite',
             image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300',
-            count: 15
+            count: 6
         },
         {
             name: 'Marble',
             image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300',
-            count: 12
-        },
-        {
-            name: 'Limestone',
-            image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=400&h=300',
-            count: 10
-        },
-        {
-            name: 'Slate',
-            image: 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=400&h=300',
-            count: 8
-        },
-        {
-            name: 'Quartzite',
-            image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300',
-            count: 6
-        },
-        {
-            name: 'Basalt',
-            image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300',
             count: 5
-        },
-        {
-            name: 'Travertine',
-            image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=400&h=300',
-            count: 7
-        },
-        {
-            name: 'Cobbles',
-            image: 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=400&h=300',
-            count: 9
-        },
-        {
-            name: 'Pebbles',
-            image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300',
-            count: 11
-        },
-        {
-            name: 'Aggregates',
-            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300',
-            count: 14
         }
     ];
     
-    categoriesSlider.init(defaultCategories);
+    displayCategories(defaultCategories);
 }
 
 // ============================================
 // LOAD STONE USES FROM FIREBASE
 // ============================================
 
-async function loadStoneUsesSlider() {
+async function loadStoneUses() {
+    const container = document.getElementById('usesGrid');
+    
+    if (!container) return;
+    
     try {
         if (!firebaseDB) {
             const initialized = initializeFirebase();
             if (!initialized) {
-                loadDefaultUsesSlider();
+                loadDefaultUses();
                 return;
             }
         }
@@ -2826,128 +2371,262 @@ async function loadStoneUsesSlider() {
             
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                const usage = data.usage || data.uses || 'General Use';
+                // Check both 'uses' and 'usage' fields
+                const usage = data.uses || data.usage || 'General Use';
                 
-                let image = data.image || '';
-                if (!image && data.images && Array.isArray(data.images) && data.images.length > 0) {
-                    image = data.images[0];
-                }
-                if (!image) {
-                    image = getDefaultUseImage(usage);
-                }
-                
-                if (!usesMap.has(usage)) {
-                    usesMap.set(usage, {
-                        name: usage,
-                        image: image,
-                        count: 1
-                    });
-                } else {
-                    usesMap.get(usage).count += 1;
+                if (usage && usage.trim() !== '') {
+                    let image = '';
+                    if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+                        image = data.images[0];
+                    } else if (typeof data.image === 'string') {
+                        image = data.image;
+                    }
+                    if (!image) {
+                        image = getDefaultUseImage(usage);
+                    }
+                    
+                    if (!usesMap.has(usage)) {
+                        usesMap.set(usage, {
+                            name: usage,
+                            image: image,
+                            count: 1
+                        });
+                    } else {
+                        usesMap.get(usage).count += 1;
+                    }
                 }
             });
             
+            // Store uses for filter
+            availableUses = Array.from(usesMap.keys());
+            
+            // Sort by count
             const uses = Array.from(usesMap.values())
                 .sort((a, b) => b.count - a.count);
             
-            usesSlider.init(uses);
+            displayUses(uses);
         } else {
-            loadDefaultUsesSlider();
+            loadDefaultUses();
         }
         
     } catch (error) {
         console.error('Error loading stone uses:', error);
-        loadDefaultUsesSlider();
+        loadDefaultUses();
     }
 }
 
-function loadDefaultUsesSlider() {
+function displayUses(uses) {
+    const container = document.getElementById('usesGrid');
+    if (!container) return;
+    
+    if (uses.length === 0) {
+        container.innerHTML = `
+            <div class="no-products">
+                <i class="fas fa-tools"></i>
+                <h3>No Uses Found</h3>
+                <p>Uses will appear when products are added</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const usesHTML = uses.map(use => `
+        <a href="products.html?usage=${encodeURIComponent(use.name)}" class="use-card">
+            <div class="use-image-container">
+                <img src="${use.image}" alt="${use.name}" class="use-image"
+                     onerror="this.src='${getDefaultUseImage(use.name)}'"
+                     loading="lazy">
+            </div>
+            <div class="use-content">
+                <div class="use-name">${use.name}</div>
+                <div class="use-count">${use.count} products</div>
+            </div>
+        </a>
+    `).join('');
+    
+    container.innerHTML = usesHTML;
+}
+
+function loadDefaultUses() {
     const defaultUses = [
-        {
-            name: 'Wall Cladding',
-            image: 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=400&h=300',
-            count: 15
-        },
         {
             name: 'Flooring',
             image: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=400&h=300',
-            count: 20
+            count: 8
+        },
+        {
+            name: 'Wall Cladding',
+            image: 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=400&h=300',
+            count: 6
         },
         {
             name: 'Kitchen Countertops',
             image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=400&h=300',
-            count: 12
-        },
-        {
-            name: 'Garden Paving',
-            image: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=400&h=300',
-            count: 18
-        },
-        {
-            name: 'Pool Surround',
-            image: 'https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?auto=format&fit=crop&w=400&h=300',
-            count: 8
-        },
-        {
-            name: 'Patio Flooring',
-            image: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=400&h=300',
-            count: 14
+            count: 4
         },
         {
             name: 'Staircase',
             image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300',
-            count: 10
+            count: 5
         },
         {
-            name: 'Fireplace',
-            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300',
-            count: 6
-        },
-        {
-            name: 'Bathroom Walls',
-            image: 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=400&h=300',
-            count: 9
-        },
-        {
-            name: 'Driveway',
+            name: 'Garden Paving',
             image: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=400&h=300',
-            count: 11
-        },
-        {
-            name: 'Commercial Flooring',
-            image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=400&h=300',
             count: 7
         },
         {
-            name: 'Landscaping',
+            name: 'Pool Surround',
             image: 'https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?auto=format&fit=crop&w=400&h=300',
-            count: 13
+            count: 3
         }
     ];
     
-    usesSlider.init(defaultUses);
+    displayUses(defaultUses);
 }
 
 function getDefaultUseImage(use) {
     const useLower = (use || '').toLowerCase();
     
-    if (useLower.includes('wall') || useLower.includes('cladding')) {
-        return 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=400&h=300';
-    } else if (useLower.includes('floor') || useLower.includes('paving') || useLower.includes('patio')) {
+    if (useLower.includes('floor')) {
         return 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=400&h=300';
+    } else if (useLower.includes('wall') || useLower.includes('cladding')) {
+        return 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=400&h=300';
     } else if (useLower.includes('kitchen') || useLower.includes('counter')) {
         return 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=400&h=300';
+    } else if (useLower.includes('stair')) {
+        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
+    } else if (useLower.includes('garden') || useLower.includes('paving')) {
+        return 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=400&h=300';
     } else if (useLower.includes('pool')) {
         return 'https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?auto=format&fit=crop&w=400&h=300';
-    } else if (useLower.includes('bathroom')) {
-        return 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=400&h=300';
     }
     
     return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
 }
 
 // ============================================
-// LOAD PRODUCTS FROM FIREBASE
+// SMART FILTER SYSTEM
+// ============================================
+
+async function loadSmartFilters() {
+    try {
+        if (!firebaseDB) {
+            const initialized = initializeFirebase();
+            if (!initialized) return;
+        }
+        
+        const querySnapshot = await firebaseDB.collection("products").limit(100).get();
+        
+        if (querySnapshot.empty) {
+            populateDefaultFilters();
+            return;
+        }
+        
+        const categoriesSet = new Set();
+        const usesSet = new Set();
+        const colorsSet = new Set();
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            
+            // Collect categories
+            if (data.category && data.category.trim() !== '') {
+                categoriesSet.add(data.category);
+            }
+            
+            // Collect uses (check both fields)
+            const usage = data.uses || data.usage;
+            if (usage && usage.trim() !== '') {
+                usesSet.add(usage);
+            }
+            
+            // Collect colors
+            if (data.color && data.color.trim() !== '') {
+                colorsSet.add(data.color);
+            }
+        });
+        
+        // Update global arrays
+        availableCategories = Array.from(categoriesSet).sort();
+        availableUses = Array.from(usesSet).sort();
+        availableColors = Array.from(colorsSet).sort();
+        
+        // Populate filter dropdowns
+        populateFilterOptions();
+        
+    } catch (error) {
+        console.error('Error loading smart filters:', error);
+        populateDefaultFilters();
+    }
+}
+
+function populateFilterOptions() {
+    // Category filter
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+        // Clear existing options (keep "All Categories")
+        while (categoryFilter.options.length > 1) {
+            categoryFilter.remove(1);
+        }
+        
+        // Add categories
+        availableCategories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categoryFilter.appendChild(option);
+        });
+    }
+    
+    // Usage filter
+    const usageFilter = document.getElementById('usageFilter');
+    if (usageFilter) {
+        // Clear existing options (keep "All Uses")
+        while (usageFilter.options.length > 1) {
+            usageFilter.remove(1);
+        }
+        
+        // Add uses
+        availableUses.forEach(use => {
+            const option = document.createElement('option');
+            option.value = use;
+            option.textContent = use;
+            usageFilter.appendChild(option);
+        });
+    }
+    
+    // Color filter
+    const colorFilter = document.getElementById('colorFilter');
+    if (colorFilter) {
+        // Clear existing options (keep "All Colors")
+        while (colorFilter.options.length > 1) {
+            colorFilter.remove(1);
+        }
+        
+        // Add colors
+        availableColors.forEach(color => {
+            const option = document.createElement('option');
+            option.value = color;
+            option.textContent = color;
+            colorFilter.appendChild(option);
+        });
+    }
+}
+
+function populateDefaultFilters() {
+    const defaultCategories = ['Sand Stone', 'Kota Stone', 'Granite', 'Marble', 'Limestone', 'Slate'];
+    const defaultUses = ['Flooring', 'Wall Cladding', 'Kitchen Countertops', 'Staircase', 'Garden Paving', 'Pool Surround'];
+    const defaultColors = ['Gray', 'Brown', 'Black', 'White', 'Green', 'Blue', 'Red', 'Yellow'];
+    
+    availableCategories = defaultCategories;
+    availableUses = defaultUses;
+    availableColors = defaultColors;
+    
+    populateFilterOptions();
+}
+
+// ============================================
+// LOAD PRODUCTS FROM FIREBASE WITH SMART FILTERS
 // ============================================
 
 async function loadProductsFromFirebase() {
@@ -2968,26 +2647,22 @@ async function loadProductsFromFirebase() {
         
         let query = firebaseDB.collection("products");
         
+        // Apply category filter
         if (currentCategory !== 'all') {
             query = query.where("category", "==", currentCategory);
         }
         
-        if (currentPriceFilter !== 'all') {
-            const priceRange = currentPriceFilter.split('-');
-            if (priceRange.length === 2) {
-                if (priceRange[1] === '+') {
-                    query = query.where("price", ">=", parseFloat(priceRange[0]));
-                } else {
-                    query = query.where("price", ">=", parseFloat(priceRange[0]))
-                                .where("price", "<=", parseFloat(priceRange[1]));
-                }
-            }
-        }
-        
+        // Apply usage filter (check both 'uses' and 'usage' fields)
         if (currentUsageFilter !== 'all') {
-            query = query.where("usage", "==", currentUsageFilter);
+            query = query.where("uses", "==", currentUsageFilter);
         }
         
+        // Apply color filter
+        if (currentColorFilter !== 'all') {
+            query = query.where("color", "==", currentColorFilter);
+        }
+        
+        // Apply sorting
         if (currentSort === 'price_low') {
             query = query.orderBy("price", "asc");
         } else if (currentSort === 'price_high') {
@@ -2998,10 +2673,10 @@ async function loadProductsFromFirebase() {
             query = query.orderBy("created_at", "desc");
         }
         
-        const querySnapshot = await query.limit(20).get();
+        const querySnapshot = await query.limit(50).get();
         
         if (querySnapshot.empty) {
-            showDefaultProducts();
+            showNoProducts();
             return;
         }
         
@@ -3011,32 +2686,57 @@ async function loadProductsFromFirebase() {
             
             const product = {
                 id: doc.id,
-                stone_name: data.stone_name || data.name || 'Stone Product',
+                stone_name: data.stone_name || 'Stone Product',
                 category: data.category || '',
-                description: data.description || 'Premium quality natural stone.',
+                description: data.description || '',
                 price: parseFloat(data.price) || 0,
                 price_unit: data.price_unit || 'piece',
                 finish: data.finish || '',
                 size: data.size || '',
                 thickness: data.thickness || '',
                 color: data.color || '',
-                usage: data.usage || data.uses || '',
-                compressive_strength: data.compressive_strength || '',
-                density: data.density || '',
-                water_absorption: data.water_absorption || '',
-                type: data.type || ''
+                uses: data.uses || data.usage || '',
+                type: data.type || '',
+                sub_category: data.sub_category || '',
+                length: data.length || '',
+                width: data.width || '',
+                images: data.images || [],
+                image: data.image || ''
             };
-            
-            if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-                product.image = data.images[0];
-            } else if (typeof data.image === 'string') {
-                product.image = data.image;
-            } else {
-                product.image = getDefaultImage(product.category);
-            }
             
             allProducts.push(product);
         });
+        
+        // Apply price filter after loading (client-side)
+        if (currentPriceFilter !== 'all') {
+            allProducts = allProducts.filter(product => {
+                const price = product.price || 0;
+                
+                switch(currentPriceFilter) {
+                    case '0-25':
+                        return price >= 0 && price <= 25;
+                    case '25-50':
+                        return price > 25 && price <= 50;
+                    case '50-100':
+                        return price > 50 && price <= 100;
+                    case '100-250':
+                        return price > 100 && price <= 250;
+                    case '250+':
+                        return price > 250;
+                    default:
+                        return true;
+                }
+            });
+        }
+        
+        // Apply additional client-side sorting if needed
+        if (currentSort === 'price_low') {
+            allProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
+        } else if (currentSort === 'price_high') {
+            allProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
+        } else if (currentSort === 'name') {
+            allProducts.sort((a, b) => (a.stone_name || '').localeCompare(b.stone_name || ''));
+        }
         
         displayProducts(allProducts);
         
@@ -3054,13 +2754,7 @@ function displayProducts(products) {
     if (!container) return;
     
     if (products.length === 0) {
-        container.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 25px; color: var(--text-light);">
-                <i class="fas fa-box-open" style="font-size: 30px; margin-bottom: 12px; opacity: 0.5;"></i>
-                <h3 style="font-size: 14px; margin-bottom: 8px;">No products found</h3>
-                <p style="font-size: 12px;">Try selecting a different category or filter</p>
-            </div>
-        `;
+        showNoProducts();
         return;
     }
     
@@ -3068,10 +2762,20 @@ function displayProducts(products) {
         const formattedPrice = formatPrice(product.price, product.price_unit);
         const isInWishlist = wishlistSystem.isInWishlist(product.id);
         
+        // Get the first image
+        let productImage = '';
+        if (product.images && product.images.length > 0) {
+            productImage = product.images[0];
+        } else if (product.image) {
+            productImage = product.image;
+        } else {
+            productImage = getDefaultImage(product.category);
+        }
+        
         return `
             <a href="product.html?id=${encodeURIComponent(product.id)}" class="image-card">
                 <div class="card-image-container">
-                    <img src="${product.image}" alt="${product.stone_name}" class="card-image" 
+                    <img src="${productImage}" alt="${product.stone_name}" class="card-image" 
                          onerror="this.src='${getDefaultImage(product.category)}'"
                          loading="lazy">
                     
@@ -3097,6 +2801,19 @@ function displayProducts(products) {
     }).join('');
     
     container.innerHTML = productsHTML;
+}
+
+function showNoProducts() {
+    const container = document.getElementById('productGrid');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="no-products">
+            <i class="fas fa-search"></i>
+            <h3>No Products Found</h3>
+            <p>Try selecting different filters or check back later for new products</p>
+        </div>
+    `;
 }
 
 // Add to cart directly from product card
@@ -3215,10 +2932,6 @@ function getDefaultImage(category) {
         return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300';
     } else if (categoryLower.includes('marble')) {
         return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300';
-    } else if (categoryLower.includes('limestone')) {
-        return 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=400&h=300';
-    } else if (categoryLower.includes('slate')) {
-        return 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=400&h=300';
     }
     
     return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
@@ -3244,16 +2957,14 @@ function showDefaultProducts() {
     const products = [
         {
             id: '1',
-            stone_name: 'Raj Green Sandstone',
-            category: 'Sand Stone',
-            description: 'Beautiful green sandstone with natural patterns.',
-            price: 38.00,
-            image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300',
+            stone_name: 'Gray Kota Stone',
+            category: 'Kota Stone',
+            description: 'Premium quality Kota stone for staircases',
+            price: 50.00,
+            images: ['https://i.ibb.co/hxTqdyM2/daad0a39e4cc.webp'],
             price_unit: 'sqft',
-            finish: 'Natural',
-            size: 'Custom',
-            color: 'Green',
-            usage: 'Wall Cladding'
+            color: 'Gray',
+            uses: 'Staircase'
         }
     ];
     
@@ -3271,64 +2982,95 @@ function applyFilters() {
     currentCategory = document.getElementById('categoryFilter').value;
     currentPriceFilter = document.getElementById('priceFilter').value;
     currentUsageFilter = document.getElementById('usageFilter').value;
+    currentColorFilter = document.getElementById('colorFilter').value;
     currentSort = document.getElementById('sortFilter').value;
     
     loadProductsFromFirebase();
 }
 
 // ============================================
-// SCROLL HANDLING
+// IMPROVED SCROLL HANDLING
 // ============================================
 
 let lastScrollTop = 0;
 let scrollTimeout;
-let isScrolling = false;
-const header = document.getElementById('mainHeader');
-const bottomNav = document.getElementById('bottomNav');
-const scrollTopBtn = document.getElementById('scrollTopBtn');
-const heroSection = document.getElementById('heroSection');
+let scrollDirection = 'up';
+let scrollVelocity = 0;
+let lastScrollTime = Date.now();
 
 function handleScroll() {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollDelta = scrollTop - lastScrollTop;
+    const currentTime = Date.now();
+    const timeDiff = currentTime - lastScrollTime;
+    
+    // Calculate scroll velocity (pixels per second)
+    if (timeDiff > 0) {
+        scrollVelocity = Math.abs(scrollTop - lastScrollTop) / (timeDiff / 1000);
+    }
+    
+    // Determine scroll direction
+    scrollDirection = scrollTop > lastScrollTop ? 'down' : 'up';
     
     clearTimeout(scrollTimeout);
     
-    if (scrollTop > 50) {
+    const header = document.getElementById('mainHeader');
+    const bottomNav = document.getElementById('bottomNav');
+    const heroSection = document.getElementById('heroSection');
+    
+    if (!header || !bottomNav) return;
+    
+    // Show/hide header based on scroll position
+    if (scrollTop > 100) {
         header.classList.add('scrolled');
         bottomNav.classList.add('scrolled');
+        
+        // Show header on fast upward scroll (velocity > 50 pixels/second)
+        if (scrollDirection === 'up' && scrollVelocity > 50 && scrollTop > 150) {
+            header.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+            header.classList.add('show');
+            bottomNav.classList.add('show');
+        } 
+        // Hide header on downward scroll
+        else if (scrollDirection === 'down' && scrollTop - lastScrollTop > 10) {
+            header.classList.add('hidden');
+            bottomNav.classList.add('hidden');
+            header.classList.remove('show');
+            bottomNav.classList.remove('show');
+        }
     } else {
-        header.classList.remove('scrolled');
-        bottomNav.classList.remove('scrolled');
-    }
-    
-    if (scrollDelta > 5 && scrollTop > 100) {
-        header.classList.add('hidden');
-        bottomNav.classList.add('hidden');
-        header.classList.remove('show');
-        bottomNav.classList.remove('show');
-        isScrolling = true;
-    } else if (scrollDelta < -5) {
-        header.classList.remove('hidden');
-        bottomNav.classList.remove('hidden');
+        // Always show when near top
+        header.classList.remove('scrolled', 'hidden');
+        bottomNav.classList.remove('scrolled', 'hidden');
         header.classList.add('show');
         bottomNav.classList.add('show');
-        isScrolling = false;
     }
     
+    // Update scroll position for next calculation
     lastScrollTop = scrollTop;
+    lastScrollTime = currentTime;
     
-    if (scrollTop > 300) {
-        scrollTopBtn.classList.add('visible');
-    } else {
-        scrollTopBtn.classList.remove('visible');
+    // Scroll to top button
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    if (scrollTopBtn) {
+        if (scrollTop > 300) {
+            scrollTopBtn.classList.add('visible');
+        } else {
+            scrollTopBtn.classList.remove('visible');
+        }
     }
     
-    if (header.classList.contains('hidden')) {
+    // Adjust hero margin when header is hidden
+    if (heroSection && header.classList.contains('hidden')) {
         heroSection.style.marginTop = '0';
-    } else {
+    } else if (heroSection) {
         heroSection.style.marginTop = '';
     }
+    
+    // Reset velocity after a delay
+    scrollTimeout = setTimeout(() => {
+        scrollVelocity = 0;
+    }, 150);
 }
 
 // ============================================
@@ -3352,15 +3094,19 @@ document.addEventListener('DOMContentLoaded', async function() {
     wishlistSystem.init();
     updateWishlistUI();
     
+    // Load data in sequence
+    await loadSmartFilters();
     await Promise.all([
-        loadCategoriesSlider(),
-        loadStoneUsesSlider(),
+        loadCategories(),
+        loadStoneUses(),
         loadProductsFromFirebase()
     ]);
     
+    // Setup filter event listeners
     const categoryFilter = document.getElementById('categoryFilter');
     const priceFilter = document.getElementById('priceFilter');
     const usageFilter = document.getElementById('usageFilter');
+    const colorFilter = document.getElementById('colorFilter');
     const sortFilter = document.getElementById('sortFilter');
     
     if (categoryFilter) {
@@ -3373,6 +3119,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     if (usageFilter) {
         usageFilter.addEventListener('change', applyFilters);
+    }
+    
+    if (colorFilter) {
+        colorFilter.addEventListener('change', applyFilters);
     }
     
     if (sortFilter) {
@@ -3403,12 +3153,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
         
         document.addEventListener('click', function(e) {
-            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            if (searchResults && searchInput && 
+                !searchInput.contains(e.target) && !searchResults.contains(e.target)) {
                 hideSearchResults();
             }
         });
     }
     
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
     if (scrollTopBtn) {
         scrollTopBtn.addEventListener('click', function() {
             window.scrollTo({
@@ -3420,29 +3172,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    
-    const categoriesSliderContainer = document.querySelector('.categories-slider-container');
-    const usesSliderContainer = document.querySelector('.uses-slider-container');
-    
-    if (categoriesSliderContainer) {
-        categoriesSliderContainer.addEventListener('mouseenter', () => {
-            categoriesSlider.stopAutoSlide();
-        });
-        
-        categoriesSliderContainer.addEventListener('mouseleave', () => {
-            categoriesSlider.restartAutoSlide();
-        });
-    }
-    
-    if (usesSliderContainer) {
-        usesSliderContainer.addEventListener('mouseenter', () => {
-            usesSlider.stopAutoSlide();
-        });
-        
-        usesSliderContainer.addEventListener('mouseleave', () => {
-            usesSlider.restartAutoSlide();
-        });
-    }
     
     window.authSystem = authSystem;
     window.cartSystem = cartSystem;
@@ -3462,24 +3191,36 @@ function searchProducts(query) {
     
     const filtered = allProducts.filter(product => 
         product.stone_name.toLowerCase().includes(query.toLowerCase()) ||
-        product.category.toLowerCase().includes(query.toLowerCase()) ||
-        product.description.toLowerCase().includes(query.toLowerCase())
+        (product.category && product.category.toLowerCase().includes(query.toLowerCase())) ||
+        (product.description && product.description.toLowerCase().includes(query.toLowerCase())) ||
+        (product.color && product.color.toLowerCase().includes(query.toLowerCase()))
     ).slice(0, 8);
     
     if (filtered.length > 0) {
-        const resultsHTML = filtered.map(product => `
-            <a href="product.html?id=${encodeURIComponent(product.id)}" class="search-result-item">
-                <div class="search-result-image">
-                    <img src="${product.image}" alt="${product.stone_name}"
-                         onerror="this.src='${getDefaultImage(product.category)}'">
-                </div>
-                <div class="search-result-info">
-                    <div class="search-result-name">${product.stone_name}</div>
-                    <div class="search-result-category">${product.category}</div>
-                </div>
-                <div class="search-result-price">£${product.price.toFixed(2)}</div>
-            </a>
-        `).join('');
+        const resultsHTML = filtered.map(product => {
+            let image = '';
+            if (product.images && product.images.length > 0) {
+                image = product.images[0];
+            } else if (product.image) {
+                image = product.image;
+            } else {
+                image = getDefaultImage(product.category);
+            }
+            
+            return `
+                <a href="product.html?id=${encodeURIComponent(product.id)}" class="search-result-item">
+                    <div class="search-result-image">
+                        <img src="${image}" alt="${product.stone_name}"
+                             onerror="this.src='${getDefaultImage(product.category)}'">
+                    </div>
+                    <div class="search-result-info">
+                        <div class="search-result-name">${product.stone_name}</div>
+                        <div class="search-result-category">${product.category || 'Stone'}</div>
+                    </div>
+                    <div class="search-result-price">${formatPrice(product.price, product.price_unit)}</div>
+                </a>
+            `;
+        }).join('');
         
         searchResults.innerHTML = resultsHTML;
     } else {
