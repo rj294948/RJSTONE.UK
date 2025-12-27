@@ -11,6 +11,11 @@
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
 <style>
 :root {
     --primary-gold: #c9a227;
@@ -128,6 +133,22 @@ header {
     background: var(--primary-gold);
     color: var(--white);
     transform: scale(1.05);
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 600;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ============================================
@@ -350,6 +371,13 @@ header {
 .quantity-btn:hover {
     background: var(--primary-gold);
     color: white;
+}
+
+.quantity-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: none;
+    color: var(--text-light);
 }
 
 .quantity-value {
@@ -752,6 +780,10 @@ header {
         <a href="wishlist.html" class="action-btn" title="Wishlist">
             <i class="far fa-heart"></i>
         </a>
+        <a href="cart.html" class="action-btn" title="Cart" style="position: relative;">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge" id="headerCartBadge">0</span>
+        </a>
     </div>
 </header>
 
@@ -835,13 +867,13 @@ header {
     <a href="cart.html" class="nav-btn active">
         <i class="fas fa-shopping-cart"></i>
         <span>Cart</span>
-        <span class="cart-badge" id="cartBadge">0</span>
+        <span class="cart-badge" id="bottomCartBadge">0</span>
     </a>
 </div>
 
 <script>
 // ============================================
-// FIREBASE CONFIGURATION
+// FIREBASE CONFIGURATION - SAME AS INDEX.HTML
 // ============================================
 
 const firebaseConfig = {
@@ -856,379 +888,283 @@ const firebaseConfig = {
 
 // Firebase variables
 let firebaseApp, firebaseDB, firebaseAuth;
+let cartSystem = null;
 
 // ============================================
-// SIMPLE CART SYSTEM - NO DUPLICATES
+// UPDATED CART SYSTEM - COMPATIBLE WITH INDEX.HTML
 // ============================================
 
-class SimpleCartSystem {
+class CartSystem {
     constructor() {
-        this.cart = [];
-        this.cartKey = 'irya_simple_cart';
-        this.userId = null;
+        this.localCartKey = 'irya_cart';
+        this.cartItems = [];
+        this.initialized = false;
+        this.authKey = 'irya_stone_user';
+        this.cartGuestIdKey = 'irya_cart_guest_id';
     }
     
     async init() {
-        try {
-            // Get or create user ID
-            this.userId = this.getUserId();
-            
-            // Load cart from localStorage first
-            this.loadFromLocalStorage();
-            
-            console.log("Cart initialized:", this.cart.length, "items");
-            return this;
-        } catch (error) {
-            console.error("Cart initialization error:", error);
-            this.cart = [];
-            return this;
-        }
+        if (this.initialized) return this;
+        
+        console.log('🛒 Cart system initializing from cart.html');
+        await this.loadCart();
+        this.updateCartBadge();
+        this.initialized = true;
+        return this;
     }
     
     getUserId() {
-        // Try to get user ID from auth system
-        let userId = localStorage.getItem('irya_user_id');
-        
-        if (!userId) {
-            // Create new guest ID
-            userId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('irya_user_id', userId);
+        // Check if user is logged in
+        const userData = localStorage.getItem(this.authKey);
+        if (userData) {
+            try {
+                const user = JSON.parse(userData);
+                return user.uid || 'guest_user';
+            } catch (e) {
+                console.error('Error parsing user data:', e);
+            }
         }
         
-        return userId;
+        // Return guest ID
+        let guestId = localStorage.getItem(this.cartGuestIdKey);
+        if (!guestId) {
+            guestId = 'cart_guest_user_' + Date.now();
+            localStorage.setItem(this.cartGuestIdKey, guestId);
+        }
+        return guestId;
     }
     
-    loadFromLocalStorage() {
+    async loadCart() {
         try {
-            const cartData = localStorage.getItem(this.cartKey);
+            const userId = this.getUserId();
+            const cartKey = `${this.localCartKey}_${userId}`;
+            
+            console.log(`📥 Loading cart for user: ${userId}`);
+            
+            // Load from localStorage
+            const cartData = localStorage.getItem(cartKey);
+            
             if (cartData) {
-                const parsed = JSON.parse(cartData);
-                // Only load if it's for current user
-                if (parsed.userId === this.userId) {
-                    this.cart = parsed.items || [];
-                } else {
-                    this.cart = [];
+                try {
+                    const parsedData = JSON.parse(cartData);
+                    if (Array.isArray(parsedData)) {
+                        this.cartItems = parsedData;
+                    } else if (parsedData && Array.isArray(parsedData.items)) {
+                        this.cartItems = parsedData.items;
+                    } else {
+                        this.cartItems = [];
+                    }
+                    
+                    console.log(`✅ Loaded ${this.cartItems.length} items from localStorage`);
+                    
+                    // Remove any invalid items
+                    this.removeInvalidItems();
+                    
+                } catch (e) {
+                    console.error('Error parsing cart data:', e);
+                    this.cartItems = [];
                 }
             } else {
-                this.cart = [];
-            }
-        } catch (error) {
-            console.error("Error loading cart from localStorage:", error);
-            this.cart = [];
-        }
-    }
-    
-    saveToLocalStorage() {
-        try {
-            const cartData = {
-                userId: this.userId,
-                items: this.cart,
-                updatedAt: new Date().toISOString()
-            };
-            localStorage.setItem(this.cartKey, JSON.stringify(cartData));
-        } catch (error) {
-            console.error("Error saving cart to localStorage:", error);
-        }
-    }
-    
-    async syncWithFirebase() {
-        try {
-            if (!firebaseDB) return;
-            
-            const userId = this.userId;
-            const cartDoc = await firebaseDB.collection('userCarts').doc(userId).get();
-            
-            if (cartDoc.exists) {
-                const firebaseCart = cartDoc.data().items || [];
-                // Merge carts - prefer local cart for simplicity
-                if (firebaseCart.length > this.cart.length) {
-                    this.cart = this.mergeCarts(this.cart, firebaseCart);
-                    this.saveToLocalStorage();
-                }
+                this.cartItems = [];
+                console.log('No existing cart data found');
             }
             
-            // Save current cart to Firebase
-            await this.saveToFirebase();
+            return this.cartItems;
             
         } catch (error) {
-            console.error("Error syncing with Firebase:", error);
+            console.error('Error loading cart:', error);
+            this.cartItems = [];
+            return [];
         }
     }
     
-    mergeCarts(localCart, firebaseCart) {
-        const mergedMap = new Map();
+    removeInvalidItems() {
+        const originalCount = this.cartItems.length;
         
-        // Add all items with unique IDs
-        [...localCart, ...firebaseCart].forEach(item => {
-            const key = item.id + (item.calculationData ? JSON.stringify(item.calculationData) : '');
-            if (!mergedMap.has(key)) {
-                mergedMap.set(key, item);
-            }
+        // Remove items with invalid data
+        this.cartItems = this.cartItems.filter(item => {
+            return item && 
+                   item.id && 
+                   item.name &&
+                   typeof item.price === 'number' &&
+                   item.price >= 0;
         });
         
-        return Array.from(mergedMap.values());
+        const removedCount = originalCount - this.cartItems.length;
+        if (removedCount > 0) {
+            console.log(`🚫 Removed ${removedCount} invalid items`);
+        }
     }
     
-    async saveToFirebase() {
+    async saveCart() {
+        const userId = this.getUserId();
+        const cartKey = `${this.localCartKey}_${userId}`;
+        
+        console.log(`💾 Saving cart for user: ${userId}, items: ${this.cartItems.length}`);
+        
+        // Remove duplicates and invalid items
+        this.removeDuplicates();
+        this.removeInvalidItems();
+        
+        // Save to localStorage
+        localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
+        
+        // Save to Firebase if available
+        await this.saveToFirebase(userId);
+        
+        this.updateCartBadge();
+        return this.cartItems;
+    }
+    
+    async saveToFirebase(userId) {
         try {
-            if (!firebaseDB) return;
+            if (!firebaseDB || userId.includes('guest') || userId.includes('fresh_cart')) {
+                return;
+            }
             
-            const cartData = {
-                userId: this.userId,
-                items: this.cart,
+            await firebaseDB.collection('userCarts').doc(userId).set({
+                userId: userId,
+                items: this.cartItems,
                 updatedAt: new Date().toISOString(),
                 itemCount: this.getCartCount(),
-                subtotal: this.getSubtotal(),
-                tax: this.getTax(),
-                total: this.getTotal()
-            };
-            
-            await firebaseDB.collection('userCarts').doc(this.userId).set(cartData, { merge: true });
+                totalAmount: this.getCartTotal()
+            }, { merge: true });
             
         } catch (error) {
-            console.error("Error saving to Firebase:", error);
+            console.error('Error saving cart to Firebase:', error);
         }
     }
     
-    // SIMPLE ADD TO CART - NO DUPLICATES
-    async addToCart(product, quantity = 1, calculationData = null) {
-        try {
-            console.log("Adding product to cart:", product.stone_name);
-            
-            // Generate unique item key
-            const itemKey = product.id + (calculationData ? JSON.stringify(calculationData) : '');
-            
-            // Check if item already exists
-            const existingIndex = this.cart.findIndex(item => 
-                item.id === product.id && 
-                JSON.stringify(item.calculationData) === JSON.stringify(calculationData)
-            );
-            
-            let cartItem;
-            
-            if (existingIndex >= 0) {
-                // Update existing item quantity
-                cartItem = this.cart[existingIndex];
-                cartItem.quantity += quantity;
-                cartItem.updatedAt = new Date().toISOString();
-                
-                console.log("Updated existing item quantity to:", cartItem.quantity);
-            } else {
-                // Create new cart item
-                cartItem = {
-                    id: product.id,
-                    stone_name: product.stone_name || 'Stone Product',
-                    name: product.stone_name || 'Stone Product',
-                    price: parseFloat(product.price) || 0,
-                    priceUnit: product.price_unit || 'piece',
-                    image: product.images?.[0] || product.image || this.getDefaultImage(product.category),
-                    category: product.category || '',
-                    description: product.description || '',
-                    quantity: quantity,
-                    calculationData: calculationData,
-                    addedAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                };
-                
-                // Add to cart
-                this.cart.push(cartItem);
-                console.log("Added new item to cart");
-            }
-            
-            // Calculate price
-            this.calculateItemPrice(cartItem);
-            
-            // Save cart
-            this.saveToLocalStorage();
-            await this.saveToFirebase();
-            
-            // Update cart badge
-            this.updateCartBadge();
-            
-            return {
-                success: true,
-                item: cartItem,
-                isNew: existingIndex === -1
-            };
-            
-        } catch (error) {
-            console.error("Error adding to cart:", error);
-            return {
-                success: false,
-                error: error.message
-            };
-        }
-    }
-    
-    calculateItemPrice(item) {
-        const price = parseFloat(item.price) || 0;
-        const quantity = item.quantity || 1;
+    removeDuplicates() {
+        const uniqueItems = [];
+        const seenIds = new Set();
         
-        let calculatedPrice = price * quantity;
-        
-        // Apply calculation data if exists
-        if (item.calculationData) {
-            const calc = item.calculationData;
-            
-            if (calc.mode === 'area') {
-                if (calc.unit === 'sqft' || calc.unit === 'sqm') {
-                    const length = parseFloat(calc.length) || 1;
-                    const width = parseFloat(calc.width) || 1;
-                    const area = length * width;
-                    calculatedPrice = price * area * quantity;
-                }
-            } else if (calc.mode === 'weight') {
-                const weight = parseFloat(calc.weight) || 1;
-                calculatedPrice = price * weight * quantity;
+        for (const item of this.cartItems) {
+            if (item && item.id && !seenIds.has(item.id)) {
+                seenIds.add(item.id);
+                uniqueItems.push(item);
             }
         }
         
-        item.calculatedPrice = parseFloat(calculatedPrice.toFixed(2));
-        item.totalPrice = item.calculatedPrice;
-        item.advancePayment = parseFloat((item.totalPrice * 0.3).toFixed(2));
-        item.remainingPayment = parseFloat((item.totalPrice * 0.7).toFixed(2));
-        
-        return item.calculatedPrice;
+        if (uniqueItems.length !== this.cartItems.length) {
+            console.log(`Removed ${this.cartItems.length - uniqueItems.length} duplicate items`);
+            this.cartItems = uniqueItems;
+        }
     }
     
     async updateQuantity(itemIndex, newQuantity) {
         try {
-            if (itemIndex < 0 || itemIndex >= this.cart.length) {
+            if (itemIndex < 0 || itemIndex >= this.cartItems.length) {
                 throw new Error("Invalid item index");
             }
             
-            const item = this.cart[itemIndex];
+            const item = this.cartItems[itemIndex];
             
             if (newQuantity <= 0) {
                 // Remove item if quantity is 0 or less
-                this.cart.splice(itemIndex, 1);
-                console.log("Item removed from cart");
+                this.cartItems.splice(itemIndex, 1);
+                console.log(`🗑️ Item removed from cart`);
             } else {
                 // Update quantity
                 item.quantity = newQuantity;
                 item.updatedAt = new Date().toISOString();
-                
-                // Recalculate price
-                this.calculateItemPrice(item);
-                console.log("Item quantity updated to:", newQuantity);
+                console.log(`🔢 Item quantity updated to: ${newQuantity}`);
             }
             
-            // Save cart
-            this.saveToLocalStorage();
-            await this.saveToFirebase();
-            
-            // Update cart badge
-            this.updateCartBadge();
-            
+            await this.saveCart();
             return true;
             
         } catch (error) {
-            console.error("Error updating quantity:", error);
+            console.error('Error updating quantity:', error);
             return false;
         }
     }
     
     async removeItem(itemIndex) {
         try {
-            if (itemIndex < 0 || itemIndex >= this.cart.length) {
+            if (itemIndex < 0 || itemIndex >= this.cartItems.length) {
                 throw new Error("Invalid item index");
             }
             
-            const itemName = this.cart[itemIndex].stone_name;
-            this.cart.splice(itemIndex, 1);
+            const itemName = this.cartItems[itemIndex].name;
+            this.cartItems.splice(itemIndex, 1);
             
-            // Save cart
-            this.saveToLocalStorage();
-            await this.saveToFirebase();
+            await this.saveCart();
             
-            // Update cart badge
-            this.updateCartBadge();
-            
-            console.log("Item removed:", itemName);
+            console.log(`🗑️ Item removed: ${itemName}`);
             return true;
             
         } catch (error) {
-            console.error("Error removing item:", error);
+            console.error('Error removing item:', error);
             return false;
         }
     }
     
     async clearCart() {
         try {
-            this.cart = [];
-            
-            // Save cart
-            this.saveToLocalStorage();
-            await this.saveToFirebase();
-            
-            // Update cart badge
-            this.updateCartBadge();
-            
-            console.log("Cart cleared");
+            this.cartItems = [];
+            await this.saveCart();
+            console.log('🧹 Cart cleared completely');
             return true;
             
         } catch (error) {
-            console.error("Error clearing cart:", error);
+            console.error('Error clearing cart:', error);
             return false;
         }
     }
     
     getCartCount() {
-        return this.cart.reduce((total, item) => total + (item.quantity || 1), 0);
+        return this.cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
+    }
+    
+    getCartTotal() {
+        return this.cartItems.reduce((total, item) => {
+            return total + ((item.price || 0) * (item.quantity || 1));
+        }, 0);
+    }
+    
+    getCartSubtotal() {
+        return this.getCartTotal();
+    }
+    
+    getCartTax() {
+        return this.getCartTotal() * 0.2; // 20% VAT
+    }
+    
+    getCartGrandTotal() {
+        return this.getCartTotal() + this.getCartTax();
+    }
+    
+    getCartAdvancePayment() {
+        return this.getCartGrandTotal() * 0.3; // 30% advance
     }
     
     getCartItems() {
         // Sort by most recently updated
-        return [...this.cart].sort((a, b) => 
-            new Date(b.updatedAt || b.addedAt) - new Date(a.updatedAt || a.addedAt)
+        return [...this.cartItems].sort((a, b) => 
+            new Date(b.updatedAt || b.addedAt || 0) - new Date(a.updatedAt || a.addedAt || 0)
         );
-    }
-    
-    getSubtotal() {
-        return this.cart.reduce((total, item) => {
-            const itemPrice = item.calculatedPrice || (item.price * item.quantity) || 0;
-            return total + itemPrice;
-        }, 0);
-    }
-    
-    getTax() {
-        return this.getSubtotal() * 0.2; // 20% VAT
-    }
-    
-    getTotal() {
-        return this.getSubtotal() + this.getTax();
-    }
-    
-    getAdvancePayment() {
-        return this.getTotal() * 0.3;
     }
     
     updateCartBadge() {
         const count = this.getCartCount();
-        const cartBadge = document.getElementById('cartBadge');
-        if (cartBadge) {
-            cartBadge.textContent = count > 99 ? '99+' : count;
-            cartBadge.style.display = count > 0 ? 'flex' : 'none';
-        }
-    }
-    
-    getDefaultImage(category) {
-        const categoryLower = (category || '').toLowerCase();
+        const headerCartBadge = document.getElementById('headerCartBadge');
+        const bottomCartBadge = document.getElementById('bottomCartBadge');
         
-        if (categoryLower.includes('sand')) {
-            return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
-        } else if (categoryLower.includes('kota')) {
-            return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300';
-        } else if (categoryLower.includes('granite')) {
-            return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300';
+        if (headerCartBadge) {
+            headerCartBadge.textContent = count > 99 ? '99+' : count;
+            headerCartBadge.style.display = count > 0 ? 'flex' : 'none';
         }
         
-        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
+        if (bottomCartBadge) {
+            bottomCartBadge.textContent = count > 99 ? '99+' : count;
+            bottomCartBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
     }
 }
 
 // ============================================
-// UI FUNCTIONS
+// UTILITY FUNCTIONS
 // ============================================
 
 function showLoading(show) {
@@ -1238,15 +1174,11 @@ function showLoading(show) {
     }
 }
 
-function showNotification(message, type = 'success') {
+function showNotification(message) {
     const notification = document.getElementById('notification');
     if (!notification) return;
     
     notification.textContent = message;
-    notification.style.background = type === 'success' ? 'var(--primary-gold)' : 
-                                  type === 'error' ? '#ff4757' : 
-                                  type === 'info' ? '#2ed573' : 'var(--primary-gold)';
-    
     notification.classList.add('show');
     
     setTimeout(() => {
@@ -1255,7 +1187,15 @@ function showNotification(message, type = 'success') {
 }
 
 function showError(message) {
-    showNotification(message, 'error');
+    const errorDiv = document.getElementById('errorMessage');
+    if (!errorDiv) return;
+    
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 5000);
 }
 
 function formatPrice(price) {
@@ -1265,11 +1205,23 @@ function formatPrice(price) {
     return '£' + numPrice.toFixed(2);
 }
 
-// ============================================
-// CART RENDERING
-// ============================================
+function getDefaultImage(category) {
+    const categoryLower = (category || '').toLowerCase();
+    
+    if (categoryLower.includes('sand')) {
+        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
+    } else if (categoryLower.includes('kota')) {
+        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300';
+    } else if (categoryLower.includes('granite')) {
+        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300';
+    }
+    
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
+}
 
-let cartSystem = null;
+// ============================================
+// CART RENDERING FUNCTIONS
+// ============================================
 
 async function renderCart() {
     const container = document.getElementById('cartItemsContainer');
@@ -1293,7 +1245,7 @@ async function renderCart() {
         checkoutBtn.disabled = cartItems.length === 0;
         checkoutBtn.innerHTML = cartItems.length === 0 ? 
             '<i class="fas fa-lock"></i> Cart is empty' : 
-            `<i class="fas fa-lock"></i> Checkout (${formatPrice(cartSystem.getTotal())})`;
+            `<i class="fas fa-lock"></i> Checkout (${formatPrice(cartSystem.getCartGrandTotal())})`;
     }
     
     // Show empty cart message
@@ -1317,8 +1269,8 @@ async function renderCart() {
     
     // Render cart items
     const itemsHTML = cartItems.map((item, index) => {
-        const itemPrice = item.calculatedPrice || (item.price * item.quantity);
-        const advancePayment = itemPrice * 0.3;
+        const itemTotal = (item.price || 0) * (item.quantity || 1);
+        const advancePayment = itemTotal * 0.3;
         
         // Build specifications HTML
         let specsHTML = '';
@@ -1348,14 +1300,14 @@ async function renderCart() {
         return `
         <div class="cart-item" data-index="${index}">
             <div class="cart-item-image">
-                <img src="${item.image || cartSystem.getDefaultImage(item.category)}" 
-                     alt="${item.stone_name || item.name}"
-                     onerror="this.src='${cartSystem.getDefaultImage(item.category)}'">
+                <img src="${item.image || getDefaultImage(item.category)}" 
+                     alt="${item.name || item.stone_name}"
+                     onerror="this.src='${getDefaultImage(item.category)}'">
             </div>
             
             <div class="cart-item-details">
                 <div class="cart-item-header">
-                    <div class="cart-item-name">${item.stone_name || item.name}</div>
+                    <div class="cart-item-name">${item.name || item.stone_name || 'Stone Product'}</div>
                     <div class="cart-item-price">${formatPrice(item.price)}/${item.priceUnit || 'piece'}</div>
                 </div>
                 
@@ -1366,10 +1318,10 @@ async function renderCart() {
                 <div class="cart-item-actions">
                     <div class="quantity-controls">
                         <button class="quantity-btn" onclick="updateQuantity(${index}, ${item.quantity - 1})" 
-                                ${item.quantity <= 1 ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+                                ${item.quantity <= 1 ? 'disabled' : ''}>
                             <i class="fas fa-minus"></i>
                         </button>
-                        <span class="quantity-value">${item.quantity}</span>
+                        <span class="quantity-value">${item.quantity || 1}</span>
                         <button class="quantity-btn" onclick="updateQuantity(${index}, ${item.quantity + 1})">
                             <i class="fas fa-plus"></i>
                         </button>
@@ -1382,7 +1334,7 @@ async function renderCart() {
                 </div>
                 
                 <div class="cart-item-footer">
-                    <div class="cart-item-total">Item Total: ${formatPrice(itemPrice)}</div>
+                    <div class="cart-item-total">Item Total: ${formatPrice(itemTotal)}</div>
                     <div class="cart-item-advance">Advance: ${formatPrice(advancePayment)} (30%)</div>
                 </div>
             </div>
@@ -1397,10 +1349,9 @@ async function renderCart() {
 function updateOrderSummary() {
     if (!cartSystem) return;
     
-    const subtotal = cartSystem.getSubtotal();
-    const tax = cartSystem.getTax();
-    const total = cartSystem.getTotal();
-    const advancePayment = cartSystem.getAdvancePayment();
+    const subtotal = cartSystem.getCartSubtotal();
+    const tax = cartSystem.getCartTax();
+    const total = cartSystem.getCartGrandTotal();
     
     const subtotalEl = document.getElementById('subtotalAmount');
     const taxEl = document.getElementById('taxAmount');
@@ -1434,7 +1385,7 @@ async function removeItem(index) {
     
     // Confirm before removing
     const cartItems = cartSystem.getCartItems();
-    const itemName = cartItems[index]?.stone_name || 'this item';
+    const itemName = cartItems[index]?.name || cartItems[index]?.stone_name || 'this item';
     
     if (!confirm(`Are you sure you want to remove "${itemName}" from your cart?`)) {
         return;
@@ -1459,7 +1410,7 @@ async function removeItem(index) {
 // FIREBASE INITIALIZATION
 // ============================================
 
-async function initializeFirebase() {
+function initializeFirebase() {
     try {
         if (typeof firebase === 'undefined') {
             console.warn('Firebase SDK not loaded');
@@ -1488,38 +1439,27 @@ async function initializeFirebase() {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('Cart page initializing...');
+    console.log('🚀 Cart page initializing...');
     
     showLoading(true);
     
     try {
         // Initialize Firebase
-        await initializeFirebase();
+        initializeFirebase();
         
-        // Initialize Cart System
-        cartSystem = new SimpleCartSystem();
+        // Initialize Cart System (compatible with index.html)
+        cartSystem = new CartSystem();
         await cartSystem.init();
-        
-        // Sync with Firebase (optional)
-        if (firebaseDB) {
-            await cartSystem.syncWithFirebase();
-        }
         
         // Render cart
         await renderCart();
         
-        // Listen for cart updates from other tabs
+        // Listen for cart updates from other tabs/windows
         window.addEventListener('storage', function(e) {
-            if (e.key === 'irya_simple_cart') {
-                console.log('Cart updated in another tab');
+            if (e.key && e.key.startsWith('irya_cart_')) {
+                console.log('🔄 Cart updated in another tab/window');
                 window.location.reload();
             }
-        });
-        
-        // Listen for cart update events
-        window.addEventListener('cartUpdated', function() {
-            console.log('Cart update event received');
-            renderCart();
         });
         
         // Setup checkout button
@@ -1528,13 +1468,16 @@ document.addEventListener('DOMContentLoaded', async function() {
             checkoutBtn.addEventListener('click', function() {
                 if (cartSystem && cartSystem.getCartCount() > 0) {
                     // Store cart data for checkout
-                    sessionStorage.setItem('irya_checkout_cart', JSON.stringify({
+                    const cartData = {
                         items: cartSystem.getCartItems(),
-                        subtotal: cartSystem.getSubtotal(),
-                        tax: cartSystem.getTax(),
-                        total: cartSystem.getTotal(),
-                        advancePayment: cartSystem.getAdvancePayment()
-                    }));
+                        subtotal: cartSystem.getCartSubtotal(),
+                        tax: cartSystem.getCartTax(),
+                        total: cartSystem.getCartGrandTotal(),
+                        advancePayment: cartSystem.getCartAdvancePayment(),
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    sessionStorage.setItem('irya_checkout_cart', JSON.stringify(cartData));
                     
                     // Navigate to checkout
                     window.location.href = 'checkout.html';
@@ -1542,10 +1485,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
         }
         
-        console.log('Cart page initialized successfully');
+        console.log('✅ Cart page initialized successfully');
         
     } catch (error) {
-        console.error('Cart page initialization error:', error);
+        console.error('❌ Cart page initialization error:', error);
         showError('Failed to load cart. Please refresh the page.');
     } finally {
         showLoading(false);
@@ -1555,6 +1498,25 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Make functions available globally
 window.updateQuantity = updateQuantity;
 window.removeItem = removeItem;
+
+// Add debug function for testing
+window.debugCart = function() {
+    if (cartSystem) {
+        console.log('Cart Debug Info:');
+        console.log('Items:', cartSystem.getCartItems());
+        console.log('Count:', cartSystem.getCartCount());
+        console.log('Total:', cartSystem.getCartTotal());
+        console.log('User ID:', cartSystem.getUserId());
+        
+        // Show all localStorage cart data
+        console.log('All localStorage cart data:');
+        Object.keys(localStorage).forEach(key => {
+            if (key.includes('irya')) {
+                console.log(key, localStorage.getItem(key));
+            }
+        });
+    }
+};
 </script>
 </body>
 </html>
