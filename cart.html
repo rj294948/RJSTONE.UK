@@ -49,7 +49,7 @@ body {
 }
 
 /* ============================================
-   HEADER - HOME PAGE STYLE WITH SCROLL BEHAVIOR
+   HEADER - HOME PAGE STYLE WITH ENHANCED SCROLL
    ============================================ */
 header {
     position: fixed;
@@ -67,15 +67,12 @@ header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     height: 60px;
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
 }
 
 header.hidden {
     transform: translateY(-100%);
-}
-
-header.show {
-    transform: translateY(0);
 }
 
 .logo {
@@ -228,7 +225,7 @@ header.show {
 }
 
 /* ============================================
-   CART ITEMS - HOME PAGE CARD STYLE
+   CART ITEMS - FIXED PRICE CALCULATION
    ============================================ */
 .cart-items {
     background: var(--white);
@@ -298,9 +295,15 @@ header.show {
 }
 
 .cart-item-price {
-    font-size: 15px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     color: var(--primary-gold);
+    margin-bottom: 10px;
+}
+
+.cart-item-quantity {
+    font-size: 12px;
+    color: var(--text-light);
     margin-bottom: 10px;
 }
 
@@ -379,6 +382,23 @@ header.show {
     border-top: 1px dashed #f0f0f0;
     margin-top: 10px;
     grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-total-amount {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-gold);
+}
+
+.item-advance {
+    font-size: 11px;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 /* Empty Cart */
@@ -543,7 +563,7 @@ header.show {
 }
 
 /* ============================================
-   BOTTOM NAVIGATION - HOME PAGE STYLE WITH SCROLL BEHAVIOR
+   BOTTOM NAVIGATION - ENHANCED SCROLL BEHAVIOR
    ============================================ */
 .bottom-nav {
     position: fixed;
@@ -559,15 +579,12 @@ header.show {
     z-index: 999;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
     height: 65px;
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
 }
 
 .bottom-nav.hidden {
     transform: translateY(100%);
-}
-
-.bottom-nav.show {
-    transform: translateY(0);
 }
 
 .nav-btn {
@@ -603,24 +620,8 @@ header.show {
     font-size: 16px;
 }
 
-.cart-badge {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: #ff4757;
-    color: var(--white);
-    font-size: 9px;
-    font-weight: 600;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 /* ============================================
-   LOADING & NOTIFICATIONS - HOME PAGE STYLE
+   LOADING & NOTIFICATIONS
    ============================================ */
 .loading-spinner {
     display: none;
@@ -755,7 +756,7 @@ header.show {
     }
     
     .cart-item-price {
-        font-size: 16px;
+        font-size: 15px;
     }
     
     .quantity-controls {
@@ -769,6 +770,10 @@ header.show {
     }
     
     .cart-item-total {
+        font-size: 18px;
+    }
+    
+    .item-total-amount {
         font-size: 18px;
     }
     
@@ -960,6 +965,10 @@ header.show {
         font-size: 14px;
     }
     
+    .item-total-amount {
+        font-size: 14px;
+    }
+    
     .empty-cart {
         padding: 30px 15px;
     }
@@ -1026,12 +1035,6 @@ header.show {
     
     .nav-btn i {
         font-size: 14px;
-    }
-    
-    .cart-badge {
-        font-size: 8px;
-        width: 14px;
-        height: 14px;
     }
 }
 </style>
@@ -1174,7 +1177,7 @@ header.show {
 
 <script>
 // ============================================
-// FIREBASE CONFIGURATION (SAME AS HOME PAGE & CHECKOUT)
+// FIREBASE CONFIGURATION
 // ============================================
 
 const firebaseConfig = {
@@ -1193,82 +1196,68 @@ let authSystem = null;
 let cartSystem = null;
 
 // ============================================
-// ENHANCED SCROLL HANDLING
+// ENHANCED SCROLL HANDLING - FIXED BEHAVIOR
 // ============================================
 
 let lastScrollTop = 0;
-let scrollTimeout;
-let scrollThreshold = 100;
-let scrollVelocity = 0;
 let lastScrollTime = 0;
+let scrollVelocity = 0;
 let isHeaderVisible = true;
-let hideThreshold = 150; // Hide after scrolling down this much
-let showThreshold = 10;  // Show immediately when scrolling up fast
+const HIDE_THRESHOLD = 100; // Hide after 100px scroll down
+const SHOW_VELOCITY = 0.5;  // Fast scroll up threshold (px/ms)
 
 function handleScroll() {
     const header = document.getElementById('mainHeader');
     const bottomNav = document.getElementById('bottomNav');
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const currentTime = Date.now();
     
     if (!header || !bottomNav) return;
     
-    // Calculate scroll velocity (pixels per millisecond)
+    // Calculate scroll velocity
     if (lastScrollTime > 0) {
         const timeDiff = currentTime - lastScrollTime;
         if (timeDiff > 0) {
-            scrollVelocity = Math.abs(scrollTop - lastScrollTop) / timeDiff;
+            scrollVelocity = (currentScrollTop - lastScrollTop) / timeDiff;
         }
     }
     
-    // Always show when near top
-    if (scrollTop < 50) {
-        header.classList.remove('hidden');
-        bottomNav.classList.remove('hidden');
-        header.classList.add('show');
-        bottomNav.classList.add('show');
-        isHeaderVisible = true;
-        lastScrollTop = scrollTop;
+    // Always show when at top
+    if (currentScrollTop < 10) {
+        if (!isHeaderVisible) {
+            header.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+            isHeaderVisible = true;
+        }
+        lastScrollTop = currentScrollTop;
         lastScrollTime = currentTime;
         return;
     }
     
-    // Determine scroll direction
-    const scrollingDown = scrollTop > lastScrollTop;
+    const scrollingDown = currentScrollTop > lastScrollTop;
     
     if (scrollingDown) {
-        // Scrolling DOWN - hide if we've scrolled past threshold
-        if (scrollTop > hideThreshold && isHeaderVisible) {
+        // Scrolling DOWN - hide if past threshold
+        if (currentScrollTop > HIDE_THRESHOLD && isHeaderVisible) {
             header.classList.add('hidden');
             bottomNav.classList.add('hidden');
             isHeaderVisible = false;
         }
     } else {
-        // Scrolling UP - show based on velocity
-        if (!isHeaderVisible) {
-            // If scrolling up fast OR reached top of page, show immediately
-            if (scrollVelocity > 0.15 || scrollTop <= showThreshold) {
-                header.classList.remove('hidden');
-                bottomNav.classList.remove('hidden');
-                header.classList.add('show');
-                bottomNav.classList.add('show');
-                isHeaderVisible = true;
-            }
+        // Scrolling UP - show only if scrolling fast
+        if (!isHeaderVisible && scrollVelocity < -SHOW_VELOCITY) {
+            header.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+            isHeaderVisible = true;
         }
     }
     
-    lastScrollTop = scrollTop;
+    lastScrollTop = currentScrollTop;
     lastScrollTime = currentTime;
-    
-    // Debounce to prevent too many calculations
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-        scrollVelocity = 0; // Reset velocity after inactivity
-    }, 100);
 }
 
 // ============================================
-// AUTH SYSTEM (SAME AS HOME PAGE)
+// AUTH SYSTEM
 // ============================================
 
 class AuthSystem {
@@ -1278,7 +1267,6 @@ class AuthSystem {
     }
     
     async init() {
-        // Load user from localStorage
         const userData = localStorage.getItem(this.authKey);
         if (userData) {
             try {
@@ -1288,11 +1276,9 @@ class AuthSystem {
             }
         }
         
-        // Initialize Firebase Auth if available
         if (firebaseAuth) {
             firebaseAuth.onAuthStateChanged((user) => {
                 if (user) {
-                    // Firebase user signed in
                     this.currentUser = {
                         uid: user.uid,
                         displayName: user.displayName || 'User',
@@ -1302,14 +1288,12 @@ class AuthSystem {
                     };
                     localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
                 } else if (this.currentUser && this.currentUser.isFirebaseUser) {
-                    // Firebase user signed out
                     this.currentUser = null;
                     localStorage.removeItem(this.authKey);
                 }
             });
         }
         
-        // Create guest user if no user exists
         if (!this.currentUser) {
             this.currentUser = this.createGuestUser();
             localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
@@ -1349,21 +1333,16 @@ class AuthSystem {
     isLoggedIn() {
         return this.currentUser && this.currentUser.isFirebaseUser === true;
     }
-    
-    isGuest() {
-        return !this.currentUser || this.currentUser.isFirebaseUser === false;
-    }
 }
 
 // ============================================
-// CART SYSTEM (CHECKOUT COMPATIBLE)
+// CART SYSTEM - FIXED PRICE CALCULATION
 // ============================================
 
 class CartSystem {
     constructor(authSystem) {
         this.authSystem = authSystem;
         this.localCartKey = 'irya_cart_';
-        this.checkoutDataKey = 'irya_checkout_data_';
         this.cartItems = [];
         this.userId = null;
     }
@@ -1383,7 +1362,6 @@ class CartSystem {
             
             console.log("Loaded cart items:", this.cartItems.length);
             
-            // Sync with Firebase if logged in
             if (this.authSystem.isLoggedIn() && firebaseDB) {
                 await this.syncWithFirebase();
             }
@@ -1403,15 +1381,10 @@ class CartSystem {
             
             if (cartDoc.exists) {
                 const firebaseCart = cartDoc.data().items || [];
-                
-                // Merge carts
                 const mergedCart = this.mergeCarts(this.cartItems, firebaseCart);
                 this.cartItems = mergedCart;
-                
-                // Save back to Firebase
                 await this.saveToFirebase();
             } else if (this.cartItems.length > 0) {
-                // Save local cart to Firebase
                 await this.saveToFirebase();
             }
             
@@ -1423,12 +1396,10 @@ class CartSystem {
     mergeCarts(localCart, firebaseCart) {
         const mergedMap = new Map();
         
-        // Add local items first
         localCart.forEach(item => {
             mergedMap.set(item.uniqueId || item.id, item);
         });
         
-        // Add Firebase items if not already present
         firebaseCart.forEach(item => {
             if (!mergedMap.has(item.uniqueId || item.id)) {
                 mergedMap.set(item.uniqueId || item.id, item);
@@ -1440,14 +1411,11 @@ class CartSystem {
     
     async saveCart() {
         try {
-            // Save to localStorage
             const cartKey = this.localCartKey + this.userId;
             localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
             
-            // Update cart badge
             this.updateCartBadge();
             
-            // Save to Firebase if logged in
             if (this.authSystem.isLoggedIn() && firebaseDB) {
                 await this.saveToFirebase();
             }
@@ -1473,44 +1441,84 @@ class CartSystem {
             };
             
             await firebaseDB.collection('userCarts').doc(this.userId).set(cartData, { merge: true });
-            console.log("Cart saved to Firebase");
         } catch (error) {
             console.error('Error saving to Firebase:', error);
         }
     }
     
-    // CHECKOUT COMPATIBLE: Prepare data for checkout.html
-    async prepareCheckoutData() {
+    // FIXED: Correct price calculation
+    async addToCart(product, quantity = 1, calculationData = null) {
         try {
-            const checkoutData = {
-                userId: this.userId,
-                userName: this.authSystem.getUserName(),
-                userEmail: this.authSystem.getUserEmail(),
-                items: this.cartItems,
-                subtotal: this.getSubtotal(),
-                tax: this.getTax(),
-                total: this.getTotal(),
-                advancePayment: this.getAdvancePayment(),
-                createdAt: new Date().toISOString(),
-                orderType: 'normal',
-                cartSessionId: 'cart_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+            // Generate unique ID
+            const itemId = calculationData ? 
+                `${product.id}_${JSON.stringify(calculationData)}_${Date.now()}` : 
+                `${product.id}_${quantity}_${Date.now()}`;
+            
+            // Calculate price based on unit
+            let unitPrice = parseFloat(product.price) || 0;
+            let totalPrice = 0;
+            let quantityForDisplay = quantity;
+            
+            if (calculationData) {
+                if (calculationData.unit === 'sqft' || calculationData.unit === 'sqm') {
+                    const length = parseFloat(calculationData.length) || 1;
+                    const width = parseFloat(calculationData.width) || 1;
+                    const area = length * width;
+                    totalPrice = unitPrice * area * quantity;
+                    quantityForDisplay = 1; // Show 1 for area calculations
+                } else if (calculationData.unit === 'weight') {
+                    const weight = parseFloat(calculationData.weight) || 1;
+                    totalPrice = unitPrice * weight * quantity;
+                    quantityForDisplay = 1; // Show 1 for weight calculations
+                } else {
+                    totalPrice = unitPrice * quantity;
+                }
+            } else {
+                // Standard piece calculation
+                totalPrice = unitPrice * quantity;
+            }
+            
+            const cartItem = {
+                id: product.id,
+                uniqueId: itemId,
+                stone_name: product.stone_name || product.name || 'Stone Product',
+                name: product.stone_name || product.name || 'Stone Product',
+                price: unitPrice, // Price per unit
+                calculatedPrice: parseFloat(totalPrice.toFixed(2)), // Total price for this item
+                priceUnit: product.price_unit || 'piece',
+                image: product.images?.[0] || product.image || this.getDefaultImage(product.category),
+                category: product.category || '',
+                description: product.description || '',
+                quantity: quantityForDisplay, // Display quantity
+                actualQuantity: quantity, // Actual quantity for calculations
+                calculationData: calculationData,
+                addedAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                userId: this.userId
             };
             
-            // Save checkout data to localStorage and sessionStorage
-            const checkoutKey = this.checkoutDataKey + this.userId;
-            localStorage.setItem(checkoutKey, JSON.stringify(checkoutData));
-            sessionStorage.setItem('irya_current_checkout', JSON.stringify(checkoutData));
+            // Check if item already exists
+            const existingIndex = this.cartItems.findIndex(item => 
+                item.uniqueId === itemId
+            );
             
-            // Save user data for checkout
-            localStorage.setItem('irya_user_name', this.authSystem.getUserName());
-            localStorage.setItem('irya_user_email', this.authSystem.getUserEmail());
+            if (existingIndex >= 0) {
+                // Update existing item
+                this.cartItems[existingIndex].quantity += quantityForDisplay;
+                this.cartItems[existingIndex].actualQuantity += quantity;
+                this.cartItems[existingIndex].calculatedPrice += totalPrice;
+                this.cartItems[existingIndex].updatedAt = new Date().toISOString();
+            } else {
+                // Add new item
+                this.cartItems.push(cartItem);
+            }
             
-            console.log("Checkout data prepared:", checkoutData);
+            await this.saveCart();
+            return true;
             
-            return checkoutData;
         } catch (error) {
-            console.error('Error preparing checkout data:', error);
-            throw error;
+            console.error('Error adding to cart:', error);
+            return false;
         }
     }
     
@@ -1522,26 +1530,37 @@ class CartSystem {
             
             if (itemIndex >= 0) {
                 if (newQuantity <= 0) {
-                    // Remove item
                     this.cartItems.splice(itemIndex, 1);
                 } else {
-                    // Update quantity
                     const item = this.cartItems[itemIndex];
-                    item.quantity = newQuantity;
-                    item.updatedAt = new Date().toISOString();
                     
-                    // Recalculate price if needed
+                    // FIXED: Correct quantity update
+                    const oldQuantity = item.quantity || 1;
+                    const unitPrice = item.price || 0;
+                    
+                    // Calculate new price based on calculation type
+                    let newTotalPrice = 0;
+                    
                     if (item.calculationData) {
-                        item.calculatedPrice = this.calculatePrice(item, item.calculationData);
-                        item.totalPrice = item.calculatedPrice;
-                        item.advancePayment = item.totalPrice * 0.3;
-                        item.remainingPayment = item.totalPrice * 0.7;
+                        if (item.calculationData.unit === 'sqft' || item.calculationData.unit === 'sqm') {
+                            const length = parseFloat(item.calculationData.length) || 1;
+                            const width = parseFloat(item.calculationData.width) || 1;
+                            const area = length * width;
+                            newTotalPrice = unitPrice * area * newQuantity;
+                        } else if (item.calculationData.unit === 'weight') {
+                            const weight = parseFloat(item.calculationData.weight) || 1;
+                            newTotalPrice = unitPrice * weight * newQuantity;
+                        } else {
+                            newTotalPrice = unitPrice * newQuantity;
+                        }
                     } else {
-                        item.calculatedPrice = item.price * newQuantity;
-                        item.totalPrice = item.calculatedPrice;
-                        item.advancePayment = item.totalPrice * 0.3;
-                        item.remainingPayment = item.totalPrice * 0.7;
+                        newTotalPrice = unitPrice * newQuantity;
                     }
+                    
+                    item.quantity = newQuantity;
+                    item.actualQuantity = newQuantity;
+                    item.calculatedPrice = parseFloat(newTotalPrice.toFixed(2));
+                    item.updatedAt = new Date().toISOString();
                 }
                 
                 await this.saveCart();
@@ -1568,67 +1587,24 @@ class CartSystem {
         }
     }
     
-    calculatePrice(product, calculationData) {
-        const mode = calculationData.mode || 'standard';
-        const unit = calculationData.unit || product.price_unit || 'piece';
-        const quantity = parseFloat(calculationData.quantity) || 1;
-        
-        let price = parseFloat(product.price);
-        let totalPrice = 0;
-        
-        switch(mode) {
-            case 'standard':
-                switch(unit) {
-                    case 'sqft':
-                        const lengthFt = parseFloat(calculationData.length) || 1;
-                        const widthFt = parseFloat(calculationData.width) || 1;
-                        const areaSqft = lengthFt * widthFt;
-                        totalPrice = price * areaSqft * quantity;
-                        break;
-                        
-                    case 'sqm':
-                        const lengthM = parseFloat(calculationData.length) || 1;
-                        const widthM = parseFloat(calculationData.width) || 1;
-                        const areaSqm = lengthM * widthM;
-                        totalPrice = price * areaSqm * quantity;
-                        break;
-                        
-                    case 'weight':
-                        const weight = parseFloat(calculationData.weight) || 1;
-                        totalPrice = price * weight * quantity;
-                        break;
-                        
-                    case 'piece':
-                    default:
-                        totalPrice = price * quantity;
-                        break;
-                }
-                break;
-                
-            default:
-                totalPrice = price * quantity;
-        }
-        
-        return parseFloat(totalPrice.toFixed(2));
-    }
-    
     getCartCount() {
-        return this.cartItems.reduce((total, item) => total + item.quantity, 0);
+        return this.cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
     }
     
     getCartItems() {
         return this.cartItems;
     }
     
+    // FIXED: Correct subtotal calculation
     getSubtotal() {
         return this.cartItems.reduce((total, item) => {
-            const itemPrice = item.calculatedPrice || (item.price * item.quantity);
-            return total + itemPrice;
+            const itemTotal = item.calculatedPrice || (item.price * (item.quantity || 1));
+            return total + itemTotal;
         }, 0);
     }
     
     getTax() {
-        return this.getSubtotal() * 0.2; // 20% VAT
+        return this.getSubtotal() * 0.2;
     }
     
     getTotal() {
@@ -1711,7 +1687,7 @@ function formatPrice(price) {
 }
 
 // ============================================
-// CART RENDERING FUNCTIONS
+// CART RENDERING FUNCTIONS - FIXED PRICE DISPLAY
 // ============================================
 
 async function renderCartItems() {
@@ -1734,31 +1710,36 @@ async function renderCartItems() {
     if (emptyCartMessage) emptyCartMessage.style.display = 'none';
     if (checkoutBtn) checkoutBtn.disabled = false;
     
-    // Sort by most recently added/updated
     const sortedItems = [...cartItems].sort((a, b) => 
         new Date(b.updatedAt || b.addedAt) - new Date(a.updatedAt || a.addedAt)
     );
     
     const itemsHTML = sortedItems.map(item => {
-        const itemPrice = item.calculatedPrice || (item.price * item.quantity);
-        const itemTotal = itemPrice * item.quantity;
+        // FIXED: Use calculatedPrice for total
+        const itemTotal = item.calculatedPrice || (item.price * (item.quantity || 1));
         const advancePayment = itemTotal * 0.3;
+        
+        // FIXED: Correct per unit price display
+        const unitPrice = formatPrice(item.price);
+        const unitLabel = item.priceUnit ? `/ ${item.priceUnit}` : '';
         
         let specsHTML = '';
         if (item.calculationData) {
             const calc = item.calculationData;
             if (calc.unit === 'sqft' || calc.unit === 'sqm') {
+                const length = calc.length || 0;
+                const width = calc.width || 0;
                 specsHTML = `
                     <div class="cart-item-specs">
                         <i class="fas fa-ruler-combined"></i> 
-                        ${calc.length || 0} × ${calc.width || 0} ${calc.unit}
+                        Area: ${length} × ${width} ${calc.unit}
                     </div>
                 `;
             } else if (calc.unit === 'weight') {
                 specsHTML = `
                     <div class="cart-item-specs">
                         <i class="fas fa-weight"></i> 
-                        ${calc.weight || 0} kg
+                        Weight: ${calc.weight || 0} kg
                     </div>
                 `;
             }
@@ -1777,16 +1758,19 @@ async function renderCartItems() {
                 <div class="cart-item-category">${item.category || 'Natural Stone'}</div>
                 ${specsHTML}
                 <div class="cart-item-price">
-                    ${formatPrice(item.price)} ${item.priceUnit ? 'per ' + item.priceUnit : ''}
+                    ${unitPrice} ${unitLabel}
+                </div>
+                <div class="cart-item-quantity">
+                    <strong>Quantity:</strong> ${item.quantity || 1}
                 </div>
                 
                 <div class="cart-item-actions">
                     <div class="quantity-controls">
-                        <button class="quantity-btn" onclick="updateItemQuantity('${item.uniqueId || item.id}', ${item.quantity - 1})" ${item.quantity <= 1 ? 'disabled' : ''}>
+                        <button class="quantity-btn" onclick="updateItemQuantity('${item.uniqueId || item.id}', ${(item.quantity || 1) - 1})" ${(item.quantity || 1) <= 1 ? 'disabled' : ''}>
                             <i class="fas fa-minus"></i>
                         </button>
-                        <span class="quantity-value">${item.quantity}</span>
-                        <button class="quantity-btn" onclick="updateItemQuantity('${item.uniqueId || item.id}', ${item.quantity + 1})">
+                        <span class="quantity-value">${item.quantity || 1}</span>
+                        <button class="quantity-btn" onclick="updateItemQuantity('${item.uniqueId || item.id}', ${(item.quantity || 1) + 1})">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
@@ -1799,9 +1783,13 @@ async function renderCartItems() {
             </div>
             
             <div class="cart-item-total">
-                ${formatPrice(itemTotal)}
-                <div style="font-size: 11px; color: var(--text-light); margin-top: 5px;">
-                    Advance: ${formatPrice(advancePayment)}
+                <div>
+                    <div style="font-size: 14px; color: var(--text-light); margin-bottom: 2px;">Item Total:</div>
+                    <div class="item-total-amount">${formatPrice(itemTotal)}</div>
+                    <div class="item-advance">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Advance: ${formatPrice(advancePayment)}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1820,18 +1808,11 @@ function updateOrderSummary() {
     const total = cartSystem.getTotal();
     const advancePayment = cartSystem.getAdvancePayment();
     
-    const subtotalEl = document.getElementById('subtotalAmount');
-    const taxEl = document.getElementById('taxAmount');
-    const totalEl = document.getElementById('totalAmount');
-    const advanceAmountEl = document.getElementById('advanceAmount');
-    const advanceRow = document.getElementById('advancePaymentRow');
-    
-    if (subtotalEl) subtotalEl.textContent = formatPrice(subtotal);
-    if (taxEl) taxEl.textContent = formatPrice(tax);
-    if (totalEl) totalEl.textContent = formatPrice(total);
-    
-    if (advanceAmountEl) advanceAmountEl.textContent = formatPrice(advancePayment);
-    if (advanceRow) advanceRow.style.display = 'flex';
+    document.getElementById('subtotalAmount').textContent = formatPrice(subtotal);
+    document.getElementById('taxAmount').textContent = formatPrice(tax);
+    document.getElementById('totalAmount').textContent = formatPrice(total);
+    document.getElementById('advanceAmount').textContent = formatPrice(advancePayment);
+    document.getElementById('advancePaymentRow').style.display = 'flex';
 }
 
 async function updateItemQuantity(itemId, newQuantity) {
@@ -1885,20 +1866,28 @@ async function proceedToCheckout() {
     showLoading(true);
     
     try {
-        // Prepare checkout data (checkout.html compatible)
-        const checkoutData = await cartSystem.prepareCheckoutData();
+        // Prepare data for checkout.html
+        const checkoutData = {
+            userId: cartSystem.authSystem.getUserId(),
+            userName: cartSystem.authSystem.getUserName(),
+            userEmail: cartSystem.authSystem.getUserEmail(),
+            items: cartItems,
+            subtotal: cartSystem.getSubtotal(),
+            tax: cartSystem.getTax(),
+            total: cartSystem.getTotal(),
+            advancePayment: cartSystem.getAdvancePayment(),
+            cartSessionId: 'cart_' + Date.now()
+        };
         
-        // Store checkout flag
-        localStorage.setItem('irya_checkout_pending', 'true');
-        localStorage.setItem('irya_checkout_user', cartSystem.authSystem.getUserId());
-        localStorage.setItem('irya_checkout_items_count', cartItems.length.toString());
-        localStorage.setItem('irya_checkout_total_amount', cartSystem.getTotal().toString());
-        localStorage.setItem('irya_checkout_advance_amount', cartSystem.getAdvancePayment().toString());
-        
-        // Save cart items for checkout
+        // Save to sessionStorage for checkout.html
+        sessionStorage.setItem('irya_checkout_data', JSON.stringify(checkoutData));
         sessionStorage.setItem('irya_cart_items', JSON.stringify(cartItems));
         sessionStorage.setItem('irya_cart_total', cartSystem.getTotal().toString());
         sessionStorage.setItem('irya_cart_user_id', cartSystem.authSystem.getUserId());
+        
+        // Save user info for autofill
+        localStorage.setItem('irya_user_name', cartSystem.authSystem.getUserName());
+        localStorage.setItem('irya_user_email', cartSystem.authSystem.getUserEmail());
         
         // Navigate to checkout
         window.location.href = 'checkout.html';
@@ -1949,24 +1938,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     showLoading(true);
     
     try {
-        // Initialize Firebase
         await initializeFirebase();
         
-        // Initialize Authentication System
         authSystem = new AuthSystem();
         await authSystem.init();
         
-        // Initialize Cart System
         cartSystem = new CartSystem(authSystem);
         await cartSystem.init();
         
-        // Render cart items
         renderCartItems();
         
         // Setup scroll listener
         window.addEventListener('scroll', handleScroll, { passive: true });
         
-        // Listen for cart updates from other tabs
+        // Listen for cart updates
         window.addEventListener('storage', function(e) {
             if (e.key && e.key.includes('irya_cart_')) {
                 console.log('Cart updated from another tab');
@@ -1974,7 +1959,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
         
-        // Setup event listeners
         setupCartPageListeners();
         
         console.log('Cart page initialized successfully');
@@ -1988,7 +1972,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 function setupCartPageListeners() {
-    // Checkout button
     const checkoutBtn = document.getElementById('checkoutBtn');
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', proceedToCheckout);
