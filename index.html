@@ -1593,8 +1593,6 @@ header.show {
 <body>
 
 <!-- All HTML structure remains the same -->
-<!-- Copy your entire HTML body from original file -->
-
 <!-- Loading Spinner -->
 <div class="loading-spinner" id="loadingSpinner"></div>
 
@@ -1625,11 +1623,7 @@ header.show {
 
     <!-- Header Actions -->
     <div style="display: flex; gap: 8px; align-items: center;">
-        <!-- Wishlist icon -->
-        <a href="wishlist.html" class="action-btn wishlist-btn" title="Wishlist">
-            <i class="far fa-heart"></i>
-            <span class="wishlist-badge" id="wishlistBadge">0</span>
-        </a>
+        <!-- Wishlist icon REMOVED -->
         
         <a href="cart.html" class="action-btn" style="position: relative;">
             <i class="fas fa-shopping-cart"></i>
@@ -1789,7 +1783,6 @@ const firebaseConfig = {
 let firebaseApp, firebaseDB, firebaseAuth;
 let allProducts = [];
 let cartSystem = null;
-let wishlistSystem = null;
 let authSystem = null;
 let currentCategory = 'all';
 let currentPriceFilter = 'all';
@@ -1881,7 +1874,6 @@ class AuthSystem {
                     
                     this.saveUserToLocalStorage();
                     
-                    // IMPORTANT: Disable auto-sync on page load
                     console.log('🛑 Auto-sync disabled on initial load');
                     
                 } else {
@@ -2015,10 +2007,6 @@ class AuthSystem {
                             <i class="fas fa-box"></i>
                             <span>My Orders</span>
                         </a>
-                        <a href="wishlist.html" class="dropdown-item">
-                            <i class="fas fa-heart"></i>
-                            <span>My Wishlist</span>
-                        </a>
                         <div class="dropdown-divider"></div>
                         <a href="javascript:void(0)" class="dropdown-item signout-btn" onclick="authSystem.logout()">
                             <i class="fas fa-sign-out-alt"></i>
@@ -2074,7 +2062,7 @@ class AuthSystem {
 }
 
 // ============================================
-// ULTRA FIXED CART SYSTEM - NO AUTO-ADD
+// ULTRA FIXED CART SYSTEM - NO AUTO-ADD, NO WISHLIST
 // ============================================
 
 class CartSystem {
@@ -2405,148 +2393,6 @@ class CartSystem {
 }
 
 // ============================================
-// FIXED WISHLIST SYSTEM
-// ============================================
-
-class WishlistSystem {
-    constructor() {
-        this.localWishlistKey = 'irya_wishlist';
-        this.wishlistItems = [];
-    }
-    
-    async init() {
-        await this.loadWishlist();
-        this.updateWishlistUI();
-        return this;
-    }
-    
-    getUserId() {
-        if (!authSystem) return 'fresh_cart_' + Date.now();
-        return authSystem.getCartUserId();
-    }
-    
-    async loadWishlist() {
-        try {
-            const userId = this.getUserId();
-            const wishlistKey = `${this.localWishlistKey}_${userId}`;
-            
-            const wishlistData = localStorage.getItem(wishlistKey);
-            
-            if (wishlistData) {
-                const parsedData = JSON.parse(wishlistData);
-                if (Array.isArray(parsedData)) {
-                    this.wishlistItems = parsedData;
-                } else if (parsedData && Array.isArray(parsedData.items)) {
-                    this.wishlistItems = parsedData.items;
-                } else {
-                    this.wishlistItems = [];
-                }
-            } else {
-                this.wishlistItems = [];
-            }
-            
-            return this.wishlistItems;
-            
-        } catch (error) {
-            console.error('Error loading wishlist:', error);
-            this.wishlistItems = [];
-            return [];
-        }
-    }
-    
-    async saveWishlist() {
-        const userId = this.getUserId();
-        const wishlistKey = `${this.localWishlistKey}_${userId}`;
-        
-        localStorage.setItem(wishlistKey, JSON.stringify(this.wishlistItems));
-        this.updateWishlistUI();
-        
-        return this.wishlistItems;
-    }
-    
-    async addToWishlist(product) {
-        try {
-            // Check if already exists
-            const existingItem = this.wishlistItems.find(item => item.id === product.id);
-            
-            if (!existingItem) {
-                this.wishlistItems.push({
-                    id: product.id,
-                    stone_name: product.stone_name,
-                    category: product.category,
-                    price: parseFloat(product.price) || 0,
-                    price_unit: product.price_unit,
-                    image: getProductImage(product),
-                    addedAt: new Date().toISOString()
-                });
-                
-                await this.saveWishlist();
-                showNotification(`${product.stone_name} added to wishlist!`);
-                return true;
-            }
-            return false;
-            
-        } catch (error) {
-            console.error('Error adding to wishlist:', error);
-            showError('Failed to add to wishlist. Please try again.');
-            return false;
-        }
-    }
-    
-    async removeFromWishlist(productId) {
-        try {
-            const index = this.wishlistItems.findIndex(item => item.id === productId);
-            
-            if (index !== -1) {
-                const productName = this.wishlistItems[index].stone_name;
-                this.wishlistItems.splice(index, 1);
-                
-                await this.saveWishlist();
-                showNotification(`${productName} removed from wishlist`);
-                return true;
-            }
-            return false;
-            
-        } catch (error) {
-            console.error('Error removing from wishlist:', error);
-            return false;
-        }
-    }
-    
-    isInWishlist(productId) {
-        return this.wishlistItems.some(item => item.id === productId);
-    }
-    
-    getWishlistCount() {
-        return this.wishlistItems.length;
-    }
-    
-    updateWishlistUI() {
-        const count = this.getWishlistCount();
-        const wishlistBtn = document.querySelector('.wishlist-btn');
-        const wishlistBadge = document.getElementById('wishlistBadge');
-        
-        if (wishlistBtn) {
-            const heartIcon = wishlistBtn.querySelector('i');
-            if (count > 0) {
-                heartIcon.classList.remove('far');
-                heartIcon.classList.add('fas');
-                wishlistBtn.classList.add('active');
-            } else {
-                heartIcon.classList.remove('fas');
-                heartIcon.classList.add('far');
-                wishlistBtn.classList.remove('active');
-            }
-        }
-        
-        if (wishlistBadge) {
-            wishlistBadge.textContent = count > 99 ? '99+' : count;
-            wishlistBadge.style.display = count > 0 ? 'flex' : 'none';
-        }
-    }
-}
-
-// ============================================
 // FIREBASE INITIALIZATION
 // ============================================
 
@@ -2671,7 +2517,7 @@ function formatPrice(price, unit = 'piece') {
 }
 
 // ============================================
-// CATEGORIES AND USES DISPLAY FUNCTIONS (RESTORED)
+// CATEGORIES AND USES DISPLAY FUNCTIONS
 // ============================================
 
 async function loadCategories() {
@@ -2931,16 +2777,6 @@ function loadDefaultUses() {
             name: 'Bathroom',
             image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300',
             count: 3
-        },
-        {
-            name: 'Outdoor Paving',
-            image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300',
-            count: 5
-        },
-        {
-            name: 'Staircase',
-            image: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=400&h=300',
-            count: 2
         }
     ];
     
@@ -3066,7 +2902,7 @@ function populateFilterOptions() {
 
 function populateDefaultFilters() {
     const defaultCategories = ['Sand Stone', 'Kota Stone', 'Granite', 'Marble', 'Limestone', 'Slate'];
-    const defaultUses = ['Flooring', 'Wall Cladding', 'Kitchen Countertops', 'Staircase', 'Garden Paving', 'Pool Surround'];
+    const defaultUses = ['Flooring', 'Wall Cladding', 'Kitchen Countertops', 'Staircase', 'Garden Paving'];
     const defaultColors = ['Gray', 'Brown', 'Black', 'White', 'Green', 'Blue', 'Red', 'Yellow'];
     
     availableCategories = defaultCategories;
@@ -3077,7 +2913,7 @@ function populateDefaultFilters() {
 }
 
 // ============================================
-// PRODUCT LOADING WITH FILTERS (RESTORED)
+// PRODUCT LOADING WITH FILTERS
 // ============================================
 
 async function loadProductsFromFirebase() {
@@ -3259,7 +3095,7 @@ function displayProducts(products) {
     
     const productsHTML = products.map(product => {
         const formattedPrice = formatPrice(product.price, product.price_unit);
-        const isInWishlist = wishlistSystem ? wishlistSystem.isInWishlist(product.id) : false;
+        // Wishlist functionality REMOVED
         
         // Get product image
         let productImage = getProductImage(product);
@@ -3273,11 +3109,7 @@ function displayProducts(products) {
                          onerror="this.src='${getDefaultImage(product.category)}'"
                          loading="lazy">
                     
-                    <!-- Wishlist Button -->
-                    <button class="wishlist-icon ${isInWishlist ? 'active' : ''}" 
-                            onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${product.id}')">
-                        <i class="${isInWishlist ? 'fas' : 'far'} fa-heart"></i>
-                    </button>
+                    <!-- Wishlist Button REMOVED -->
                     
                     <!-- Add to Cart Button -->
                     <button class="add-cart-icon" 
@@ -3341,11 +3173,11 @@ function showDefaultProducts() {
 }
 
 // ============================================
-// CRITICAL INITIALIZATION - NO AUTO-ADD
+// CRITICAL INITIALIZATION - NO AUTO-ADD, NO WISHLIST
 // ============================================
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 IRYA STONE Initializing (Auto-add protection ON)');
+    console.log('🚀 IRYA STONE Initializing (Auto-add protection ON, Wishlist OFF)');
     
     // IMPORTANT: Mark as fresh session
     if (!sessionStorage.getItem('app_initialized')) {
@@ -3363,10 +3195,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize cart system with protection
     cartSystem = new CartSystem();
     await cartSystem.init();
-    
-    // Initialize wishlist system
-    wishlistSystem = new WishlistSystem();
-    await wishlistSystem.init();
     
     console.log('✅ All systems initialized successfully');
     
@@ -3386,7 +3214,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Make systems available globally
     window.authSystem = authSystem;
     window.cartSystem = cartSystem;
-    window.wishlistSystem = wishlistSystem;
     
     // Add emergency clear function
     window.clearAllCartData = function() {
@@ -3470,7 +3297,7 @@ function hideSearchResults() {
 }
 
 // ============================================
-// CART FUNCTIONS
+// CART FUNCTIONS ONLY
 // ============================================
 
 async function addToCartDirect(productId, event = null) {
@@ -3489,48 +3316,6 @@ async function addToCartDirect(productId, event = null) {
         console.error('Error adding to cart:', error);
         showError('Failed to add to cart');
     }
-}
-
-async function toggleWishlist(productId) {
-    try {
-        const product = allProducts.find(p => p.id === productId);
-        
-        if (!product) {
-            showError('Product not found');
-            return;
-        }
-        
-        if (wishlistSystem.isInWishlist(productId)) {
-            await wishlistSystem.removeFromWishlist(productId);
-            updateWishlistIcon(productId, false);
-        } else {
-            await wishlistSystem.addToWishlist(product);
-            updateWishlistIcon(productId, true);
-        }
-    } catch (error) {
-        console.error('Error toggling wishlist:', error);
-        showError('Failed to update wishlist');
-    }
-}
-
-function updateWishlistIcon(productId, isInWishlist) {
-    const wishlistIcons = document.querySelectorAll(`.wishlist-icon`);
-    
-    wishlistIcons.forEach(icon => {
-        const productCard = icon.closest('.image-card');
-        if (productCard && productCard.href.includes(productId)) {
-            const heartIcon = icon.querySelector('i');
-            if (isInWishlist) {
-                icon.classList.add('active');
-                heartIcon.classList.remove('far');
-                heartIcon.classList.add('fas');
-            } else {
-                icon.classList.remove('active');
-                heartIcon.classList.remove('fas');
-                heartIcon.classList.add('far');
-            }
-        }
-    });
 }
 
 // ============================================
