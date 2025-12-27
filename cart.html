@@ -49,7 +49,7 @@ body {
 }
 
 /* ============================================
-   HEADER - HOME PAGE STYLE
+   HEADER - HOME PAGE STYLE WITH SCROLL BEHAVIOR
    ============================================ */
 header {
     position: fixed;
@@ -67,6 +67,15 @@ header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     height: 60px;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.3s ease;
+}
+
+header.hidden {
+    transform: translateY(-100%);
+}
+
+header.show {
+    transform: translateY(0);
 }
 
 .logo {
@@ -534,7 +543,7 @@ header {
 }
 
 /* ============================================
-   BOTTOM NAVIGATION - HOME PAGE STYLE
+   BOTTOM NAVIGATION - HOME PAGE STYLE WITH SCROLL BEHAVIOR
    ============================================ */
 .bottom-nav {
     position: fixed;
@@ -550,6 +559,15 @@ header {
     z-index: 999;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
     height: 65px;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.3s ease;
+}
+
+.bottom-nav.hidden {
+    transform: translateY(100%);
+}
+
+.bottom-nav.show {
+    transform: translateY(0);
 }
 
 .nav-btn {
@@ -1031,7 +1049,7 @@ header {
 <div class="error-message" id="errorMessage"></div>
 
 <!-- Header -->
-<header>
+<header id="mainHeader">
     <a href="index.html" class="back-btn">
         <i class="fas fa-arrow-left"></i>
         <span>Back</span>
@@ -1125,7 +1143,7 @@ header {
 </main>
 
 <!-- Bottom Navigation -->
-<div class="bottom-nav">
+<div class="bottom-nav" id="bottomNav">
     <a href="index.html" class="nav-btn">
         <i class="fas fa-home"></i>
         <span>Home</span>
@@ -1156,7 +1174,7 @@ header {
 
 <script>
 // ============================================
-// FIREBASE CONFIGURATION (SAME AS HOME PAGE)
+// FIREBASE CONFIGURATION (SAME AS HOME PAGE & CHECKOUT)
 // ============================================
 
 const firebaseConfig = {
@@ -1173,6 +1191,81 @@ const firebaseConfig = {
 let firebaseApp, firebaseDB, firebaseAuth;
 let authSystem = null;
 let cartSystem = null;
+
+// ============================================
+// ENHANCED SCROLL HANDLING
+// ============================================
+
+let lastScrollTop = 0;
+let scrollTimeout;
+let scrollThreshold = 100;
+let scrollVelocity = 0;
+let lastScrollTime = 0;
+let isHeaderVisible = true;
+let hideThreshold = 150; // Hide after scrolling down this much
+let showThreshold = 10;  // Show immediately when scrolling up fast
+
+function handleScroll() {
+    const header = document.getElementById('mainHeader');
+    const bottomNav = document.getElementById('bottomNav');
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const currentTime = Date.now();
+    
+    if (!header || !bottomNav) return;
+    
+    // Calculate scroll velocity (pixels per millisecond)
+    if (lastScrollTime > 0) {
+        const timeDiff = currentTime - lastScrollTime;
+        if (timeDiff > 0) {
+            scrollVelocity = Math.abs(scrollTop - lastScrollTop) / timeDiff;
+        }
+    }
+    
+    // Always show when near top
+    if (scrollTop < 50) {
+        header.classList.remove('hidden');
+        bottomNav.classList.remove('hidden');
+        header.classList.add('show');
+        bottomNav.classList.add('show');
+        isHeaderVisible = true;
+        lastScrollTop = scrollTop;
+        lastScrollTime = currentTime;
+        return;
+    }
+    
+    // Determine scroll direction
+    const scrollingDown = scrollTop > lastScrollTop;
+    
+    if (scrollingDown) {
+        // Scrolling DOWN - hide if we've scrolled past threshold
+        if (scrollTop > hideThreshold && isHeaderVisible) {
+            header.classList.add('hidden');
+            bottomNav.classList.add('hidden');
+            isHeaderVisible = false;
+        }
+    } else {
+        // Scrolling UP - show based on velocity
+        if (!isHeaderVisible) {
+            // If scrolling up fast OR reached top of page, show immediately
+            if (scrollVelocity > 0.15 || scrollTop <= showThreshold) {
+                header.classList.remove('hidden');
+                bottomNav.classList.remove('hidden');
+                header.classList.add('show');
+                bottomNav.classList.add('show');
+                isHeaderVisible = true;
+            }
+        }
+    }
+    
+    lastScrollTop = scrollTop;
+    lastScrollTime = currentTime;
+    
+    // Debounce to prevent too many calculations
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        scrollVelocity = 0; // Reset velocity after inactivity
+    }, 100);
+}
 
 // ============================================
 // AUTH SYSTEM (SAME AS HOME PAGE)
@@ -1263,7 +1356,7 @@ class AuthSystem {
 }
 
 // ============================================
-// CART SYSTEM (HOME PAGE COMPATIBLE)
+// CART SYSTEM (CHECKOUT COMPATIBLE)
 // ============================================
 
 class CartSystem {
@@ -1386,6 +1479,7 @@ class CartSystem {
         }
     }
     
+    // CHECKOUT COMPATIBLE: Prepare data for checkout.html
     async prepareCheckoutData() {
         try {
             const checkoutData = {
@@ -1402,16 +1496,14 @@ class CartSystem {
                 cartSessionId: 'cart_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
             };
             
-            // Save checkout data
+            // Save checkout data to localStorage and sessionStorage
             const checkoutKey = this.checkoutDataKey + this.userId;
             localStorage.setItem(checkoutKey, JSON.stringify(checkoutData));
             sessionStorage.setItem('irya_current_checkout', JSON.stringify(checkoutData));
             
-            // Save to sessionStorage for checkout page
-            sessionStorage.setItem('irya_checkout_user_id', this.userId);
-            sessionStorage.setItem('irya_checkout_items', JSON.stringify(this.cartItems));
-            sessionStorage.setItem('irya_checkout_total', this.getTotal().toString());
-            sessionStorage.setItem('irya_checkout_advance', this.getAdvancePayment().toString());
+            // Save user data for checkout
+            localStorage.setItem('irya_user_name', this.authSystem.getUserName());
+            localStorage.setItem('irya_user_email', this.authSystem.getUserEmail());
             
             console.log("Checkout data prepared:", checkoutData);
             
@@ -1775,7 +1867,7 @@ async function removeItemFromCart(itemId) {
 }
 
 // ============================================
-// CHECKOUT FUNCTIONS
+// CHECKOUT FUNCTIONS (CHECKOUT.HTML COMPATIBLE)
 // ============================================
 
 async function proceedToCheckout() {
@@ -1793,14 +1885,20 @@ async function proceedToCheckout() {
     showLoading(true);
     
     try {
-        // Prepare checkout data
+        // Prepare checkout data (checkout.html compatible)
         const checkoutData = await cartSystem.prepareCheckoutData();
         
-        // Store data for checkout page
+        // Store checkout flag
         localStorage.setItem('irya_checkout_pending', 'true');
         localStorage.setItem('irya_checkout_user', cartSystem.authSystem.getUserId());
         localStorage.setItem('irya_checkout_items_count', cartItems.length.toString());
         localStorage.setItem('irya_checkout_total_amount', cartSystem.getTotal().toString());
+        localStorage.setItem('irya_checkout_advance_amount', cartSystem.getAdvancePayment().toString());
+        
+        // Save cart items for checkout
+        sessionStorage.setItem('irya_cart_items', JSON.stringify(cartItems));
+        sessionStorage.setItem('irya_cart_total', cartSystem.getTotal().toString());
+        sessionStorage.setItem('irya_cart_user_id', cartSystem.authSystem.getUserId());
         
         // Navigate to checkout
         window.location.href = 'checkout.html';
@@ -1864,6 +1962,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Render cart items
         renderCartItems();
+        
+        // Setup scroll listener
+        window.addEventListener('scroll', handleScroll, { passive: true });
         
         // Listen for cart updates from other tabs
         window.addEventListener('storage', function(e) {
