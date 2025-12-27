@@ -1623,7 +1623,11 @@ header.show {
 
     <!-- Header Actions -->
     <div style="display: flex; gap: 8px; align-items: center;">
-        <!-- Wishlist icon REMOVED -->
+        <!-- Wishlist icon -->
+        <a href="wishlist.html" class="action-btn wishlist-btn" title="Wishlist" id="wishlistHeaderBtn">
+            <i class="far fa-heart"></i>
+            <span class="wishlist-badge" id="wishlistBadge">0</span>
+        </a>
         
         <a href="cart.html" class="action-btn" style="position: relative;">
             <i class="fas fa-shopping-cart"></i>
@@ -1783,6 +1787,7 @@ const firebaseConfig = {
 let firebaseApp, firebaseDB, firebaseAuth;
 let allProducts = [];
 let cartSystem = null;
+let wishlistSystem = null;
 let authSystem = null;
 let currentCategory = 'all';
 let currentPriceFilter = 'all';
@@ -1824,6 +1829,7 @@ function nuclearClearGuestData() {
         // Set fresh clean IDs
         localStorage.setItem('irya_guest_id', 'guest_user');
         localStorage.setItem('irya_cart_guest_id', 'cart_guest_user');
+        localStorage.setItem('irya_wishlist_guest_id', 'wishlist_guest_user');
         
         console.log('✅ Guest data completely cleared');
         
@@ -1836,7 +1842,7 @@ function nuclearClearGuestData() {
 }
 
 // ============================================
-// FIXED AUTH SYSTEM - NO AUTO-ADD
+// FIXED AUTH SYSTEM
 // ============================================
 
 class AuthSystem {
@@ -1846,6 +1852,7 @@ class AuthSystem {
         this.dropdownOpen = false;
         this.guestIdKey = 'irya_guest_id';
         this.cartGuestIdKey = 'irya_cart_guest_id';
+        this.wishlistGuestIdKey = 'irya_wishlist_guest_id';
     }
     
     async init() {
@@ -1937,6 +1944,19 @@ class AuthSystem {
         return guestId;
     }
     
+    getWishlistUserId() {
+        if (this.isLoggedIn()) {
+            return this.currentUser.uid;
+        }
+        
+        let guestId = localStorage.getItem(this.wishlistGuestIdKey);
+        if (!guestId) {
+            guestId = 'wishlist_guest_user_' + Date.now();
+            localStorage.setItem(this.wishlistGuestIdKey, guestId);
+        }
+        return guestId;
+    }
+    
     // Reset cart user ID (fix auto-add)
     resetCartUserId() {
         if (!this.isLoggedIn()) {
@@ -2007,6 +2027,10 @@ class AuthSystem {
                             <i class="fas fa-box"></i>
                             <span>My Orders</span>
                         </a>
+                        <a href="wishlist.html" class="dropdown-item">
+                            <i class="fas fa-heart"></i>
+                            <span>My Wishlist</span>
+                        </a>
                         <div class="dropdown-divider"></div>
                         <a href="javascript:void(0)" class="dropdown-item signout-btn" onclick="authSystem.logout()">
                             <i class="fas fa-sign-out-alt"></i>
@@ -2062,7 +2086,7 @@ class AuthSystem {
 }
 
 // ============================================
-// ULTRA FIXED CART SYSTEM - NO AUTO-ADD, NO WISHLIST
+// ULTRA FIXED CART SYSTEM - NO AUTO-ADD
 // ============================================
 
 class CartSystem {
@@ -2393,6 +2417,218 @@ class CartSystem {
 }
 
 // ============================================
+// FIXED WISHLIST SYSTEM - WORKING PROPERLY
+// ============================================
+
+class WishlistSystem {
+    constructor() {
+        this.localWishlistKey = 'irya_wishlist';
+        this.wishlistItems = [];
+        this.initialized = false;
+    }
+    
+    async init() {
+        if (this.initialized) return this;
+        
+        console.log('❤️ Wishlist system initializing');
+        
+        await this.loadWishlist();
+        this.updateWishlistUI();
+        
+        this.initialized = true;
+        return this;
+    }
+    
+    getUserId() {
+        if (!authSystem) {
+            return 'fresh_wishlist_' + Date.now();
+        }
+        
+        return authSystem.getWishlistUserId();
+    }
+    
+    async loadWishlist() {
+        try {
+            const userId = this.getUserId();
+            const wishlistKey = `${this.localWishlistKey}_${userId}`;
+            
+            console.log(`Loading wishlist for user: ${userId}`);
+            
+            // Load from localStorage
+            const wishlistData = localStorage.getItem(wishlistKey);
+            
+            if (wishlistData) {
+                try {
+                    const parsedData = JSON.parse(wishlistData);
+                    if (Array.isArray(parsedData)) {
+                        this.wishlistItems = parsedData;
+                    } else if (parsedData && Array.isArray(parsedData.items)) {
+                        this.wishlistItems = parsedData.items;
+                    } else {
+                        this.wishlistItems = [];
+                    }
+                    
+                    console.log(`Loaded ${this.wishlistItems.length} items from wishlist`);
+                    
+                } catch (e) {
+                    console.error('Error parsing wishlist data:', e);
+                    this.wishlistItems = [];
+                }
+            } else {
+                this.wishlistItems = [];
+                console.log('No existing wishlist data found');
+            }
+            
+            // Remove duplicates
+            this.removeDuplicates();
+            
+            return this.wishlistItems;
+            
+        } catch (error) {
+            console.error('Error loading wishlist:', error);
+            this.wishlistItems = [];
+            return [];
+        }
+    }
+    
+    async saveWishlist() {
+        const userId = this.getUserId();
+        
+        console.log(`Saving wishlist for user: ${userId}, items: ${this.wishlistItems.length}`);
+        
+        // Remove duplicates before saving
+        this.removeDuplicates();
+        
+        // Save to localStorage
+        this.saveToLocalStorage();
+        
+        // Update UI
+        this.updateWishlistUI();
+        
+        return this.wishlistItems;
+    }
+    
+    saveToLocalStorage() {
+        const userId = this.getUserId();
+        const wishlistKey = `${this.localWishlistKey}_${userId}`;
+        
+        localStorage.setItem(wishlistKey, JSON.stringify(this.wishlistItems));
+    }
+    
+    removeDuplicates() {
+        const uniqueItems = [];
+        const seenIds = new Set();
+        
+        for (const item of this.wishlistItems) {
+            if (item && item.id && !seenIds.has(item.id)) {
+                seenIds.add(item.id);
+                uniqueItems.push(item);
+            }
+        }
+        
+        if (uniqueItems.length !== this.wishlistItems.length) {
+            console.log(`Removed ${this.wishlistItems.length - uniqueItems.length} duplicate wishlist items`);
+            this.wishlistItems = uniqueItems;
+        }
+    }
+    
+    async addToWishlist(product) {
+        try {
+            console.log(`❤️ Adding product to wishlist: ${product.id} - ${product.stone_name}`);
+            
+            // Check if product already exists in wishlist
+            const existingItem = this.wishlistItems.find(item => item.id === product.id);
+            
+            if (!existingItem) {
+                // Add new item to wishlist
+                const wishlistItem = {
+                    id: product.id,
+                    stone_name: product.stone_name,
+                    category: product.category,
+                    price: parseFloat(product.price) || 0,
+                    price_unit: product.price_unit,
+                    image: getProductImage(product),
+                    addedAt: new Date().toISOString()
+                };
+                
+                this.wishlistItems.push(wishlistItem);
+                
+                await this.saveWishlist();
+                
+                showNotification(`${product.stone_name} added to wishlist!`);
+                return true;
+            } else {
+                console.log(`Product already in wishlist: ${product.id}`);
+                return false;
+            }
+            
+        } catch (error) {
+            console.error('Error adding to wishlist:', error);
+            showError('Failed to add to wishlist. Please try again.');
+            return false;
+        }
+    }
+    
+    async removeFromWishlist(productId) {
+        try {
+            const index = this.wishlistItems.findIndex(item => item.id === productId);
+            
+            if (index !== -1) {
+                const productName = this.wishlistItems[index].stone_name;
+                this.wishlistItems.splice(index, 1);
+                
+                await this.saveWishlist();
+                
+                showNotification(`${productName} removed from wishlist`);
+                return true;
+            }
+            return false;
+            
+        } catch (error) {
+            console.error('Error removing from wishlist:', error);
+            return false;
+        }
+    }
+    
+    isInWishlist(productId) {
+        return this.wishlistItems.some(item => item.id === productId);
+    }
+    
+    getWishlistCount() {
+        return this.wishlistItems.length;
+    }
+    
+    updateWishlistUI() {
+        const count = this.getWishlistCount();
+        const wishlistBtn = document.getElementById('wishlistHeaderBtn');
+        const wishlistBadge = document.getElementById('wishlistBadge');
+        
+        // Update header wishlist button
+        if (wishlistBtn) {
+            const heartIcon = wishlistBtn.querySelector('i');
+            if (count > 0) {
+                heartIcon.classList.remove('far');
+                heartIcon.classList.add('fas');
+                wishlistBtn.classList.add('active');
+            } else {
+                heartIcon.classList.remove('fas');
+                heartIcon.classList.add('far');
+                wishlistBtn.classList.remove('active');
+            }
+        }
+        
+        // Update wishlist badge
+        if (wishlistBadge) {
+            wishlistBadge.textContent = count > 99 ? '99+' : count;
+            wishlistBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
+        
+        // Update product wishlist buttons
+        updateAllWishlistButtons();
+    }
+}
+
+// ============================================
 // FIREBASE INITIALIZATION
 // ============================================
 
@@ -2514,6 +2750,101 @@ function formatPrice(price, unit = 'piece') {
     } else {
         return `£${priceNum.toFixed(2)}`;
     }
+}
+
+// ============================================
+// WISHLIST BUTTON FUNCTIONS
+// ============================================
+
+function updateAllWishlistButtons() {
+    // Update all wishlist buttons on product cards
+    const wishlistButtons = document.querySelectorAll('.wishlist-icon');
+    
+    wishlistButtons.forEach(button => {
+        const productCard = button.closest('.image-card');
+        if (productCard) {
+            const href = productCard.getAttribute('href');
+            const productId = extractProductIdFromHref(href);
+            
+            if (productId && wishlistSystem) {
+                const isInWishlist = wishlistSystem.isInWishlist(productId);
+                const heartIcon = button.querySelector('i');
+                
+                if (isInWishlist) {
+                    button.classList.add('active');
+                    heartIcon.classList.remove('far');
+                    heartIcon.classList.add('fas');
+                } else {
+                    button.classList.remove('active');
+                    heartIcon.classList.remove('fas');
+                    heartIcon.classList.add('far');
+                }
+            }
+        }
+    });
+}
+
+function extractProductIdFromHref(href) {
+    if (!href) return null;
+    const match = href.match(/id=([^&]+)/);
+    return match ? decodeURIComponent(match[1]) : null;
+}
+
+async function toggleWishlist(productId, event = null) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    try {
+        const product = allProducts.find(p => p.id === productId);
+        
+        if (!product) {
+            showError('Product not found');
+            return;
+        }
+        
+        if (wishlistSystem.isInWishlist(productId)) {
+            await wishlistSystem.removeFromWishlist(productId);
+        } else {
+            await wishlistSystem.addToWishlist(product);
+        }
+        
+        // Update the specific button
+        updateWishlistButton(productId);
+        
+    } catch (error) {
+        console.error('Error toggling wishlist:', error);
+        showError('Failed to update wishlist');
+    }
+}
+
+function updateWishlistButton(productId) {
+    // Find and update the specific wishlist button
+    const productCards = document.querySelectorAll('.image-card');
+    
+    productCards.forEach(card => {
+        const href = card.getAttribute('href');
+        const cardProductId = extractProductIdFromHref(href);
+        
+        if (cardProductId === productId) {
+            const wishlistBtn = card.querySelector('.wishlist-icon');
+            if (wishlistBtn) {
+                const isInWishlist = wishlistSystem.isInWishlist(productId);
+                const heartIcon = wishlistBtn.querySelector('i');
+                
+                if (isInWishlist) {
+                    wishlistBtn.classList.add('active');
+                    heartIcon.classList.remove('far');
+                    heartIcon.classList.add('fas');
+                } else {
+                    wishlistBtn.classList.remove('active');
+                    heartIcon.classList.remove('fas');
+                    heartIcon.classList.add('far');
+                }
+            }
+        }
+    });
 }
 
 // ============================================
@@ -2913,7 +3244,7 @@ function populateDefaultFilters() {
 }
 
 // ============================================
-// PRODUCT LOADING WITH FILTERS
+// PRODUCT LOADING WITH FILTERS AND WISHLIST
 // ============================================
 
 async function loadProductsFromFirebase() {
@@ -3095,7 +3426,7 @@ function displayProducts(products) {
     
     const productsHTML = products.map(product => {
         const formattedPrice = formatPrice(product.price, product.price_unit);
-        // Wishlist functionality REMOVED
+        const isInWishlist = wishlistSystem ? wishlistSystem.isInWishlist(product.id) : false;
         
         // Get product image
         let productImage = getProductImage(product);
@@ -3109,11 +3440,15 @@ function displayProducts(products) {
                          onerror="this.src='${getDefaultImage(product.category)}'"
                          loading="lazy">
                     
-                    <!-- Wishlist Button REMOVED -->
+                    <!-- Wishlist Button - FIXED -->
+                    <button class="wishlist-icon ${isInWishlist ? 'active' : ''}" 
+                            onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${product.id}', event)">
+                        <i class="${isInWishlist ? 'fas' : 'far'} fa-heart"></i>
+                    </button>
                     
                     <!-- Add to Cart Button -->
                     <button class="add-cart-icon" 
-                            onclick="event.preventDefault(); event.stopPropagation(); addToCartDirect('${product.id}')">
+                            onclick="event.preventDefault(); event.stopPropagation(); addToCartDirect('${product.id}', event)">
                         <i class="fas fa-cart-plus"></i>
                     </button>
                 </div>
@@ -3173,11 +3508,11 @@ function showDefaultProducts() {
 }
 
 // ============================================
-// CRITICAL INITIALIZATION - NO AUTO-ADD, NO WISHLIST
+// CRITICAL INITIALIZATION
 // ============================================
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 IRYA STONE Initializing (Auto-add protection ON, Wishlist OFF)');
+    console.log('🚀 IRYA STONE Initializing (Auto-add protection ON, Wishlist FIXED)');
     
     // IMPORTANT: Mark as fresh session
     if (!sessionStorage.getItem('app_initialized')) {
@@ -3195,6 +3530,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize cart system with protection
     cartSystem = new CartSystem();
     await cartSystem.init();
+    
+    // Initialize wishlist system
+    wishlistSystem = new WishlistSystem();
+    await wishlistSystem.init();
     
     console.log('✅ All systems initialized successfully');
     
@@ -3214,12 +3553,19 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Make systems available globally
     window.authSystem = authSystem;
     window.cartSystem = cartSystem;
+    window.wishlistSystem = wishlistSystem;
+    window.toggleWishlist = toggleWishlist;
+    window.addToCartDirect = addToCartDirect;
     
     // Add emergency clear function
     window.clearAllCartData = function() {
         if (confirm('Are you sure you want to clear ALL cart data? This cannot be undone.')) {
             nuclearClearGuestData();
             if (cartSystem) cartSystem.clearCart();
+            if (wishlistSystem) {
+                wishlistSystem.wishlistItems = [];
+                wishlistSystem.saveWishlist();
+            }
             location.reload();
         }
     };
@@ -3297,7 +3643,7 @@ function hideSearchResults() {
 }
 
 // ============================================
-// CART FUNCTIONS ONLY
+// CART FUNCTIONS
 // ============================================
 
 async function addToCartDirect(productId, event = null) {
