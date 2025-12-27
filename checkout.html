@@ -132,6 +132,11 @@
             padding: 25px;
             margin-bottom: 20px;
             box-shadow: var(--shadow-sm);
+            display: none;
+        }
+        
+        .step.active {
+            display: block;
         }
         
         .step-header {
@@ -264,7 +269,7 @@
             color: var(--stone-dark);
         }
         
-        /* Payment Methods - PROFESSIONAL UPDATE */
+        /* Payment Methods */
         .payment-method {
             display: flex;
             align-items: center;
@@ -393,6 +398,7 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            text-decoration: none;
         }
         
         .btn-primary {
@@ -497,6 +503,58 @@
             margin: 0 auto 20px;
         }
         
+        /* Address Selection */
+        .address-options {
+            margin-bottom: 20px;
+        }
+        
+        .address-card {
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .address-card:hover {
+            border-color: var(--gold-light);
+        }
+        
+        .address-card.selected {
+            border-color: var(--primary-gold);
+            background: rgba(201, 162, 39, 0.05);
+        }
+        
+        .address-card h4 {
+            margin-bottom: 8px;
+            color: var(--stone-dark);
+        }
+        
+        .address-card p {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 3px;
+        }
+        
+        .new-address-btn {
+            width: 100%;
+            padding: 12px;
+            text-align: center;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+        }
+        
+        .new-address-btn:hover {
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
+        }
+        
         /* Responsive */
         @media (max-width: 992px) {
             .checkout-flow {
@@ -581,94 +639,107 @@
         <div class="checkout-flow">
             <!-- Steps -->
             <div class="checkout-steps">
-                <!-- Step 1: Order Type -->
-                <div class="step" id="orderTypeStep">
+                <!-- Step 1: Shipping & Address -->
+                <div class="step active" id="shippingStep">
                     <div class="step-header">
                         <div class="step-number">1</div>
-                        <h3 class="step-title">Order Type</h3>
-                    </div>
-                    
-                    <div id="orderTypeContent">
-                        <!-- Content will be loaded dynamically -->
-                    </div>
-                    
-                    <div class="form-group" style="margin-top: 20px;">
-                        <label>Any special requirements?</label>
-                        <textarea id="orderNotes" rows="3" placeholder="Add any special instructions, custom requirements, or notes about your order..."></textarea>
-                    </div>
-                </div>
-                
-                <!-- Step 2: Shipping Details -->
-                <div class="step" id="shippingStep">
-                    <div class="step-header">
-                        <div class="step-number">2</div>
                         <h3 class="step-title">Shipping Details</h3>
                     </div>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Full Name *</label>
-                            <input type="text" id="shippingName" required>
+                    <div id="addressSelection" class="address-options" style="display: none;">
+                        <h4 style="margin-bottom: 15px; color: var(--stone-dark);">Select an Address</h4>
+                        <div id="savedAddresses">
+                            <!-- Saved addresses will be loaded here -->
                         </div>
-                        <div class="form-group">
-                            <label>Email *</label>
-                            <input type="email" id="shippingEmail" required>
-                        </div>
+                        <button class="new-address-btn" onclick="showAddressForm()">
+                            <i class="fas fa-plus"></i> Add New Address
+                        </button>
                     </div>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Phone Number *</label>
-                            <input type="tel" id="shippingPhone" required>
+                    <div id="addressForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name *</label>
+                                <input type="text" id="shippingName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email *</label>
+                                <input type="email" id="shippingEmail" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Country *</label>
-                            <select id="shippingCountry" required>
-                                <option value="">Select Country</option>
-                                <option value="GB" selected>United Kingdom</option>
-                                <option value="US">United States</option>
-                                <option value="CA">Canada</option>
-                                <option value="AU">Australia</option>
-                                <option value="IN">India</option>
-                            </select>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Phone Number *</label>
+                                <input type="tel" id="shippingPhone" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Country *</label>
+                                <select id="shippingCountry" required>
+                                    <option value="">Select Country</option>
+                                    <option value="GB" selected>United Kingdom</option>
+                                    <option value="US">United States</option>
+                                    <option value="CA">Canada</option>
+                                    <option value="AU">Australia</option>
+                                    <option value="IN">India</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Address Line 1 *</label>
+                        
+                        <div class="form-group">
+                            <label>Address Line 1 *</label>
                             <input type="text" id="shippingAddress1" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Address Line 2</label>
-                        <input type="text" id="shippingAddress2">
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>City *</label>
-                            <input type="text" id="shippingCity" required>
                         </div>
+                        
                         <div class="form-group">
-                            <label>Postal Code *</label>
-                            <input type="text" id="shippingPostalCode" required>
+                            <label>Address Line 2</label>
+                            <input type="text" id="shippingAddress2">
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>State/Province *</label>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>City *</label>
+                                <input type="text" id="shippingCity" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Postal Code *</label>
+                                <input type="text" id="shippingPostalCode" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>State/Province *</label>
                             <input type="text" id="shippingState" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="saveAddress"> Save this address for future orders
+                            </label>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label><input type="checkbox" id="sameAsBilling"> Billing address same as shipping</label>
+                    <!-- Any special requirements -->
+                    <div class="form-group" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                        <label>Any special requirements or notes?</label>
+                        <textarea id="orderNotes" rows="3" placeholder="Add any special instructions, custom requirements, or notes about your order..."></textarea>
+                    </div>
+                    
+                    <!-- Next Button -->
+                    <div style="margin-top: 30px; display: flex; gap: 15px;">
+                        <button class="btn btn-secondary" onclick="goBack()">
+                            <i class="fas fa-arrow-left"></i> Back to Cart
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep('shipping')">
+                            Continue to Payment <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
                 
-                <!-- Step 3: Payment Method - PROFESSIONAL UPDATE -->
+                <!-- Step 2: Payment Method -->
                 <div class="step" id="paymentStep">
                     <div class="step-header">
-                        <div class="step-number">3</div>
+                        <div class="step-number">2</div>
                         <h3 class="step-title">Payment Method</h3>
                     </div>
                     
@@ -777,12 +848,22 @@
                             <input type="text" id="cardName" placeholder="John Doe">
                         </div>
                     </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div style="margin-top: 30px; display: flex; gap: 15px;">
+                        <button class="btn btn-secondary" onclick="prevStep()">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep('payment')">
+                            Review Order <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
                 </div>
                 
-                <!-- Step 4: Review & Confirm -->
+                <!-- Step 3: Review & Confirm -->
                 <div class="step" id="reviewStep">
                     <div class="step-header">
-                        <div class="step-number">4</div>
+                        <div class="step-number">3</div>
                         <h3 class="step-title">Review & Confirm</h3>
                     </div>
                     
@@ -790,13 +871,35 @@
                         <!-- Review content will be loaded here -->
                     </div>
                     
+                    <!-- Terms & Conditions -->
+                    <div style="margin-top: 25px; padding: 20px; background: var(--bg-light); border-radius: 8px;">
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label>
+                                <input type="checkbox" id="acceptTerms" required>
+                                I agree to the <a href="terms.html" style="color: var(--primary-gold); text-decoration: none;">Terms & Conditions</a> and understand that 30% advance payment is required.
+                            </label>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-light);">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Important:</strong> 30% advance payment is required for all orders. The remaining 70% must be paid before delivery.
+                        </div>
+                    </div>
+                    
+                    <!-- Order Button -->
                     <div style="margin-top: 30px;">
                         <button class="btn btn-primary" onclick="placeOrder()" id="placeOrderBtn">
-                            <i class="fas fa-lock"></i> Place Order
+                            <i class="fas fa-lock"></i> Place Order & Pay Advance
                         </button>
                         <p style="text-align: center; margin-top: 15px; font-size: 12px; color: var(--text-light);">
                             <i class="fas fa-shield-alt"></i> Your payment is secure and encrypted
                         </p>
+                    </div>
+                    
+                    <!-- Back Button -->
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-secondary" onclick="prevStep()" style="width: 100%;">
+                            <i class="fas fa-arrow-left"></i> Back to Payment
+                        </button>
                     </div>
                 </div>
             </div>
@@ -840,29 +943,26 @@
                             <span>Total:</span>
                             <span id="totalAmount">£0.00</span>
                         </div>
+                        
+                        <!-- Advance Payment -->
+                        <div class="total-row" style="color: var(--primary-gold); font-weight: 600; font-size: 16px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd;">
+                            <span>Advance to Pay (30%):</span>
+                            <span id="advanceAmount">£0.00</span>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Payment Info -->
-                <div id="paymentInfoCard" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: var(--border-radius); margin-bottom: 20px;">
-                    <div style="margin-bottom: 15px;">
-                        <div style="font-size: 12px; opacity: 0.9;">Order Number</div>
-                        <div style="font-weight: bold; font-size: 18px;" id="orderNumberDisplay"></div>
-                    </div>
-                    <div>
-                        <div style="font-size: 12px; opacity: 0.9;">Payment Due</div>
-                        <div style="font-weight: bold; font-size: 18px;" id="paymentDueAmount">£0.00</div>
-                    </div>
+                <!-- Secure Info -->
+                <div style="background: #e3f2fd; padding: 15px; border-radius: var(--border-radius); margin-bottom: 20px; text-align: center; color: #1565c0; font-size: 13px;">
+                    <i class="fas fa-shield-alt" style="font-size: 18px; margin-right: 8px;"></i>
+                    <strong>Secure Checkout</strong>
+                    <p style="margin-top: 5px; color: #1976d2; font-size: 12px;">Your information is protected with 256-bit encryption</p>
                 </div>
                 
-                <!-- Actions -->
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-secondary" onclick="goBack()" id="backBtn">
-                        <i class="fas fa-arrow-left"></i> Back
-                    </button>
-                    <button class="btn btn-primary" onclick="nextStep()" id="nextBtn">
-                        Continue <i class="fas fa-arrow-right"></i>
-                    </button>
+                <!-- Support Info -->
+                <div style="background: var(--bg-light); padding: 15px; border-radius: var(--border-radius); font-size: 13px; color: var(--text-light); text-align: center;">
+                    <i class="fas fa-headset" style="color: var(--primary-gold); margin-right: 8px;"></i>
+                    Need help? <a href="contact.html" style="color: var(--primary-gold); text-decoration: none;">Contact Support</a>
                 </div>
             </div>
         </div>
@@ -933,52 +1033,25 @@
             <button class="btn btn-primary" onclick="viewOrder()">
                 <i class="fas fa-box"></i> View Order
             </button>
-            <button class="btn btn-secondary" onclick="goToOrders()">
-                <i class="fas fa-list"></i> My Orders
+            <button class="btn btn-secondary" onclick="goToHome()">
+                <i class="fas fa-home"></i> Back to Home
             </button>
         </div>
     </div>
 </div>
 
-<script type="module">
-// Firebase Import - UPDATED WITH addDoc
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { 
-    getFirestore, 
-    collection, 
-    doc, 
-    getDoc,
-    setDoc,
-    addDoc,
-    updateDoc,
-    arrayUnion,
-    serverTimestamp,
-    query,
-    where,
-    getDocs
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+<script>
+// ============================================
+// GLOBAL VARIABLES
+// ============================================
 
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
-    authDomain: "iryastone-uk.firebaseapp.com",
-    projectId: "iryastone-uk",
-    storageBucket: "iryastone-uk.firebasestorage.app",
-    messagingSenderId: "110940910896",
-    appId: "1:110940910896:web:b25e92127118665e5c84f5",
-    measurementId: "G-6YM1FLYN48"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Global Variables
 let currentUserId = null;
-let currentOrder = null;
-let orderType = null;
-let currentStep = 1;
+let currentUserEmail = null;
+let currentUserName = null;
+let savedAddresses = [];
+let selectedAddressId = null;
 let selectedPaymentMethod = 'stripe';
+let currentStep = 'shipping';
 let orderData = {
     items: [],
     subtotal: 0,
@@ -986,35 +1059,60 @@ let orderData = {
     tax: 0,
     total: 0,
     advancePayment: 0,
-    remainingPayment: 0,
-    alreadyPaid: 0,
-    notes: ''
+    notes: '',
+    orderType: 'cart' // cart, buynow, pending_payment
 };
 
-// Initialize Page
+// ============================================
+// INITIALIZATION
+// ============================================
+
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Checkout page initializing...');
     
     try {
-        await getUserId();
-        await loadOrderData();
-        setupEventListeners();
+        // Get user data
+        await getCurrentUser();
+        
+        // Load cart data from cart.html storage
+        await loadCartData();
+        
+        // Load saved addresses
+        await loadSavedAddresses();
+        
+        // Setup UI
+        setupCheckoutUI();
+        
+        // Hide loading, show content
+        showLoading(false);
+        document.getElementById('checkoutContent').style.display = 'block';
+        
+        console.log('Checkout initialized successfully');
+        
     } catch (error) {
-        console.error('Initialization error:', error);
-        showError('Page Error', 'Failed to initialize checkout. Please refresh.');
+        console.error('Error initializing checkout:', error);
+        showError('Failed to load checkout', 'Please try again or contact support.');
+        showLoading(false);
     }
 });
 
-// Get User ID
-async function getUserId() {
-    try {
-        const savedUser = localStorage.getItem('irya_stone_auth_user');
-        if (savedUser) {
-            const user = JSON.parse(savedUser);
-            currentUserId = user.uid;
-            return currentUserId;
-        }
+// ============================================
+// USER & CART DATA FUNCTIONS
+// ============================================
 
+async function getCurrentUser() {
+    try {
+        // Try to get user from local storage (from cart.html)
+        const userData = localStorage.getItem('irya_stone_user');
+        if (userData) {
+            const user = JSON.parse(userData);
+            currentUserId = user.uid;
+            currentUserEmail = user.email || '';
+            currentUserName = user.displayName || '';
+            return;
+        }
+        
+        // Fallback to guest user
         let guestId = localStorage.getItem('irya_guest_id');
         if (!guestId) {
             guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -1022,257 +1120,276 @@ async function getUserId() {
         }
         
         currentUserId = guestId;
-        return currentUserId;
+        currentUserEmail = '';
+        currentUserName = 'Guest User';
         
     } catch (error) {
-        console.error('Error getting user ID:', error);
+        console.error('Error getting user:', error);
         currentUserId = 'guest_' + Date.now();
-        return currentUserId;
     }
 }
 
-// Load Order Data
-async function loadOrderData() {
-    showLoading(true);
-    
+async function loadCartData() {
     try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('order');
-        const isBuyNow = urlParams.get('buynow') === 'true';
-        const isPendingPayment = urlParams.get('type') === 'remaining_payment';
+        console.log('Loading cart data...');
         
-        console.log('URL Params:', { orderId, isBuyNow, isPendingPayment });
-        
-        if (isPendingPayment && orderId) {
-            orderType = 'pending_payment';
-            await loadPendingPaymentOrder(orderId);
-        } else if (isBuyNow) {
-            orderType = 'buynow';
-            await loadBuyNowOrder();
-        } else {
-            orderType = 'cart';
-            await loadCartOrder();
-        }
-        
-        updateOrderTypeUI();
-        updateOrderSummary();
-        
-        showLoading(false);
-        document.getElementById('checkoutContent').style.display = 'block';
-        
-    } catch (error) {
-        console.error('Error loading order data:', error);
-        showError('Load Error', 'Failed to load order data. Please try again.');
-        showLoading(false);
-    }
-}
-
-// Load Pending Payment Order
-async function loadPendingPaymentOrder(orderId) {
-    try {
-        const storedPayment = localStorage.getItem('irya_pending_payment_order');
-        if (storedPayment) {
-            currentOrder = JSON.parse(storedPayment);
-            orderData.alreadyPaid = currentOrder.paidAmount || 0;
-            orderData.remainingPayment = currentOrder.remainingAmount || 0;
-            await loadOrderDetails(currentOrder.orderId);
-            return;
-        }
-        
-        await loadOrderDetails(orderId);
-        
-        const paidAmount = currentOrder.submittedAmount || currentOrder.advancePayment || 0;
-        const totalAmount = currentOrder.total || 0;
-        const remainingAmount = currentOrder.remainingPayment || (totalAmount - paidAmount);
-        
-        orderData.alreadyPaid = paidAmount;
-        orderData.remainingPayment = remainingAmount;
-        
-        document.getElementById('pageTitle').textContent = 'Complete Payment';
-        document.getElementById('pageSubtitle').textContent = 'Pay the remaining amount for your order';
-        
-    } catch (error) {
-        console.error('Error loading pending payment order:', error);
-        throw error;
-    }
-}
-
-// Load Buy Now Order
-async function loadBuyNowOrder() {
-    try {
+        // Get cart data from localStorage (set by cart.html)
         const userId = currentUserId;
-        const buyNowKey = 'irya_buynow_cart_' + userId;
-        const buyNowData = localStorage.getItem(buyNowKey);
-        
-        if (buyNowData) {
-            const buyNowItems = JSON.parse(buyNowData);
-            orderData.items = buyNowItems.map(item => ({
-                ...item,
-                type: 'buynow'
-            }));
-            
-            calculateOrderTotals();
-            document.getElementById('pageTitle').textContent = 'Buy Now Checkout';
-            
-        } else {
-            const sessionBuyNow = sessionStorage.getItem('irya_current_buynow');
-            if (sessionBuyNow) {
-                const item = JSON.parse(sessionBuyNow);
-                orderData.items = [item];
-                calculateOrderTotals();
-            } else {
-                throw new Error('No buy now items found');
-            }
-        }
-        
-    } catch (error) {
-        console.error('Error loading buy now order:', error);
-        throw error;
-    }
-}
-
-// Load Cart Order
-async function loadCartOrder() {
-    try {
-        const userId = currentUserId;
-        const cartKey = 'irya_local_cart_' + userId;
+        const cartKey = 'irya_cart_' + userId;
         const cartData = localStorage.getItem(cartKey);
         
-        if (cartData) {
-            const cartItems = JSON.parse(cartData);
-            orderData.items = cartItems.filter(item => !item.isBuyNow);
-            
-            if (orderData.items.length === 0) {
-                throw new Error('Cart is empty');
-            }
-            
-            calculateOrderTotals();
-            
-        } else {
+        if (!cartData) {
             throw new Error('Cart is empty');
         }
         
+        const cartItems = JSON.parse(cartData);
+        
+        if (!cartItems || cartItems.length === 0) {
+            throw new Error('Cart is empty');
+        }
+        
+        // Process cart items
+        orderData.items = cartItems.map(item => ({
+            id: item.id,
+            uniqueId: item.uniqueId || item.id,
+            stone_name: item.stone_name || item.name || 'Stone Product',
+            name: item.stone_name || item.name || 'Stone Product',
+            price: parseFloat(item.price) || 0,
+            calculatedPrice: parseFloat(item.calculatedPrice) || (parseFloat(item.price) * (item.quantity || 1)),
+            priceUnit: item.priceUnit || 'piece',
+            image: item.image || getDefaultImage(item.category),
+            category: item.category || '',
+            quantity: item.quantity || 1,
+            actualQuantity: item.actualQuantity || item.quantity || 1,
+            calculationData: item.calculationData || null,
+            addedAt: item.addedAt || new Date().toISOString()
+        }));
+        
+        // Calculate totals
+        calculateOrderTotals();
+        
+        console.log('Cart loaded:', orderData.items.length, 'items');
+        
     } catch (error) {
-        console.error('Error loading cart order:', error);
-        throw error;
+        console.error('Error loading cart:', error);
+        showError('Cart Error', 'Your cart is empty. Please add items to cart first.');
     }
 }
 
-// Load Order Details from Firebase
-async function loadOrderDetails(orderId) {
-    try {
-        try {
-            const orderDoc = await getDoc(doc(db, "users", currentUserId, "orders", orderId));
-            if (orderDoc.exists()) {
-                currentOrder = orderDoc.data();
-                currentOrder.id = orderDoc.id;
-                return;
-            }
-        } catch (error) {
-            console.log('Trying main orders collection...');
-        }
-        
-        const ordersRef = collection(db, "orders");
-        const orderQuery = query(ordersRef, where("__name__", "==", orderId));
-        const orderSnapshot = await getDocs(orderQuery);
-        
-        if (!orderSnapshot.empty) {
-            currentOrder = orderSnapshot.docs[0].data();
-            currentOrder.id = orderSnapshot.docs[0].id;
-            return;
-        }
-        
-        throw new Error('Order not found');
-        
-    } catch (error) {
-        console.error('Error loading order details:', error);
-        throw error;
-    }
-}
-
-// Calculate Order Totals
 function calculateOrderTotals() {
-    let subtotal = 0;
+    // Calculate subtotal
+    orderData.subtotal = orderData.items.reduce((total, item) => {
+        return total + (item.calculatedPrice || (item.price * (item.quantity || 1)));
+    }, 0);
     
-    orderData.items.forEach(item => {
-        const itemTotal = item.calculatedPrice || (item.price * (item.quantity || 1));
-        subtotal += itemTotal;
-    });
+    // Calculate shipping (free over £500, otherwise £25)
+    orderData.shipping = orderData.subtotal > 500 ? 0 : 25;
     
-    orderData.shipping = subtotal > 500 ? 0 : 25;
-    orderData.tax = subtotal * 0.2;
-    orderData.total = subtotal + orderData.shipping + orderData.tax;
+    // Calculate tax (20% VAT)
+    orderData.tax = orderData.subtotal * 0.2;
+    
+    // Calculate total
+    orderData.total = orderData.subtotal + orderData.shipping + orderData.tax;
+    
+    // Calculate advance payment (30%)
     orderData.advancePayment = orderData.total * 0.3;
-    orderData.remainingPayment = orderData.total * 0.7;
+    
+    console.log('Totals calculated:', {
+        subtotal: orderData.subtotal,
+        shipping: orderData.shipping,
+        tax: orderData.tax,
+        total: orderData.total,
+        advance: orderData.advancePayment
+    });
 }
 
-// Update Order Type UI
-function updateOrderTypeUI() {
-    const orderTypeContent = document.getElementById('orderTypeContent');
-    const paymentInfoCard = document.getElementById('paymentInfoCard');
-    const alreadyPaidRow = document.getElementById('alreadyPaidRow');
-    const remainingPaymentRow = document.getElementById('remainingPaymentRow');
-    
-    if (orderType === 'pending_payment') {
-        orderTypeContent.innerHTML = `
-            <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 4px solid #2196f3;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <i class="fas fa-money-bill-wave" style="color: #2196f3; font-size: 24px;"></i>
-                    <div>
-                        <h4 style="margin: 0; color: #0d47a1;">Complete Payment for Order</h4>
-                        <p style="margin: 5px 0 0 0; color: #1976d2;">
-                            Order: ${currentOrder.orderNumber || currentOrder.id?.substring(0, 8)}
-                        </p>
-                    </div>
-                </div>
-                <p>You are completing the remaining payment for your existing order. The order details are already confirmed.</p>
-            </div>
-        `;
+// ============================================
+// ADDRESS MANAGEMENT
+// ============================================
+
+async function loadSavedAddresses() {
+    try {
+        const userId = currentUserId;
+        const addressesKey = 'irya_saved_addresses_' + userId;
+        const addressesData = localStorage.getItem(addressesKey);
         
-        paymentInfoCard.style.display = 'block';
-        document.getElementById('orderNumberDisplay').textContent = 
-            currentOrder.orderNumber || currentOrder.id?.substring(0, 8);
-        document.getElementById('paymentDueAmount').textContent = 
-            formatPrice(orderData.remainingPayment);
-            
-        alreadyPaidRow.style.display = 'flex';
-        remainingPaymentRow.style.display = 'flex';
+        if (addressesData) {
+            savedAddresses = JSON.parse(addressesData);
+        } else {
+            savedAddresses = [];
+        }
         
-    } else if (orderType === 'buynow') {
-        orderTypeContent.innerHTML = `
-            <div style="background: #fff8e1; padding: 20px; border-radius: 8px; border-left: 4px solid var(--primary-gold);">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <i class="fas fa-bolt" style="color: var(--primary-gold); font-size: 24px;"></i>
-                    <div>
-                        <h4 style="margin: 0; color: var(--stone-dark);">Buy Now Checkout</h4>
-                        <p style="margin: 5px 0 0 0; color: var(--text-light);">
-                            Express checkout for selected product
-                        </p>
-                    </div>
-                </div>
-                <p>You are using the Buy Now option for immediate checkout. This is a single product purchase.</p>
-            </div>
-        `;
+        // Check if user has a saved address from previous orders
+        const lastAddress = localStorage.getItem('irya_last_used_address');
+        if (lastAddress) {
+            const address = JSON.parse(lastAddress);
+            if (!savedAddresses.find(a => a.id === address.id)) {
+                savedAddresses.push(address);
+                localStorage.setItem(addressesKey, JSON.stringify(savedAddresses));
+            }
+        }
         
-    } else {
-        orderTypeContent.innerHTML = `
-            <div style="background: var(--bg-light); padding: 20px; border-radius: 8px;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <i class="fas fa-shopping-cart" style="color: var(--primary-gold); font-size: 24px;"></i>
-                    <div>
-                        <h4 style="margin: 0; color: var(--stone-dark);">Cart Checkout</h4>
-                        <p style="margin: 5px 0 0 0; color: var(--text-light);">
-                            Checkout for ${orderData.items.length} item(s) from your cart
-                        </p>
-                    </div>
-                </div>
-                <p>You are checking out items from your shopping cart. Review your items below.</p>
-            </div>
-        `;
+        updateAddressSelectionUI();
+        
+    } catch (error) {
+        console.error('Error loading addresses:', error);
+        savedAddresses = [];
     }
 }
 
-// Update Order Summary
+function updateAddressSelectionUI() {
+    const addressSelection = document.getElementById('addressSelection');
+    const savedAddressesDiv = document.getElementById('savedAddresses');
+    
+    if (savedAddresses.length > 0) {
+        addressSelection.style.display = 'block';
+        
+        let addressesHTML = '';
+        savedAddresses.forEach((address, index) => {
+            const isDefault = address.isDefault || index === 0;
+            addressesHTML += `
+                <div class="address-card ${isDefault ? 'selected' : ''}" 
+                     onclick="selectAddress('${address.id || index}')" 
+                     id="address-${address.id || index}">
+                    ${isDefault ? '<div style="font-size: 11px; color: var(--primary-gold); margin-bottom: 5px;"><i class="fas fa-star"></i> Default Address</div>' : ''}
+                    <h4>${address.fullName}</h4>
+                    <p>${address.address1}</p>
+                    ${address.address2 ? `<p>${address.address2}</p>` : ''}
+                    <p>${address.city}, ${address.state} ${address.postalCode}</p>
+                    <p>${address.country}</p>
+                    <p style="margin-top: 5px;"><i class="fas fa-phone"></i> ${address.phone}</p>
+                </div>
+            `;
+            
+            if (isDefault) {
+                selectedAddressId = address.id || index;
+                fillAddressForm(address);
+            }
+        });
+        
+        savedAddressesDiv.innerHTML = addressesHTML;
+    } else {
+        addressSelection.style.display = 'none';
+        fillAddressFormFromUserData();
+    }
+}
+
+function selectAddress(addressId) {
+    selectedAddressId = addressId;
+    
+    // Update UI
+    document.querySelectorAll('.address-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    document.getElementById(`address-${addressId}`).classList.add('selected');
+    
+    // Fill form with selected address
+    const address = savedAddresses.find(a => (a.id || savedAddresses.indexOf(a).toString()) === addressId);
+    if (address) {
+        fillAddressForm(address);
+    }
+}
+
+function showAddressForm() {
+    document.getElementById('addressSelection').style.display = 'none';
+    clearAddressForm();
+}
+
+function fillAddressForm(address) {
+    if (!address) return;
+    
+    document.getElementById('shippingName').value = address.fullName || '';
+    document.getElementById('shippingEmail').value = address.email || currentUserEmail || '';
+    document.getElementById('shippingPhone').value = address.phone || '';
+    document.getElementById('shippingCountry').value = address.country || 'GB';
+    document.getElementById('shippingAddress1').value = address.address1 || '';
+    document.getElementById('shippingAddress2').value = address.address2 || '';
+    document.getElementById('shippingCity').value = address.city || '';
+    document.getElementById('shippingPostalCode').value = address.postalCode || '';
+    document.getElementById('shippingState').value = address.state || '';
+}
+
+function fillAddressFormFromUserData() {
+    document.getElementById('shippingName').value = currentUserName || '';
+    document.getElementById('shippingEmail').value = currentUserEmail || '';
+    
+    // Try to get last used address
+    const lastAddress = localStorage.getItem('irya_last_used_address');
+    if (lastAddress) {
+        const address = JSON.parse(lastAddress);
+        fillAddressForm(address);
+    }
+}
+
+function clearAddressForm() {
+    document.getElementById('shippingName').value = currentUserName || '';
+    document.getElementById('shippingEmail').value = currentUserEmail || '';
+    document.getElementById('shippingPhone').value = '';
+    document.getElementById('shippingCountry').value = 'GB';
+    document.getElementById('shippingAddress1').value = '';
+    document.getElementById('shippingAddress2').value = '';
+    document.getElementById('shippingCity').value = '';
+    document.getElementById('shippingPostalCode').value = '';
+    document.getElementById('shippingState').value = '';
+}
+
+async function saveCurrentAddress() {
+    try {
+        const shouldSave = document.getElementById('saveAddress').checked;
+        if (!shouldSave) return null;
+        
+        const addressData = {
+            id: 'addr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            fullName: document.getElementById('shippingName').value.trim(),
+            email: document.getElementById('shippingEmail').value.trim(),
+            phone: document.getElementById('shippingPhone').value.trim(),
+            country: document.getElementById('shippingCountry').value,
+            address1: document.getElementById('shippingAddress1').value.trim(),
+            address2: document.getElementById('shippingAddress2').value.trim(),
+            city: document.getElementById('shippingCity').value.trim(),
+            postalCode: document.getElementById('shippingPostalCode').value.trim(),
+            state: document.getElementById('shippingState').value.trim(),
+            isDefault: savedAddresses.length === 0,
+            createdAt: new Date().toISOString()
+        };
+        
+        // Add to saved addresses
+        savedAddresses.push(addressData);
+        
+        // Save to localStorage
+        const userId = currentUserId;
+        const addressesKey = 'irya_saved_addresses_' + userId;
+        localStorage.setItem(addressesKey, JSON.stringify(savedAddresses));
+        
+        // Also save as last used address
+        localStorage.setItem('irya_last_used_address', JSON.stringify(addressData));
+        
+        return addressData.id;
+        
+    } catch (error) {
+        console.error('Error saving address:', error);
+        return null;
+    }
+}
+
+// ============================================
+// UI FUNCTIONS
+// ============================================
+
+function setupCheckoutUI() {
+    // Update order summary
+    updateOrderSummary();
+    
+    // Set up payment method selection
+    selectPaymentMethod('stripe');
+    
+    // Set up form validation
+    setupFormValidation();
+    
+    // Set up card input formatting
+    setupCardInputs();
+}
+
 function updateOrderSummary() {
     const orderItemsSummary = document.getElementById('orderItemsSummary');
     
@@ -1280,16 +1397,16 @@ function updateOrderSummary() {
         let itemsHTML = '';
         
         orderData.items.forEach(item => {
-            const itemName = item.stoneName || item.name || 'Stone Product';
+            const itemName = item.stone_name || item.name;
             const itemQuantity = item.quantity || 1;
-            const itemPrice = item.calculatedPrice || (item.price * itemQuantity);
-            const itemImage = item.image || getDefaultImage(item.category);
+            const itemPrice = formatPrice(item.calculatedPrice || (item.price * itemQuantity));
+            const itemImage = item.image;
             
             itemsHTML += `
                 <div class="order-item">
                     <div class="item-image">
                         <img src="${itemImage}" alt="${itemName}" 
-                             onerror="this.src='${getDefaultImage('stone')}'">
+                             onerror="this.src='${getDefaultImage(item.category)}'">
                     </div>
                     <div class="item-details">
                         <div class="item-name">${itemName}</div>
@@ -1297,179 +1414,38 @@ function updateOrderSummary() {
                             Quantity: ${itemQuantity}
                             ${item.calculationData ? ` • ${item.calculationData.unit || 'piece'}` : ''}
                         </div>
-                        <div class="item-price">${formatPrice(itemPrice)}</div>
+                        <div class="item-price">${itemPrice}</div>
                     </div>
                 </div>
             `;
         });
         
         orderItemsSummary.innerHTML = itemsHTML;
-    } else {
-        orderItemsSummary.innerHTML = '<p style="text-align: center; color: var(--text-light);">No items</p>';
     }
     
+    // Update totals
     document.getElementById('subtotalAmount').textContent = formatPrice(orderData.subtotal);
     document.getElementById('shippingAmount').textContent = formatPrice(orderData.shipping);
     document.getElementById('taxAmount').textContent = formatPrice(orderData.tax);
-    document.getElementById('alreadyPaidAmount').textContent = formatPrice(orderData.alreadyPaid);
-    document.getElementById('remainingPaymentAmount').textContent = formatPrice(orderData.remainingPayment);
-    
-    if (orderType === 'pending_payment') {
-        document.getElementById('totalAmount').textContent = formatPrice(orderData.remainingPayment);
-    } else {
-        document.getElementById('totalAmount').textContent = formatPrice(orderData.total);
-    }
+    document.getElementById('totalAmount').textContent = formatPrice(orderData.total);
+    document.getElementById('advanceAmount').textContent = formatPrice(orderData.advancePayment);
 }
 
-// Step Navigation
-function nextStep() {
-    if (currentStep === 4) return;
-    
-    if (!validateStep(currentStep)) {
-        return;
-    }
-    
-    currentStep++;
-    updateStepDisplay();
-}
-
-function goBack() {
-    if (currentStep === 1) {
-        window.history.back();
-        return;
-    }
-    
-    currentStep--;
-    updateStepDisplay();
-}
-
-function updateStepDisplay() {
-    document.querySelectorAll('.step').forEach(step => {
-        step.style.display = 'none';
-    });
-    
-    const stepElements = [
-        'orderTypeStep',
-        'shippingStep',
-        'paymentStep',
-        'reviewStep'
-    ];
-    
-    if (stepElements[currentStep - 1]) {
-        document.getElementById(stepElements[currentStep - 1]).style.display = 'block';
-    }
-    
-    const backBtn = document.getElementById('backBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    
-    if (currentStep === 1) {
-        backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Store';
-    } else {
-        backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Back';
-    }
-    
-    if (currentStep === 4) {
-        nextBtn.style.display = 'none';
-        document.getElementById('placeOrderBtn').style.display = 'block';
-    } else {
-        nextBtn.style.display = 'block';
-        document.getElementById('placeOrderBtn').style.display = 'none';
-    }
-    
-    if (currentStep === 4) {
-        updateReviewContent();
-    }
-}
-
-function validateStep(step) {
-    if (step === 2) {
-        const requiredFields = [
-            'shippingName',
-            'shippingEmail',
-            'shippingPhone',
-            'shippingAddress1',
-            'shippingCity',
-            'shippingPostalCode',
-            'shippingState'
-        ];
-        
-        for (const fieldId of requiredFields) {
-            const field = document.getElementById(fieldId);
-            if (!field.value.trim()) {
-                alert(`Please fill in ${field.previousElementSibling.textContent}`);
-                field.focus();
-                return false;
-            }
-        }
-        
-        const email = document.getElementById('shippingEmail').value;
-        if (!isValidEmail(email)) {
-            alert('Please enter a valid email address');
-            return false;
-        }
-        
-    } else if (step === 3) {
-        if (!selectedPaymentMethod) {
-            alert('Please select a payment method');
-            return false;
-        }
-        
-        if (selectedPaymentMethod === 'stripe') {
-            const cardNumber = document.getElementById('cardNumber').value;
-            const cardExpiry = document.getElementById('cardExpiry').value;
-            const cardCvc = document.getElementById('cardCvc').value;
-            const cardName = document.getElementById('cardName').value;
-            
-            if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
-                alert('Please fill in all card details');
-                return false;
-            }
-        }
-    }
-    
-    return true;
-}
-
-function isValidEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-}
-
-// Payment Method Selection
-function selectPaymentMethod(method) {
-    selectedPaymentMethod = method;
-    
-    document.querySelectorAll('.payment-method').forEach(el => {
-        el.classList.remove('selected');
-        el.querySelector('.fa-check-circle').style.display = 'none';
-    });
-    
-    const selectedMethod = document.getElementById(method + 'Method');
-    selectedMethod.classList.add('selected');
-    selectedMethod.querySelector('.fa-check-circle').style.display = 'block';
-    
-    document.getElementById('bankDetails').style.display = method === 'bank' ? 'block' : 'none';
-    document.getElementById('cardDetails').style.display = method === 'stripe' ? 'block' : 'none';
-    
-    if (method === 'bank') {
-        const reference = `IRYA-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        document.getElementById('bankReference').textContent = reference;
-    }
-}
-
-// Update Review Content
 function updateReviewContent() {
     const reviewContent = document.getElementById('reviewContent');
     
+    // Get form values
     const shippingName = document.getElementById('shippingName').value;
     const shippingEmail = document.getElementById('shippingEmail').value;
     const shippingPhone = document.getElementById('shippingPhone').value;
+    const shippingCountry = document.getElementById('shippingCountry').options[document.getElementById('shippingCountry').selectedIndex].text;
     const shippingAddress = [
         document.getElementById('shippingAddress1').value,
         document.getElementById('shippingAddress2').value,
         document.getElementById('shippingCity').value,
         document.getElementById('shippingState').value,
-        document.getElementById('shippingPostalCode').value
+        document.getElementById('shippingPostalCode').value,
+        shippingCountry
     ].filter(Boolean).join(', ');
     
     const paymentMethodNames = {
@@ -1487,13 +1463,9 @@ function updateReviewContent() {
                 <h4 style="margin-bottom: 10px; color: var(--stone-dark);">Order Details</h4>
                 <div style="font-size: 14px;">
                     <div style="margin-bottom: 5px;">
-                        <strong>Type:</strong> ${orderType === 'pending_payment' ? 'Complete Payment' : 
-                                               orderType === 'buynow' ? 'Buy Now' : 'Cart Checkout'}
-                    </div>
-                    <div style="margin-bottom: 5px;">
                         <strong>Items:</strong> ${orderData.items.length} product(s)
                     </div>
-                    ${notes ? `<div><strong>Notes:</strong> ${notes}</div>` : ''}
+                    ${notes ? `<div style="margin-top: 8px;"><strong>Notes:</strong> ${notes}</div>` : ''}
                 </div>
             </div>
             
@@ -1525,299 +1497,284 @@ function updateReviewContent() {
                             <i class="fas fa-bolt"></i> Instant confirmation
                         </div>
                     `}
-                    ${orderType === 'pending_payment' ? `
-                        <div style="margin-top: 5px; color: var(--success-green);">
-                            <strong>Already Paid:</strong> ${formatPrice(orderData.alreadyPaid)}
-                        </div>
-                        <div style="color: var(--error-red);">
-                            <strong>Payment Due:</strong> ${formatPrice(orderData.remainingPayment)}
-                        </div>
-                    ` : `
-                        <div style="margin-top: 5px;">
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
+                        <div><strong>Total Order Value:</strong> ${formatPrice(orderData.total)}</div>
+                        <div style="color: var(--primary-gold); font-weight: 600;">
                             <strong>Advance Payment (30%):</strong> ${formatPrice(orderData.advancePayment)}
                         </div>
-                        <div style="color: var(--text-light); font-size: 12px;">
+                        <div style="font-size: 12px; color: var(--text-light); margin-top: 5px;">
                             <i class="fas fa-info-circle"></i> Remaining 70% payable before delivery
                         </div>
-                    `}
+                    </div>
                 </div>
             </div>
         </div>
     `;
 }
 
-// Save Address Function
-async function saveAddress(addressData) {
-    try {
-        if (!currentUserId || currentUserId.startsWith('guest_')) {
-            localStorage.setItem('irya_saved_address', JSON.stringify(addressData));
-            return null;
+// ============================================
+// STEP NAVIGATION
+// ============================================
+
+function nextStep(fromStep) {
+    // Validate current step
+    if (!validateStep(fromStep)) {
+        return;
+    }
+    
+    // Hide current step
+    document.getElementById(`${fromStep}Step`).classList.remove('active');
+    
+    // Show next step
+    let nextStepId;
+    if (fromStep === 'shipping') {
+        nextStepId = 'payment';
+    } else if (fromStep === 'payment') {
+        nextStepId = 'review';
+        updateReviewContent();
+    }
+    
+    document.getElementById(`${nextStepId}Step`).classList.add('active');
+    currentStep = nextStepId;
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function prevStep() {
+    // Hide current step
+    document.getElementById(`${currentStep}Step`).classList.remove('active');
+    
+    // Show previous step
+    let prevStepId;
+    if (currentStep === 'payment') {
+        prevStepId = 'shipping';
+    } else if (currentStep === 'review') {
+        prevStepId = 'payment';
+    }
+    
+    document.getElementById(`${prevStepId}Step`).classList.add('active');
+    currentStep = prevStepId;
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateStep(step) {
+    if (step === 'shipping') {
+        const requiredFields = [
+            'shippingName',
+            'shippingEmail',
+            'shippingPhone',
+            'shippingAddress1',
+            'shippingCity',
+            'shippingPostalCode',
+            'shippingState'
+        ];
+        
+        for (const fieldId of requiredFields) {
+            const field = document.getElementById(fieldId);
+            if (!field.value.trim()) {
+                alert(`Please fill in ${field.previousElementSibling.textContent}`);
+                field.focus();
+                return false;
+            }
         }
         
-        const userDocRef = doc(db, "users", currentUserId);
-        const userDocSnap = await getDoc(userDocRef);
-        
-        if (!userDocSnap.exists()) {
-            await setDoc(userDocRef, {
-                createdAt: serverTimestamp(),
-                addresses: [],
-                payments: [],
-                orders: []
-            });
+        const email = document.getElementById('shippingEmail').value;
+        if (!isValidEmail(email)) {
+            alert('Please enter a valid email address');
+            document.getElementById('shippingEmail').focus();
+            return false;
         }
         
-        const addressesCollection = collection(userDocRef, "addresses");
-        const addressDocRef = await addDoc(addressesCollection, {
-            ...addressData,
-            isDefault: false,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
+    } else if (step === 'payment') {
+        if (!selectedPaymentMethod) {
+            alert('Please select a payment method');
+            return false;
+        }
+        
+        if (selectedPaymentMethod === 'stripe') {
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s+/g, '');
+            const cardExpiry = document.getElementById('cardExpiry').value;
+            const cardCvc = document.getElementById('cardCvc').value;
+            const cardName = document.getElementById('cardName').value;
+            
+            if (!cardNumber || cardNumber.length < 16) {
+                alert('Please enter a valid card number');
+                document.getElementById('cardNumber').focus();
+                return false;
+            }
+            
+            if (!cardExpiry || !/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+                alert('Please enter a valid expiry date (MM/YY)');
+                document.getElementById('cardExpiry').focus();
+                return false;
+            }
+            
+            if (!cardCvc || cardCvc.length < 3) {
+                alert('Please enter a valid CVC');
+                document.getElementById('cardCvc').focus();
+                return false;
+            }
+            
+            if (!cardName.trim()) {
+                alert('Please enter cardholder name');
+                document.getElementById('cardName').focus();
+                return false;
+            }
+        }
+    } else if (step === 'review') {
+        const acceptTerms = document.getElementById('acceptTerms').checked;
+        if (!acceptTerms) {
+            alert('Please accept the Terms & Conditions to continue');
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+function isValidEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+// ============================================
+// PAYMENT METHODS
+// ============================================
+
+function selectPaymentMethod(method) {
+    selectedPaymentMethod = method;
+    
+    // Update UI
+    document.querySelectorAll('.payment-method').forEach(el => {
+        el.classList.remove('selected');
+        el.querySelector('.fa-check-circle').style.display = 'none';
+    });
+    
+    const selectedMethod = document.getElementById(method + 'Method');
+    selectedMethod.classList.add('selected');
+    selectedMethod.querySelector('.fa-check-circle').style.display = 'block';
+    
+    // Show/hide details
+    document.getElementById('bankDetails').style.display = method === 'bank' ? 'block' : 'none';
+    document.getElementById('cardDetails').style.display = method === 'stripe' ? 'block' : 'none';
+    
+    if (method === 'bank') {
+        const reference = `IRYA-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        document.getElementById('bankReference').textContent = reference;
+    }
+}
+
+function setupCardInputs() {
+    const cardNumberInput = document.getElementById('cardNumber');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formatted = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += value[i];
+            }
+            e.target.value = formatted.substring(0, 19);
         });
-        
-        console.log('Address saved with ID:', addressDocRef.id);
-        return addressDocRef.id;
-        
-    } catch (error) {
-        console.error('Error saving address:', error);
-        return null;
+    }
+    
+    const expiryInput = document.getElementById('cardExpiry');
+    if (expiryInput) {
+        expiryInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/gi, '');
+            if (value.length >= 2) {
+                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                e.target.value = value;
+            }
+        });
     }
 }
 
-// Record Payment in User Payments
-async function recordPaymentInUserPayments(orderId, orderData) {
+// ============================================
+// ORDER PROCESSING
+// ============================================
+
+async function placeOrder() {
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const originalText = placeOrderBtn.innerHTML;
+    
     try {
-        if (!currentUserId || currentUserId.startsWith('guest_')) {
-            return null;
+        // Validate all steps
+        if (!validateStep('shipping') || !validateStep('payment') || !validateStep('review')) {
+            return;
         }
         
-        const userDocRef = doc(db, "users", currentUserId);
-        const paymentsCollection = collection(userDocRef, "payments");
+        // Disable button and show loading
+        placeOrderBtn.disabled = true;
+        placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
         
-        const paymentStatus = selectedPaymentMethod === 'bank' ? 'pending' : 'confirmed';
-        
-        const paymentData = {
-            orderId: orderId,
-            orderNumber: orderData.orderNumber,
-            amount: orderData.paymentDueNow,
-            method: selectedPaymentMethod,
-            status: paymentStatus,
-            type: orderType === 'pending_payment' ? 'remaining_payment' : 'advance',
-            reference: orderData.paymentReference || `IRYA-${Date.now()}`,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-        
-        const paymentDocRef = await addDoc(paymentsCollection, paymentData);
-        console.log('Payment recorded in user payments:', paymentDocRef.id);
-        return paymentDocRef.id;
-        
-    } catch (error) {
-        console.error('Error recording payment:', error);
-        return null;
-    }
-}
-
-// CRITICAL FIX: Update Order Status after Payment
-async function updateOrderStatusAfterPayment(orderId, paymentStatus) {
-    try {
-        // Update in user's orders collection
-        const userOrderRef = doc(db, "users", currentUserId, "orders", orderId);
-        
-        const updateData = {
-            paymentStatus: paymentStatus,
-            status: paymentStatus === 'confirmed' ? 'confirmed' : 'payment_pending',
-            updatedAt: new Date().toISOString()
-        };
-        
-        // Add to status history
-        await updateDoc(userOrderRef, {
-            ...updateData,
-            statusHistory: arrayUnion({
-                status: paymentStatus === 'confirmed' ? 'confirmed' : 'payment_pending',
-                at: new Date().toISOString(),
-                notes: `Payment ${paymentStatus === 'confirmed' ? 'confirmed' : 'pending'} via ${selectedPaymentMethod}`
-            })
-        });
-        
-        // Also update in main orders collection
-        const mainOrderRef = doc(db, "orders", orderId);
-        await updateDoc(mainOrderRef, updateData);
-        
-        console.log(`Order ${orderId} status updated to:`, paymentStatus);
-        
-    } catch (error) {
-        console.error('Error updating order status:', error);
-    }
-}
-
-// Save Order to Firebase - FIXED FOR NEW ORDERS
-async function saveOrderToFirebase(orderData) {
-    try {
-        // Generate unique order ID
-        const orderId = 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        
-        // Determine payment status
-        const paymentStatus = selectedPaymentMethod === 'bank' ? 'pending' : 'confirmed';
-        const orderStatus = paymentStatus === 'confirmed' ? 'confirmed' : 'payment_pending';
+        // Save address
+        await saveCurrentAddress();
         
         // Prepare order data
-        const orderDataForFirebase = {
-            id: orderId,
-            orderNumber: orderData.orderNumber,
-            userId: currentUserId,
-            userEmail: orderData.userEmail,
-            userName: orderData.userName,
-            items: orderData.items,
-            subtotal: orderData.subtotal,
-            shipping: orderData.shipping,
-            tax: orderData.tax,
-            total: orderData.total,
-            advancePayment: orderData.advancePayment,
-            remainingPayment: orderData.remainingPayment,
-            submittedAmount: orderData.paymentDueNow, // Amount being submitted now
-            paymentDueNow: orderData.paymentDueNow,
-            shippingAddress: orderData.shippingAddress,
-            billingAddress: orderData.billingAddress || orderData.shippingAddress,
-            paymentMethod: selectedPaymentMethod,
-            paymentStatus: paymentStatus,
-            paymentType: orderType === 'pending_payment' ? 'remaining_payment' : 'advance',
-            status: orderStatus,
-            notes: orderData.notes,
-            source: orderType,
-            isLoggedIn: !currentUserId.startsWith('guest_'),
-            isBuyNowOrder: orderType === 'buynow',
-            
-            // Dates
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            
-            // Initialize arrays
-            statusHistory: [{
-                status: orderStatus,
-                at: new Date().toISOString(),
-                notes: `Order created. Payment ${paymentStatus} via ${selectedPaymentMethod}`
-            }],
-            
-            paymentHistory: []
-        };
+        const orderDataObj = await prepareOrderData();
         
-        // Add bank transfer details if applicable
-        if (selectedPaymentMethod === 'bank') {
-            orderDataForFirebase.paymentReference = orderData.paymentReference || `IRYA-${Date.now()}`;
-            orderDataForFirebase.bankTransferDetails = {
-                accountName: "IRYA STONE LTD",
-                accountNumber: "12345678",
-                sortCode: "40-04-15",
-                reference: orderDataForFirebase.paymentReference,
-                amount: orderData.paymentDueNow,
-                currency: "GBP"
-            };
-        }
+        // Show payment processing
+        showPaymentProcessing();
         
-        // Add initial payment entry to payment history
-        const paymentEntry = {
-            amount: orderData.paymentDueNow,
-            date: new Date().toISOString(),
-            method: selectedPaymentMethod,
-            paymentId: 'payment_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-            reference: orderDataForFirebase.paymentReference || `IRYA-${Date.now()}`,
-            status: paymentStatus,
-            type: orderType === 'pending_payment' ? 'remaining_payment' : 'advance'
-        };
-        
-        orderDataForFirebase.paymentHistory.push(paymentEntry);
-        
-        // FOR PENDING PAYMENT: Update existing order
-        if (orderType === 'pending_payment' && currentOrder && currentOrder.id) {
-            console.log('Updating existing order for pending payment:', currentOrder.id);
-            
-            // Calculate new values
-            const newSubmittedAmount = (currentOrder.submittedAmount || 0) + orderData.paymentDueNow;
-            const newRemainingPayment = Math.max(0, (currentOrder.remainingPayment || 0) - orderData.paymentDueNow);
-            
-            // Update existing order
-            const existingOrderRef = doc(db, "users", currentUserId, "orders", currentOrder.id);
-            
-            await updateDoc(existingOrderRef, {
-                remainingPayment: newRemainingPayment,
-                submittedAmount: newSubmittedAmount,
-                paymentHistory: arrayUnion(paymentEntry),
-                paymentStatus: paymentStatus,
-                status: paymentStatus === 'confirmed' ? 'confirmed' : currentOrder.status,
-                updatedAt: new Date().toISOString()
-            });
-            
-            // Also update main orders collection
-            const mainOrderRef = doc(db, "orders", currentOrder.id);
-            await updateDoc(mainOrderRef, {
-                remainingPayment: newRemainingPayment,
-                submittedAmount: newSubmittedAmount,
-                paymentStatus: paymentStatus,
-                status: paymentStatus === 'confirmed' ? 'confirmed' : currentOrder.status,
-                updatedAt: new Date().toISOString()
-            });
-            
-            console.log('Updated existing order:', currentOrder.id);
-            return currentOrder.id;
-            
-        } else {
-            // FOR NEW ORDERS: Save new order
-            console.log('Creating new order:', orderId);
-            
-            // Save to user's orders collection
-            const userOrderRef = doc(db, "users", currentUserId, "orders", orderId);
-            await setDoc(userOrderRef, orderDataForFirebase);
-            
-            // Also save to main orders collection
-            const mainOrderRef = doc(db, "orders", orderId);
-            await setDoc(mainOrderRef, {
-                ...orderDataForFirebase,
-                firebaseUserId: currentUserId
-            });
-            
-            console.log('New order saved to Firebase:', orderId);
-            return orderId;
-        }
+        // Simulate payment processing
+        setTimeout(async () => {
+            try {
+                // Generate order ID
+                const orderId = 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                // Save order to localStorage (for orders.html)
+                await saveOrderToLocalStorage(orderId, orderDataObj);
+                
+                // Clear cart
+                clearCart();
+                
+                // Show success based on payment method
+                if (selectedPaymentMethod === 'bank') {
+                    showBankTransferDetails(orderId, orderDataObj);
+                } else {
+                    showSuccess(orderId, orderDataObj);
+                }
+                
+            } catch (error) {
+                console.error('Error processing order:', error);
+                alert('Payment processing failed. Please try again.');
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.innerHTML = originalText;
+                hidePaymentProcessing();
+            }
+        }, 2000);
         
     } catch (error) {
-        console.error('Error saving order to Firebase:', error);
-        throw error;
+        console.error('Error placing order:', error);
+        alert('Failed to place order. Please check your details.');
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.innerHTML = originalText;
     }
 }
 
-// Prepare Order Data
 async function prepareOrderData() {
-    // Collect all data
+    // Collect all form data
     const shippingName = document.getElementById('shippingName').value;
     const shippingEmail = document.getElementById('shippingEmail').value;
     const shippingPhone = document.getElementById('shippingPhone').value;
+    const shippingCountry = document.getElementById('shippingCountry').value;
     const shippingAddress1 = document.getElementById('shippingAddress1').value;
     const shippingAddress2 = document.getElementById('shippingAddress2').value;
     const shippingCity = document.getElementById('shippingCity').value;
     const shippingState = document.getElementById('shippingState').value;
     const shippingPostalCode = document.getElementById('shippingPostalCode').value;
-    const shippingCountry = document.getElementById('shippingCountry').value;
     const notes = document.getElementById('orderNotes').value;
     
     // Generate order number
     const orderNumber = 'IRYA-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
     
-    // Calculate payment amounts
-    let advancePayment, remainingPayment, totalAmount, paymentDueNow;
-    
-    if (orderType === 'pending_payment') {
-        totalAmount = orderData.alreadyPaid + orderData.remainingPayment;
-        advancePayment = orderData.alreadyPaid;
-        remainingPayment = 0;
-        paymentDueNow = orderData.remainingPayment;
-    } else {
-        totalAmount = orderData.total;
-        advancePayment = orderData.advancePayment;
-        remainingPayment = orderData.remainingPayment;
-        paymentDueNow = advancePayment;
-    }
-    
-    const orderDataObj = {
+    return {
+        orderId: 'order_' + Date.now(),
         orderNumber: orderNumber,
         userId: currentUserId,
         userEmail: shippingEmail,
@@ -1826,10 +1783,9 @@ async function prepareOrderData() {
         subtotal: orderData.subtotal,
         shipping: orderData.shipping,
         tax: orderData.tax,
-        total: totalAmount,
-        advancePayment: advancePayment,
-        remainingPayment: remainingPayment,
-        paymentDueNow: paymentDueNow,
+        total: orderData.total,
+        advancePayment: orderData.advancePayment,
+        remainingPayment: orderData.total - orderData.advancePayment,
         shippingAddress: {
             fullName: shippingName,
             email: shippingEmail,
@@ -1839,109 +1795,74 @@ async function prepareOrderData() {
             city: shippingCity,
             state: shippingState,
             postalCode: shippingPostalCode,
-            country: shippingCountry,
-            saveAddress: true
-        },
-        billingAddress: document.getElementById('sameAsBilling').checked ? null : {
-            // Same as shipping for now
+            country: shippingCountry
         },
         paymentMethod: selectedPaymentMethod,
-        paymentStatus: selectedPaymentMethod === 'bank' ? 'pending' : 'confirmed',
-        status: selectedPaymentMethod === 'bank' ? 'payment_pending' : 'confirmed',
+        paymentStatus: selectedPaymentMethod === 'bank' ? 'pending' : 'paid',
+        orderStatus: selectedPaymentMethod === 'bank' ? 'payment_pending' : 'confirmed',
         notes: notes,
-        source: orderType,
-        isLoggedIn: !currentUserId.startsWith('guest_'),
-        isBuyNowOrder: orderType === 'buynow'
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        paymentReference: selectedPaymentMethod === 'bank' ? document.getElementById('bankReference').textContent : null
     };
-    
-    // Add payment reference for bank transfer
-    if (selectedPaymentMethod === 'bank') {
-        orderDataObj.paymentReference = document.getElementById('bankReference').textContent;
-    }
-    
-    return orderDataObj;
 }
 
-// Place Order - UPDATED WITH PROPER CONFIRMATION
-async function placeOrder() {
-    const placeOrderBtn = document.getElementById('placeOrderBtn');
-    placeOrderBtn.disabled = true;
-    placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-    
+async function saveOrderToLocalStorage(orderId, orderData) {
     try {
-        // Collect order data
-        const orderDataObj = await prepareOrderData();
+        // Save to user's orders
+        const userId = currentUserId;
+        const ordersKey = 'irya_user_orders_' + userId;
         
-        // Save address to Firestore
-        const shouldSaveAddress = true;
-        if (shouldSaveAddress) {
-            const addressData = {
-                fullName: orderDataObj.shippingAddress.fullName,
-                email: orderDataObj.shippingAddress.email,
-                phone: orderDataObj.shippingAddress.phone,
-                address1: orderDataObj.shippingAddress.address1,
-                address2: orderDataObj.shippingAddress.address2 || '',
-                city: orderDataObj.shippingAddress.city,
-                state: orderDataObj.shippingAddress.state,
-                postalCode: orderDataObj.shippingAddress.postalCode,
-                country: orderDataObj.shippingAddress.country,
-                saveAddress: true,
-                isDefault: false
-            };
-            
-            await saveAddress(addressData);
+        let userOrders = [];
+        const existingOrders = localStorage.getItem(ordersKey);
+        if (existingOrders) {
+            userOrders = JSON.parse(existingOrders);
         }
         
-        // Show payment processing modal
-        showPaymentProcessing();
+        userOrders.unshift(orderData);
+        localStorage.setItem(ordersKey, JSON.stringify(userOrders));
         
-        // Simulate payment processing
-        setTimeout(async () => {
-            try {
-                // Save to Firebase
-                const orderId = await saveOrderToFirebase(orderDataObj);
-                
-                // Record payment in user payments collection
-                await recordPaymentInUserPayments(orderId, orderDataObj);
-                
-                // CRITICAL: Update order status after payment
-                const paymentStatus = selectedPaymentMethod === 'bank' ? 'pending' : 'confirmed';
-                await updateOrderStatusAfterPayment(orderId, paymentStatus);
-                
-                // Handle success based on payment method
-                if (selectedPaymentMethod === 'bank') {
-                    showBankTransferDetails(orderId, orderDataObj);
-                } else {
-                    // For stripe/paypal, show immediate success
-                    showSuccess(orderId, orderDataObj);
-                }
-                
-                // Clear cart/buy now data
-                clearOrderSourceData();
-                
-            } catch (error) {
-                console.error('Error processing order:', error);
-                alert('Failed to process order. Please try again.');
-                placeOrderBtn.disabled = false;
-                placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
-                hidePaymentProcessing();
-            }
-        }, 2000);
+        // Save to all orders (for admin view)
+        const allOrdersKey = 'irya_all_orders';
+        let allOrders = [];
+        const existingAllOrders = localStorage.getItem(allOrdersKey);
+        if (existingAllOrders) {
+            allOrders = JSON.parse(existingAllOrders);
+        }
+        
+        allOrders.unshift(orderData);
+        localStorage.setItem(allOrdersKey, JSON.stringify(allOrders));
+        
+        // Save order ID for success modal
+        localStorage.setItem('irya_last_order_id', orderId);
+        localStorage.setItem('irya_last_order_data', JSON.stringify(orderData));
+        
+        console.log('Order saved to localStorage:', orderId);
         
     } catch (error) {
-        console.error('Error preparing order:', error);
-        alert('Failed to prepare order. Please check your details.');
-        placeOrderBtn.disabled = false;
-        placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
+        console.error('Error saving order to localStorage:', error);
     }
 }
+
+function clearCart() {
+    const userId = currentUserId;
+    const cartKey = 'irya_cart_' + userId;
+    localStorage.removeItem(cartKey);
+    
+    // Update cart badge on other pages
+    localStorage.setItem('irya_cart_updated', Date.now().toString());
+}
+
+// ============================================
+// MODAL FUNCTIONS
+// ============================================
 
 function showPaymentProcessing() {
     const modal = document.getElementById('paymentProcessingModal');
     const message = document.getElementById('processingMessage');
     
     if (selectedPaymentMethod === 'stripe') {
-        message.textContent = 'Processing your card payment securely with Stripe...';
+        message.textContent = 'Processing your card payment securely...';
     } else if (selectedPaymentMethod === 'paypal') {
         message.textContent = 'Redirecting to PayPal for secure payment...';
     } else {
@@ -1966,7 +1887,7 @@ function showBankTransferDetails(orderId, orderData) {
         </div>
         <div style="margin-bottom: 15px;">
             <div style="font-size: 12px; color: var(--text-light);">Amount to Transfer</div>
-            <div style="font-weight: bold; font-size: 20px; color: var(--primary-gold);">${formatPrice(orderData.paymentDueNow)}</div>
+            <div style="font-weight: bold; font-size: 20px; color: var(--primary-gold);">${formatPrice(orderData.advancePayment)}</div>
         </div>
         <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #eee;">
             <p><strong>Bank Name:</strong> HSBC UK</p>
@@ -1981,16 +1902,12 @@ function showBankTransferDetails(orderId, orderData) {
         </div>
     `;
     
-    detailsDiv.setAttribute('data-order-id', orderId);
-    detailsDiv.setAttribute('data-order-data', JSON.stringify(orderData));
-    
     modal.style.display = 'flex';
     hidePaymentProcessing();
 }
 
 function copyBankDetails() {
-    const detailsDiv = document.getElementById('bankTransferDetails');
-    const textToCopy = `IRYA STONE Order Details:
+    const detailsText = `IRYA STONE Order Details:
 Order Number: ${document.querySelector('#bankTransferDetails div:nth-child(1) div:nth-child(2)').textContent}
 Amount: ${document.querySelector('#bankTransferDetails div:nth-child(2) div:nth-child(2)').textContent}
 Bank: HSBC UK
@@ -1999,88 +1916,56 @@ Account Number: 12345678
 Sort Code: 40-04-15
 Reference: ${document.querySelector('#bankTransferDetails p:nth-child(5)').textContent.replace('Reference: ', '')}`;
     
-    navigator.clipboard.writeText(textToCopy).then(() => {
+    navigator.clipboard.writeText(detailsText).then(() => {
         alert('Bank details copied to clipboard!');
     });
 }
 
 function closeBankModal() {
     const modal = document.getElementById('bankTransferModal');
-    const detailsDiv = document.getElementById('bankTransferDetails');
-    const orderId = detailsDiv.getAttribute('data-order-id');
-    const orderData = JSON.parse(detailsDiv.getAttribute('data-order-data'));
-    
     modal.style.display = 'none';
-    showSuccess(orderId, orderData);
+    showSuccess('bank_order', { orderNumber: 'Pending Bank Transfer' });
 }
 
 function showSuccess(orderId, orderData) {
     const successDetails = document.getElementById('successDetails');
     const successMessage = document.getElementById('successMessage');
     
-    // Determine payment confirmation status
-    const isPaymentConfirmed = selectedPaymentMethod !== 'bank';
-    
-    if (!isPaymentConfirmed) {
-        successMessage.textContent = 'Order created! Please complete bank transfer to confirm.';
+    if (selectedPaymentMethod === 'bank') {
+        successMessage.textContent = 'Order Created Successfully!';
         successDetails.innerHTML = `
             <div style="margin-bottom: 8px;"><strong>Order Number:</strong> ${orderData.orderNumber}</div>
-            <div style="margin-bottom: 8px;"><strong>Amount to Pay:</strong> ${formatPrice(orderData.paymentDueNow)}</div>
+            <div style="margin-bottom: 8px;"><strong>Advance Amount:</strong> ${formatPrice(orderData.advancePayment)}</div>
             <div style="margin-bottom: 8px;"><strong>Payment Method:</strong> Bank Transfer</div>
-            <div style="margin-bottom: 8px;"><strong>Payment Reference:</strong> ${orderData.paymentReference || `IRYA-${Date.now()}`}</div>
+            <div style="margin-bottom: 8px;"><strong>Payment Reference:</strong> ${orderData.paymentReference}</div>
             <div style="margin-top: 10px; padding: 10px; background: #fff8e1; border-radius: 6px; font-size: 12px; color: var(--warning-orange);">
                 <i class="fas fa-clock"></i> 
-                <strong>Note:</strong> Order will be confirmed once payment is received (1-3 business days)
+                <strong>Note:</strong> Complete bank transfer to confirm order. Confirmation takes 1-3 business days.
             </div>
         `;
     } else {
-        successMessage.textContent = 'Payment successful! Your order is confirmed.';
+        successMessage.textContent = 'Payment Successful! Your order is confirmed.';
         successDetails.innerHTML = `
             <div style="margin-bottom: 8px;"><strong>Order Number:</strong> ${orderData.orderNumber}</div>
             <div style="margin-bottom: 8px;"><strong>Total Amount:</strong> ${formatPrice(orderData.total)}</div>
             <div style="margin-bottom: 8px;"><strong>Advance Paid:</strong> ${formatPrice(orderData.advancePayment)}</div>
             <div style="margin-bottom: 8px;"><strong>Remaining to Pay:</strong> ${formatPrice(orderData.remainingPayment)}</div>
-            <div style="margin-bottom: 8px;"><strong>Payment Method:</strong> ${selectedPaymentMethod === 'stripe' ? 'Credit/Debit Card (Stripe)' : 'PayPal'}</div>
+            <div style="margin-bottom: 8px;"><strong>Payment Method:</strong> ${selectedPaymentMethod === 'stripe' ? 'Credit/Debit Card' : 'PayPal'}</div>
             <div style="margin-top: 10px; font-size: 12px; color: var(--success-green);">
                 <i class="fas fa-check-circle"></i> 
-                <strong>Payment Status:</strong> Confirmed instantly
-            </div>
-            <div style="margin-top: 10px; font-size: 12px; color: var(--text-light);">
-                <i class="fas fa-info-circle"></i> 
-                <strong>Order Status:</strong> Confirmed
+                <strong>Payment Status:</strong> Advance payment confirmed
             </div>
         `;
     }
     
-    successDetails.setAttribute('data-order-id', orderId);
     document.getElementById('successModal').style.display = 'flex';
     hidePaymentProcessing();
 }
 
-function clearOrderSourceData() {
-    const buyNowKey = 'irya_buynow_cart_' + currentUserId;
-    localStorage.removeItem(buyNowKey);
-    sessionStorage.removeItem('irya_current_buynow');
-    localStorage.removeItem('irya_is_buynow_flow');
-    
-    localStorage.removeItem('irya_pending_payment_order');
-    
-    if (orderType === 'buynow' || orderType === 'pending_payment') {
-        const cartKey = 'irya_local_cart_' + currentUserId;
-        const cartData = localStorage.getItem(cartKey);
-        
-        if (cartData) {
-            const cartItems = JSON.parse(cartData);
-            const orderItemIds = orderData.items.map(item => item.uniqueId || item.id);
-            const updatedCart = cartItems.filter(item => 
-                !orderItemIds.includes(item.uniqueId || item.id)
-            );
-            localStorage.setItem(cartKey, JSON.stringify(updatedCart));
-        }
-    }
-}
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
 
-// Utility Functions
 function formatPrice(price) {
     if (!price && price !== 0) return '£0.00';
     return `£${parseFloat(price).toFixed(2)}`;
@@ -2111,69 +1996,51 @@ function showError(title, message) {
     document.getElementById('errorMessage').textContent = message;
     document.getElementById('errorState').style.display = 'block';
     document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('checkoutContent').style.display = 'none';
 }
 
 function retryLoad() {
     showLoading(true);
     setTimeout(() => {
-        loadOrderData();
+        location.reload();
     }, 1000);
 }
 
+function goBack() {
+    window.location.href = 'cart.html';
+}
+
 function viewOrder() {
-    const successDetails = document.getElementById('successDetails');
-    const orderId = successDetails.getAttribute('data-order-id');
-    window.location.href = `orders.html?order_id=${orderId}`;
+    const orderId = localStorage.getItem('irya_last_order_id');
+    if (orderId) {
+        window.location.href = `orders.html?order_id=${orderId}`;
+    } else {
+        window.location.href = 'orders.html';
+    }
+}
+
+function goToHome() {
+    window.location.href = 'index.html';
 }
 
 function goToOrders() {
     window.location.href = 'orders.html';
 }
 
-// Setup Event Listeners
-function setupEventListeners() {
-    const cardNumberInput = document.getElementById('cardNumber');
-    if (cardNumberInput) {
-        cardNumberInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-            let formatted = '';
-            for (let i = 0; i < value.length; i++) {
-                if (i > 0 && i % 4 === 0) formatted += ' ';
-                formatted += value[i];
-            }
-            e.target.value = formatted.substring(0, 19);
-        });
-    }
-    
-    const expiryInput = document.getElementById('cardExpiry');
-    if (expiryInput) {
-        expiryInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/[^0-9]/gi, '');
-            if (value.length >= 2) {
-                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
-            } else {
-                e.target.value = value;
-            }
-        });
-    }
-    
-    document.getElementById('shippingName').value = localStorage.getItem('irya_user_name') || '';
-    document.getElementById('shippingEmail').value = localStorage.getItem('irya_user_email') || '';
-    
-    selectPaymentMethod('stripe');
-    updateStepDisplay();
-}
-
 // Make functions available globally
-window.nextStep = nextStep;
-window.goBack = goBack;
 window.selectPaymentMethod = selectPaymentMethod;
+window.selectAddress = selectAddress;
+window.showAddressForm = showAddressForm;
+window.nextStep = nextStep;
+window.prevStep = prevStep;
 window.placeOrder = placeOrder;
-window.viewOrder = viewOrder;
-window.goToOrders = goToOrders;
-window.retryLoad = retryLoad;
 window.copyBankDetails = copyBankDetails;
 window.closeBankModal = closeBankModal;
+window.viewOrder = viewOrder;
+window.goToHome = goToHome;
+window.goToOrders = goToOrders;
+window.retryLoad = retryLoad;
+window.goBack = goBack;
 </script>
 </body>
 </html>
