@@ -2627,9 +2627,717 @@ function getDefaultImage(category) {
         return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
     } else if (categoryLower.includes('kota')) {
         return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300';
+    } else if (categoryLower.includes('granite')) {
+        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300';
+    } else if (categoryLower.includes('marble')) {
+        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300';
     }
     
     return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
+}
+
+function getDefaultUseImage(use) {
+    const useLower = (use || '').toLowerCase();
+    
+    if (useLower.includes('floor')) {
+        return 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=400&h=300';
+    } else if (useLower.includes('wall') || useLower.includes('cladding')) {
+        return 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=400&h=300';
+    } else if (useLower.includes('kitchen') || useLower.includes('counter')) {
+        return 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=400&h=300';
+    } else if (useLower.includes('bathroom')) {
+        return 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300';
+    }
+    
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
+}
+
+function formatPrice(price, unit = 'piece') {
+    if (!price && price !== 0) return 'Price on request';
+    
+    const priceNum = typeof price === 'number' ? price : parseFloat(price);
+    
+    if (isNaN(priceNum)) return 'Price on request';
+    
+    if (unit === 'sqft' || unit === 'm²') {
+        return `£${priceNum.toFixed(2)}/${unit}`;
+    } else if (unit === 'piece') {
+        return `£${priceNum.toFixed(2)} per piece`;
+    } else if (unit === 'kg') {
+        return `£${priceNum.toFixed(2)}/kg`;
+    } else {
+        return `£${priceNum.toFixed(2)}`;
+    }
+}
+
+// ============================================
+// CATEGORIES AND USES DISPLAY FUNCTIONS (RESTORED)
+// ============================================
+
+async function loadCategories() {
+    const container = document.getElementById('categoriesGrid');
+    
+    if (!container) return;
+    
+    try {
+        showLoading(true);
+        
+        if (!firebaseDB) {
+            const initialized = initializeFirebase();
+            if (!initialized) {
+                loadDefaultCategories();
+                return;
+            }
+        }
+        
+        console.log('Loading categories from Firebase...');
+        const querySnapshot = await firebaseDB.collection("products").get();
+        
+        if (!querySnapshot.empty) {
+            const categoryMap = new Map();
+            
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const category = data.category || 'Natural Stone';
+                
+                let image = '';
+                if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+                    image = data.images[0];
+                } else if (typeof data.image === 'string') {
+                    image = data.image;
+                }
+                if (!image) {
+                    image = getDefaultImage(category);
+                }
+                
+                if (!categoryMap.has(category)) {
+                    categoryMap.set(category, {
+                        name: category,
+                        image: image,
+                        count: 1
+                    });
+                } else {
+                    categoryMap.get(category).count += 1;
+                }
+            });
+            
+            // Store categories for filter
+            availableCategories = Array.from(categoryMap.keys());
+            
+            // Sort by count
+            const allCategories = Array.from(categoryMap.values())
+                .sort((a, b) => b.count - a.count);
+            
+            console.log('Loaded categories:', allCategories.length);
+            displayCategories(allCategories);
+        } else {
+            loadDefaultCategories();
+        }
+        
+    } catch (error) {
+        console.error('Error loading categories:', error);
+        loadDefaultCategories();
+    } finally {
+        showLoading(false);
+    }
+}
+
+function displayCategories(categories) {
+    const container = document.getElementById('categoriesGrid');
+    if (!container) return;
+    
+    if (categories.length === 0) {
+        container.innerHTML = `
+            <div class="no-products">
+                <i class="fas fa-box-open"></i>
+                <h3>No Categories Found</h3>
+                <p>Categories will appear when products are added</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const categoriesHTML = categories.map(category => `
+        <a href="products.html?category=${encodeURIComponent(category.name)}" class="category-card">
+            <div class="category-image-container">
+                <img src="${category.image}" alt="${category.name}" 
+                     class="category-image"
+                     onerror="this.src='${getDefaultImage(category.name)}'"
+                     loading="lazy">
+            </div>
+            <div class="category-content">
+                <div class="category-name">${category.name}</div>
+                <div class="category-count">${category.count} products</div>
+            </div>
+        </a>
+    `).join('');
+    
+    container.innerHTML = categoriesHTML;
+}
+
+function loadDefaultCategories() {
+    const defaultCategories = [
+        {
+            name: 'Sand Stone',
+            image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300',
+            count: 12
+        },
+        {
+            name: 'Kota Stone',
+            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300',
+            count: 8
+        },
+        {
+            name: 'Granite',
+            image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300',
+            count: 6
+        },
+        {
+            name: 'Marble',
+            image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300',
+            count: 5
+        }
+    ];
+    
+    displayCategories(defaultCategories);
+}
+
+async function loadStoneUses() {
+    const container = document.getElementById('usesGrid');
+    
+    if (!container) return;
+    
+    try {
+        showLoading(true);
+        
+        if (!firebaseDB) {
+            const initialized = initializeFirebase();
+            if (!initialized) {
+                loadDefaultUses();
+                return;
+            }
+        }
+        
+        console.log('Loading stone uses from Firebase...');
+        const querySnapshot = await firebaseDB.collection("products").get();
+        
+        if (!querySnapshot.empty) {
+            const usesMap = new Map();
+            
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                // Check multiple possible fields for usage
+                const usage = data.usage || data.uses || data.application || 'General Use';
+                
+                if (usage && usage.trim() !== '') {
+                    // Handle multiple uses separated by comma
+                    const usesArray = usage.split(',').map(u => u.trim()).filter(u => u !== '');
+                    
+                    usesArray.forEach(singleUse => {
+                        let image = '';
+                        if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+                            image = data.images[0];
+                        } else if (typeof data.image === 'string') {
+                            image = data.image;
+                        }
+                        if (!image) {
+                            image = getDefaultUseImage(singleUse);
+                        }
+                        
+                        if (!usesMap.has(singleUse)) {
+                            usesMap.set(singleUse, {
+                                name: singleUse,
+                                image: image,
+                                count: 1
+                            });
+                        } else {
+                            usesMap.get(singleUse).count += 1;
+                        }
+                    });
+                }
+            });
+            
+            // Store uses for filter
+            availableUses = Array.from(usesMap.keys());
+            
+            // Sort by count
+            const uses = Array.from(usesMap.values())
+                .sort((a, b) => b.count - a.count);
+            
+            console.log('Loaded uses:', uses.length);
+            displayUses(uses);
+        } else {
+            loadDefaultUses();
+        }
+        
+    } catch (error) {
+        console.error('Error loading stone uses:', error);
+        loadDefaultUses();
+    } finally {
+        showLoading(false);
+    }
+}
+
+function displayUses(uses) {
+    const container = document.getElementById('usesGrid');
+    if (!container) return;
+    
+    if (uses.length === 0) {
+        container.innerHTML = `
+            <div class="no-products">
+                <i class="fas fa-tools"></i>
+                <h3>No Uses Found</h3>
+                <p>Uses will appear when products are added</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const usesHTML = uses.map(use => `
+        <a href="products.html?usage=${encodeURIComponent(use.name)}" class="use-card">
+            <div class="use-image-container">
+                <img src="${use.image}" alt="${use.name}" class="use-image"
+                     onerror="this.src='${getDefaultUseImage(use.name)}'"
+                     loading="lazy">
+            </div>
+            <div class="use-content">
+                <div class="use-name">${use.name}</div>
+                <div class="use-count">${use.count} products</div>
+            </div>
+        </a>
+    `).join('');
+    
+    container.innerHTML = usesHTML;
+}
+
+function loadDefaultUses() {
+    const defaultUses = [
+        {
+            name: 'Flooring',
+            image: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=400&h=300',
+            count: 8
+        },
+        {
+            name: 'Wall Cladding',
+            image: 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=400&h=300',
+            count: 6
+        },
+        {
+            name: 'Kitchen Countertops',
+            image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=400&h=300',
+            count: 4
+        },
+        {
+            name: 'Bathroom',
+            image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300',
+            count: 3
+        },
+        {
+            name: 'Outdoor Paving',
+            image: 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300',
+            count: 5
+        },
+        {
+            name: 'Staircase',
+            image: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=400&h=300',
+            count: 2
+        }
+    ];
+    
+    displayUses(defaultUses);
+}
+
+// ============================================
+// SMART FILTER SYSTEM
+// ============================================
+
+async function loadSmartFilters() {
+    try {
+        if (!firebaseDB) {
+            const initialized = initializeFirebase();
+            if (!initialized) return;
+        }
+        
+        console.log('Loading smart filters from Firebase...');
+        const querySnapshot = await firebaseDB.collection("products").get();
+        
+        if (querySnapshot.empty) {
+            populateDefaultFilters();
+            return;
+        }
+        
+        const categoriesSet = new Set();
+        const usesSet = new Set();
+        const colorsSet = new Set();
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            
+            // Collect categories
+            if (data.category && data.category.trim() !== '') {
+                categoriesSet.add(data.category);
+            }
+            
+            // Collect uses from multiple possible fields
+            const usage = data.usage || data.uses || data.application;
+            if (usage && usage.trim() !== '') {
+                const usesArray = usage.split(',').map(u => u.trim()).filter(u => u !== '');
+                usesArray.forEach(u => usesSet.add(u));
+            }
+            
+            // Collect colors
+            if (data.color && data.color.trim() !== '') {
+                colorsSet.add(data.color);
+            }
+        });
+        
+        // Update global arrays
+        availableCategories = Array.from(categoriesSet).sort();
+        availableUses = Array.from(usesSet).sort();
+        availableColors = Array.from(colorsSet).sort();
+        
+        console.log('Filters loaded:', {
+            categories: availableCategories.length,
+            uses: availableUses.length,
+            colors: availableColors.length
+        });
+        
+        // Populate filter dropdowns
+        populateFilterOptions();
+        
+    } catch (error) {
+        console.error('Error loading smart filters:', error);
+        populateDefaultFilters();
+    }
+}
+
+function populateFilterOptions() {
+    // Category filter
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+        // Clear existing options (keep "All Categories")
+        while (categoryFilter.options.length > 1) {
+            categoryFilter.remove(1);
+        }
+        
+        // Add categories
+        availableCategories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categoryFilter.appendChild(option);
+        });
+    }
+    
+    // Usage filter
+    const usageFilter = document.getElementById('usageFilter');
+    if (usageFilter) {
+        // Clear existing options (keep "All Uses")
+        while (usageFilter.options.length > 1) {
+            usageFilter.remove(1);
+        }
+        
+        // Add uses
+        availableUses.forEach(use => {
+            const option = document.createElement('option');
+            option.value = use;
+            option.textContent = use;
+            usageFilter.appendChild(option);
+        });
+    }
+    
+    // Color filter
+    const colorFilter = document.getElementById('colorFilter');
+    if (colorFilter) {
+        // Clear existing options (keep "All Colors")
+        while (colorFilter.options.length > 1) {
+            colorFilter.remove(1);
+        }
+        
+        // Add colors
+        availableColors.forEach(color => {
+            const option = document.createElement('option');
+            option.value = color;
+            option.textContent = color;
+            colorFilter.appendChild(option);
+        });
+    }
+}
+
+function populateDefaultFilters() {
+    const defaultCategories = ['Sand Stone', 'Kota Stone', 'Granite', 'Marble', 'Limestone', 'Slate'];
+    const defaultUses = ['Flooring', 'Wall Cladding', 'Kitchen Countertops', 'Staircase', 'Garden Paving', 'Pool Surround'];
+    const defaultColors = ['Gray', 'Brown', 'Black', 'White', 'Green', 'Blue', 'Red', 'Yellow'];
+    
+    availableCategories = defaultCategories;
+    availableUses = defaultUses;
+    availableColors = defaultColors;
+    
+    populateFilterOptions();
+}
+
+// ============================================
+// PRODUCT LOADING WITH FILTERS (RESTORED)
+// ============================================
+
+async function loadProductsFromFirebase() {
+    const container = document.getElementById('productGrid');
+    
+    if (!container) return;
+    
+    try {
+        showLoading(true);
+        
+        if (!firebaseDB) {
+            const initialized = initializeFirebase();
+            if (!initialized) {
+                showDefaultProducts();
+                return;
+            }
+        }
+        
+        // Reset products array
+        allProducts = [];
+        
+        try {
+            console.log('Fetching products from Firebase...');
+            const querySnapshot = await firebaseDB.collection("products").get();
+            
+            if (querySnapshot.empty) {
+                console.log('No products found in Firestore');
+                showNoProducts();
+                showLoading(false);
+                return;
+            }
+            
+            console.log(`Found ${querySnapshot.size} products`);
+            
+            // Use Map to ensure uniqueness by product ID
+            const productMap = new Map();
+            
+            querySnapshot.forEach((doc) => {
+                const productId = doc.id;
+                const data = doc.data();
+                
+                // Skip if we already have this product
+                if (productMap.has(productId)) {
+                    return;
+                }
+                
+                const product = {
+                    id: productId,
+                    stone_name: data.stone_name || data.name || 'Stone Product',
+                    category: data.category || 'Natural Stone',
+                    description: data.description || '',
+                    price: parseFloat(data.price) || 0,
+                    price_unit: data.price_unit || 'piece',
+                    finish: data.finish || '',
+                    size: data.size || '',
+                    thickness: data.thickness || '',
+                    color: data.color || '',
+                    usage: data.usage || data.uses || '',
+                    type: data.type || '',
+                    sub_category: data.sub_category || '',
+                    length: data.length || '',
+                    width: data.width || '',
+                    images: Array.isArray(data.images) ? data.images : 
+                           (data.image ? [data.image] : []),
+                    image: data.image || '',
+                    created_at: data.created_at || new Date().toISOString(),
+                    is_active: data.is_active !== undefined ? data.is_active : true
+                };
+                
+                // Only add active products
+                if (product.is_active) {
+                    productMap.set(productId, product);
+                }
+            });
+            
+            // Convert Map to array
+            allProducts = Array.from(productMap.values());
+            
+            console.log(`Loaded ${allProducts.length} unique products from Firebase`);
+            
+            if (allProducts.length === 0) {
+                showNoProducts();
+            } else {
+                // Apply all filters client-side
+                applyAllFiltersClientSide();
+            }
+            
+        } catch (error) {
+            console.error('Firestore query error:', error);
+            showError('Error loading products: ' + error.message);
+            showDefaultProducts();
+        }
+        
+    } catch (error) {
+        console.error('Error loading products:', error);
+        showError('Failed to load products. Please try again.');
+        showDefaultProducts();
+    } finally {
+        showLoading(false);
+    }
+}
+
+function applyAllFiltersClientSide() {
+    if (allProducts.length === 0) {
+        showNoProducts();
+        return;
+    }
+    
+    let filteredProducts = [...allProducts];
+    
+    console.log('Applying filters to', allProducts.length, 'products');
+    
+    // Apply category filter
+    if (currentCategory !== 'all') {
+        filteredProducts = filteredProducts.filter(product => 
+            product.category && product.category === currentCategory
+        );
+    }
+    
+    // Apply usage filter
+    if (currentUsageFilter !== 'all') {
+        filteredProducts = filteredProducts.filter(product => 
+            product.usage && product.usage.includes(currentUsageFilter)
+        );
+    }
+    
+    // Apply color filter
+    if (currentColorFilter !== 'all') {
+        filteredProducts = filteredProducts.filter(product => 
+            product.color && product.color === currentColorFilter
+        );
+    }
+    
+    // Apply price filter
+    if (currentPriceFilter !== 'all') {
+        filteredProducts = filteredProducts.filter(product => {
+            const price = product.price || 0;
+            
+            switch(currentPriceFilter) {
+                case '0-25':
+                    return price >= 0 && price <= 25;
+                case '25-50':
+                    return price > 25 && price <= 50;
+                case '50-100':
+                    return price > 50 && price <= 100;
+                case '100-250':
+                    return price > 100 && price <= 250;
+                case '250+':
+                    return price > 250;
+                default:
+                    return true;
+            }
+        });
+    }
+    
+    // Apply sorting
+    if (currentSort === 'price_low') {
+        filteredProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (currentSort === 'price_high') {
+        filteredProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
+    } else if (currentSort === 'name') {
+        filteredProducts.sort((a, b) => (a.stone_name || '').localeCompare(b.stone_name || ''));
+    } else if (currentSort === 'newest') {
+        filteredProducts.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    }
+    
+    console.log('After filtering:', filteredProducts.length, 'products');
+    displayProducts(filteredProducts);
+}
+
+function displayProducts(products) {
+    const container = document.getElementById('productGrid');
+    if (!container) return;
+    
+    if (products.length === 0) {
+        showNoProducts();
+        return;
+    }
+    
+    const productsHTML = products.map(product => {
+        const formattedPrice = formatPrice(product.price, product.price_unit);
+        const isInWishlist = wishlistSystem ? wishlistSystem.isInWishlist(product.id) : false;
+        
+        // Get product image
+        let productImage = getProductImage(product);
+        
+        return `
+            <a href="product.html?id=${encodeURIComponent(product.id)}" class="image-card">
+                <div class="card-image-container">
+                    <img src="${productImage}" 
+                         alt="${product.stone_name}" 
+                         class="card-image" 
+                         onerror="this.src='${getDefaultImage(product.category)}'"
+                         loading="lazy">
+                    
+                    <!-- Wishlist Button -->
+                    <button class="wishlist-icon ${isInWishlist ? 'active' : ''}" 
+                            onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${product.id}')">
+                        <i class="${isInWishlist ? 'fas' : 'far'} fa-heart"></i>
+                    </button>
+                    
+                    <!-- Add to Cart Button -->
+                    <button class="add-cart-icon" 
+                            onclick="event.preventDefault(); event.stopPropagation(); addToCartDirect('${product.id}')">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                </div>
+                
+                <div class="product-info-overlay">
+                    <div class="product-name">${product.stone_name}</div>
+                    <div class="product-price">${formattedPrice}</div>
+                    ${product.category ? `<div class="product-category">${product.category}</div>` : ''}
+                </div>
+            </a>
+        `;
+    }).join('');
+    
+    container.innerHTML = productsHTML;
+}
+
+function showNoProducts() {
+    const container = document.getElementById('productGrid');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="no-products">
+            <i class="fas fa-search"></i>
+            <h3>No Products Found</h3>
+            <p>Try selecting different filters or check back later for new products</p>
+        </div>
+    `;
+}
+
+function showDefaultProducts() {
+    const products = [
+        {
+            id: 'default1',
+            stone_name: 'Premium Sandstone',
+            category: 'Sand Stone',
+            description: 'High quality sandstone for various applications',
+            price: 45.00,
+            images: ['https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300'],
+            price_unit: 'sqft',
+            color: 'Brown',
+            usage: 'Flooring'
+        },
+        {
+            id: 'default2',
+            stone_name: 'Kota Blue Stone',
+            category: 'Kota Stone',
+            description: 'Beautiful blue kota stone for flooring',
+            price: 35.00,
+            images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300'],
+            price_unit: 'sqft',
+            color: 'Blue',
+            usage: 'Flooring'
+        }
+    ];
+    
+    displayProducts(products);
 }
 
 // ============================================
@@ -2662,8 +3370,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     console.log('✅ All systems initialized successfully');
     
-    // Load products (but don't auto-add to cart)
-    loadProducts();
+    // Load categories and uses FIRST
+    await loadCategories();
+    await loadStoneUses();
+    
+    // Load smart filters for dropdowns
+    await loadSmartFilters();
+    
+    // Load products
+    await loadProductsFromFirebase();
     
     // Setup event listeners
     setupEventListeners();
@@ -2684,127 +3399,74 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ============================================
-// PRODUCT LOADING (SAFE)
+// FILTER EVENT HANDLERS
 // ============================================
 
-async function loadProducts() {
-    try {
-        showLoading(true);
-        
-        if (!firebaseDB) {
-            initializeFirebase();
-        }
-        
-        const querySnapshot = await firebaseDB.collection("products").get();
-        
-        if (querySnapshot.empty) {
-            console.log('No products found');
-            showLoading(false);
-            return;
-        }
-        
-        const productMap = new Map();
-        
-        querySnapshot.forEach((doc) => {
-            const productId = doc.id;
-            const data = doc.data();
-            
-            const product = {
-                id: productId,
-                stone_name: data.stone_name || data.name || 'Stone Product',
-                category: data.category || 'Natural Stone',
-                description: data.description || '',
-                price: parseFloat(data.price) || 0,
-                price_unit: data.price_unit || 'piece',
-                color: data.color || '',
-                usage: data.usage || '',
-                images: Array.isArray(data.images) ? data.images : 
-                       (data.image ? [data.image] : []),
-                image: data.image || '',
-                is_active: data.is_active !== undefined ? data.is_active : true
-            };
-            
-            if (product.is_active) {
-                productMap.set(productId, product);
-            }
-        });
-        
-        allProducts = Array.from(productMap.values());
-        
-        if (allProducts.length > 0) {
-            displayProducts(allProducts);
-        }
-        
-    } catch (error) {
-        console.error('Error loading products:', error);
-    } finally {
-        showLoading(false);
+function applyFilters() {
+    currentCategory = document.getElementById('categoryFilter').value;
+    currentPriceFilter = document.getElementById('priceFilter').value;
+    currentUsageFilter = document.getElementById('usageFilter').value;
+    currentColorFilter = document.getElementById('colorFilter').value;
+    currentSort = document.getElementById('sortFilter').value;
+    
+    applyAllFiltersClientSide();
+}
+
+// ============================================
+// SEARCH FUNCTION
+// ============================================
+
+function searchProducts(query) {
+    const searchResults = document.getElementById('searchResults');
+    if (!searchResults || !query.trim()) {
+        searchResults.classList.remove('active');
+        return;
     }
-}
-
-function displayProducts(products) {
-    const container = document.getElementById('productGrid');
-    if (!container) return;
     
-    const productsHTML = products.map(product => {
-        const formattedPrice = formatPrice(product.price, product.price_unit);
-        const isInWishlist = wishlistSystem ? wishlistSystem.isInWishlist(product.id) : false;
-        let productImage = getProductImage(product);
+    const filtered = allProducts.filter(product => 
+        product.stone_name.toLowerCase().includes(query.toLowerCase()) ||
+        (product.category && product.category.toLowerCase().includes(query.toLowerCase())) ||
+        (product.description && product.description.toLowerCase().includes(query.toLowerCase())) ||
+        (product.color && product.color.toLowerCase().includes(query.toLowerCase()))
+    ).slice(0, 8);
+    
+    if (filtered.length > 0) {
+        const resultsHTML = filtered.map(product => {
+            let image = getProductImage(product);
+            
+            return `
+                <a href="product.html?id=${encodeURIComponent(product.id)}" class="search-result-item">
+                    <div class="search-result-image">
+                        <img src="${image}" alt="${product.stone_name}"
+                             onerror="this.src='${getDefaultImage(product.category)}'">
+                    </div>
+                    <div class="search-result-info">
+                        <div class="search-result-name">${product.stone_name}</div>
+                        <div class="search-result-category">${product.category || 'Stone'}</div>
+                    </div>
+                    <div class="search-result-price">${formatPrice(product.price, product.price_unit)}</div>
+                </a>
+            `;
+        }).join('');
         
-        return `
-            <a href="product.html?id=${encodeURIComponent(product.id)}" class="image-card">
-                <div class="card-image-container">
-                    <img src="${productImage}" 
-                         alt="${product.stone_name}" 
-                         class="card-image" 
-                         onerror="this.src='${getDefaultImage(product.category)}'"
-                         loading="lazy">
-                    
-                    <button class="wishlist-icon ${isInWishlist ? 'active' : ''}" 
-                            onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${product.id}')">
-                        <i class="${isInWishlist ? 'fas' : 'far'} fa-heart"></i>
-                    </button>
-                    
-                    <button class="add-cart-icon" 
-                            onclick="event.preventDefault(); event.stopPropagation(); addToCartDirect('${product.id}')">
-                        <i class="fas fa-cart-plus"></i>
-                    </button>
-                </div>
-                
-                <div class="product-info-overlay">
-                    <div class="product-name">${product.stone_name}</div>
-                    <div class="product-price">${formattedPrice}</div>
-                    ${product.category ? `<div class="product-category">${product.category}</div>` : ''}
-                </div>
-            </a>
-        `;
-    }).join('');
-    
-    container.innerHTML = productsHTML;
-}
-
-function formatPrice(price, unit = 'piece') {
-    if (!price && price !== 0) return 'Price on request';
-    
-    const priceNum = typeof price === 'number' ? price : parseFloat(price);
-    
-    if (isNaN(priceNum)) return 'Price on request';
-    
-    if (unit === 'sqft' || unit === 'm²') {
-        return `£${priceNum.toFixed(2)}/${unit}`;
-    } else if (unit === 'piece') {
-        return `£${priceNum.toFixed(2)} per piece`;
+        searchResults.innerHTML = resultsHTML;
     } else {
-        return `£${priceNum.toFixed(2)}`;
+        searchResults.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <p>No products found for "${query}"</p>
+            </div>
+        `;
     }
+    
+    searchResults.classList.add('active');
 }
 
-// ============================================
-// EVENT LISTENERS
-// ============================================
-
-function setupEventListeners() {
-    // Your existing event listeners here
+function hideSearchResults() {
+    const searchResultsDiv = document.getElementById('searchResults');
+    if (searchResultsDiv) {
+        searchResultsDiv.classList.remove('active');
+    }
 }
 
 // ============================================
@@ -2869,6 +3531,160 @@ function updateWishlistIcon(productId, isInWishlist) {
             }
         }
     });
+}
+
+// ============================================
+// EVENT LISTENERS SETUP
+// ============================================
+
+function setupEventListeners() {
+    // Filter event listeners
+    const filterIds = ['categoryFilter', 'priceFilter', 'usageFilter', 'colorFilter', 'sortFilter'];
+    
+    filterIds.forEach(filterId => {
+        const filter = document.getElementById(filterId);
+        if (filter) {
+            filter.addEventListener('change', applyFilters);
+        }
+    });
+    
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const searchIcon = document.getElementById('searchIcon');
+    const searchResults = document.getElementById('searchResults');
+    
+    if (searchInput && searchIcon) {
+        searchIcon.addEventListener('click', () => {
+            if (searchInput.value.trim()) {
+                searchProducts(searchInput.value);
+            } else {
+                hideSearchResults();
+            }
+        });
+        
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim()) {
+                searchProducts(searchInput.value);
+            }
+        });
+        
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length >= 2) {
+                searchTimeout = setTimeout(() => {
+                    searchProducts(query);
+                }, 300);
+            } else {
+                hideSearchResults();
+            }
+        });
+    }
+    
+    // Close search results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (searchResults && searchInput && 
+            !searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            hideSearchResults();
+        }
+    });
+    
+    // Scroll to top button
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    if (scrollTopBtn) {
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+    
+    // Improved scroll handling
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Initial scroll check
+    handleScroll();
+}
+
+// ============================================
+// IMPROVED SCROLL HANDLING
+// ============================================
+
+let lastScrollTop = 0;
+let scrollTimeout;
+let isHeaderVisible = true;
+let scrollThreshold = 100;
+let debounceTimeout;
+
+function handleScroll() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const header = document.getElementById('mainHeader');
+    const bottomNav = document.getElementById('bottomNav');
+    
+    if (!header || !bottomNav) return;
+    
+    // Clear any existing timeout
+    if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+    }
+    
+    // Debounce the scroll event
+    debounceTimeout = setTimeout(() => {
+        // Always show when near top
+        if (scrollTop < 50) {
+            header.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+            header.classList.add('show');
+            bottomNav.classList.add('show');
+            isHeaderVisible = true;
+            return;
+        }
+        
+        // Determine scroll direction
+        if (scrollTop > lastScrollTop) {
+            // Scrolling DOWN - hide
+            if (scrollTop > scrollThreshold && isHeaderVisible) {
+                header.classList.add('hidden');
+                bottomNav.classList.add('hidden');
+                header.classList.remove('show');
+                bottomNav.classList.remove('show');
+                isHeaderVisible = false;
+            }
+        } else {
+            // Scrolling UP - show smoothly
+            if (!isHeaderVisible) {
+                header.classList.remove('hidden');
+                bottomNav.classList.remove('hidden');
+                header.classList.add('show');
+                bottomNav.classList.add('show');
+                isHeaderVisible = true;
+            }
+        }
+        
+        // Add scrolled class when not at top
+        if (scrollTop > 100) {
+            header.classList.add('scrolled');
+            bottomNav.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+            bottomNav.classList.remove('scrolled');
+        }
+        
+        lastScrollTop = scrollTop;
+        
+        // Update scroll to top button
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        if (scrollTopBtn) {
+            if (scrollTop > 300) {
+                scrollTopBtn.classList.add('visible');
+            } else {
+                scrollTopBtn.classList.remove('visible');
+            }
+        }
+    }, 100);
 }
 </script>
 </body>
