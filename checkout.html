@@ -29,6 +29,9 @@
             --warning-orange: #f59e0b;
             --error-red: #ef4444;
             --info-blue: #3b82f6;
+            --pending-yellow: #fbbf24;
+            --refunded-purple: #8b5cf6;
+            --cancelled-red: #dc2626;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
             --shadow-lg: 0 8px 20px rgba(0,0,0,0.12);
@@ -1190,27 +1193,11 @@
                     <div class="payment-method selected" onclick="selectPaymentMethod('stripe')" id="stripeMethod">
                         <div class="method-header">
                             <div class="method-icon">
-                                <i class="fab fa-cc-stripe"></i>
+                                <i class="fas fa-credit-card"></i>
                             </div>
                             <div>
                                 <div class="method-title">Credit/Debit Card</div>
                                 <div class="method-description">Secure payment via Stripe</div>
-                            </div>
-                        </div>
-                        <div class="method-tags">
-                            <span class="method-tag fast">FAST</span>
-                            <span class="method-tag instant">INSTANT</span>
-                        </div>
-                    </div>
-                    
-                    <div class="payment-method" onclick="selectPaymentMethod('paypal')" id="paypalMethod">
-                        <div class="method-header">
-                            <div class="method-icon">
-                                <i class="fab fa-paypal"></i>
-                            </div>
-                            <div>
-                                <div class="method-title">PayPal</div>
-                                <div class="method-description">Pay with your PayPal account</div>
                             </div>
                         </div>
                         <div class="method-tags">
@@ -1269,7 +1256,22 @@
                         <p><strong>Account:</strong> IRYA STONE LTD</p>
                         <p><strong>Account No:</strong> 12345678</p>
                         <p><strong>Sort Code:</strong> 40-04-15</p>
-                        <p><strong>Reference:</strong> <span id="bankReference">IRYA-123456</span></p>
+                        <p><strong>Reference:</strong> <span id="bankReference">IRYA-${Date.now().toString().slice(-6)}</span></p>
+                        <p style="color: var(--warning-orange); margin-top: 8px;">
+                            <i class="fas fa-exclamation-triangle"></i> Platform fee 2.5% + £0.30 will be deducted
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Payment Terms -->
+                <div style="margin-top: 20px; padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                    <h4 style="margin-bottom: 8px; color: var(--error-red); font-size: 14px;">
+                        <i class="fas fa-exclamation-circle"></i> Payment Confirmation Policy
+                    </h4>
+                    <div style="font-size: 11px; line-height: 1.4; color: var(--text-light);">
+                        <p>✓ If payment is not confirmed within 24 hours, order will be cancelled</p>
+                        <p>✓ Refunds will be processed after deducting platform fees & bank charges</p>
+                        <p>✓ 30% advance is non-refundable if order is confirmed</p>
                     </div>
                 </div>
                 
@@ -1301,6 +1303,8 @@
                     <div style="font-size: 11px; color: var(--text-light); line-height: 1.4;">
                         <i class="fas fa-info-circle"></i>
                         30% advance payment required. Remaining 70% payable before delivery.
+                        <br><i class="fas fa-exclamation-triangle" style="color: var(--warning-orange);"></i>
+                        If payment not confirmed within 24 hours, order will be cancelled automatically
                     </div>
                 </div>
                 
@@ -1419,32 +1423,28 @@
     </div>
 </div>
 
-<!-- Bottom Navigation -->
-<div class="bottom-nav" id="bottomNav">
-    <a href="index.html" class="nav-btn">
-        <i class="fas fa-home"></i>
-        <span>Home</span>
-    </a>
-    <a href="products.html" class="nav-btn">
-        <i class="fas fa-th-large"></i>
-        <span>Products</span>
-    </a>
-    <a href="account.html" class="nav-btn">
-        <i class="fas fa-user"></i>
-        <span>Account</span>
-    </a>
-    <a href="orders.html" class="nav-btn">
-        <i class="fas fa-box"></i>
-        <span>Orders</span>
-    </a>
-    <a href="cart.html" class="nav-btn active">
-        <i class="fas fa-shopping-cart"></i>
-        <span>Cart</span>
-        <span class="nav-badge" id="bottomCartBadge" style="display: none;">0</span>
-    </a>
-</div>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
 <script>
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+    authDomain: "iryastone-uk.firebaseapp.com",
+    projectId: "iryastone-uk",
+    storageBucket: "iryastone-uk.firebasestorage.app",
+    messagingSenderId: "110940910896",
+    appId: "1:110940910896:web:b25e92127118665e5c84f5",
+    measurementId: "G-6YM1FLYN48"
+};
+
+let firebaseApp, firebaseDB, firebaseAuth;
+
 // ============================================
 // GLOBAL VARIABLES
 // ============================================
@@ -1457,9 +1457,53 @@ let orderData = {
     tax: 0,
     total: 0,
     advancePayment: 0,
+    platformFee: 0,
+    netAdvance: 0,
     isBuyNow: false,
-    buyNowProduct: null
+    buyNowProduct: null,
+    userId: null,
+    userName: null,
+    userEmail: null
 };
+
+// ============================================
+// FIREBASE INITIALIZATION
+// ============================================
+
+async function initializeFirebase() {
+    try {
+        if (typeof firebase === 'undefined') {
+            console.warn('Firebase SDK not loaded');
+            return false;
+        }
+        
+        if (!firebase.apps.length) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase app initialized');
+        } else {
+            firebaseApp = firebase.app();
+            console.log('✅ Using existing Firebase app');
+        }
+        
+        firebaseDB = firebase.firestore();
+        firebaseAuth = firebase.auth();
+        
+        // Enable persistence
+        try {
+            await firebaseDB.enablePersistence();
+            console.log('✅ Firestore persistence enabled');
+        } catch (err) {
+            console.log('ℹ️ Firestore persistence not enabled:', err);
+        }
+        
+        console.log('✅ Firebase services initialized');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Firebase initialization error:', error);
+        return false;
+    }
+}
 
 // ============================================
 // INITIALIZATION
@@ -1467,15 +1511,39 @@ let orderData = {
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Checkout page initializing...');
     
+    showLoading(true);
+    
     try {
+        // Initialize Firebase
+        const firebaseInitialized = await initializeFirebase();
+        
+        if (!firebaseInitialized) {
+            console.log('⚠️ Firebase not initialized, using localStorage only');
+        }
+        
+        // Get current user
+        const userData = localStorage.getItem('irya_stone_user');
+        const currentUser = userData ? JSON.parse(userData) : null;
+        
+        if (currentUser) {
+            orderData.userId = currentUser.uid;
+            orderData.userName = currentUser.displayName || 'Guest User';
+            orderData.userEmail = currentUser.email || '';
+        } else {
+            // Create guest user
+            let guestId = localStorage.getItem('irya_guest_id');
+            if (!guestId) {
+                guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('irya_guest_id', guestId);
+            }
+            orderData.userId = guestId;
+            orderData.userName = 'Guest User';
+            orderData.userEmail = '';
+        }
+        
         // Check if this is a Buy Now flow
         const urlParams = new URLSearchParams(window.location.search);
         const isBuyNow = urlParams.get('buynow') === 'true';
-        const userId = urlParams.get('user');
-        
-        if (userId) {
-            sessionStorage.setItem('irya_checkout_user_id', userId);
-        }
         
         if (isBuyNow) {
             // This is a Buy Now flow
@@ -1503,45 +1571,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     } catch (error) {
         console.error('Error initializing checkout:', error);
         showError('Failed to load checkout. Please try again.');
+    } finally {
+        showLoading(false);
     }
 });
 
 // ============================================
-// SCROLL HANDLING
+// DATA LOADING FUNCTIONS - FIXED
 // ============================================
-function setupScrollHandling() {
-    let lastScrollTop = 0;
-    const header = document.getElementById('mainHeader');
-    const bottomNav = document.getElementById('bottomNav');
-    
-    window.addEventListener('scroll', function() {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        if (scrollTop < 10) {
-            header.classList.remove('hidden');
-            bottomNav.classList.remove('hidden');
-            return;
-        }
-        
-        if (scrollTop > lastScrollTop) {
-            // Scrolling down
-            if (scrollTop > 100) {
-                header.classList.add('hidden');
-                bottomNav.classList.add('hidden');
-            }
-        } else {
-            // Scrolling up
-            header.classList.remove('hidden');
-            bottomNav.classList.remove('hidden');
-        }
-        
-        lastScrollTop = scrollTop;
-    }, { passive: true });
-}
 
-// ============================================
-// BUY NOW DATA FUNCTIONS
-// ============================================
 async function loadBuyNowData() {
     try {
         console.log('Loading Buy Now data...');
@@ -1549,55 +1587,56 @@ async function loadBuyNowData() {
         // Show Buy Now section
         document.getElementById('buyNowSection').style.display = 'block';
         
-        // Update back button to go to product page
-        const backButton = document.getElementById('backButton');
-        const backToCartButton = document.getElementById('backToCartButton');
+        // Get Buy Now data from multiple sources
+        let buyNowData = null;
         
-        if (backButton) {
-            backButton.href = 'javascript:history.back()';
+        // Try sessionStorage first
+        const sessionData = sessionStorage.getItem('irya_buynow_product');
+        if (sessionData) {
+            buyNowData = JSON.parse(sessionData);
+            console.log('✅ Loaded Buy Now from sessionStorage');
         }
         
-        if (backToCartButton) {
-            backToCartButton.href = 'javascript:history.back()';
-            backToCartButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Product';
+        // Try localStorage
+        if (!buyNowData) {
+            const localData = localStorage.getItem('irya_buynow_product_' + orderData.userId);
+            if (localData) {
+                buyNowData = JSON.parse(localData);
+                console.log('✅ Loaded Buy Now from localStorage');
+            }
         }
         
-        // Get user ID from session storage
-        const userId = sessionStorage.getItem('irya_checkout_user_id') || 
-                      localStorage.getItem('irya_guest_id') || 
-                      'guest_unknown';
-        
-        // Load Buy Now product from localStorage
-        const buyNowKey = 'irya_buynow_cart_' + userId;
-        const buyNowData = localStorage.getItem(buyNowKey);
+        // Try URL parameters
+        if (!buyNowData) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productParam = urlParams.get('product');
+            if (productParam) {
+                buyNowData = JSON.parse(decodeURIComponent(productParam));
+                console.log('✅ Loaded Buy Now from URL');
+            }
+        }
         
         if (!buyNowData) {
             throw new Error('No Buy Now item found');
         }
         
-        const buyNowItems = JSON.parse(buyNowData);
-        
-        if (!buyNowItems || buyNowItems.length === 0) {
-            throw new Error('No Buy Now item found');
-        }
-        
-        // Get the Buy Now product
-        const buyNowItem = buyNowItems[0];
-        orderData.buyNowProduct = buyNowItem;
-        
         // Process Buy Now item
-        orderData.items = [{
-            id: buyNowItem.id,
-            uniqueId: buyNowItem.uniqueId || buyNowItem.id,
-            name: buyNowItem.stone_name || buyNowItem.name || 'Stone Product',
-            price: parseFloat(buyNowItem.price) || 0,
-            quantity: buyNowItem.quantity || 1,
-            image: buyNowItem.image || getDefaultImage(buyNowItem.category),
-            category: buyNowItem.category || '',
-            calculationData: buyNowItem.calculationData || null,
-            customRequirements: buyNowItem.customRequirements || '',
+        orderData.buyNowProduct = buyNowData;
+        
+        const item = {
+            id: buyNowData.id || `buynow_${Date.now()}`,
+            uniqueId: `buynow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            name: buyNowData.stone_name || buyNowData.name || 'Stone Product',
+            price: parseFloat(buyNowData.price) || 0,
+            quantity: buyNowData.quantity || 1,
+            image: buyNowData.image || getDefaultImage(buyNowData.category),
+            category: buyNowData.category || '',
+            calculationData: buyNowData.calculationData || null,
+            customRequirements: buyNowData.customRequirements || '',
             isBuyNow: true
-        }];
+        };
+        
+        orderData.items = [item];
         
         // Calculate totals
         calculateOrderTotals();
@@ -1608,41 +1647,69 @@ async function loadBuyNowData() {
         // Render order items
         renderOrderItems();
         
-        console.log('Buy Now data loaded successfully:', orderData.items[0]);
+        console.log('Buy Now data loaded successfully:', item);
         
     } catch (error) {
         console.error('Error loading Buy Now data:', error);
         showError('Buy Now item not found. Please try again.');
-        // Redirect back after 3 seconds
         setTimeout(() => {
-            window.history.back();
+            window.location.href = 'products.html';
         }, 3000);
     }
 }
 
-// ============================================
-// CART DATA FUNCTIONS
-// ============================================
 async function loadCartData() {
     try {
         console.log('Loading cart data...');
         
-        // Get user data
-        const userData = localStorage.getItem('irya_stone_user');
-        const currentUser = userData ? JSON.parse(userData) : null;
-        const userId = currentUser ? currentUser.uid : localStorage.getItem('irya_guest_id') || 'guest_unknown';
+        // Try multiple sources for cart data
+        let cartItems = [];
+        let dataSource = 'unknown';
         
-        // Get cart data
-        const cartKey = 'irya_cart_' + userId;
-        const cartData = localStorage.getItem(cartKey);
-        
-        if (!cartData) {
-            throw new Error('Cart is empty');
+        // Method 1: Checkout data from cart page
+        const checkoutData = sessionStorage.getItem('irya_checkout_data');
+        if (checkoutData) {
+            try {
+                const parsedData = JSON.parse(checkoutData);
+                cartItems = parsedData.items || [];
+                dataSource = 'checkout_data';
+                console.log(`✅ Loaded ${cartItems.length} items from checkout_data`);
+            } catch (e) {
+                console.error('Error parsing checkout data:', e);
+            }
         }
         
-        const cartItems = JSON.parse(cartData);
+        // Method 2: LocalStorage cart
+        if (cartItems.length === 0) {
+            const cartKey = 'irya_cart_' + orderData.userId;
+            const cartData = localStorage.getItem(cartKey);
+            if (cartData) {
+                try {
+                    cartItems = JSON.parse(cartData);
+                    dataSource = 'localStorage_cart';
+                    console.log(`✅ Loaded ${cartItems.length} items from localStorage`);
+                } catch (e) {
+                    console.error('Error parsing cart data:', e);
+                }
+            }
+        }
         
-        if (!cartItems || cartItems.length === 0) {
+        // Method 3: Backup checkout data
+        if (cartItems.length === 0) {
+            const backupData = localStorage.getItem('irya_checkout_backup');
+            if (backupData) {
+                try {
+                    const parsedData = JSON.parse(backupData);
+                    cartItems = parsedData.items || [];
+                    dataSource = 'backup_data';
+                    console.log(`✅ Loaded ${cartItems.length} items from backup`);
+                } catch (e) {
+                    console.error('Error parsing backup data:', e);
+                }
+            }
+        }
+        
+        if (cartItems.length === 0) {
             throw new Error('Cart is empty');
         }
         
@@ -1669,12 +1736,11 @@ async function loadCartData() {
         // Render order items
         renderOrderItems();
         
-        console.log('Cart data loaded successfully. Items:', orderData.items.length);
+        console.log(`Cart data loaded successfully from ${dataSource}. Items: ${orderData.items.length}`);
         
     } catch (error) {
         console.error('Error loading cart:', error);
         showError('Your cart is empty. Please add items first.');
-        // Redirect to cart page after 3 seconds
         setTimeout(() => {
             window.location.href = 'cart.html';
         }, 3000);
@@ -1686,7 +1752,6 @@ function calculateOrderTotals() {
     orderData.subtotal = orderData.items.reduce((total, item) => {
         let itemTotal = item.price * item.quantity;
         
-        // If there's calculation data (area/weight based), calculate accordingly
         if (item.calculationData) {
             const calc = item.calculationData;
             if (calc.mode === 'area') {
@@ -1712,6 +1777,12 @@ function calculateOrderTotals() {
     
     // Calculate advance payment (30%)
     orderData.advancePayment = orderData.total * 0.3;
+    
+    // Calculate platform fees (2.5% + £0.30)
+    orderData.platformFee = (orderData.advancePayment * 0.025) + 0.30;
+    
+    // Calculate net advance (after fees)
+    orderData.netAdvance = orderData.advancePayment - orderData.platformFee;
 }
 
 function updateCartBadge() {
@@ -1731,21 +1802,324 @@ function updateCartBadge() {
     }
 }
 
-function checkNotifications() {
-    // Check for unread notifications
-    const notifications = JSON.parse(localStorage.getItem('irya_notifications') || '[]');
-    const unreadCount = notifications.filter(n => !n.read).length;
-    
-    const notificationBadge = document.getElementById('notificationBadge');
-    if (notificationBadge && unreadCount > 0) {
-        notificationBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
-        notificationBadge.style.display = 'flex';
+// ============================================
+// FIREBASE ORDER SAVING FUNCTIONS
+// ============================================
+
+async function saveOrderToFirebase(orderObj) {
+    try {
+        if (!firebaseDB || !orderData.userId) {
+            console.log('⚠️ Firebase not available or user not logged in');
+            return null;
+        }
+        
+        console.log('💾 Saving order to Firebase...');
+        
+        // Prepare data for Firestore
+        const orderId = orderObj.orderId;
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        
+        // 1. Save to user's orders collection
+        const userOrderRef = firebaseDB.collection('users').doc(orderData.userId)
+            .collection('orders').doc(orderId);
+        
+        const orderDataForFirebase = {
+            ...orderObj,
+            userId: orderData.userId,
+            userName: orderData.userName,
+            userEmail: orderData.userEmail,
+            platformFee: orderData.platformFee,
+            netAdvance: orderData.netAdvance,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+            // Payment confirmation timer
+            paymentConfirmDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
+            autoCancelTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            refundPolicy: 'If payment not confirmed within 24 hours, order will be cancelled and refund processed after deducting platform fees & bank charges'
+        };
+        
+        await userOrderRef.set(orderDataForFirebase);
+        console.log('✅ Order saved to user collection');
+        
+        // 2. Save to addresses subcollection
+        const addressData = {
+            fullName: document.getElementById('shippingName').value,
+            email: document.getElementById('shippingEmail').value,
+            phone: document.getElementById('shippingPhone').value,
+            address1: document.getElementById('shippingAddress1').value,
+            address2: document.getElementById('shippingAddress2').value,
+            city: document.getElementById('shippingCity').value,
+            state: document.getElementById('shippingState').value,
+            postalCode: document.getElementById('shippingPostalCode').value,
+            country: document.getElementById('shippingCountry').value,
+            isDefault: document.getElementById('saveAddress').checked,
+            orderId: orderId,
+            createdAt: timestamp
+        };
+        
+        const addressRef = firebaseDB.collection('users').doc(orderData.userId)
+            .collection('addresses').doc(`address_${Date.now()}`);
+        
+        await addressRef.set(addressData);
+        console.log('✅ Address saved to user collection');
+        
+        // 3. Save to payments subcollection
+        const paymentId = `payment_${Date.now()}`;
+        const paymentData = {
+            orderId: orderId,
+            orderNumber: orderObj.orderNumber,
+            amount: orderData.advancePayment,
+            platformFee: orderData.platformFee,
+            netAmount: orderData.netAdvance,
+            paymentMethod: selectedPaymentMethod,
+            status: selectedPaymentMethod === 'bank' ? 'pending' : 'paid',
+            paymentReference: selectedPaymentMethod === 'bank' ? orderObj.paymentReference : null,
+            currency: 'GBP',
+            userId: orderData.userId,
+            userEmail: orderData.userEmail,
+            createdAt: timestamp,
+            confirmedAt: selectedPaymentMethod === 'bank' ? null : timestamp,
+            confirmDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            refundPolicy: 'If payment not confirmed within 24 hours, 100% refund after deducting platform fees (2.5% + £0.30)',
+            bankCharges: 0.50 // Bank charges for processing
+        };
+        
+        const paymentRef = firebaseDB.collection('users').doc(orderData.userId)
+            .collection('payments').doc(paymentId);
+        
+        await paymentRef.set(paymentData);
+        console.log('✅ Payment saved to user collection');
+        
+        // 4. Save to global orders collection for admin
+        const globalOrderRef = firebaseDB.collection('orders').doc(orderId);
+        
+        const globalOrderData = {
+            ...orderDataForFirebase,
+            userData: {
+                userId: orderData.userId,
+                userName: orderData.userName,
+                userEmail: orderData.userEmail
+            },
+            paymentData: paymentData,
+            addressData: addressData
+        };
+        
+        await globalOrderRef.set(globalOrderData);
+        console.log('✅ Order saved to global orders collection');
+        
+        // 5. Update user document with last order info
+        const userRef = firebaseDB.collection('users').doc(orderData.userId);
+        await userRef.set({
+            lastOrderId: orderId,
+            lastOrderDate: timestamp,
+            totalOrders: firebase.firestore.FieldValue.increment(1),
+            totalSpent: firebase.firestore.FieldValue.increment(orderData.total),
+            updatedAt: timestamp
+        }, { merge: true });
+        
+        console.log('✅ User document updated');
+        
+        return {
+            orderId: orderId,
+            paymentId: paymentId,
+            addressId: addressRef.id
+        };
+        
+    } catch (error) {
+        console.error('❌ Error saving to Firebase:', error);
+        throw error;
     }
 }
 
 // ============================================
-// UI FUNCTIONS
+// ORDER PROCESSING - UPDATED
 // ============================================
+
+async function placeOrder() {
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    
+    try {
+        // Validate all steps
+        if (!validateCurrentStep()) {
+            return;
+        }
+        
+        // Validate terms acceptance
+        if (!document.getElementById('acceptTerms').checked) {
+            showError('Please accept the Terms & Conditions');
+            return;
+        }
+        
+        // Disable button
+        placeOrderBtn.disabled = true;
+        placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        
+        // Show processing modal
+        const processingModal = document.getElementById('processingModal');
+        const processingMessage = document.getElementById('processingMessage');
+        
+        processingMessage.textContent = selectedPaymentMethod === 'bank' 
+            ? 'Creating your order...' 
+            : 'Processing your payment...';
+        
+        processingModal.style.display = 'flex';
+        
+        // Process order
+        setTimeout(async () => {
+            try {
+                // Generate order data
+                const orderId = 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                const orderNumber = 'IRYA-' + Date.now().toString().slice(-8);
+                const paymentReference = selectedPaymentMethod === 'bank' 
+                    ? `IRYA-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`
+                    : null;
+                
+                // Prepare order object
+                const orderObj = {
+                    orderId: orderId,
+                    orderNumber: orderNumber,
+                    userId: orderData.userId,
+                    items: orderData.items,
+                    subtotal: orderData.subtotal,
+                    shipping: orderData.shipping,
+                    tax: orderData.tax,
+                    total: orderData.total,
+                    advancePayment: orderData.advancePayment,
+                    remainingPayment: orderData.total - orderData.advancePayment,
+                    shippingDetails: {
+                        name: document.getElementById('shippingName').value,
+                        email: document.getElementById('shippingEmail').value,
+                        phone: document.getElementById('shippingPhone').value,
+                        address: [
+                            document.getElementById('shippingAddress1').value,
+                            document.getElementById('shippingAddress2').value,
+                            document.getElementById('shippingCity').value,
+                            document.getElementById('shippingState').value,
+                            document.getElementById('shippingPostalCode').value
+                        ].filter(Boolean).join(', '),
+                        country: document.getElementById('shippingCountry').value
+                    },
+                    paymentMethod: selectedPaymentMethod,
+                    paymentStatus: selectedPaymentMethod === 'bank' ? 'pending' : 'paid',
+                    orderStatus: selectedPaymentMethod === 'bank' ? 'payment_pending' : 'confirmed',
+                    notes: document.getElementById('orderNotes').value,
+                    isBuyNow: orderData.isBuyNow,
+                    createdAt: new Date().toISOString(),
+                    paymentReference: paymentReference,
+                    // Payment confirmation details
+                    paymentConfirmDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                    autoCancelTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                    refundPolicy: 'If payment not confirmed within 24 hours, order will be cancelled and refund processed after deducting platform fees (2.5% + £0.30) and bank charges (£0.50)'
+                };
+                
+                // Save order to Firebase
+                let firebaseResult = null;
+                try {
+                    firebaseResult = await saveOrderToFirebase(orderObj);
+                } catch (firebaseError) {
+                    console.error('Firebase save failed, saving locally:', firebaseError);
+                }
+                
+                // Always save to localStorage as backup
+                await saveOrderToLocalStorage(orderObj, firebaseResult);
+                
+                // Clear appropriate cart/buy now data
+                clearOrderData();
+                
+                // Hide processing modal
+                processingModal.style.display = 'none';
+                
+                // Show success based on payment method
+                if (selectedPaymentMethod === 'bank') {
+                    showBankModal(orderObj, firebaseResult);
+                } else {
+                    showSuccessModal(orderObj, firebaseResult);
+                }
+                
+            } catch (error) {
+                console.error('Error processing order:', error);
+                showError('Payment processing failed. Please try again.');
+                processingModal.style.display = 'none';
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order & Pay Advance';
+            }
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Error placing order:', error);
+        showError('Failed to place order. Please check your details.');
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order & Pay Advance';
+    }
+}
+
+async function saveOrderToLocalStorage(orderObj, firebaseResult) {
+    try {
+        // Save to user's orders
+        const ordersKey = 'irya_user_orders_' + orderData.userId;
+        let userOrders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
+        userOrders.unshift(orderObj);
+        localStorage.setItem(ordersKey, JSON.stringify(userOrders));
+        
+        // Save last order for quick access
+        localStorage.setItem('irya_last_order_id', orderObj.orderId);
+        localStorage.setItem('irya_last_order_data', JSON.stringify(orderObj));
+        
+        // Save user info if not already saved
+        localStorage.setItem('irya_user_name', orderData.userName);
+        if (orderData.userEmail) {
+            localStorage.setItem('irya_user_email', orderData.userEmail);
+        }
+        
+        // Save Firebase IDs if available
+        if (firebaseResult) {
+            localStorage.setItem('irya_firebase_order_id', firebaseResult.orderId);
+            localStorage.setItem('irya_firebase_payment_id', firebaseResult.paymentId);
+        }
+        
+        console.log('✅ Order saved to localStorage');
+        
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+    }
+}
+
+function clearOrderData() {
+    if (orderData.isBuyNow) {
+        // Clear Buy Now data
+        sessionStorage.removeItem('irya_buynow_product');
+        localStorage.removeItem('irya_buynow_product_' + orderData.userId);
+        sessionStorage.removeItem('irya_current_buynow');
+        sessionStorage.removeItem('irya_is_buynow_flow');
+        sessionStorage.removeItem('irya_buynow_product_id');
+        sessionStorage.removeItem('irya_buynow_quantity');
+        sessionStorage.removeItem('irya_buynow_calc_data');
+        sessionStorage.removeItem('irya_buynow_custom_req');
+    } else {
+        // Clear regular cart data
+        const cartKey = 'irya_cart_' + orderData.userId;
+        localStorage.removeItem(cartKey);
+        
+        // Clear checkout data
+        sessionStorage.removeItem('irya_checkout_data');
+        localStorage.removeItem('irya_checkout_backup');
+        
+        // Clear temp keys
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('irya_checkout_temp_')) {
+                localStorage.removeItem(key);
+            }
+        });
+    }
+    
+    // Update cart badge
+    updateCartBadge();
+}
+
+// ============================================
+// UI FUNCTIONS (REMAINING SAME)
+// ============================================
+
 function setupCheckoutUI() {
     // Set default payment method
     selectPaymentMethod('stripe');
@@ -1771,7 +2145,6 @@ function renderOrderItems() {
         let itemTotal = item.price * item.quantity;
         let metaInfo = '';
         
-        // If there's calculation data, calculate accordingly
         if (item.calculationData) {
             const calc = item.calculationData;
             if (calc.mode === 'area') {
@@ -1823,7 +2196,6 @@ function updateOrderSummaryUI() {
 function updateReviewContent() {
     const reviewContent = document.getElementById('reviewContent');
     
-    // Get form values
     const shippingName = document.getElementById('shippingName').value || 'Not provided';
     const shippingEmail = document.getElementById('shippingEmail').value || 'Not provided';
     const shippingPhone = document.getElementById('shippingPhone').value || 'Not provided';
@@ -1843,9 +2215,12 @@ function updateReviewContent() {
     
     const notes = document.getElementById('orderNotes').value;
     
+    // Platform fees info
+    const platformFee = orderData.platformFee;
+    const netAdvance = orderData.netAdvance;
+    
     reviewContent.innerHTML = `
         <div style="display: grid; gap: 15px;">
-            <!-- Order Type -->
             ${orderData.isBuyNow ? `
                 <div style="padding: 15px; background: linear-gradient(135deg, rgba(201, 162, 39, 0.1), rgba(240, 215, 124, 0.05)); border-radius: 8px; border-left: 4px solid var(--primary-gold);">
                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -1859,6 +2234,21 @@ function updateReviewContent() {
                     </div>
                 </div>
             ` : ''}
+            
+            <!-- Platform Fees Info -->
+            <div style="padding: 15px; background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
+                <h4 style="margin-bottom: 8px; font-size: 14px; color: var(--warning-orange);">Payment Details</h4>
+                <div style="font-size: 12px; line-height: 1.6;">
+                    <p><strong>Advance Amount:</strong> ${formatPrice(orderData.advancePayment)}</p>
+                    <p><strong>Platform Fee (2.5% + £0.30):</strong> ${formatPrice(platformFee)}</p>
+                    <p><strong>Net Advance:</strong> ${formatPrice(netAdvance)}</p>
+                    ${selectedPaymentMethod === 'bank' ? `<p><strong>Bank Charges:</strong> £0.50</p>` : ''}
+                    <p style="color: var(--error-red); margin-top: 8px; font-size: 11px;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        If payment not confirmed within 24 hours: Refund = Advance - Platform Fee - Bank Charges
+                    </p>
+                </div>
+            </div>
             
             <!-- Shipping Details -->
             <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
@@ -1874,7 +2264,7 @@ function updateReviewContent() {
             
             <!-- Payment Details -->
             <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
-                <h4 style="margin-bottom: 10px; font-size: 14px; color: var(--stone-dark);">Payment Details</h4>
+                <h4 style="margin-bottom: 10px; font-size: 14px; color: var(--stone-dark);">Payment Method</h4>
                 <div style="font-size: 12px; line-height: 1.6;">
                     <p><strong>Method:</strong> ${paymentMethodNames[selectedPaymentMethod]}</p>
                     ${selectedPaymentMethod === 'bank' ? `
@@ -1893,25 +2283,20 @@ function updateReviewContent() {
 }
 
 // ============================================
-// STEP NAVIGATION
+// STEP NAVIGATION (REMAINING SAME)
 // ============================================
+
 function goToStep(stepNumber) {
-    // Validate current step
     if (!validateCurrentStep()) {
         return;
     }
     
-    // Update step UI
     updateStepUI(stepNumber);
-    
     currentStep = stepNumber;
-    
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function updateStepUI(stepNumber) {
-    // Update step circles
     for (let i = 1; i <= 3; i++) {
         const stepCircle = document.getElementById('step' + i);
         const stepLine = document.getElementById('line' + (i - 1));
@@ -1930,7 +2315,6 @@ function updateStepUI(stepNumber) {
         }
     }
     
-    // Update review content if going to step 3
     if (stepNumber === 3) {
         updateReviewContent();
     }
@@ -2011,24 +2395,23 @@ function isValidEmail(email) {
 }
 
 // ============================================
-// PAYMENT METHODS
+// PAYMENT METHODS (REMAINING SAME)
 // ============================================
+
 function selectPaymentMethod(method) {
     selectedPaymentMethod = method;
     
-    // Update UI
     document.querySelectorAll('.payment-method').forEach(el => {
         el.classList.remove('selected');
     });
     
     document.getElementById(method + 'Method').classList.add('selected');
     
-    // Show/hide details
     document.getElementById('bankDetails').style.display = method === 'bank' ? 'block' : 'none';
     document.getElementById('cardDetails').style.display = method === 'stripe' ? 'block' : 'none';
     
     if (method === 'bank') {
-        const reference = `IRYA-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const reference = `IRYA-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
         document.getElementById('bankReference').textContent = reference;
     }
 }
@@ -2061,189 +2444,30 @@ function setupCardInputs() {
 }
 
 // ============================================
-// ORDER PROCESSING
+// MODAL FUNCTIONS - UPDATED
 // ============================================
-async function placeOrder() {
-    const placeOrderBtn = document.getElementById('placeOrderBtn');
-    
-    try {
-        // Validate all steps
-        if (!validateCurrentStep()) {
-            return;
-        }
-        
-        // Validate terms acceptance
-        if (!document.getElementById('acceptTerms').checked) {
-            showError('Please accept the Terms & Conditions');
-            return;
-        }
-        
-        // Disable button
-        placeOrderBtn.disabled = true;
-        placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        
-        // Show processing modal
-        const processingModal = document.getElementById('processingModal');
-        const processingMessage = document.getElementById('processingMessage');
-        
-        if (selectedPaymentMethod === 'bank') {
-            processingMessage.textContent = 'Creating your order...';
-        } else {
-            processingMessage.textContent = 'Processing your payment...';
-        }
-        
-        processingModal.style.display = 'flex';
-        
-        // Simulate processing delay
-        setTimeout(async () => {
-            try {
-                // Generate order data
-                const orderId = 'order_' + Date.now();
-                const orderNumber = 'IRYA-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-                
-                // Get user ID
-                const userData = localStorage.getItem('irya_stone_user');
-                const currentUser = userData ? JSON.parse(userData) : null;
-                const userId = currentUser ? currentUser.uid : localStorage.getItem('irya_guest_id') || 'guest_unknown';
-                
-                // Prepare order object
-                const orderObj = {
-                    orderId: orderId,
-                    orderNumber: orderNumber,
-                    userId: userId,
-                    items: orderData.items,
-                    subtotal: orderData.subtotal,
-                    shipping: orderData.shipping,
-                    tax: orderData.tax,
-                    total: orderData.total,
-                    advancePayment: orderData.advancePayment,
-                    remainingPayment: orderData.total - orderData.advancePayment,
-                    shippingDetails: {
-                        name: document.getElementById('shippingName').value,
-                        email: document.getElementById('shippingEmail').value,
-                        phone: document.getElementById('shippingPhone').value,
-                        address: [
-                            document.getElementById('shippingAddress1').value,
-                            document.getElementById('shippingAddress2').value,
-                            document.getElementById('shippingCity').value,
-                            document.getElementById('shippingState').value,
-                            document.getElementById('shippingPostalCode').value
-                        ].filter(Boolean).join(', '),
-                        country: document.getElementById('shippingCountry').value
-                    },
-                    paymentMethod: selectedPaymentMethod,
-                    paymentStatus: selectedPaymentMethod === 'bank' ? 'pending' : 'paid',
-                    orderStatus: selectedPaymentMethod === 'bank' ? 'payment_pending' : 'confirmed',
-                    notes: document.getElementById('orderNotes').value,
-                    isBuyNow: orderData.isBuyNow,
-                    createdAt: new Date().toISOString(),
-                    paymentReference: selectedPaymentMethod === 'bank' ? document.getElementById('bankReference').textContent : null
-                };
-                
-                // Save order to localStorage
-                await saveOrder(orderObj);
-                
-                // Clear appropriate cart/buy now data
-                clearOrderData();
-                
-                // Hide processing modal
-                processingModal.style.display = 'none';
-                
-                // Show success based on payment method
-                if (selectedPaymentMethod === 'bank') {
-                    showBankModal(orderObj);
-                } else {
-                    showSuccessModal(orderObj);
-                }
-                
-            } catch (error) {
-                console.error('Error processing order:', error);
-                showError('Payment processing failed. Please try again.');
-                processingModal.style.display = 'none';
-                placeOrderBtn.disabled = false;
-                placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order & Pay Advance';
-            }
-        }, 2000);
-        
-    } catch (error) {
-        console.error('Error placing order:', error);
-        showError('Failed to place order. Please check your details.');
-        placeOrderBtn.disabled = false;
-        placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order & Pay Advance';
-    }
-}
 
-function clearOrderData() {
-    // Get user ID
-    const userData = localStorage.getItem('irya_stone_user');
-    const currentUser = userData ? JSON.parse(userData) : null;
-    const userId = currentUser ? currentUser.uid : localStorage.getItem('irya_guest_id') || 'guest_unknown';
-    
-    if (orderData.isBuyNow) {
-        // Clear Buy Now data
-        const buyNowKey = 'irya_buynow_cart_' + userId;
-        localStorage.removeItem(buyNowKey);
-        sessionStorage.removeItem('irya_current_buynow');
-        sessionStorage.removeItem('irya_is_buynow_flow');
-        sessionStorage.removeItem('irya_buynow_product_id');
-        sessionStorage.removeItem('irya_buynow_quantity');
-        sessionStorage.removeItem('irya_buynow_calc_data');
-        sessionStorage.removeItem('irya_buynow_custom_req');
-    } else {
-        // Clear regular cart data
-        const cartKey = 'irya_cart_' + userId;
-        localStorage.removeItem(cartKey);
-    }
-    
-    // Update cart badge
-    updateCartBadge();
-}
-
-async function saveOrder(orderData) {
-    try {
-        // Get user ID
-        const userId = orderData.userId;
-        
-        // Save to user's orders
-        const ordersKey = 'irya_user_orders_' + userId;
-        let userOrders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
-        userOrders.unshift(orderData);
-        localStorage.setItem(ordersKey, JSON.stringify(userOrders));
-        
-        // Save to all orders
-        const allOrdersKey = 'irya_all_orders';
-        let allOrders = JSON.parse(localStorage.getItem(allOrdersKey) || '[]');
-        allOrders.unshift(orderData);
-        localStorage.setItem(allOrdersKey, JSON.stringify(allOrders));
-        
-        // Save last order for quick access
-        localStorage.setItem('irya_last_order_id', orderData.orderId);
-        localStorage.setItem('irya_last_order_data', JSON.stringify(orderData));
-        
-        console.log('Order saved:', orderData.orderId);
-        
-    } catch (error) {
-        console.error('Error saving order:', error);
-    }
-}
-
-// ============================================
-// MODAL FUNCTIONS
-// ============================================
-function showSuccessModal(orderData) {
+function showSuccessModal(orderObj, firebaseResult) {
     const successModal = document.getElementById('successModal');
     const successMessage = document.getElementById('successMessage');
     const successDetails = document.getElementById('successDetails');
     
     successMessage.textContent = 'Payment Successful! Your order is confirmed.';
     
+    const firebaseInfo = firebaseResult ? 
+        `<p><strong>Firebase Order ID:</strong> ${firebaseResult.orderId}</p>` : 
+        '<p><em>Order saved locally only</em></p>';
+    
     successDetails.innerHTML = `
-        <p><strong>Order Number:</strong> ${orderData.orderNumber}</p>
-        <p><strong>Total Amount:</strong> ${formatPrice(orderData.total)}</p>
+        ${firebaseInfo}
+        <p><strong>Order Number:</strong> ${orderObj.orderNumber}</p>
+        <p><strong>Total Amount:</strong> ${formatPrice(orderObj.total)}</p>
         <p><strong>Advance Paid:</strong> ${formatPrice(orderData.advancePayment)}</p>
-        <p><strong>Remaining:</strong> ${formatPrice(orderData.remainingPayment)}</p>
-        <p><strong>Payment Method:</strong> ${selectedPaymentMethod === 'stripe' ? 'Credit/Debit Card' : 'PayPal'}</p>
-        <p><strong>Order Type:</strong> ${orderData.isBuyNow ? 'Buy Now' : 'Cart Checkout'}</p>
+        <p><strong>Platform Fee:</strong> ${formatPrice(orderData.platformFee)}</p>
+        <p><strong>Net Received:</strong> ${formatPrice(orderData.netAdvance)}</p>
+        <p><strong>Remaining:</strong> ${formatPrice(orderObj.remainingPayment)}</p>
+        <p><strong>Payment Method:</strong> Credit/Debit Card</p>
+        <p><strong>Order Type:</strong> ${orderObj.isBuyNow ? 'Buy Now' : 'Cart Checkout'}</p>
         <p style="color: var(--success-green); margin-top: 8px;">
             <i class="fas fa-check-circle"></i> Advance payment confirmed
         </p>
@@ -2252,36 +2476,60 @@ function showSuccessModal(orderData) {
     successModal.style.display = 'flex';
 }
 
-function showBankModal(orderData) {
+function showBankModal(orderObj, firebaseResult) {
     const bankModal = document.getElementById('bankModal');
     const bankDetails = document.getElementById('bankModalDetails');
     
+    const firebaseInfo = firebaseResult ? 
+        `<p><strong>Firebase Order ID:</strong> ${firebaseResult.orderId}</p>` : 
+        '<p><em>Order saved locally only</em></p>';
+    
+    // Calculate refund amount if cancelled (after 24 hours)
+    const refundAmount = orderData.advancePayment - orderData.platformFee - 0.50; // platform fee + bank charges
+    
     bankDetails.innerHTML = `
-        <p><strong>Order Number:</strong> ${orderData.orderNumber}</p>
-        <p><strong>Order Type:</strong> ${orderData.isBuyNow ? 'Buy Now' : 'Cart Checkout'}</p>
+        ${firebaseInfo}
+        <p><strong>Order Number:</strong> ${orderObj.orderNumber}</p>
+        <p><strong>Order Type:</strong> ${orderObj.isBuyNow ? 'Buy Now' : 'Cart Checkout'}</p>
         <p><strong>Advance Amount:</strong> ${formatPrice(orderData.advancePayment)}</p>
         <p><strong>Bank:</strong> HSBC UK</p>
         <p><strong>Account:</strong> IRYA STONE LTD</p>
         <p><strong>Account No:</strong> 12345678</p>
         <p><strong>Sort Code:</strong> 40-04-15</p>
-        <p><strong>Reference:</strong> ${orderData.paymentReference}</p>
-        <p style="color: var(--warning-orange); margin-top: 8px;">
-            <i class="fas fa-clock"></i> Confirmation takes 1-3 business days
-        </p>
+        <p><strong>Reference:</strong> ${orderObj.paymentReference}</p>
+        <div style="margin-top: 15px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
+            <p style="color: var(--error-red); font-size: 11px; margin-bottom: 5px;">
+                <i class="fas fa-exclamation-triangle"></i> Payment Confirmation Policy
+            </p>
+            <p style="font-size: 10px; color: var(--text-light); line-height: 1.3;">
+                • Confirm payment within 24 hours<br>
+                • Platform fee: ${formatPrice(orderData.platformFee)} (2.5% + £0.30)<br>
+                • Bank charges: £0.50<br>
+                • If not confirmed: Refund = ${formatPrice(refundAmount)}<br>
+                • Auto-cancel after 24 hours
+            </p>
+        </div>
     `;
     
     bankModal.style.display = 'flex';
 }
 
 function copyBankDetails() {
-    const detailsText = `IRYA STONE Bank Transfer Details:
-Order Number: ${document.querySelector('#bankModalDetails p:nth-child(1)').textContent.replace('Order Number: ', '')}
-Advance Amount: ${document.querySelector('#bankModalDetails p:nth-child(3)').textContent.replace('Advance Amount: ', '')}
+    const orderNumber = document.querySelector('#bankModalDetails p:nth-child(2)').textContent.replace('Order Number: ', '');
+    const advanceAmount = document.querySelector('#bankModalDetails p:nth-child(4)').textContent.replace('Advance Amount: ', '');
+    const reference = document.querySelector('#bankModalDetails p:nth-child(10)').textContent.replace('Reference: ', '');
+    
+    const detailsText = `IRYA STONE - Bank Transfer Details
+Order Number: ${orderNumber}
+Advance Amount: ${advanceAmount}
 Bank: HSBC UK
 Account: IRYA STONE LTD
 Account No: 12345678
 Sort Code: 40-04-15
-Reference: ${document.querySelector('#bankModalDetails p:nth-child(7)').textContent.replace('Reference: ', '')}`;
+Reference: ${reference}
+
+Important: Please confirm payment within 24 hours.
+If payment not confirmed, order will be cancelled automatically.`;
     
     navigator.clipboard.writeText(detailsText).then(() => {
         showNotification('Bank details copied to clipboard!');
@@ -2291,7 +2539,7 @@ Reference: ${document.querySelector('#bankModalDetails p:nth-child(7)').textCont
 function closeBankModal() {
     document.getElementById('bankModal').style.display = 'none';
     
-    // Show success modal instead
+    // Show modified success modal
     const successModal = document.getElementById('successModal');
     const successMessage = document.getElementById('successMessage');
     const successDetails = document.getElementById('successDetails');
@@ -2305,9 +2553,14 @@ function closeBankModal() {
         <p><strong>Payment Method:</strong> Bank Transfer</p>
         <p><strong>Payment Reference:</strong> ${orderData.paymentReference || 'N/A'}</p>
         <p><strong>Order Type:</strong> ${orderData.isBuyNow ? 'Buy Now' : 'Cart Checkout'}</p>
-        <p style="color: var(--warning-orange); margin-top: 8px;">
-            <i class="fas fa-clock"></i> Complete bank transfer to confirm order
-        </p>
+        <div style="padding: 10px; background: rgba(245, 158, 11, 0.1); border-radius: 6px; margin-top: 10px;">
+            <p style="color: var(--warning-orange); font-size: 11px;">
+                <i class="fas fa-clock"></i> Complete bank transfer within 24 hours
+            </p>
+            <p style="font-size: 10px; color: var(--text-light); margin-top: 5px;">
+                Order will auto-cancel after 24 hours if payment not confirmed
+            </p>
+        </div>
     `;
     
     successModal.style.display = 'flex';
@@ -2315,8 +2568,11 @@ function closeBankModal() {
 
 function viewOrder() {
     const orderId = localStorage.getItem('irya_last_order_id');
-    if (orderId) {
-        window.location.href = `orders.html?order_id=${orderId}`;
+    const userId = orderData.userId;
+    
+    if (orderId && userId) {
+        // Pass user ID to orders page for filtering
+        window.location.href = `orders.html?user_id=${userId}&order_id=${orderId}`;
     } else {
         window.location.href = 'orders.html';
     }
@@ -2329,6 +2585,7 @@ function goToHome() {
 // ============================================
 // UTILITY FUNCTIONS
 // ============================================
+
 function formatPrice(price) {
     if (!price && price !== 0) return '£0.00';
     return `£${parseFloat(price).toFixed(2)}`;
@@ -2381,18 +2638,12 @@ function showError(message) {
 
 async function loadSavedAddresses() {
     try {
-        // Get user ID
-        const userData = localStorage.getItem('irya_stone_user');
-        const currentUser = userData ? JSON.parse(userData) : null;
-        const userId = currentUser ? currentUser.uid : localStorage.getItem('irya_guest_id') || 'guest_unknown';
-        
-        const addressesKey = 'irya_saved_addresses_' + userId;
+        const addressesKey = 'irya_saved_addresses_' + orderData.userId;
         const addressesData = localStorage.getItem(addressesKey);
         
         if (addressesData) {
             const addresses = JSON.parse(addressesData);
             if (addresses.length > 0) {
-                // Fill form with first address
                 const address = addresses[0];
                 fillAddressForm(address);
             }
@@ -2415,6 +2666,45 @@ function fillAddressForm(address) {
     document.getElementById('shippingCity').value = address.city || '';
     document.getElementById('shippingPostalCode').value = address.postalCode || '';
     document.getElementById('shippingState').value = address.state || '';
+}
+
+function setupScrollHandling() {
+    let lastScrollTop = 0;
+    const header = document.getElementById('mainHeader');
+    const bottomNav = document.getElementById('bottomNav');
+    
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop < 10) {
+            header.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+            return;
+        }
+        
+        if (scrollTop > lastScrollTop) {
+            if (scrollTop > 100) {
+                header.classList.add('hidden');
+                bottomNav.classList.add('hidden');
+            }
+        } else {
+            header.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+        }
+        
+        lastScrollTop = scrollTop;
+    }, { passive: true });
+}
+
+function checkNotifications() {
+    const notifications = JSON.parse(localStorage.getItem('irya_notifications') || '[]');
+    const unreadCount = notifications.filter(n => !n.read).length;
+    
+    const notificationBadge = document.getElementById('notificationBadge');
+    if (notificationBadge && unreadCount > 0) {
+        notificationBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+        notificationBadge.style.display = 'flex';
+    }
 }
 
 // ============================================
