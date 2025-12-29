@@ -1569,7 +1569,7 @@ let availableUses = [];
 let availableColors = [];
 
 // ============================================
-// FIXED AUTH SYSTEM
+// SIMPLIFIED AUTH SYSTEM - NO AUTO GUEST
 // ============================================
 
 class AuthSystem {
@@ -1577,12 +1577,9 @@ class AuthSystem {
         this.currentUser = null;
         this.authKey = 'irya_stone_user';
         this.dropdownOpen = false;
-        this.guestIdKey = 'irya_guest_id';
-        this.cartGuestIdKey = 'irya_cart_guest_id';
     }
     
     async init() {
-        this.checkLocalStorage();
         await this.checkFirebaseAuth();
         this.updateAuthUI();
     }
@@ -1591,48 +1588,48 @@ class AuthSystem {
         try {
             if (!firebaseAuth) return;
             
-            firebaseAuth.onAuthStateChanged((user) => {
-                if (user) {
-                    this.currentUser = {
-                        uid: user.uid,
-                        displayName: user.displayName || 'User',
-                        email: user.email,
-                        photoURL: user.photoURL,
-                        provider: user.providerId,
-                        isFirebaseUser: true
-                    };
+            return new Promise((resolve) => {
+                firebaseAuth.onAuthStateChanged((user) => {
+                    if (user) {
+                        this.currentUser = {
+                            uid: user.uid,
+                            displayName: user.displayName || 'User',
+                            email: user.email,
+                            photoURL: user.photoURL,
+                            provider: user.providerId,
+                            isFirebaseUser: true
+                        };
+                        
+                        localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
+                        console.log("✅ Firebase user logged in:", user.uid);
+                    } else {
+                        // NO AUTO GUEST CREATION - Only check localStorage
+                        const savedUser = localStorage.getItem(this.authKey);
+                        if (savedUser) {
+                            try {
+                                this.currentUser = JSON.parse(savedUser);
+                                console.log("✅ Using saved user from localStorage");
+                            } catch (e) {
+                                console.error("❌ Error parsing saved user:", e);
+                                this.currentUser = null;
+                            }
+                        } else {
+                            // Completely anonymous - no user created
+                            this.currentUser = null;
+                            console.log("🕶️ User is completely anonymous");
+                        }
+                    }
                     
-                    this.saveUserToLocalStorage();
-                    
-                } else {
-                    this.currentUser = this.getUserFromLocalStorage();
-                }
-                
-                this.updateAuthUI();
+                    this.updateAuthUI();
+                    resolve(this.currentUser);
+                });
             });
         } catch (error) {
             console.error('Firebase auth error:', error);
-            this.currentUser = this.getUserFromLocalStorage();
+            this.currentUser = null;
             this.updateAuthUI();
+            return null;
         }
-    }
-    
-    checkLocalStorage() {
-        const userData = localStorage.getItem(this.authKey);
-        if (userData) {
-            this.currentUser = JSON.parse(userData);
-        }
-    }
-    
-    saveUserToLocalStorage() {
-        if (this.currentUser) {
-            localStorage.setItem(this.authKey, JSON.stringify(this.currentUser));
-        }
-    }
-    
-    getUserFromLocalStorage() {
-        const userData = localStorage.getItem(this.authKey);
-        return userData ? JSON.parse(userData) : null;
     }
     
     isLoggedIn() {
@@ -1644,42 +1641,28 @@ class AuthSystem {
             return this.currentUser.uid;
         }
         
-        let guestId = localStorage.getItem(this.guestIdKey);
-        if (!guestId) {
-            guestId = 'guest_user';
-            localStorage.setItem(this.guestIdKey, guestId);
-        }
-        return guestId;
+        // For cart, use a simple anonymous identifier
+        // But NOT stored as a user
+        const cartUserId = 'anonymous_' + Date.now();
+        return cartUserId;
     }
     
     getCartUserId() {
-        if (this.isLoggedIn()) {
-            return this.currentUser.uid;
+        // Cart uses session-based ID for anonymous users
+        let cartId = sessionStorage.getItem('irya_cart_session_id');
+        if (!cartId) {
+            cartId = 'cart_session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('irya_cart_session_id', cartId);
         }
-        
-        let guestId = localStorage.getItem(this.cartGuestIdKey);
-        if (!guestId) {
-            guestId = 'cart_guest_user_' + Date.now();
-            localStorage.setItem(this.cartGuestIdKey, guestId);
-        }
-        return guestId;
-    }
-    
-    resetCartUserId() {
-        if (!this.isLoggedIn()) {
-            const newId = 'cart_guest_user_' + Date.now();
-            localStorage.setItem(this.cartGuestIdKey, newId);
-            return newId;
-        }
-        return this.currentUser.uid;
+        return cartId;
     }
     
     getUserName() {
-        return this.currentUser ? this.currentUser.displayName : 'Guest';
+        return this.currentUser ? this.currentUser.displayName : null;
     }
     
     getUserEmail() {
-        return this.currentUser ? this.currentUser.email : '';
+        return this.currentUser ? this.currentUser.email : null;
     }
     
     async logout() {
@@ -1691,7 +1674,8 @@ class AuthSystem {
             this.currentUser = null;
             localStorage.removeItem(this.authKey);
             
-            this.resetCartUserId();
+            // Clear session storage for cart
+            sessionStorage.removeItem('irya_cart_session_id');
             
             this.updateAuthUI();
             showNotification('Logged out successfully!');
@@ -1710,7 +1694,7 @@ class AuthSystem {
         if (this.isLoggedIn()) {
             const userName = this.getUserName();
             const userEmail = this.getUserEmail();
-            const firstName = userName.split(' ')[0];
+            const firstName = userName ? userName.split(' ')[0] : 'User';
             
             userProfileDiv.innerHTML = `
                 <button class="profile-btn" id="profileDropdownBtn">
@@ -1777,6 +1761,7 @@ class AuthSystem {
             }
             
         } else {
+            // Show Sign In button only
             userProfileDiv.innerHTML = `
                 <a href="sign.html" class="signin-btn">
                     <i class="fas fa-user"></i> Sign In
@@ -1787,7 +1772,7 @@ class AuthSystem {
 }
 
 // ============================================
-// FIXED CART SYSTEM
+// SIMPLIFIED CART SYSTEM - NO AUTO GUEST
 // ============================================
 
 class CartSystem {
@@ -1795,48 +1780,37 @@ class CartSystem {
         this.localCartKey = 'irya_cart';
         this.cartItems = [];
         this.initialized = false;
-        this.preventAutoLoad = false;
     }
     
     async init() {
         if (this.initialized) return this;
         
-        console.log('🛒 Cart system initializing (auto-add protection ON)');
-        
-        this.preventAutoLoad = true;
-        
-        if (authSystem && !authSystem.isLoggedIn()) {
-            authSystem.resetCartUserId();
-        }
+        console.log('🛒 Cart system initializing');
         
         await this.loadCart();
         this.updateCartBadge();
-        
-        setTimeout(() => {
-            this.preventAutoLoad = false;
-            console.log('✅ Cart system ready');
-        }, 1000);
         
         this.initialized = true;
         return this;
     }
     
-    getUserId() {
-        if (!authSystem) {
-            return 'fresh_cart_' + Date.now();
+    getCartUserId() {
+        if (authSystem && authSystem.isLoggedIn()) {
+            return authSystem.currentUser.uid;
         }
         
-        return authSystem.getCartUserId();
+        // Anonymous user - session-based ID
+        let cartId = sessionStorage.getItem('irya_cart_session_id');
+        if (!cartId) {
+            cartId = 'cart_session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('irya_cart_session_id', cartId);
+        }
+        return cartId;
     }
     
     async loadCart() {
         try {
-            if (this.preventAutoLoad) {
-                this.cartItems = [];
-                return [];
-            }
-            
-            const userId = this.getUserId();
+            const userId = this.getCartUserId();
             const cartKey = `${this.localCartKey}_${userId}`;
             
             const cartData = localStorage.getItem(cartKey);
@@ -1851,9 +1825,6 @@ class CartSystem {
                     } else {
                         this.cartItems = [];
                     }
-                    
-                    this.removeSuspiciousItems();
-                    
                 } catch (e) {
                     console.error('Error parsing cart data:', e);
                     this.cartItems = [];
@@ -1861,6 +1832,8 @@ class CartSystem {
             } else {
                 this.cartItems = [];
             }
+            
+            console.log(`📦 Loaded ${this.cartItems.length} cart items for user: ${userId}`);
             
             return this.cartItems;
             
@@ -1871,9 +1844,11 @@ class CartSystem {
         }
     }
     
-    removeSuspiciousItems() {
-        const originalCount = this.cartItems.length;
+    async saveCart() {
+        const userId = this.getCartUserId();
+        const cartKey = `${this.localCartKey}_${userId}`;
         
+        // Remove any suspicious items
         this.cartItems = this.cartItems.filter(item => {
             return item && 
                    item.id && 
@@ -1882,49 +1857,17 @@ class CartSystem {
                    item.price > 0 &&
                    !item.autoAdded;
         });
-    }
-    
-    async saveCart() {
-        const userId = this.getUserId();
         
-        this.removeDuplicates();
-        this.removeSuspiciousItems();
-        
-        this.saveToLocalStorage();
+        // Save to localStorage
+        localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
         
         this.updateCartBadge();
         return this.cartItems;
     }
     
-    saveToLocalStorage() {
-        const userId = this.getUserId();
-        const cartKey = `${this.localCartKey}_${userId}`;
-        
-        localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
-    }
-    
-    removeDuplicates() {
-        const uniqueItems = [];
-        const seenIds = new Set();
-        
-        for (const item of this.cartItems) {
-            if (item && item.id && !seenIds.has(item.id)) {
-                seenIds.add(item.id);
-                uniqueItems.push(item);
-            }
-        }
-        
-        this.cartItems = uniqueItems;
-    }
-    
     async addToCart(product) {
         try {
             console.log(`📦 Adding product to cart: ${product.id} - ${product.stone_name}`);
-            
-            if (this.preventAutoLoad) {
-                console.log('🛑 Auto-add prevented');
-                return false;
-            }
             
             const existingIndex = this.cartItems.findIndex(item => item.id === product.id);
             
@@ -2218,7 +2161,7 @@ function populateDefaultFilters() {
 }
 
 // ============================================
-// PRODUCT LOADING WITH FILTERS - FIXED
+// PRODUCT LOADING WITH FILTERS
 // ============================================
 
 async function loadProductsFromFirebase() {
@@ -2560,7 +2503,7 @@ function updateProductsCount(count) {
 }
 
 // ============================================
-// DISPLAY PRODUCTS - FIXED: Shows all products correctly
+// DISPLAY PRODUCTS
 // ============================================
 
 function displayProducts(products) {
