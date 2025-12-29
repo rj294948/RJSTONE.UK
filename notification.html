@@ -1198,7 +1198,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // ============================================
-// AUTHENTICATION SYSTEM - NO AUTO SIGN-IN
+// AUTHENTICATION SYSTEM
 // ============================================
 
 let currentUserId = null;
@@ -1230,7 +1230,7 @@ async function checkUserAuthentication() {
         resolve({ isLoggedIn: true, userId: currentUserId });
         
       } else {
-        // 🔴 User is not signed in - NO AUTO GUEST CREATION
+        // 🔴 User is not signed in
         console.log("🔴 User not signed in - notifications disabled");
         isUserLoggedIn = false;
         
@@ -2000,7 +2000,7 @@ async function handleTrackOrderAction(notificationId, orderId, orderNumber) {
     // Mark as read
     await markAsRead(notificationId);
     
-    // Redirect to orders page with tracking
+    // Redirect to orders page with auto tracking
     redirectToOrdersPage(orderId, orderNumber, true);
     
   } catch (error) {
@@ -2122,6 +2122,7 @@ function redirectToOrdersPage(orderId, orderNumber, trackOrder = false) {
     orderNumber: orderNumber,
     notificationType: trackOrder ? 'order_tracking' : 'order_notification',
     trackOrder: trackOrder,
+    showTracking: trackOrder,
     timestamp: new Date().toISOString()
   };
   
@@ -2132,12 +2133,12 @@ function redirectToOrdersPage(orderId, orderNumber, trackOrder = false) {
   if (orderId) {
     ordersUrl += `?order_id=${orderId}`;
     if (trackOrder) {
-      ordersUrl += `&track=true`;
+      ordersUrl += `&auto_track=true`;
     }
   } else if (orderNumber) {
     ordersUrl += `?search=${encodeURIComponent(orderNumber)}`;
     if (trackOrder) {
-      ordersUrl += `&track=true`;
+      ordersUrl += `&auto_track=true`;
     }
   }
   
