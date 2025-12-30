@@ -2656,63 +2656,7 @@ function closeCancelModal() {
 }
 
 
-function getActualPaymentStatus(order) {
-  const total = order.total || 0;
-  const advancePayment = order.advancePayment || order.submittedAmount || 0;
-  const remainingPayment = order.remainingPayment || (total - advancePayment);
-  
-  // Agar order shipped/delivered hai to payment confirm consider karo
-  const orderStatus = order.orderStatus || order.status || '';
-  if (orderStatus === 'shipped' || orderStatus === 'out_for_delivery' || orderStatus === 'delivered') {
-    if (remainingPayment <= 0) {
-      return 'fully_paid';
-    } else if (advancePayment > 0) {
-      return 'advance_paid';
-    }
-  }
-  
-  // Regular logic
-  if (remainingPayment <= 0) {
-    return 'fully_paid';
-  } else if (advancePayment > 0) {
-    return 'advance_paid';
-  } else if (order.paymentStatus === 'confirmed') {
-    return 'confirmed';
-  }
-  
-  return 'pending';
-}
 
-function getAddressHTML(address) {
-  if (!address) return '';
-  
-  let html = '';
-  
-  if (typeof address === 'string') {
-    html += `<div class="address-line">${address}</div>`;
-    return html;
-  }
-  
-  if (address.name || address.fullName) {
-    html += `<div class="address-line"><strong>${address.fullName || address.name}</strong></div>`;
-  }
-  if (address.email) html += `<div class="address-line">${address.email}</div>`;
-  if (address.phone) html += `<div class="address-line">Phone: ${address.phone}</div>`;
-  if (address.address) html += `<div class="address-line">${address.address}</div>`;
-  if (address.address1) html += `<div class="address-line">${address.address1}</div>`;
-  if (address.address2) html += `<div class="address-line">${address.address2}</div>`;
-  if (address.city || address.state) {
-    html += `<div class="address-line">`;
-    if (address.city) html += `${address.city}`;
-    if (address.city && address.state) html += `, `;
-    if (address.state) html += `${address.state}`;
-    html += `</div>`;
-  }
-  if (address.postalCode) html += `<div class="address-line">Postal Code: ${address.postalCode}</div>`;
-  if (address.country) html += `<div class="address-line">${address.country}</div>`;
-  
-  return html;
-}
 
 // ============================================
 // NOTIFICATIONS LISTENER - FOR BADGE UPDATES ONLY
