@@ -46,6 +46,7 @@
     --cancelled: #dc2626;
     --returned: #6b7280;
     --refunded: #8b5cf6;
+    --pending-confirmation: #f59e0b;
 }
 
 * {
@@ -523,6 +524,7 @@ body {
 }
 
 .status-payment-pending { background: #fff5f5; color: var(--payment-pending); border: 1px solid #ffc9c9; }
+.status-pending-confirmation { background: #fff4e6; color: var(--pending-confirmation); border: 1px solid #ffd8a8; }
 .status-payment-advance { background: #fff4e6; color: var(--payment-advance); border: 1px solid #ffd8a8; }
 .status-payment-full { background: #ebfbee; color: var(--payment-full); border: 1px solid #b2f2bb; }
 .status-processing { background: #e7f5ff; color: var(--processing); border: 1px solid #a5d8ff; }
@@ -550,6 +552,12 @@ body {
     background: #fff5f5;
     color: var(--payment-pending);
     border: 1px solid #ffc9c9;
+}
+
+.payment-status.pending-confirmation {
+    background: #fff4e6;
+    color: var(--pending-confirmation);
+    border: 1px solid #ffd8a8;
 }
 
 .payment-status.advance {
@@ -1954,39 +1962,85 @@ function getDefaultImage(category) {
 }
 
 // ============================================
-// PAY REMAINING AMOUNT - NOTIFICATION CHECKOUT STYLE
+// CHECK NOTIFICATION REDIRECT - UPDATED
+// ============================================
+
+function checkNotificationRedirect() {
+  const notificationRedirect = localStorage.getItem('irya_notification_redirect');
+  if (notificationRedirect) {
+    try {
+      const redirectData = JSON.parse(notificationRedirect);
+      console.log("📌 Processing notification redirect:", redirectData);
+      
+      const { orderId, orderNumber, action } = redirectData;
+      
+      if (action === 'track_order' && orderId) {
+        // Directly open tracking modal
+        setTimeout(() => {
+          showTrackingModal(orderId);
+        }, 1000);
+      } else if (orderId || orderNumber) {
+        // Scroll to order
+        setTimeout(() => {
+          let orderElement;
+          
+          if (orderId) {
+            orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
+          }
+          
+          if (!orderElement && orderNumber) {
+            orderElement = document.querySelector(`[data-order-number="${orderNumber}"]`);
+          }
+          
+          if (orderElement) {
+            orderElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            orderElement.style.boxShadow = '0 0 0 3px var(--primary-gold)';
+            setTimeout(() => {
+              orderElement.style.boxShadow = '';
+            }, 3000);
+          }
+        }, 1000);
+      }
+      
+      localStorage.removeItem('irya_notification_redirect');
+      
+    } catch (error) {
+      console.error("❌ Error processing notification redirect:", error);
+      localStorage.removeItem('irya_stone_notification_redirect');
+    }
+  }
+}
+
+// ============================================
+// PAY REMAINING AMOUNT - UPDATED WITH TIME LIMITS
 // ============================================
 
 async function payRemainingAmount(orderId) {
   try {
-    console.log("🚀 Processing remaining payment for order:", orderId);
-    
     const order = orders.find(o => o.id === orderId);
     if (!order) {
       showMessage("Order not found", "error");
       return;
     }
     
-    // Calculate remaining payment
+    const orderStatus = order.orderStatus || order.status || '';
     const total = order.total || 0;
     const advancePayment = order.advancePayment || order.submittedAmount || 0;
     const remainingPayment = order.remainingPayment || (total - advancePayment);
-    
-    console.log("💰 Payment Details:", {
-      total: total,
-      advance: advancePayment,
-      remaining: remainingPayment
-    });
     
     if (remainingPayment <= 0) {
       showMessage("This order is already fully paid", "info");
       return;
     }
     
-    // Check if order can accept payment
-    const orderStatus = order.orderStatus || order.status || '';
-    if (['cancelled', 'returned', 'refunded'].includes(orderStatus)) {
-      showMessage("This order cannot accept payments as it has been cancelled or returned.", "error");
+    // Check if order is ready to ship
+    if (orderStatus === 'ready_to_ship') {
+      showMessage("⚠️ Order is ready to ship! Complete payment within 1 hour or order will be cancelled.", "warning");
+    }
+    
+    // Check if payment can be made
+    if (['shipped', 'out_for_delivery', 'delivered', 'cancelled', 'returned', 'refunded'].includes(orderStatus)) {
+      showMessage(`This order cannot accept payments. Current status: ${orderStatus}`, "error");
       return;
     }
     
@@ -2017,17 +2071,22 @@ async function payRemainingAmount(orderId) {
       // Order Details
       items: order.items || [],
       shippingDetails: order.shippingDetails || order.shippingAddress || {},
-      paymentMethod: order.paymentMethod || 'stripe',
+      paymentMethod: order.paymentMethod || 'bank',
       shippingCost: order.shipping || 0,
       taxAmount: order.tax || 0,
       subtotal: order.subtotal || 0,
-      orderStatus: order.orderStatus,
+      orderStatus: orderStatus,
       
       // Payment Type & Source
       type: 'remaining_payment',
       source: 'orders_page',
       createdAt: new Date().toISOString(),
       paymentConfirmDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+      
+      // Time Limits
+      requiresAdminConfirmation: true,
+      maxWaitTime: orderStatus === 'ready_to_ship' ? 60 : 1440, // 1 hour or 24 hours
+      autoCancelAfter: orderStatus === 'ready_to_ship' ? '1 hour' : '24 hours',
       
       // Additional Info
       estimatedDelivery: order.estimatedDelivery || order.deliveryDate,
@@ -2038,28 +2097,7 @@ async function payRemainingAmount(orderId) {
     console.log("💾 Saving payment data to localStorage:", paymentData);
     
     // Save to localStorage for notification-checkout page
-    localStorage.setItem('irya_pending_payment_order', JSON.stringify({
-      orderId: order.id,
-      orderNumber: order.orderNumber,
-      amount: remainingPayment,
-      totalAmount: total,
-      paidAmount: advancePayment,
-      remainingAmount: remainingPayment,
-      notificationType: 'payment_pending',
-      source: 'orders_page',
-      timestamp: new Date().toISOString(),
-      userId: currentUserId,
-      userEmail: userEmail || order.userEmail,
-      userName: userName || order.userName,
-      paymentMethod: order.paymentMethod,
-      items: order.items,
-      shippingDetails: order.shippingDetails,
-      autoCancelTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      platformFee: platformFee,
-      netAmount: netAmount,
-      isBuyNow: order.isBuyNow || false,
-      orderType: order.isBuyNow ? 'buy_now' : 'cart_order'
-    }));
+    localStorage.setItem('irya_pending_payment_order', JSON.stringify(paymentData));
     
     // Also save for compatibility with notification-checkout.html
     localStorage.setItem('irya_checkout_data', JSON.stringify({
@@ -2076,7 +2114,7 @@ async function payRemainingAmount(orderId) {
     }));
     
     // Redirect to notification-checkout page
-    const checkoutUrl = `notification-checkout.html?order_id=${order.id}&type=remaining_payment&amount=${remainingPayment}&source=orders_page&order_number=${order.orderNumber}&is_buy_now=${order.isBuyNow || false}`;
+    const checkoutUrl = `notification-checkout.html?order_id=${order.id}&type=remaining_payment&amount=${remainingPayment}&source=orders_page&order_number=${order.orderNumber}&is_buy_now=${order.isBuyNow || false}&max_wait=${paymentData.maxWaitTime}`;
     
     showMessage(`Redirecting to payment page for £${remainingPayment.toFixed(2)}...`, "info");
     
@@ -2311,6 +2349,35 @@ function closeCancelModal() {
 }
 
 // ============================================
+// PAYMENT STATUS HELPER - ALL PAYMENTS NEED ADMIN CONFIRMATION
+// ============================================
+
+function getActualPaymentStatus(order) {
+  const total = order.total || 0;
+  const advancePayment = order.advancePayment || order.submittedAmount || 0;
+  const remainingPayment = order.remainingPayment || (total - advancePayment);
+  
+  // ALL PAYMENTS REQUIRE ADMIN CONFIRMATION
+  if (order.paymentStatus === 'confirmed') {
+    // Admin ne confirm kar diya
+    if (remainingPayment <= 0) {
+      return 'fully_paid';
+    } else if (advancePayment > 0) {
+      return 'advance_paid';
+    }
+  } else if (order.paymentStatus === 'pending') {
+    // Admin confirmation pending
+    if (advancePayment > 0 || order.submittedAmount > 0) {
+      return 'pending_confirmation';
+    } else {
+      return 'payment_pending';
+    }
+  }
+  
+  return 'payment_pending';
+}
+
+// ============================================
 // DISPLAY ORDERS - COMPLETE WITH PAY REMAINING
 // ============================================
 
@@ -2342,20 +2409,24 @@ function displayOrders(ordersList) {
     
     // Payment badge logic
     let paymentBadgeClass = 'pending';
-    let paymentBadgeText = 'Payment Pending';
+    let paymentBadgeText = '⏳ Wait for Payment';
     let paymentIcon = 'fa-clock';
     
     if (paymentStatus === 'fully_paid' || remainingPayment <= 0) {
       paymentBadgeClass = 'full';
-      paymentBadgeText = 'Fully Paid';
+      paymentBadgeText = '✅ Fully Paid';
       paymentIcon = 'fa-check-circle';
-    } else if (paymentStatus === 'advance_paid' || advancePayment > 0) {
+    } else if (paymentStatus === 'advance_paid') {
       paymentBadgeClass = 'advance';
-      paymentBadgeText = 'Advance Paid';
+      paymentBadgeText = '✅ Advance Paid';
       paymentIcon = 'fa-money-bill-wave';
+    } else if (paymentStatus === 'pending_confirmation') {
+      paymentBadgeClass = 'pending-confirmation';
+      paymentBadgeText = '⏳ Waiting Admin Confirmation (24hrs max)';
+      paymentIcon = 'fa-user-check';
     } else if (paymentStatus === 'confirmed') {
       paymentBadgeClass = 'confirmed';
-      paymentBadgeText = 'Payment Confirmed';
+      paymentBadgeText = '✅ Payment Confirmed';
       paymentIcon = 'fa-check-circle';
     }
     
@@ -2382,6 +2453,9 @@ function displayOrders(ordersList) {
     const canCancelOrder = !isCancelled && 
                           !['delivered', 'returned', 'shipped', 'out_for_delivery'].includes(orderStatus) &&
                           ['payment_pending', 'processing', 'ready_to_ship'].includes(orderStatus);
+    
+    // Check if order is ready to ship with pending payment
+    const isReadyToShipWithPayment = orderStatus === 'ready_to_ship' && remainingPayment > 0;
     
     ordersHTML += `
       <div class="${cardClass}" data-order-id="${order.id}" data-order-number="${order.orderNumber || ''}">
@@ -2463,14 +2537,26 @@ function displayOrders(ordersList) {
             </div>
           </div>
           
-          ${showPaymentReminder && canMakePayment ? `
+          ${isReadyToShipWithPayment && canMakePayment ? `
+          <div class="payment-reminder" style="background: linear-gradient(135deg, #fef3c7, #fee2e2); border-color: #ef4444;">
+            <div class="payment-reminder-header">
+              <i class="fas fa-exclamation-triangle"></i> URGENT: Complete Payment Within 1 Hour
+            </div>
+            <div class="payment-reminder-content">
+              Your order is ready to ship! Complete remaining payment of £${remainingPayment.toFixed(2)} within <strong>1 hour</strong> or order will be automatically cancelled.
+            </div>
+            <button class="pay-now-btn" onclick="payRemainingAmount('${order.id}')" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+              <i class="fas fa-bolt"></i> PAY NOW - £${remainingPayment.toFixed(2)} (1 HOUR LEFT)
+            </button>
+          </div>
+          ` : showPaymentReminder && canMakePayment ? `
           <div class="payment-reminder">
             <div class="payment-reminder-header">
               <i class="fas fa-exclamation-circle"></i> Payment Required
             </div>
             <div class="payment-reminder-content">
               Your order has a remaining balance of £${remainingPayment.toFixed(2)}. 
-              ${order.paymentMethod === 'bank' ? 'This is a bank transfer - payment requires admin confirmation.' : 'Please complete the payment to proceed.'}
+              ${order.paymentMethod === 'bank' ? 'This is a bank transfer - payment requires admin confirmation (max 24 hours).' : 'Please complete the payment to proceed.'}
               
               ${order.autoCancelTime ? `
               <div style="margin-top: 8px; padding: 6px; background: rgba(239, 68, 68, 0.1); border-radius: 4px; font-size: 11px;">
@@ -2508,6 +2594,13 @@ function displayOrders(ordersList) {
               <span>Net Advance:</span>
               <span>£${calculatedNetAdvance.toFixed(2)}</span>
             </div>
+          </div>
+          ` : ''}
+          
+          ${order.paymentMethod === 'bank' || order.requiresAdminConfirmation ? `
+          <div style="margin: 15px 0; padding: 10px; background: #fff8e1; border-radius: 6px; border-left: 4px solid #f59e0b; font-size: 12px;">
+            <i class="fas fa-user-check"></i>
+            <strong>Admin Confirmation Required:</strong> All payments require admin verification (max 24 hours)
           </div>
           ` : ''}
           
@@ -2596,32 +2689,28 @@ function displayOrders(ordersList) {
 }
 
 // ============================================
-// PAYMENT STATUS HELPER
+// GET STATUS TEXT - UPDATED
 // ============================================
 
-function getActualPaymentStatus(order) {
-  const total = order.total || 0;
-  const advancePayment = order.advancePayment || order.submittedAmount || 0;
-  const remainingPayment = order.remainingPayment || (total - advancePayment);
+function getStatusText(status) {
+  if (!status) return '⏳ Wait for Payment';
   
-  // Bank transfer requires admin confirmation
-  if (order.paymentMethod === 'bank' && order.paymentStatus === 'pending') {
-    return 'pending';
-  }
+  const statusMap = {
+    'payment_pending': '⏳ Wait for Payment',
+    'pending_confirmation': '⏳ Waiting Admin Confirmation (24hrs max)',
+    'advance_paid': '✅ Advance Paid',
+    'fully_paid': '✅ Fully Paid',
+    'processing': 'Processing',
+    'ready_to_ship': 'Ready to Ship',
+    'shipped': 'Shipped',
+    'out_for_delivery': 'Out for Delivery',
+    'delivered': 'Delivered',
+    'cancelled': 'Cancelled',
+    'returned': 'Returned',
+    'refunded': 'Refunded'
+  };
   
-  // If payment is confirmed by admin
-  if (order.paymentStatus === 'confirmed') {
-    return remainingPayment <= 0 ? 'fully_paid' : 'advance_paid';
-  }
-  
-  // Regular logic
-  if (remainingPayment <= 0) {
-    return 'fully_paid';
-  } else if (advancePayment > 0) {
-    return 'advance_paid';
-  }
-  
-  return 'pending';
+  return statusMap[status] || status;
 }
 
 // ============================================
@@ -2712,6 +2801,7 @@ function filterOrders(status) {
       if (statusLower === 'pending') {
         return orderStatusLower.includes('pending') || 
                orderStatusLower === 'payment_pending' ||
+               orderStatusLower === 'pending_confirmation' ||
                orderStatusLower === 'advance_paid' ||
                orderStatusLower === 'processing';
       }
@@ -2784,48 +2874,8 @@ function searchOrders() {
 }
 
 // ============================================
-// CHECK REDIRECTS
+// CHECK PAYMENT SUCCESS
 // ============================================
-
-function checkNotificationRedirect() {
-  const notificationRedirect = localStorage.getItem('irya_notification_redirect');
-  if (notificationRedirect) {
-    try {
-      const redirectData = JSON.parse(notificationRedirect);
-      console.log("📌 Processing notification redirect:", redirectData);
-      
-      const { orderId, orderNumber } = redirectData;
-      
-      if (orderId || orderNumber) {
-        setTimeout(() => {
-          let orderElement;
-          
-          if (orderId) {
-            orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
-          }
-          
-          if (!orderElement && orderNumber) {
-            orderElement = document.querySelector(`[data-order-number="${orderNumber}"]`);
-          }
-          
-          if (orderElement) {
-            orderElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            orderElement.style.boxShadow = '0 0 0 3px var(--primary-gold)';
-            setTimeout(() => {
-              orderElement.style.boxShadow = '';
-            }, 3000);
-          }
-        }, 1000);
-      }
-      
-      localStorage.removeItem('irya_notification_redirect');
-      
-    } catch (error) {
-      console.error("❌ Error processing notification redirect:", error);
-      localStorage.removeItem('irya_notification_redirect');
-    }
-  }
-}
 
 function checkPaymentSuccess() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -2872,6 +2922,7 @@ function getStatusClass(status) {
   
   const statusMap = {
     'payment_pending': 'status-payment-pending',
+    'pending_confirmation': 'status-pending-confirmation',
     'advance_paid': 'status-payment-advance',
     'fully_paid': 'status-payment-full',
     'processing': 'status-processing',
@@ -2887,31 +2938,12 @@ function getStatusClass(status) {
   return statusMap[status] || 'status-payment-pending';
 }
 
-function getStatusText(status) {
-  if (!status) return 'Payment Pending';
-  
-  const statusMap = {
-    'payment_pending': 'Payment Pending',
-    'advance_paid': 'Advance Paid',
-    'fully_paid': 'Full Payment',
-    'processing': 'Processing',
-    'ready_to_ship': 'Ready to Ship',
-    'shipped': 'Shipped',
-    'out_for_delivery': 'Out for Delivery',
-    'delivered': 'Delivered',
-    'cancelled': 'Cancelled',
-    'returned': 'Returned',
-    'refunded': 'Refunded'
-  };
-  
-  return statusMap[status] || status;
-}
-
 function getStatusIcon(status) {
   if (!status) return 'fa-clock';
   
   const iconMap = {
     'payment_pending': 'fa-clock',
+    'pending_confirmation': 'fa-user-check',
     'advance_paid': 'fa-money-bill-wave',
     'fully_paid': 'fa-check-circle',
     'processing': 'fa-cogs',
@@ -3352,7 +3384,7 @@ function updateCartBadge() {
 }
 
 // ============================================
-// INVOICE FUNCTION
+// INVOICE FUNCTION - USE CONFIRMATION DATE
 // ============================================
 
 async function downloadInvoice(orderId) {
@@ -3378,10 +3410,26 @@ async function downloadInvoice(orderId) {
 }
 
 function generateInvoiceHTML(order) {
-  const invoiceDate = formatDate(order.createdAt);
+  // Use confirmation date or order date
+  let invoiceDate = 'N/A';
+  
+  if (order.paymentConfirmedAt) {
+    invoiceDate = formatDate(order.paymentConfirmedAt);
+  } else if (order.confirmedAt) {
+    invoiceDate = formatDate(order.confirmedAt);
+  } else if (order.createdAt) {
+    invoiceDate = formatDate(order.createdAt);
+  }
+  
   const total = order.total || 0;
   const advancePayment = order.advancePayment || order.submittedAmount || 0;
   const remainingPayment = order.remainingPayment || (total - advancePayment);
+  
+  // Determine invoice status based on payment confirmation
+  let invoiceStatus = 'PENDING';
+  if (order.paymentStatus === 'confirmed') {
+    invoiceStatus = remainingPayment <= 0 ? 'FULLY PAID' : 'ADVANCE PAID';
+  }
   
   return `
     <!DOCTYPE html>
@@ -3399,6 +3447,14 @@ function generateInvoiceHTML(order) {
         .items-table th { background: #f5f5f5; }
         .total-section { text-align: right; margin-top: 30px; }
         .footer { margin-top: 50px; text-align: center; color: #666; font-size: 12px; }
+        .invoice-status {
+          padding: 5px 10px;
+          border-radius: 4px;
+          font-weight: bold;
+          display: inline-block;
+        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-confirmed { background: #d1fae5; color: #065f46; }
       </style>
     </head>
     <body>
@@ -3412,7 +3468,12 @@ function generateInvoiceHTML(order) {
           <div class="invoice-info">
             <h2>INVOICE</h2>
             <p><strong>Invoice No:</strong> ${order.orderNumber || order.id}</p>
-            <p><strong>Date:</strong> ${invoiceDate}</p>
+            <p><strong>Invoice Date:</strong> ${invoiceDate}</p>
+            <p><strong>Status:</strong> 
+              <span class="invoice-status ${invoiceStatus === 'PENDING' ? 'status-pending' : 'status-confirmed'}">
+                ${invoiceStatus}
+              </span>
+            </p>
           </div>
         </div>
         
@@ -3430,7 +3491,8 @@ function generateInvoiceHTML(order) {
             <div>
               <h3>Payment Details:</h3>
               <p><strong>Status:</strong> ${order.orderStatus || 'Processing'}</p>
-              <p><strong>Payment Method:</strong> ${order.paymentMethod || 'Stripe'}</p>
+              <p><strong>Payment Method:</strong> ${order.paymentMethod || 'Bank Transfer'}</p>
+              <p><strong>Admin Confirmation:</strong> ${order.paymentStatus === 'confirmed' ? 'Confirmed' : 'Pending (Max 24hrs)'}</p>
               ${order.paymentReference ? `<p><strong>Reference:</strong> ${order.paymentReference}</p>` : ''}
             </div>
           </div>
@@ -3464,18 +3526,48 @@ function generateInvoiceHTML(order) {
           <h3>Total: £${total.toFixed(2)}</h3>
           <p><strong>Paid Amount:</strong> £${advancePayment.toFixed(2)}</p>
           <p><strong>Remaining:</strong> £${remainingPayment.toFixed(2)}</p>
+          ${order.platformFee ? `<p><strong>Platform Fee:</strong> £${order.platformFee.toFixed(2)}</p>` : ''}
+          ${order.paymentMethod === 'bank' ? `<p><strong>Bank Charges:</strong> £0.50</p>` : ''}
         </div>
         
         <div class="footer">
           <p>Thank you for your business!</p>
           <p>IRYA STONE | United Kingdom | www.iryastone.com</p>
           <p>This is a computer-generated invoice. No signature required.</p>
+          <p><strong>Note:</strong> All payments require admin confirmation (max 24 hours)</p>
         </div>
       </div>
     </body>
     </html>
   `;
 }
+
+// ============================================
+// AUTO-CANCEL LOGIC (Frontend simulation)
+// ============================================
+
+function checkAutoCancelOrders() {
+  // This would be called periodically from the backend
+  // For now, just log the logic
+  console.log("🔍 Checking for orders that need auto-cancellation...");
+  
+  orders.forEach(order => {
+    if (order.orderStatus === 'ready_to_ship' && order.remainingPayment > 0) {
+      if (order.readyToShipAt) {
+        const readyTime = new Date(order.readyToShipAt);
+        const now = new Date();
+        const hoursDiff = (now - readyTime) / (1000 * 60 * 60);
+        
+        if (hoursDiff >= 1) {
+          console.log(`⚠️ Order ${order.orderNumber} should be auto-cancelled (ready to ship for ${hoursDiff.toFixed(1)} hours)`);
+        }
+      }
+    }
+  });
+}
+
+// Check auto-cancel every 5 minutes
+setInterval(checkAutoCancelOrders, 5 * 60 * 1000);
 
 // ============================================
 // CLEANUP
