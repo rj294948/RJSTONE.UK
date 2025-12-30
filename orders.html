@@ -1954,7 +1954,7 @@ function getDefaultImage(category) {
 }
 
 // ============================================
-// PAY REMAINING AMOUNT - COMPLETE FUNCTION
+// PAY REMAINING AMOUNT - ADMIN CONFIRMATION SYSTEM
 // ============================================
 
 async function payRemainingAmount(orderId) {
@@ -1990,16 +1990,19 @@ async function payRemainingAmount(orderId) {
       return;
     }
     
-    // Calculate platform fees
+    // Calculate platform fees (same as advance payment)
     const platformFee = (remainingPayment * 0.025) + 0.30; // 2.5% + £0.30
     const netAmount = remainingPayment - platformFee;
+    
+    // Determine if this is a buy-now or cart order
+    const orderType = order.isBuyNow ? 'buy_now' : 'cart_order';
     
     // Create comprehensive payment data
     const paymentData = {
       // Order Information
       orderId: order.id,
       orderNumber: order.orderNumber || 'ORDER-' + order.id.substring(0, 8),
-      orderType: order.isBuyNow ? 'buy_now' : 'cart_order',
+      orderType: orderType,
       
       // Payment Amounts
       amount: remainingPayment,
@@ -2011,8 +2014,8 @@ async function payRemainingAmount(orderId) {
       
       // User Information
       userId: currentUserId,
-      userEmail: userEmail,
-      userName: userName || 'Customer',
+      userEmail: userEmail || order.userEmail,
+      userName: userName || order.userName || 'Customer',
       
       // Order Details
       items: order.items || [],
@@ -2027,9 +2030,12 @@ async function payRemainingAmount(orderId) {
       type: 'remaining_payment',
       source: 'orders_page',
       createdAt: new Date().toISOString(),
+      paymentConfirmDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
       
       // Additional Info
-      estimatedDelivery: order.estimatedDelivery || order.deliveryDate
+      estimatedDelivery: order.estimatedDelivery || order.deliveryDate,
+      refundPolicy: "If payment not confirmed within 24 hours, order will be cancelled and refund processed after deducting platform fees (2.5% + £0.30) and bank charges (£0.50)",
+      notes: order.notes || ""
     };
     
     console.log("💾 Saving payment data to localStorage:", paymentData);
@@ -2037,26 +2043,29 @@ async function payRemainingAmount(orderId) {
     // Save to localStorage for checkout page
     localStorage.setItem('irya_remaining_payment', JSON.stringify(paymentData));
     
-    // Also save for checkout compatibility
-    localStorage.setItem('irya_checkout_data', JSON.stringify({
-      type: 'remaining_payment',
+    // Also save for checkout compatibility (notification-checkout style)
+    localStorage.setItem('irya_pending_payment_order', JSON.stringify({
       orderId: order.id,
+      orderNumber: order.orderNumber,
       amount: remainingPayment,
+      totalAmount: total,
+      paidAmount: advancePayment,
+      remainingAmount: remainingPayment,
+      notificationType: 'payment_pending',
+      source: 'orders_page',
+      timestamp: new Date().toISOString(),
+      userId: currentUserId,
+      paymentMethod: order.paymentMethod,
       items: order.items,
-      user: {
-        id: currentUserId,
-        email: userEmail,
-        name: userName
-      },
-      shippingDetails: order.shippingDetails || order.shippingAddress
+      shippingDetails: order.shippingDetails,
+      autoCancelTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     }));
     
-    // Redirect to checkout page
-    const checkoutUrl = `checkout.html?type=remaining_payment&order_id=${order.id}&amount=${remainingPayment}&order_number=${paymentData.orderNumber}`;
+    // Redirect to notification checkout page (which has admin confirmation system)
+    const checkoutUrl = `notification-checkout.html?order_id=${order.id}&type=remaining_payment&amount=${remainingPayment}&source=orders_page&order_type=${orderType}`;
     
     showMessage(`Redirecting to payment page for £${remainingPayment.toFixed(2)}...`, "info");
     
-    // Small delay before redirect
     setTimeout(() => {
       window.location.href = checkoutUrl;
     }, 800);
@@ -2067,6 +2076,365 @@ async function payRemainingAmount(orderId) {
   }
 }
 
+// ============================================
+// DISPLAY ORDERS - UPDATED WITH CART/BUY NOW TAGS
+// ============================================
+
+function displayOrders(ordersList) {
+  const ordersDiv = document.getElementById("orders");
+  
+  if (!ordersList || ordersList.length === 0) {
+    showEmptyState("You haven't placed any orders yet.");
+    return;
+  }
+  
+  let ordersHTML = '';
+  
+  ordersList.forEach((order) => {
+    const orderDate = formatDate(order.createdAt);
+    const paymentStatus = getActualPaymentStatus(order);
+    const orderStatus = order.orderStatus || order.status || 'payment_pending';
+    const statusClass = getStatusClass(orderStatus);
+    const statusText = getStatusText(orderStatus);
+    
+    const subtotal = order.subtotal || 0;
+    const shipping = order.shipping || 0;
+    const tax = order.tax || 0;
+    const total = order.total || 0;
+    const advancePayment = order.advancePayment || order.submittedAmount || 0;
+    const remainingPayment = order.remainingPayment || (total - advancePayment);
+    const platformFee = order.platformFee || 0;
+    const netAdvance = order.netAdvance || (advancePayment - platformFee);
+    
+    // Payment badge logic
+    let paymentBadgeClass = 'pending';
+    let paymentBadgeText = 'Payment Pending';
+    let paymentIcon = 'fa-clock';
+    
+    if (paymentStatus === 'fully_paid' || remainingPayment <= 0) {
+      paymentBadgeClass = 'full';
+      paymentBadgeText = 'Fully Paid';
+      paymentIcon = 'fa-check-circle';
+    } else if (paymentStatus === 'advance_paid' || advancePayment > 0) {
+      paymentBadgeClass = 'advance';
+      paymentBadgeText = 'Advance Paid';
+      paymentIcon = 'fa-money-bill-wave';
+    } else if (paymentStatus === 'confirmed') {
+      paymentBadgeClass = 'confirmed';
+      paymentBadgeText = 'Payment Confirmed';
+      paymentIcon = 'fa-check-circle';
+    }
+    
+    const isCancelled = orderStatus === 'cancelled' || orderStatus === 'returned' || orderStatus === 'refunded';
+    const cardClass = isCancelled ? 'order-card cancelled' : 'order-card';
+    
+    // Determine order type - IMPORTANT FIX
+    const orderType = order.isBuyNow ? 'buy-now' : 'cart';
+    const orderTypeText = order.isBuyNow ? 'BUY NOW' : 'CART ORDER';
+    
+    // Calculate platform fees if not available
+    const calculatedPlatformFee = platformFee || (advancePayment * 0.025) + 0.30;
+    const calculatedNetAdvance = netAdvance || (advancePayment - calculatedPlatformFee);
+    
+    // Check if payment is due
+    const showPaymentReminder = remainingPayment > 0;
+    
+    // Check if order can still accept payment
+    const canMakePayment = !isCancelled && 
+                          !['cancelled', 'returned', 'refunded'].includes(orderStatus) &&
+                          remainingPayment > 0;
+    
+    // Check if order can be cancelled
+    const canCancelOrder = !isCancelled && 
+                          !['delivered', 'returned', 'shipped', 'out_for_delivery'].includes(orderStatus) &&
+                          ['payment_pending', 'processing', 'ready_to_ship'].includes(orderStatus);
+    
+    ordersHTML += `
+      <div class="${cardClass}" data-order-id="${order.id}" data-order-number="${order.orderNumber || ''}">
+        <div class="order-type-badge ${orderType}">
+          ${orderTypeText}
+        </div>
+        
+        <div class="order-header">
+          <div class="order-info">
+            <h3>${order.orderNumber || 'Order #' + order.id.substring(0, 8)}</h3>
+            <div class="order-date">Placed on ${orderDate}</div>
+            ${order.userEmail ? `<div class="order-date" style="font-size: 11px; color: #666;">${order.userEmail}</div>` : ''}
+          </div>
+          <div>
+            <div class="status-badge ${statusClass}" style="margin-bottom: 8px;">
+              <i class="fas ${getStatusIcon(orderStatus)}"></i>
+              ${statusText}
+            </div>
+            <div class="payment-status ${paymentBadgeClass}">
+              <i class="fas ${paymentIcon}"></i>
+              ${paymentBadgeText}
+            </div>
+          </div>
+        </div>
+        
+        <div class="order-body">
+          ${order.items && order.items.map(item => `
+            <div class="order-item">
+              <div class="item-image">
+                <img src="${item.image || getDefaultImage(item.category)}" 
+                     alt="${item.name || 'Product'}" 
+                     loading="lazy"
+                     onerror="this.src='${getDefaultImage(item.category)}'">
+              </div>
+              <div class="item-details">
+                <div class="item-name">${item.name || 'Product'}</div>
+                
+                <div class="item-specs">
+                  ${item.category ? `<span class="spec-badge">${item.category}</span>` : ''}
+                  ${item.isBuyNow ? `<span class="spec-badge" style="background: var(--primary-gold); color: white;">Buy Now</span>` : ''}
+                  ${item.calculationData && item.calculationData.mode === 'area' ? 
+                    `<span class="spec-badge">Size: ${item.calculationData.length || 1} × ${item.calculationData.width || 1} ft</span>` : ''}
+                  ${item.calculationData && item.calculationData.mode === 'weight' ? 
+                    `<span class="spec-badge">Weight: ${item.calculationData.weight || 1} kg</span>` : ''}
+                </div>
+                
+                <div class="item-meta">
+                  Quantity: ${item.quantity || 1} • 
+                  Price: £${(item.price || 0).toFixed(2)}
+                </div>
+                <div class="item-price">Total: £${(item.totalPrice || (item.price * (item.quantity || 1)) || 0).toFixed(2)}</div>
+              </div>
+            </div>
+          `).join('')}
+          
+          <div class="order-summary">
+            <div class="summary-item">
+              <span class="summary-label">Subtotal</span>
+              <span class="summary-value">£${subtotal.toFixed(2)}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Shipping</span>
+              <span class="summary-value">${shipping === 0 ? 'FREE' : '£' + shipping.toFixed(2)}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Tax (20%)</span>
+              <span class="summary-value">£${tax.toFixed(2)}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Total</span>
+              <span class="summary-value total">£${total.toFixed(2)}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Paid</span>
+              <span class="summary-value paid">£${advancePayment.toFixed(2)}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Remaining</span>
+              <span class="summary-value remaining">£${remainingPayment.toFixed(2)}</span>
+            </div>
+          </div>
+          
+          ${showPaymentReminder && canMakePayment ? `
+          <div class="payment-reminder">
+            <div class="payment-reminder-header">
+              <i class="fas fa-exclamation-circle"></i> Payment Required
+            </div>
+            <div class="payment-reminder-content">
+              Your order has a remaining balance of £${remainingPayment.toFixed(2)}. 
+              ${order.paymentMethod === 'bank' ? 'This is a bank transfer - payment requires admin confirmation.' : 'Please complete the payment to proceed.'}
+              
+              ${order.autoCancelTime ? `
+              <div style="margin-top: 8px; padding: 6px; background: rgba(239, 68, 68, 0.1); border-radius: 4px; font-size: 11px;">
+                <i class="fas fa-clock"></i> 
+                <strong>Deadline:</strong> ${formatDateTime(order.autoCancelTime)}
+              </div>
+              ` : ''}
+            </div>
+            <button class="pay-now-btn" onclick="payRemainingAmount('${order.id}')">
+              <i class="fas fa-bolt"></i> PAY REMAINING AMOUNT - £${remainingPayment.toFixed(2)}
+            </button>
+          </div>
+          ` : ''}
+          
+          ${advancePayment > 0 ? `
+          <div class="platform-fees">
+            <div class="platform-fees-header">
+              <i class="fas fa-info-circle"></i> Advance Payment Details
+            </div>
+            <div class="platform-fee-item">
+              <span>Advance Amount:</span>
+              <span>£${advancePayment.toFixed(2)}</span>
+            </div>
+            <div class="platform-fee-item">
+              <span>Platform Fee (2.5% + £0.30):</span>
+              <span>£${calculatedPlatformFee.toFixed(2)}</span>
+            </div>
+            ${order.paymentMethod === 'bank' ? `
+            <div class="platform-fee-item">
+              <span>Bank Charges:</span>
+              <span>£0.50</span>
+            </div>
+            ` : ''}
+            <div class="platform-fee-total">
+              <span>Net Advance:</span>
+              <span>£${calculatedNetAdvance.toFixed(2)}</span>
+            </div>
+          </div>
+          ` : ''}
+          
+          ${order.paymentMethod === 'bank' && order.paymentReference ? `
+          <div class="platform-fees" style="background: rgba(245, 158, 11, 0.1);">
+            <div class="platform-fees-header">
+              <i class="fas fa-university"></i> Bank Transfer Details
+            </div>
+            <div class="platform-fee-item">
+              <span>Reference:</span>
+              <span>${order.paymentReference}</span>
+            </div>
+            <div class="platform-fee-item">
+              <span>Status:</span>
+              <span>${order.paymentStatus === 'pending' ? '⏳ Pending Admin Confirmation' : '✅ Confirmed by Admin'}</span>
+            </div>
+            ${order.paymentConfirmDeadline ? `
+            <div class="platform-fee-item">
+              <span>Confirm By:</span>
+              <span>${formatDate(order.paymentConfirmDeadline)}</span>
+            </div>
+            ` : ''}
+          </div>
+          ` : ''}
+          
+          ${order.estimatedDelivery || order.deliveryDate ? `
+          <div class="delivery-estimate">
+            <div class="label">Estimated Delivery</div>
+            <div class="date">${formatDate(order.estimatedDelivery || order.deliveryDate)}</div>
+          </div>
+          ` : ''}
+          
+          ${order.shippingDetails || order.shippingAddress ? `
+          <div class="address-section">
+            <div class="address-header">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Shipping Address</span>
+            </div>
+            <div class="address-details">
+              ${getAddressHTML(order.shippingDetails || order.shippingAddress)}
+            </div>
+          </div>
+          ` : ''}
+          
+          ${isCancelled && order.cancellationDetails ? `
+          <div class="cancellation-section">
+            <div class="cancellation-reason">
+              <i class="fas fa-times-circle"></i> ${order.cancellationDetails.reason || 'Order Cancelled'}
+            </div>
+            <div class="cancellation-date">
+              Cancelled on ${formatDate(order.cancellationDetails.date)}
+              ${order.cancellationDetails.cancelledBy ? `by ${order.cancellationDetails.cancelledBy}` : ''}
+            </div>
+            ${order.cancellationDetails.refundAmount ? `
+            <div class="cancellation-date" style="color: var(--refunded); font-weight: 600;">
+              Refund Amount: £${order.cancellationDetails.refundAmount.toFixed(2)}
+            </div>
+            ` : ''}
+          </div>
+          ` : ''}
+          
+          ${order.refundPolicy ? `
+          <div style="margin-top: 15px; padding: 10px; background: #fff8e1; border-radius: 6px; border-left: 4px solid var(--warning-orange); font-size: 11px; color: #92400e;">
+            <i class="fas fa-info-circle"></i> 
+            <strong>Refund Policy:</strong> ${order.refundPolicy}
+          </div>
+          ` : ''}
+        </div>
+        
+        <div class="order-actions">
+          <button class="btn btn-primary" onclick="showTrackingModal('${order.id}')">
+            <i class="fas fa-truck"></i> Track Order
+          </button>
+          <button class="btn btn-success" onclick="downloadInvoice('${order.id}')">
+            <i class="fas fa-file-invoice"></i> Invoice
+          </button>
+          ${canMakePayment ? `
+          <button class="btn btn-warning" onclick="payRemainingAmount('${order.id}')">
+            <i class="fas fa-money-bill-wave"></i> Pay Remaining
+          </button>
+          ` : ''}
+          ${canCancelOrder ? `
+          <button class="btn btn-danger" onclick="cancelOrder('${order.id}')">
+            <i class="fas fa-times"></i> Cancel Order
+          </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  });
+  
+  ordersDiv.innerHTML = ordersHTML;
+}
+
+// ============================================
+// HELPER FUNCTIONS UPDATE
+// ============================================
+
+function getActualPaymentStatus(order) {
+  const total = order.total || 0;
+  const advancePayment = order.advancePayment || order.submittedAmount || 0;
+  const remainingPayment = order.remainingPayment || (total - advancePayment);
+  
+  // Bank transfer requires admin confirmation
+  if (order.paymentMethod === 'bank' && order.paymentStatus === 'pending') {
+    return 'pending';
+  }
+  
+  // Agar order shipped/delivered hai to payment confirm consider karo
+  const orderStatus = order.orderStatus || order.status || '';
+  if (orderStatus === 'shipped' || orderStatus === 'out_for_delivery' || orderStatus === 'delivered') {
+    if (remainingPayment <= 0) {
+      return 'fully_paid';
+    } else if (advancePayment > 0) {
+      return 'advance_paid';
+    }
+  }
+  
+  // Regular logic
+  if (remainingPayment <= 0) {
+    return 'fully_paid';
+  } else if (advancePayment > 0) {
+    if (order.paymentStatus === 'confirmed') {
+      return 'confirmed';
+    }
+    return 'advance_paid';
+  }
+  
+  return 'pending';
+}
+
+function formatDateTime(dateString) {
+  if (!dateString) return 'N/A';
+  
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = date - now;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffHours < 0) {
+      return 'Expired';
+    } else if (diffHours < 24) {
+      return `in ${diffHours} hours`;
+    } else if (diffDays < 7) {
+      return `in ${diffDays} days`;
+    } else {
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+  } catch (error) {
+    return dateString;
+  }
+}
 // ============================================
 // ORDER CANCEL - COMPLETE IMPLEMENTATION
 // ============================================
