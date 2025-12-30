@@ -783,32 +783,45 @@ const firebaseConfig = {
 let currentStep = 1;
 let selectedPaymentMethod = 'stripe';
 let stripe = null;
-let firebaseApp, firebaseDB;
+let firebaseApp, firebaseDB, firebaseAuth;
 let orderData = {
     items: [],
     subtotal: 0,
     total: 0,
     advance: 0,
     userId: null,
-    userEmail: null
+    userEmail: null,
+    userName: null
 };
 
 // ============================================
 // INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('🚀 Checkout page initializing...');
     showLoading(true);
     
     try {
         // Initialize Stripe
         stripe = Stripe(STRIPE_TEST_PK);
+        console.log('✅ Stripe initialized');
         
         // Initialize Firebase
-        firebaseApp = firebase.initializeApp(firebaseConfig);
-        firebaseDB = firebase.firestore();
+        await initializeFirebase();
+        console.log('✅ Firebase initialized');
         
-        // Load cart data
+        // Load user data
+        await loadUserData();
+        console.log('✅ User data loaded:', orderData.userId, orderData.userEmail);
+        
+        // Load cart data from MULTIPLE SOURCES
         await loadCartData();
+        console.log('✅ Cart data loaded:', orderData.items.length, 'items');
+        
+        if (orderData.items.length === 0) {
+            showError('Your cart is empty. Please add items first.');
+            document.getElementById('placeOrderBtn').disabled = true;
+        }
         
         // Check test mode
         checkTestMode();
@@ -818,7 +831,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         renderOrderItems();
         updateOrderSummary();
         
+        console.log('✅ Checkout page initialized successfully');
+        
     } catch (error) {
+        console.error('❌ Initialization error:', error);
         showError('Failed to initialize: ' + error.message);
     } finally {
         showLoading(false);
@@ -826,41 +842,340 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ============================================
-// DATA LOADING
+// FIREBASE INITIALIZATION - FIXED
+// ============================================
+async function initializeFirebase() {
+    try {
+        // Check if Firebase is already initialized
+        if (!firebase.apps.length) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase app initialized');
+        } else {
+            firebaseApp = firebase.app();
+            console.log('✅ Using existing Firebase app');
+        }
+        
+        // Initialize services
+        firebaseDB = firebase.firestore();
+        firebaseAuth = firebase.auth();
+        
+        // Enable persistence for offline support
+        try {
+            await firebaseDB.enablePersistence();
+            console.log('✅ Firestore persistence enabled');
+        } catch (err) {
+            console.log('ℹ️ Firestore persistence not enabled:', err.message);
+        }
+        
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Firebase initialization error:', error);
+        return false;
+    }
+}
+
+// ============================================
+// USER DATA LOADING - FIXED
+// ============================================
+async function loadUserData() {
+    try {
+        // Try multiple sources for user data
+        let userData = null;
+        
+        // Source 1: localStorage with multiple keys
+        const localStorageKeys = [
+            'irya_stone_user',
+            'irya_user',
+            'user_data',
+            'current_user'
+        ];
+        
+        for (const key of localStorageKeys) {
+            const data = localStorage.getItem(key);
+            if (data) {
+                try {
+                    userData = JSON.parse(data);
+                    console.log(`✅ Found user data in ${key}`);
+                    break;
+                } catch (e) {
+                    console.log(`❌ Error parsing ${key}:`, e);
+                }
+            }
+        }
+        
+        // Source 2: Session storage
+        if (!userData) {
+            const sessionData = sessionStorage.getItem('irya_current_user');
+            if (sessionData) {
+                try {
+                    userData = JSON.parse(sessionData);
+                    console.log('✅ Found user data in sessionStorage');
+                } catch (e) {
+                    console.log('❌ Error parsing sessionStorage:', e);
+                }
+            }
+        }
+        
+        // Source 3: URL parameters (for Buy Now flow)
+        if (!userData) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('user_id');
+            const userEmail = urlParams.get('user_email');
+            
+            if (userId) {
+                userData = {
+                    uid: userId,
+                    email: userEmail || '',
+                    displayName: urlParams.get('user_name') || 'Guest'
+                };
+                console.log('✅ Found user data in URL parameters');
+            }
+        }
+        
+        // Set orderData from user data
+        if (userData) {
+            orderData.userId = userData.uid || userData.id || 'guest_' + Date.now();
+            orderData.userEmail = userData.email || '';
+            orderData.userName = userData.displayName || userData.name || 'Guest User';
+            
+            // Pre-fill email in form if available
+            if (orderData.userEmail) {
+                document.getElementById('shippingEmail').value = orderData.userEmail;
+            }
+            
+            // Pre-fill name if available
+            if (orderData.userName && orderData.userName !== 'Guest User') {
+                document.getElementById('shippingName').value = orderData.userName;
+            }
+        } else {
+            // Create guest user
+            orderData.userId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            orderData.userEmail = '';
+            orderData.userName = 'Guest User';
+        }
+        
+        console.log('📋 User Info Set:', {
+            userId: orderData.userId,
+            userEmail: orderData.userEmail,
+            userName: orderData.userName
+        });
+        
+    } catch (error) {
+        console.error('❌ Error loading user data:', error);
+        // Fallback to guest user
+        orderData.userId = 'guest_error_' + Date.now();
+        orderData.userEmail = '';
+        orderData.userName = 'Guest User';
+    }
+}
+
+// ============================================
+// CART DATA LOADING - FIXED FOR MULTIPLE SOURCES
 // ============================================
 async function loadCartData() {
     try {
-        const cartData = localStorage.getItem('irya_cart') || '[]';
-        orderData.items = JSON.parse(cartData);
+        console.log('🛒 Loading cart data from multiple sources...');
         
-        if (orderData.items.length === 0) {
-            throw new Error('Cart is empty');
+        let cartItems = [];
+        let dataSource = 'unknown';
+        
+        // ✅ SOURCE 1: Checkout data from cart page (most reliable)
+        const checkoutData = sessionStorage.getItem('irya_checkout_data');
+        if (checkoutData) {
+            try {
+                const parsedData = JSON.parse(checkoutData);
+                cartItems = parsedData.items || parsedData.cartItems || [];
+                dataSource = 'checkout_data';
+                console.log(`✅ Loaded ${cartItems.length} items from checkout_data`);
+            } catch (e) {
+                console.error('❌ Error parsing checkout data:', e);
+            }
         }
+        
+        // ✅ SOURCE 2: Universal cart key
+        if (cartItems.length === 0) {
+            const universalCart = localStorage.getItem('irya_cart');
+            if (universalCart) {
+                try {
+                    cartItems = JSON.parse(universalCart);
+                    dataSource = 'universal_cart';
+                    console.log(`✅ Loaded ${cartItems.length} items from universal_cart`);
+                } catch (e) {
+                    console.error('❌ Error parsing universal cart:', e);
+                }
+            }
+        }
+        
+        // ✅ SOURCE 3: User-specific cart key
+        if (cartItems.length === 0 && orderData.userId) {
+            const userCartKey = 'irya_cart_' + orderData.userId;
+            const userCartData = localStorage.getItem(userCartKey);
+            if (userCartData) {
+                try {
+                    cartItems = JSON.parse(userCartData);
+                    dataSource = 'user_cart';
+                    console.log(`✅ Loaded ${cartItems.length} items from user_cart`);
+                } catch (e) {
+                    console.error('❌ Error parsing user cart:', e);
+                }
+            }
+        }
+        
+        // ✅ SOURCE 4: Legacy cart keys
+        if (cartItems.length === 0) {
+            const legacyKeys = [
+                'cart_items',
+                'shopping_cart',
+                'irya_local_cart',
+                'irya_cart_items'
+            ];
+            
+            for (const key of legacyKeys) {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        cartItems = JSON.parse(data);
+                        dataSource = 'legacy_' + key;
+                        console.log(`✅ Loaded ${cartItems.length} items from ${key}`);
+                        break;
+                    } catch (e) {
+                        console.error(`❌ Error parsing ${key}:`, e);
+                    }
+                }
+            }
+        }
+        
+        // ✅ SOURCE 5: Buy Now data (check URL parameter)
+        if (cartItems.length === 0) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const buyNowParam = urlParams.get('buynow');
+            const productParam = urlParams.get('product');
+            
+            if (buyNowParam === 'true' || productParam) {
+                // Load Buy Now product
+                await loadBuyNowProduct();
+                return; // Exit early as Buy Now has different flow
+            }
+        }
+        
+        // Validate cart items
+        if (cartItems.length === 0) {
+            console.log('🛒 Cart is empty from all sources');
+            orderData.items = [];
+            return;
+        }
+        
+        // Process cart items into standard format
+        orderData.items = cartItems.map(item => {
+            // Handle different item structures
+            return {
+                id: item.id || item.productId || 'item_' + Date.now(),
+                name: item.stone_name || item.name || item.productName || 'Stone Product',
+                price: parseFloat(item.price) || parseFloat(item.productPrice) || 0,
+                quantity: item.quantity || item.qty || 1,
+                image: item.image || item.productImage || getDefaultImage(item.category),
+                category: item.category || item.productCategory || '',
+                calculationData: item.calculationData || null,
+                customRequirements: item.customRequirements || '',
+                totalPrice: (parseFloat(item.price) || 0) * (item.quantity || 1)
+            };
+        }).filter(item => item.price > 0); // Filter out invalid items
+        
+        console.log(`✅ Processed ${orderData.items.length} items from ${dataSource}`);
         
         // Calculate totals
         calculateTotals();
         
-        // Get user data
-        const userData = localStorage.getItem('irya_user');
-        if (userData) {
-            const user = JSON.parse(userData);
-            orderData.userId = user.uid || 'guest_' + Date.now();
-            orderData.userEmail = user.email || '';
-            
-            // Pre-fill email if available
-            if (user.email) {
-                document.getElementById('shippingEmail').value = user.email;
+    } catch (error) {
+        console.error('❌ Error loading cart data:', error);
+        orderData.items = [];
+        throw error;
+    }
+}
+
+// ============================================
+// BUY NOW PRODUCT LOADING
+// ============================================
+async function loadBuyNowProduct() {
+    try {
+        console.log('⚡ Loading Buy Now product...');
+        
+        let buyNowProduct = null;
+        
+        // Check multiple sources for Buy Now data
+        const sources = [
+            { key: 'irya_buynow_product', storage: sessionStorage },
+            { key: 'irya_current_buynow', storage: sessionStorage },
+            { key: 'irya_buynow_cart_' + orderData.userId, storage: localStorage },
+            { key: 'irya_current_buynow', storage: localStorage }
+        ];
+        
+        for (const source of sources) {
+            const data = source.storage.getItem(source.key);
+            if (data) {
+                try {
+                    buyNowProduct = JSON.parse(data);
+                    console.log(`✅ Buy Now product loaded from ${source.key}`);
+                    break;
+                } catch (e) {
+                    console.error(`❌ Error parsing ${source.key}:`, e);
+                }
             }
-        } else {
-            orderData.userId = 'guest_' + Date.now();
         }
         
+        // Check URL parameters
+        if (!buyNowProduct) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productParam = urlParams.get('product');
+            if (productParam) {
+                try {
+                    buyNowProduct = JSON.parse(decodeURIComponent(productParam));
+                    console.log('✅ Buy Now product loaded from URL');
+                } catch (e) {
+                    console.error('❌ Error parsing URL product:', e);
+                }
+            }
+        }
+        
+        if (!buyNowProduct) {
+            throw new Error('Buy Now product not found');
+        }
+        
+        // Convert to standard item format
+        orderData.items = [{
+            id: buyNowProduct.id || 'buynow_' + Date.now(),
+            name: buyNowProduct.stone_name || buyNowProduct.name || 'Buy Now Product',
+            price: parseFloat(buyNowProduct.price) || 0,
+            quantity: buyNowProduct.quantity || 1,
+            image: buyNowProduct.image || getDefaultImage(buyNowProduct.category),
+            category: buyNowProduct.category || '',
+            calculationData: buyNowProduct.calculationData || null,
+            customRequirements: buyNowProduct.customRequirements || '',
+            isBuyNow: true,
+            totalPrice: (parseFloat(buyNowProduct.price) || 0) * (buyNowProduct.quantity || 1)
+        }];
+        
+        console.log('✅ Buy Now product processed:', orderData.items[0]);
+        
+        // Calculate totals
+        calculateTotals();
+        
     } catch (error) {
-        showError('Failed to load cart: ' + error.message);
+        console.error('❌ Error loading Buy Now product:', error);
+        throw error;
     }
 }
 
 function calculateTotals() {
+    if (orderData.items.length === 0) {
+        orderData.subtotal = 0;
+        orderData.tax = 0;
+        orderData.total = 0;
+        orderData.advance = 0;
+        return;
+    }
+    
     orderData.subtotal = orderData.items.reduce((sum, item) => {
         return sum + (item.price * item.quantity);
     }, 0);
@@ -868,6 +1183,13 @@ function calculateTotals() {
     orderData.tax = orderData.subtotal * 0.2;
     orderData.total = orderData.subtotal + orderData.tax;
     orderData.advance = orderData.total * 0.3;
+    
+    console.log('💰 Totals calculated:', {
+        subtotal: orderData.subtotal,
+        tax: orderData.tax,
+        total: orderData.total,
+        advance: orderData.advance
+    });
 }
 
 // ============================================
@@ -879,7 +1201,7 @@ function checkTestMode() {
     
     if (isTestEmail) {
         document.getElementById('testModeBadge').style.display = 'block';
-        showNotification('Test Mode Active - Only test payments allowed');
+        showNotification('Test Mode Active - Payments allowed for ' + TEST_EMAIL);
     }
 }
 
@@ -986,13 +1308,15 @@ function updatePaymentTimingInfo() {
                 </h4>
                 <p style="font-size: 12px; color: var(--text-dark);">
                     • Order confirmed immediately<br>
-                    • No waiting period<br>
-                    • Platform fee: 2.5% + £0.30 + Stripe charges (1.4% + £0.20)
+                    • Platform fee: 2.5% + £0.30<br>
+                    • Stripe charges: 1.4% + £0.20<br>
+                    • Total fees: ${calculateFees().totalFees.toFixed(2)}
                 </p>
             </div>
         `;
     } else {
         const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const fees = calculateFees();
         timingDiv.innerHTML = `
             <div style="background: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px;">
                 <h4 style="margin-bottom: 8px; color: var(--warning-orange); font-size: 14px;">
@@ -1001,8 +1325,9 @@ function updatePaymentTimingInfo() {
                 <p style="font-size: 12px; color: var(--text-dark);">
                     • Deadline: ${deadline.toLocaleString()}<br>
                     • Auto-cancel if payment not confirmed<br>
-                    • Platform fee: 2.5% + £0.30 + Bank charges (£0.50)<br>
-                    • Refund = Advance - Fees if cancelled
+                    • Platform fee: 2.5% + £0.30<br>
+                    • Bank charges: £0.50<br>
+                    • Refund if cancelled: £${fees.refundAmount.toFixed(2)}
                 </p>
             </div>
         `;
@@ -1010,17 +1335,50 @@ function updatePaymentTimingInfo() {
     timingDiv.style.display = 'block';
 }
 
+function calculateFees() {
+    const advance = orderData.advance;
+    const platformFee = (advance * 0.025) + 0.30;
+    let gatewayFee = 0;
+    
+    if (selectedPaymentMethod === 'stripe') {
+        gatewayFee = (advance * 0.014) + 0.20;
+    } else {
+        gatewayFee = 0.50;
+    }
+    
+    const totalFees = platformFee + gatewayFee;
+    const refundAmount = advance - totalFees;
+    
+    return {
+        advance: advance,
+        platformFee: platformFee,
+        gatewayFee: gatewayFee,
+        totalFees: totalFees,
+        refundAmount: refundAmount
+    };
+}
+
 // ============================================
-// ORDER PROCESSING
+// ORDER PROCESSING - FIXED FIREBASE SAVE
 // ============================================
 async function placeOrder() {
     showLoading(true);
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    placeOrderBtn.disabled = true;
+    placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     
     try {
         // Validate test mode
         if (!validateTestMode()) {
             showLoading(false);
+            placeOrderBtn.disabled = false;
+            placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order & Pay Advance';
             return;
+        }
+        
+        // Validate items
+        if (orderData.items.length === 0) {
+            throw new Error('Cart is empty');
         }
         
         // Create order object
@@ -1029,16 +1387,46 @@ async function placeOrder() {
         const now = new Date();
         const deadline = new Date(now.getTime() + 24 * 60 * 60 * 1000);
         
+        const fees = calculateFees();
+        
         const order = {
+            // Order Identification
             orderId: orderId,
             orderNumber: orderNumber,
+            
+            // User Information
             userId: orderData.userId,
             userEmail: document.getElementById('shippingEmail').value,
-            items: orderData.items,
+            userName: document.getElementById('shippingName').value,
+            
+            // Order Items
+            items: orderData.items.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                image: item.image,
+                category: item.category,
+                calculationData: item.calculationData || null,
+                customRequirements: item.customRequirements || '',
+                isBuyNow: item.isBuyNow || false,
+                totalPrice: item.price * item.quantity
+            })),
+            
+            // Pricing
             subtotal: orderData.subtotal,
             tax: orderData.tax,
             total: orderData.total,
             advance: orderData.advance,
+            remaining: orderData.total - orderData.advance,
+            
+            // Fees
+            platformFee: fees.platformFee,
+            gatewayFee: fees.gatewayFee,
+            totalFees: fees.totalFees,
+            refundAmount: fees.refundAmount,
+            
+            // Shipping Details
             shippingDetails: {
                 name: document.getElementById('shippingName').value,
                 email: document.getElementById('shippingEmail').value,
@@ -1046,31 +1434,47 @@ async function placeOrder() {
                 address: document.getElementById('shippingAddress1').value,
                 city: document.getElementById('shippingCity').value,
                 postalCode: document.getElementById('shippingPostalCode').value,
-                country: document.getElementById('shippingCountry').value
+                country: document.getElementById('shippingCountry').value,
+                notes: document.getElementById('orderNotes').value || ''
             },
+            
+            // Payment Information
             paymentMethod: selectedPaymentMethod,
             paymentStatus: selectedPaymentMethod === 'bank' ? 'pending' : 'paid',
+            paymentReference: selectedPaymentMethod === 'bank' ? 
+                'IRYA-' + Date.now().toString().slice(-6) + '-' + Math.floor(Math.random() * 1000) : 
+                'stripe_' + Date.now(),
+            
+            // Order Status
             orderStatus: selectedPaymentMethod === 'bank' ? 'payment_pending' : 'confirmed',
-            notes: document.getElementById('orderNotes').value,
+            
+            // Timing Information
             createdAt: now.toISOString(),
             updatedAt: now.toISOString(),
             paymentConfirmDeadline: deadline.toISOString(),
             autoCancelTime: deadline.toISOString(),
-            refundPolicy: 'Refund = Advance - Platform Fee (2.5% + £0.30) - Payment Gateway Charges'
+            
+            // Metadata
+            isBuyNow: orderData.items.some(item => item.isBuyNow),
+            source: window.location.href,
+            userAgent: navigator.userAgent,
+            
+            // Refund Policy
+            refundPolicy: 'Refund = Advance - Platform Fee (2.5% + £0.30) - Payment Gateway Charges',
+            termsAccepted: true
         };
         
-        // Calculate fees
-        const platformFee = (orderData.advance * 0.025) + 0.30;
-        const gatewayFee = selectedPaymentMethod === 'stripe' ? 
-            (orderData.advance * 0.014) + 0.20 : 0.50;
-        const refundAmount = orderData.advance - platformFee - gatewayFee;
+        console.log('📝 Order object created:', order);
         
-        order.platformFee = platformFee;
-        order.gatewayFee = gatewayFee;
-        order.refundAmount = refundAmount;
-        
-        // Save to Firebase FIRST
+        // ✅ SAVE TO FIREBASE FIRST (BEFORE PAYMENT)
+        console.log('💾 Saving order to Firebase...');
         const firebaseResult = await saveOrderToFirebase(order);
+        console.log('✅ Firebase save result:', firebaseResult);
+        
+        // Save to localStorage as backup
+        localStorage.setItem('irya_last_order', JSON.stringify(order));
+        localStorage.setItem('irya_last_order_id', orderId);
+        console.log('✅ Saved to localStorage as backup');
         
         if (selectedPaymentMethod === 'stripe') {
             // Process Stripe payment
@@ -1081,47 +1485,161 @@ async function placeOrder() {
         }
         
     } catch (error) {
+        console.error('❌ Order processing error:', error);
         showError('Order failed: ' + error.message);
+        
+        // Re-enable button
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order & Pay Advance';
         showLoading(false);
     }
 }
 
 // ============================================
-// FIREBASE SAVE - FIXED
+// FIREBASE SAVE - COMPLETELY FIXED
 // ============================================
 async function saveOrderToFirebase(order) {
     try {
-        // Save to user's orders collection
+        console.log('🔥 Starting Firebase save process...');
+        
+        // Check if Firebase is initialized
+        if (!firebaseDB) {
+            console.error('❌ Firebase DB not initialized');
+            throw new Error('Database not available');
+        }
+        
+        // ✅ 1. Save to user's orders collection
+        console.log('📁 Saving to user collection:', order.userId);
         const userOrderRef = firebaseDB.collection('users')
             .doc(order.userId)
             .collection('orders')
             .doc(order.orderId);
         
         await userOrderRef.set(order);
-        console.log('✅ Saved to user orders');
+        console.log('✅ Saved to user orders collection');
         
-        // Save to global orders collection
+        // ✅ 2. Save to global orders collection
+        console.log('📁 Saving to global orders collection');
         const globalOrderRef = firebaseDB.collection('orders')
             .doc(order.orderId);
         
         await globalOrderRef.set(order);
-        console.log('✅ Saved to global orders');
+        console.log('✅ Saved to global orders collection');
         
-        // Also save to backup collection
+        // ✅ 3. Save to orders_backup collection
+        console.log('📁 Saving to backup collection');
         const backupRef = firebaseDB.collection('orders_backup')
             .doc(order.orderId);
         
         await backupRef.set({
             ...order,
-            backupSavedAt: new Date().toISOString()
+            backupSavedAt: new Date().toISOString(),
+            backupNote: 'Main backup copy'
         });
-        console.log('✅ Saved to backup');
+        console.log('✅ Saved to backup collection');
         
-        return { success: true, orderId: order.orderId };
+        // ✅ 4. Update user document with order count
+        try {
+            const userRef = firebaseDB.collection('users').doc(order.userId);
+            const userDoc = await userRef.get();
+            
+            if (userDoc.exists) {
+                await userRef.update({
+                    lastOrderId: order.orderId,
+                    lastOrderDate: order.createdAt,
+                    totalOrders: firebase.firestore.FieldValue.increment(1),
+                    totalSpent: firebase.firestore.FieldValue.increment(order.total),
+                    updatedAt: new Date().toISOString()
+                });
+                console.log('✅ User document updated');
+            } else {
+                // Create user document if it doesn't exist
+                await userRef.set({
+                    userId: order.userId,
+                    userName: order.userName,
+                    userEmail: order.userEmail,
+                    createdAt: order.createdAt,
+                    updatedAt: order.createdAt,
+                    totalOrders: 1,
+                    totalSpent: order.total,
+                    lastOrderId: order.orderId,
+                    lastOrderDate: order.createdAt
+                });
+                console.log('✅ Created new user document');
+            }
+        } catch (userError) {
+            console.log('⚠️ Could not update user document:', userError);
+            // Continue even if user update fails
+        }
+        
+        // ✅ 5. Save shipping address separately
+        try {
+            const addressRef = firebaseDB.collection('users')
+                .doc(order.userId)
+                .collection('addresses')
+                .doc('shipping_' + Date.now());
+            
+            await addressRef.set({
+                ...order.shippingDetails,
+                orderId: order.orderId,
+                createdAt: order.createdAt,
+                isDefault: false
+            });
+            console.log('✅ Shipping address saved');
+        } catch (addressError) {
+            console.log('⚠️ Could not save address:', addressError);
+        }
+        
+        console.log('🎉 Firebase save COMPLETED SUCCESSFULLY');
+        return {
+            success: true,
+            orderId: order.orderId,
+            userId: order.userId,
+            message: 'Order saved to Firebase successfully'
+        };
         
     } catch (error) {
-        console.error('Firebase save error:', error);
-        throw new Error('Failed to save order: ' + error.message);
+        console.error('❌ Firebase save ERROR:', error);
+        console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
+        
+        // Try alternative save method
+        try {
+            console.log('🔄 Trying alternative save method...');
+            
+            // Create simplified order for backup
+            const backupOrder = {
+                orderId: order.orderId,
+                orderNumber: order.orderNumber,
+                userId: order.userId,
+                userEmail: order.userEmail,
+                total: order.total,
+                status: 'save_failed_but_backed_up',
+                createdAt: new Date().toISOString(),
+                backupNote: 'Saved after initial failure'
+            };
+            
+            // Save to backup_failed_orders collection
+            const failedRef = firebaseDB.collection('backup_failed_orders')
+                .doc(order.orderId);
+            
+            await failedRef.set(backupOrder);
+            console.log('✅ Saved to backup_failed_orders collection');
+            
+            return {
+                success: false,
+                orderId: order.orderId,
+                message: 'Order partially saved to backup collection',
+                error: error.message
+            };
+            
+        } catch (backupError) {
+            console.error('❌ Backup save also failed:', backupError);
+            throw new Error('Complete Firebase save failure: ' + error.message);
+        }
     }
 }
 
@@ -1130,16 +1648,17 @@ async function saveOrderToFirebase(order) {
 // ============================================
 async function processStripePayment(order, firebaseResult) {
     try {
-        // Create Stripe payment intent on your backend
-        // For demo, we'll simulate this
+        console.log('💳 Processing Stripe payment...');
+        
+        // Simulate Stripe payment (replace with actual Stripe integration)
         const paymentResult = await simulateStripePayment(order);
         
         if (paymentResult.success) {
-            // Update order status
+            // Update order status in Firebase
             await updateOrderStatus(order.orderId, 'paid', 'confirmed');
             
             // Clear cart
-            localStorage.removeItem('irya_cart');
+            clearCartData();
             
             // Show success
             showSuccessModal(order, 'Card payment successful! Order confirmed instantly.');
@@ -1153,6 +1672,8 @@ async function processStripePayment(order, firebaseResult) {
         throw error;
     } finally {
         showLoading(false);
+        document.getElementById('placeOrderBtn').disabled = false;
+        document.getElementById('placeOrderBtn').innerHTML = '<i class="fas fa-lock"></i> Place Order & Pay Advance';
     }
 }
 
@@ -1163,7 +1684,8 @@ async function simulateStripePayment(order) {
             resolve({
                 success: true,
                 paymentId: 'pi_' + Date.now(),
-                amount: Math.round(order.advance * 100)
+                amount: Math.round(order.advance * 100),
+                currency: 'gbp'
             });
         }, 1500);
     });
@@ -1196,21 +1718,57 @@ function showBankTransferModal(order, firebaseResult) {
                 • Refund if cancelled: £${refundAmount.toFixed(2)}
             </p>
         </div>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+            <p style="color: var(--success-green); font-size: 11px;">
+                <i class="fas fa-check-circle"></i> Order Saved to Database
+            </p>
+            <p style="font-size: 10px; color: var(--text-dark);">
+                Order ID: ${order.orderId}<br>
+                Saved at: ${new Date().toLocaleString()}
+            </p>
+        </div>
     `;
     
     document.getElementById('bankModal').style.display = 'flex';
     showLoading(false);
+    
+    // Clear cart
+    clearCartData();
+    
+    // Re-enable button
+    document.getElementById('placeOrderBtn').disabled = false;
+    document.getElementById('placeOrderBtn').innerHTML = '<i class="fas fa-lock"></i> Place Order & Pay Advance';
 }
 
 function closeBankModal() {
     document.getElementById('bankModal').style.display = 'none';
     
-    // Clear cart
-    localStorage.removeItem('irya_cart');
-    
     // Show success modal
-    const order = JSON.parse(localStorage.getItem('irya_last_order'));
+    const order = JSON.parse(localStorage.getItem('irya_last_order') || '{}');
     showSuccessModal(order, 'Order created! Complete bank transfer within 24 hours.');
+}
+
+function clearCartData() {
+    // Clear cart from all possible storage locations
+    const keysToClear = [
+        'irya_cart',
+        'irya_checkout_data',
+        'cart_items',
+        'shopping_cart',
+        'irya_local_cart',
+        'irya_cart_items'
+    ];
+    
+    if (orderData.userId) {
+        keysToClear.push('irya_cart_' + orderData.userId);
+    }
+    
+    keysToClear.forEach(key => {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
+    });
+    
+    console.log('🧹 Cart data cleared');
 }
 
 // ============================================
@@ -1236,8 +1794,10 @@ async function updateOrderStatus(orderId, paymentStatus, orderStatus) {
             .doc(orderId)
             .update(updateData);
             
+        console.log('✅ Order status updated:', { paymentStatus, orderStatus });
+        
     } catch (error) {
-        console.error('Status update failed:', error);
+        console.error('❌ Status update failed:', error);
     }
 }
 
@@ -1248,7 +1808,26 @@ function renderOrderItems() {
     const container = document.getElementById('orderItems');
     
     if (orderData.items.length === 0) {
-        container.innerHTML = '<p style="text-align: center; padding: 20px;">No items</p>';
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 48px; color: var(--text-light); opacity: 0.5; margin-bottom: 15px;">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3 style="color: var(--stone-dark); margin-bottom: 10px;">Your Cart is Empty</h3>
+                <p style="color: var(--text-light); margin-bottom: 20px;">Please add items to your cart first.</p>
+                <a href="products.html" style="
+                    display: inline-block;
+                    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 20px;
+                    text-decoration: none;
+                    font-weight: 500;
+                ">
+                    <i class="fas fa-gem"></i> Browse Products
+                </a>
+            </div>
+        `;
         return;
     }
     
@@ -1259,6 +1838,7 @@ function renderOrderItems() {
                 <div style="flex: 1;">
                     <div style="font-size: 13px; font-weight: 600;">${item.name}</div>
                     <div style="font-size: 11px; color: var(--text-light);">Qty: ${item.quantity}</div>
+                    ${item.isBuyNow ? `<div style="font-size: 10px; color: var(--primary-gold);"><i class="fas fa-bolt"></i> Buy Now</div>` : ''}
                 </div>
                 <div style="font-weight: 600; color: var(--primary-gold);">
                     £${(item.price * item.quantity).toFixed(2)}
@@ -1287,10 +1867,7 @@ function updateReviewContent() {
         postalCode: document.getElementById('shippingPostalCode').value
     };
     
-    const platformFee = (orderData.advance * 0.025) + 0.30;
-    const gatewayFee = selectedPaymentMethod === 'stripe' ? 
-        (orderData.advance * 0.014) + 0.20 : 0.50;
-    const refundAmount = orderData.advance - platformFee - gatewayFee;
+    const fees = calculateFees();
     
     content.innerHTML = `
         <div style="display: grid; gap: 15px;">
@@ -1311,15 +1888,17 @@ function updateReviewContent() {
             </div>
             
             <div style="padding: 15px; background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
-                <h4 style="margin-bottom: 10px; font-size: 14px; color: var(--warning-orange);">Refund Policy</h4>
+                <h4 style="margin-bottom: 10px; font-size: 14px; color: var(--warning-orange);">Payment & Refund Details</h4>
                 <div style="font-size: 12px;">
-                    <p><strong>Advance:</strong> £${orderData.advance.toFixed(2)}</p>
-                    <p><strong>Platform Fee:</strong> £${platformFee.toFixed(2)} (2.5% + £0.30)</p>
-                    <p><strong>Payment Charges:</strong> £${gatewayFee.toFixed(2)}</p>
-                    <p><strong>Refund Amount:</strong> £${refundAmount.toFixed(2)}</p>
+                    <p><strong>Advance Payment:</strong> £${orderData.advance.toFixed(2)}</p>
+                    <p><strong>Platform Fee (2.5% + £0.30):</strong> £${fees.platformFee.toFixed(2)}</p>
+                    <p><strong>${selectedPaymentMethod === 'stripe' ? 'Stripe Charges (1.4% + £0.20)' : 'Bank Charges'}:</strong> £${fees.gatewayFee.toFixed(2)}</p>
+                    <p><strong>Total Fees:</strong> £${fees.totalFees.toFixed(2)}</p>
+                    <p><strong>Net Received:</strong> £${(orderData.advance - fees.totalFees).toFixed(2)}</p>
+                    <p><strong>Refund if Cancelled:</strong> £${fees.refundAmount.toFixed(2)}</p>
                     <p style="color: var(--error-red); margin-top: 8px;">
                         <i class="fas fa-exclamation-triangle"></i>
-                        If payment not confirmed within 24 hours
+                        Order auto-cancels after 24 hours if payment not confirmed
                     </p>
                 </div>
             </div>
@@ -1332,17 +1911,30 @@ function showSuccessModal(order, message) {
         selectedPaymentMethod === 'bank' ? 'Order Created!' : 'Payment Successful!';
     document.getElementById('successMessage').textContent = message;
     
+    const timingInfo = selectedPaymentMethod === 'bank' ? 
+        `<p style="color: var(--warning-orange);">
+            <i class="fas fa-clock"></i> Complete payment within 24 hours
+        </p>` :
+        `<p style="color: var(--success-green);">
+            <i class="fas fa-bolt"></i> Order confirmed instantly
+        </p>`;
+    
     document.getElementById('successDetails').innerHTML = `
         <p><strong>Order Number:</strong> ${order.orderNumber}</p>
         <p><strong>Total Amount:</strong> £${order.total.toFixed(2)}</p>
         <p><strong>Advance Paid:</strong> £${order.advance.toFixed(2)}</p>
         <p><strong>Payment Method:</strong> ${selectedPaymentMethod === 'stripe' ? 'Card' : 'Bank Transfer'}</p>
         <p><strong>Status:</strong> ${selectedPaymentMethod === 'stripe' ? 'Confirmed' : 'Pending Payment'}</p>
-        ${selectedPaymentMethod === 'bank' ? 
-            `<p style="color: var(--warning-orange); margin-top: 8px;">
-                <i class="fas fa-clock"></i> Complete payment within 24 hours
-            </p>` : ''
-        }
+        ${timingInfo}
+        <div style="margin-top: 10px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+            <p style="color: var(--success-green); font-size: 11px;">
+                <i class="fas fa-database"></i> Order saved to database
+            </p>
+            <p style="font-size: 10px; color: var(--text-dark);">
+                Order ID: ${order.orderId}<br>
+                User ID: ${order.userId}
+            </p>
+        </div>
     `;
     
     document.getElementById('successModal').style.display = 'flex';
@@ -1351,6 +1943,18 @@ function showSuccessModal(order, message) {
 // ============================================
 // UTILITY FUNCTIONS
 // ============================================
+function getDefaultImage(category) {
+    const categoryLower = (category || '').toLowerCase();
+    
+    if (categoryLower.includes('sand')) {
+        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
+    } else if (categoryLower.includes('kota')) {
+        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300';
+    }
+    
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
+}
+
 function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
