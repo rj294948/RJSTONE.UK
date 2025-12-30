@@ -12,6 +12,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        /* ============================================
+           SAME THEME AS CART.HTML
+           ============================================ */
         :root {
             --primary-gold: #c9a227;
             --gold-light: #f0d77c;
@@ -26,11 +29,15 @@
             --warning-orange: #f59e0b;
             --error-red: #ef4444;
             --info-blue: #3b82f6;
+            --pending-yellow: #fbbf24;
+            --refunded-purple: #8b5cf6;
+            --cancelled-red: #dc2626;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
             --shadow-lg: 0 8px 20px rgba(0,0,0,0.12);
             --transition: all 0.3s ease;
             --border-radius: 12px;
+            --border-radius-lg: 20px;
         }
         
         * {
@@ -44,28 +51,43 @@
             background: var(--bg-light);
             color: var(--text-dark);
             padding-bottom: 80px;
+            font-size: 14px;
+            scroll-behavior: smooth;
         }
         
-        /* Header */
+        /* ============================================
+           HEADER - MATCHING CART.HTML STYLE
+           ============================================ */
         header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             background: rgba(0, 0, 0, 0.95);
-            padding: 12px 16px;
+            backdrop-filter: blur(10px);
+            padding: 8px 15px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             z-index: 1000;
+            gap: 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            height: 64px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            height: 60px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
+        }
+        
+        header.hidden {
+            transform: translateY(-100%);
         }
         
         .logo {
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
+            min-width: 120px;
         }
         
         .logo i {
@@ -80,6 +102,30 @@
             font-family: 'Roboto Slab', serif;
         }
         
+        /* Back Button */
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+            color: var(--white);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            white-space: nowrap;
+            min-width: 70px;
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+        
         .action-btn {
             width: 36px;
             height: 36px;
@@ -90,8 +136,17 @@
             align-items: center;
             justify-content: center;
             color: var(--white);
+            font-size: 14px;
             cursor: pointer;
+            transition: var(--transition);
+            position: relative;
             text-decoration: none;
+        }
+        
+        .action-btn:hover {
+            background: var(--primary-gold);
+            color: var(--white);
+            transform: scale(1.05);
         }
         
         .cart-badge {
@@ -101,6 +156,7 @@
             background: #ff4757;
             color: var(--white);
             font-size: 9px;
+            font-weight: 600;
             width: 16px;
             height: 16px;
             border-radius: 50%;
@@ -109,33 +165,59 @@
             justify-content: center;
         }
         
-        /* Main Content */
+        /* ============================================
+           MAIN CONTENT - MATCHING CART.HTML STYLE
+           ============================================ */
         .main-content {
-            padding: 80px 16px 20px;
+            padding: 80px 15px 20px;
             max-width: 1200px;
             margin: 0 auto;
         }
         
+        /* Page Header - Matching Cart Style */
         .page-header {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.6));
-            padding: 20px;
-            border-radius: var(--border-radius);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             text-align: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.6));
+            padding: 20px 15px !important;
+            margin: 0 !important;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px !important;
         }
         
         .page-header h1 {
-            font-size: 18px;
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            margin-bottom: 5px !important;
             color: var(--white);
-            margin-bottom: 5px;
+            font-family: 'Roboto Slab', serif;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         
         .page-header p {
-            font-size: 12px;
+            font-size: 12px !important;
             color: rgba(255, 255, 255, 0.9);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.4;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            font-weight: 400;
+            opacity: 0.9;
         }
         
-        /* Checkout Container */
+        /* ============================================
+           CHECKOUT CONTAINER - MATCHING CART LAYOUT
+           ============================================ */
         .checkout-container {
             display: grid;
             grid-template-columns: 1fr;
@@ -145,23 +227,35 @@
         @media (min-width: 768px) {
             .checkout-container {
                 grid-template-columns: 1fr 350px;
+                gap: 20px;
             }
         }
         
-        /* Checkout Steps */
+        /* ============================================
+           CHECKOUT STEPS - NEW DESIGN
+           ============================================ */
         .checkout-steps {
             background: var(--white);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
             padding: 20px;
+        }
+        
+        .steps-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
         }
         
         .steps-progress {
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin-bottom: 25px;
-            gap: 5px;
+            gap: 10px;
         }
         
         .step-circle {
@@ -175,6 +269,7 @@
             font-size: 13px;
             font-weight: 600;
             color: var(--text-light);
+            transition: var(--transition);
         }
         
         .step-circle.active {
@@ -203,10 +298,14 @@
         .step-title {
             font-size: 16px;
             font-weight: 600;
+            color: var(--stone-dark);
             margin-bottom: 20px;
+            font-family: 'Roboto Slab', serif;
         }
         
-        /* Form Styles */
+        /* ============================================
+           FORM STYLES - MATCHING CART
+           ============================================ */
         .form-group {
             margin-bottom: 16px;
         }
@@ -215,6 +314,8 @@
             display: block;
             margin-bottom: 6px;
             font-weight: 500;
+            color: var(--stone-dark);
+            font-size: 13px;
         }
         
         .form-group input,
@@ -225,6 +326,16 @@
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             font-size: 13px;
+            transition: var(--transition);
+            background: var(--bg-light);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.1);
         }
         
         .form-row {
@@ -239,7 +350,9 @@
             }
         }
         
-        /* Payment Methods */
+        /* ============================================
+           PAYMENT METHODS - NEW DESIGN
+           ============================================ */
         .payment-methods {
             display: grid;
             gap: 10px;
@@ -251,6 +364,13 @@
             border-radius: 10px;
             cursor: pointer;
             transition: var(--transition);
+            background: var(--bg-light);
+        }
+        
+        .payment-method:hover {
+            border-color: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
         }
         
         .payment-method.selected {
@@ -262,6 +382,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            margin-bottom: 8px;
         }
         
         .method-icon {
@@ -276,12 +397,73 @@
             color: var(--primary-gold);
         }
         
-        /* Order Summary */
+        .method-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--stone-dark);
+        }
+        
+        .method-description {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+        
+        .method-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .method-tag {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .method-tag.fast {
+            background: var(--success-green);
+            color: white;
+        }
+        
+        .method-tag.instant {
+            background: var(--info-blue);
+            color: white;
+        }
+        
+        .method-tag.delayed {
+            background: var(--warning-orange);
+            color: white;
+        }
+        
+        /* ============================================
+           ORDER SUMMARY - MATCHING CART
+           ============================================ */
         .order-summary {
             background: var(--white);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
             padding: 20px;
+            border: 1px solid #f0f0f0;
+            height: fit-content;
+        }
+        
+        @media (min-width: 768px) {
+            .order-summary {
+                position: sticky;
+                top: 80px;
+            }
+        }
+        
+        .order-summary h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--stone-dark);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            font-family: 'Roboto Slab', serif;
         }
         
         .order-items {
@@ -297,24 +479,84 @@
             border-bottom: 1px solid #f0f0f0;
         }
         
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
         .order-item-image {
             width: 60px;
             height: 60px;
             border-radius: 6px;
             overflow: hidden;
             background: var(--bg-light);
+            flex-shrink: 0;
         }
         
         .order-item-image img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+        }
+        
+        .order-item-details {
+            flex: 1;
+        }
+        
+        .order-item-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--stone-dark);
+            margin-bottom: 3px;
+            line-height: 1.3;
+        }
+        
+        .order-item-meta {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+        
+        .order-item-price {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary-gold);
+        }
+        
+        .order-item-total {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--stone-dark);
         }
         
         .summary-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
+            font-size: 13px;
+        }
+        
+        .summary-label {
+            color: var(--text-light);
+        }
+        
+        .summary-value {
+            font-weight: 500;
+            color: var(--stone-dark);
+        }
+        
+        .summary-total {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--stone-dark);
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        .summary-total .summary-value {
+            color: var(--primary-gold);
+            font-size: 20px;
         }
         
         .advance-payment {
@@ -324,14 +566,76 @@
             margin-top: 15px;
         }
         
-        /* Buttons */
+        .advance-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+        
+        .advance-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-gold);
+        }
+        
+        /* ============================================
+           BUY NOW SECTION
+           ============================================ */
+        .buynow-section {
+            background: linear-gradient(135deg, rgba(201, 162, 39, 0.1), rgba(240, 215, 124, 0.05));
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-gold);
+        }
+        
+        .buynow-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .buynow-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-gold);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .buynow-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--stone-dark);
+        }
+        
+        .buynow-message {
+            font-size: 12px;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+        
+        /* ============================================
+           BUTTONS - MATCHING CART
+           ============================================ */
         .btn {
             padding: 12px 24px;
             border: none;
             border-radius: 10px;
             font-weight: 600;
+            font-size: 13px;
             cursor: pointer;
             transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
         }
         
         .btn-primary {
@@ -340,36 +644,72 @@
             width: 100%;
         }
         
+        .btn-primary:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
         .btn-secondary {
             background: var(--white);
+            color: var(--text-dark);
             border: 1px solid #e0e0e0;
         }
         
-        /* Modals */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
+        .btn-secondary:hover {
+            background: var(--bg-light);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* ============================================
+           LOADING & ERROR STATES
+           ============================================ */
+        .loading-spinner {
             display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            padding: 20px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(201, 162, 39, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-gold);
+            animation: spin 1s ease-in-out infinite;
+            z-index: 9999;
         }
         
-        .modal-content {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
         }
         
-        /* Error Message */
+        .notification {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: var(--primary-gold);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: var(--shadow-md);
+            z-index: 9999;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            max-width: 250px;
+            display: none;
+            font-size: 13px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            display: block;
+        }
+        
         .error-message {
             position: fixed;
             top: 15px;
@@ -379,22 +719,92 @@
             color: white;
             padding: 10px 15px;
             border-radius: 6px;
-            display: none;
+            box-shadow: var(--shadow-md);
             z-index: 9999;
+            display: none;
+            max-width: 250px;
+            text-align: center;
+            font-size: 13px;
         }
         
-        /* Bottom Navigation */
+        /* ============================================
+           MODALS - NEW DESIGN
+           ============================================ */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 20px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--stone-dark);
+            margin-bottom: 10px;
+            font-family: 'Roboto Slab', serif;
+        }
+        
+        .modal-message {
+            color: var(--text-light);
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        /* ============================================
+           BOTTOM NAVIGATION - MATCHING CART
+           ============================================ */
         .bottom-nav {
             position: fixed;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px);
             display: flex;
             justify-content: space-around;
             padding: 10px 0;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 999;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+            height: 65px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
+        }
+        
+        .bottom-nav.hidden {
+            transform: translateY(100%);
         }
         
         .nav-btn {
@@ -405,25 +815,256 @@
             flex-direction: column;
             align-items: center;
             gap: 3px;
+            transition: var(--transition);
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            min-width: 55px;
             text-decoration: none;
+            height: 45px;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .nav-btn:hover {
+            color: var(--primary-gold);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-btn.active {
+            color: var(--primary-gold);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-btn i {
+            font-size: 16px;
+        }
+        
+        .nav-badge {
+            position: absolute;
+            top: 2px;
+            right: 5px;
+            background: #ff4757;
+            color: var(--white);
+            font-size: 8px;
+            font-weight: 600;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* ============================================
+           RESPONSIVE DESIGN
+           ============================================ */
+        @media (min-width: 768px) {
+            header {
+                padding: 10px 20px;
+                height: 65px;
+            }
+            
+            .logo {
+                min-width: 140px;
+            }
+            
+            .logo i {
+                font-size: 20px;
+            }
+            
+            .logo span {
+                font-size: 18px;
+            }
+            
+            .back-btn {
+                padding: 9px 16px;
+                font-size: 13px;
+            }
+            
+            .action-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+            
+            .main-content {
+                padding: 85px 20px 20px;
+            }
+            
+            .page-header {
+                min-height: 100px;
+                padding: 25px 20px !important;
+            }
+            
+            .page-header h1 {
+                font-size: 20px !important;
+            }
+            
+            .page-header p {
+                font-size: 13px !important;
+            }
+            
+            .checkout-container {
+                gap: 20px;
+            }
+            
+            .checkout-steps {
+                padding: 25px;
+            }
+            
+            .step-circle {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+            
+            .step-title {
+                font-size: 18px;
+            }
+            
+            .btn {
+                padding: 14px 28px;
+                font-size: 14px;
+            }
+            
+            .bottom-nav {
+                height: 70px;
+                padding: 12px 0;
+            }
+            
+            .nav-btn {
+                min-width: 65px;
+                font-size: 11px;
+            }
+            
+            .nav-btn i {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            header {
+                padding: 6px 10px;
+                height: 55px;
+                gap: 5px;
+            }
+            
+            .logo {
+                min-width: 100px;
+            }
+            
+            .logo i {
+                font-size: 16px;
+            }
+            
+            .logo span {
+                font-size: 14px;
+            }
+            
+            .back-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+                min-width: 60px;
+            }
+            
+            .action-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 13px;
+            }
+            
+            .main-content {
+                padding: 65px 12px 15px;
+            }
+            
+            .page-header {
+                min-height: 80px;
+                padding: 15px 12px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .page-header h1 {
+                font-size: 16px !important;
+            }
+            
+            .page-header p {
+                font-size: 11px !important;
+            }
+            
+            .checkout-container {
+                gap: 12px;
+            }
+            
+            .checkout-steps {
+                padding: 15px;
+            }
+            
+            .step-circle {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            
+            .step-line {
+                width: 30px;
+            }
+            
+            .step-title {
+                font-size: 15px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 12px;
+            }
+            
+            .bottom-nav {
+                height: 60px;
+                padding: 8px 0;
+            }
+            
+            .nav-btn {
+                min-width: 50px;
+                font-size: 9px;
+                padding: 4px 6px;
+            }
+            
+            .nav-btn i {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
 
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loadingSpinner"></div>
+
+<!-- Notification -->
+<div class="notification" id="notification"></div>
+
+<!-- Error Message -->
+<div class="error-message" id="errorMessage"></div>
+
 <!-- Header -->
-<header>
+<header id="mainHeader">
+    <a href="cart.html" class="back-btn" id="backButton">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+    </a>
+    
     <div class="logo">
         <i class="fa-solid fa-gem"></i>
         <span>IRYA STONE</span>
     </div>
     
-    <div style="display: flex; gap: 8px;">
-        <a href="notification.html" class="action-btn">
+    <div style="display: flex; gap: 8px; align-items: center;">
+        <a href="notification.html" class="action-btn" title="Notifications" style="position: relative;">
             <i class="fas fa-bell"></i>
-            <span class="cart-badge" id="notificationBadge" style="display: none;"></span>
+            <span class="cart-badge" id="notificationBadge" style="display: none;">0</span>
         </a>
-        <a href="cart.html" class="action-btn">
+        <a href="cart.html" class="action-btn" title="Cart" style="position: relative;">
             <i class="fas fa-shopping-cart"></i>
             <span class="cart-badge" id="headerCartBadge">0</span>
         </a>
@@ -437,15 +1078,15 @@
         <p>Complete your purchase with our secure checkout process</p>
     </div>
     
-    <!-- Buy Now Section -->
-    <div class="buynow-section" id="buyNowSection" style="display: none; background: rgba(201, 162, 39, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 32px; height: 32px; background: var(--primary-gold); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+    <!-- Buy Now Section (Only shown for Buy Now flow) -->
+    <div class="buynow-section" id="buyNowSection" style="display: none;">
+        <div class="buynow-header">
+            <div class="buynow-icon">
                 <i class="fas fa-bolt"></i>
             </div>
             <div>
-                <div style="font-weight: 600;">Buy Now Checkout</div>
-                <div style="font-size: 12px; color: var(--text-light);">You're purchasing a single item directly</div>
+                <div class="buynow-title">Buy Now Checkout</div>
+                <div class="buynow-message">You're purchasing a single item directly from product page</div>
             </div>
         </div>
     </div>
@@ -453,12 +1094,14 @@
     <div class="checkout-container">
         <!-- Checkout Steps -->
         <div class="checkout-steps">
-            <div class="steps-progress">
-                <div class="step-circle active" id="step1">1</div>
-                <div class="step-line" id="line1"></div>
-                <div class="step-circle" id="step2">2</div>
-                <div class="step-line" id="line2"></div>
-                <div class="step-circle" id="step3">3</div>
+            <div class="steps-header">
+                <div class="steps-progress">
+                    <div class="step-circle active" id="step1">1</div>
+                    <div class="step-line" id="line1"></div>
+                    <div class="step-circle" id="step2">2</div>
+                    <div class="step-line" id="line2"></div>
+                    <div class="step-circle" id="step3">3</div>
+                </div>
             </div>
             
             <!-- Step 1: Shipping -->
@@ -484,7 +1127,8 @@
                     <div class="form-group">
                         <label>Country *</label>
                         <select id="shippingCountry" required>
-                            <option value="GB">United Kingdom</option>
+                            <option value="">Select Country</option>
+                            <option value="GB" selected>United Kingdom</option>
                             <option value="US">United States</option>
                             <option value="CA">Canada</option>
                             <option value="AU">Australia</option>
@@ -520,12 +1164,18 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Order Notes</label>
+                    <label>
+                        <input type="checkbox" id="saveAddress"> Save this address for future orders
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label>Special Requirements</label>
                     <textarea id="orderNotes" rows="3" placeholder="Any special instructions..."></textarea>
                 </div>
                 
                 <div style="margin-top: 30px; display: flex; gap: 10px;">
-                    <a href="cart.html" class="btn btn-secondary" style="flex: 1;">
+                    <a href="cart.html" class="btn btn-secondary" style="flex: 1;" id="backToCartButton">
                         <i class="fas fa-arrow-left"></i> Back to Cart
                     </a>
                     <button class="btn btn-primary" style="flex: 2;" onclick="goToStep(2)">
@@ -537,6 +1187,7 @@
             <!-- Step 2: Payment -->
             <div class="step-content" id="stepContent2">
                 <h2 class="step-title">Payment Method</h2>
+                <p style="color: var(--text-light); margin-bottom: 20px; font-size: 13px;">Select your preferred payment method:</p>
                 
                 <div class="payment-methods">
                     <div class="payment-method selected" onclick="selectPaymentMethod('stripe')" id="stripeMethod">
@@ -546,8 +1197,12 @@
                             </div>
                             <div>
                                 <div class="method-title">Credit/Debit Card</div>
-                                <div class="method-description">Secure online payment</div>
+                                <div class="method-description">Secure payment via Stripe</div>
                             </div>
+                        </div>
+                        <div class="method-tags">
+                            <span class="method-tag fast">FAST</span>
+                            <span class="method-tag instant">INSTANT</span>
                         </div>
                     </div>
                     
@@ -561,18 +1216,62 @@
                                 <div class="method-description">Transfer directly to our account</div>
                             </div>
                         </div>
+                        <div class="method-tags">
+                            <span class="method-tag delayed">1-3 DAYS</span>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Bank Details -->
-                <div id="bankDetails" style="margin-top: 20px; padding: 15px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; display: none;">
-                    <h4 style="margin-bottom: 10px; color: var(--warning-orange);">Bank Transfer Details</h4>
-                    <div style="font-size: 12px;">
+                <!-- Card Details (for Stripe) -->
+                <div id="cardDetails" style="margin-top: 20px; display: none;">
+                    <div class="form-group">
+                        <label>Card Number *</label>
+                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Expiry Date *</label>
+                            <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label>CVC *</label>
+                            <input type="text" id="cardCvc" placeholder="123" maxlength="4">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Cardholder Name *</label>
+                        <input type="text" id="cardName" placeholder="John Doe">
+                    </div>
+                </div>
+                
+                <!-- Bank Transfer Details -->
+                <div id="bankDetails" style="margin-top: 20px; display: none; padding: 15px; background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
+                    <h4 style="margin-bottom: 10px; color: var(--warning-orange); font-size: 14px;">
+                        <i class="fas fa-info-circle"></i> Bank Transfer Details
+                    </h4>
+                    <div style="font-size: 12px; line-height: 1.6;">
                         <p><strong>Bank:</strong> HSBC UK</p>
                         <p><strong>Account:</strong> IRYA STONE LTD</p>
                         <p><strong>Account No:</strong> 12345678</p>
                         <p><strong>Sort Code:</strong> 40-04-15</p>
-                        <p><strong>Reference:</strong> <span id="bankReference"></span></p>
+                        <p><strong>Reference:</strong> <span id="bankReference">IRYA-${Date.now().toString().slice(-6)}</span></p>
+                        <p style="color: var(--warning-orange); margin-top: 8px;">
+                            <i class="fas fa-exclamation-triangle"></i> Platform fee 2.5% + £0.30 will be deducted
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Payment Terms -->
+                <div style="margin-top: 20px; padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                    <h4 style="margin-bottom: 8px; color: var(--error-red); font-size: 14px;">
+                        <i class="fas fa-exclamation-circle"></i> Payment Confirmation Policy
+                    </h4>
+                    <div style="font-size: 11px; line-height: 1.4; color: var(--text-light);">
+                        <p>✓ If payment is not confirmed within 24 hours, order will be cancelled</p>
+                        <p>✓ Refunds will be processed after deducting platform fees & bank charges</p>
+                        <p>✓ 30% advance is non-refundable if order is confirmed</p>
                     </div>
                 </div>
                 
@@ -590,14 +1289,22 @@
             <div class="step-content" id="stepContent3">
                 <h2 class="step-title">Review & Confirm</h2>
                 
-                <div id="reviewContent"></div>
+                <div id="reviewContent">
+                    <!-- Review content will be loaded here -->
+                </div>
                 
                 <div style="margin-top: 25px; padding: 15px; background: rgba(201, 162, 39, 0.1); border-radius: 8px;">
-                    <div class="form-group">
-                        <label>
+                    <div class="form-group" style="margin-bottom: 10px;">
+                        <label style="font-size: 13px;">
                             <input type="checkbox" id="acceptTerms" required>
-                            I agree to the Terms & Conditions
+                            I agree to the <a href="terms.html" style="color: var(--primary-gold); text-decoration: none;">Terms & Conditions</a>
                         </label>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-light); line-height: 1.4;">
+                        <i class="fas fa-info-circle"></i>
+                        30% advance payment required. Remaining 70% payable before delivery.
+                        <br><i class="fas fa-exclamation-triangle" style="color: var(--warning-orange);"></i>
+                        If payment not confirmed within 24 hours, order will be cancelled automatically
                     </div>
                 </div>
                 
@@ -605,6 +1312,9 @@
                     <button class="btn btn-primary" onclick="placeOrder()" id="placeOrderBtn">
                         <i class="fas fa-lock"></i> Place Order & Pay Advance
                     </button>
+                    <div style="text-align: center; margin-top: 15px; font-size: 11px; color: var(--text-light);">
+                        <i class="fas fa-shield-alt"></i> Secure & encrypted payment
+                    </div>
                 </div>
                 
                 <div style="margin-top: 15px;">
@@ -619,45 +1329,65 @@
         <div class="order-summary">
             <h2>Order Summary</h2>
             
-            <div class="order-items" id="orderItems"></div>
-            
-            <div class="summary-row">
-                <span>Subtotal</span>
-                <span id="subtotalAmount">£0.00</span>
+            <div class="order-items" id="orderItems">
+                <!-- Order items will be loaded here -->
             </div>
             
             <div class="summary-row">
-                <span>Shipping</span>
-                <span id="shippingAmount">£0.00</span>
+                <span class="summary-label">Subtotal</span>
+                <span class="summary-value" id="subtotalAmount">£0.00</span>
             </div>
             
             <div class="summary-row">
-                <span>Tax (20%)</span>
-                <span id="taxAmount">£0.00</span>
+                <span class="summary-label">Shipping</span>
+                <span class="summary-value" id="shippingAmount">£0.00</span>
             </div>
             
-            <div class="summary-row" style="font-weight: 600; font-size: 16px; margin-top: 10px; padding-top: 10px; border-top: 2px solid #f0f0f0;">
-                <span>Total</span>
-                <span id="totalAmount">£0.00</span>
+            <div class="summary-row">
+                <span class="summary-label">Tax (20%)</span>
+                <span class="summary-value" id="taxAmount">£0.00</span>
+            </div>
+            
+            <div class="summary-total">
+                <span class="summary-label">Total</span>
+                <span class="summary-value" id="totalAmount">£0.00</span>
             </div>
             
             <div class="advance-payment">
-                <div style="font-size: 12px; color: var(--text-light);">Advance Payment (30%)</div>
-                <div style="font-size: 18px; font-weight: 700; color: var(--primary-gold);" id="advanceAmount">£0.00</div>
+                <div class="advance-label">Advance Payment (30%)</div>
+                <div class="advance-amount" id="advanceAmount">£0.00</div>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 12px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; text-align: center;">
+                <div style="font-size: 11px; color: var(--success-green); display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Secure checkout protected by encryption</span>
+                </div>
             </div>
         </div>
     </div>
 </main>
 
+<!-- Processing Modal -->
+<div class="modal" id="processingModal">
+    <div class="modal-content">
+        <div class="loading-spinner" style="position: relative; transform: none; margin: 20px auto;"></div>
+        <h3 class="modal-title">Processing Payment</h3>
+        <p class="modal-message" id="processingMessage">Please wait while we process your payment...</p>
+    </div>
+</div>
+
 <!-- Success Modal -->
 <div class="modal" id="successModal">
     <div class="modal-content">
-        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark)); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 20px;">
+        <div class="modal-icon">
             <i class="fas fa-check"></i>
         </div>
-        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 10px;">Order Successful!</h3>
-        <p id="successMessage">Your order has been placed successfully.</p>
-        <div id="successDetails" style="text-align: left; margin: 20px 0; padding: 15px; background: var(--bg-light); border-radius: 8px;"></div>
+        <h3 class="modal-title">Order Successful!</h3>
+        <p class="modal-message" id="successMessage">Your order has been placed successfully.</p>
+        <div id="successDetails" style="text-align: left; margin-bottom: 25px; padding: 15px; background: var(--bg-light); border-radius: 8px; font-size: 12px;">
+            <!-- Success details -->
+        </div>
         <div style="display: flex; gap: 10px;">
             <button class="btn btn-primary" style="flex: 1;" onclick="viewOrder()">
                 <i class="fas fa-box"></i> View Order
@@ -669,33 +1399,56 @@
     </div>
 </div>
 
-<!-- Error Message -->
-<div class="error-message" id="errorMessage"></div>
+<!-- Bank Transfer Modal -->
+<div class="modal" id="bankModal">
+    <div class="modal-content">
+        <div class="modal-icon" style="background: linear-gradient(135deg, var(--warning-orange), #fbbf24);">
+            <i class="fas fa-clock"></i>
+        </div>
+        <h3 class="modal-title">Payment Pending</h3>
+        <p class="modal-message">Please complete the bank transfer to confirm your order.</p>
+        
+        <div id="bankModalDetails" style="text-align: left; margin-bottom: 25px; padding: 15px; background: var(--bg-light); border-radius: 8px; font-size: 12px;">
+            <!-- Bank details -->
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary" style="flex: 1;" onclick="copyBankDetails()">
+                <i class="fas fa-copy"></i> Copy Details
+            </button>
+            <button class="btn btn-secondary" style="flex: 1;" onclick="closeBankModal()">
+                <i class="fas fa-check"></i> Got It
+            </button>
+        </div>
+    </div>
+</div>
 
-<!-- Bottom Navigation -->
-<nav class="bottom-nav">
-    <a href="index.html" class="nav-btn">
-        <i class="fas fa-home"></i>
-        <span>Home</span>
-    </a>
-    <a href="products.html" class="nav-btn">
-        <i class="fas fa-th-large"></i>
-        <span>Products</span>
-    </a>
-    <a href="orders.html" class="nav-btn">
-        <i class="fas fa-box"></i>
-        <span>Orders</span>
-    </a>
-    <a href="account.html" class="nav-btn">
-        <i class="fas fa-user"></i>
-        <span>Account</span>
-    </a>
-</nav>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
 <script>
 // ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+const firebaseConfig = {
+    apiKey: "AIzaSyDNwzhOkQQLAQbkiNFTFEGSpWJdKaxbTRk",
+    authDomain: "iryastone-uk.firebaseapp.com",
+    projectId: "iryastone-uk",
+    storageBucket: "iryastone-uk.firebasestorage.app",
+    messagingSenderId: "110940910896",
+    appId: "1:110940910896:web:b25e92127118665e5c84f5",
+    measurementId: "G-6YM1FLYN48"
+};
+
+let firebaseApp, firebaseDB, firebaseAuth;
+
+// ============================================
 // GLOBAL VARIABLES
 // ============================================
+let currentStep = 1;
+let selectedPaymentMethod = 'stripe';
 let orderData = {
     items: [],
     subtotal: 0,
@@ -703,231 +1456,981 @@ let orderData = {
     tax: 0,
     total: 0,
     advancePayment: 0,
+    platformFee: 0,
+    netAdvance: 0,
+    isBuyNow: false,
+    buyNowProduct: null,
     userId: null,
-    isBuyNow: false
+    userName: null,
+    userEmail: null
 };
 
-let selectedPaymentMethod = 'stripe';
-let currentStep = 1;
+// ============================================
+// FIREBASE INITIALIZATION
+// ============================================
+
+async function initializeFirebase() {
+    try {
+        if (typeof firebase === 'undefined') {
+            console.warn('Firebase SDK not loaded');
+            return false;
+        }
+        
+        if (!firebase.apps.length) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase app initialized');
+        } else {
+            firebaseApp = firebase.app();
+            console.log('✅ Using existing Firebase app');
+        }
+        
+        firebaseDB = firebase.firestore();
+        firebaseAuth = firebase.auth();
+        
+        // Enable persistence
+        try {
+            await firebaseDB.enablePersistence();
+            console.log('✅ Firestore persistence enabled');
+        } catch (err) {
+            console.log('ℹ️ Firestore persistence not enabled:', err);
+        }
+        
+        console.log('✅ Firebase services initialized');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Firebase initialization error:', error);
+        return false;
+    }
+}
 
 // ============================================
 // INITIALIZATION
 // ============================================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 Checkout page initializing...');
     
+    showLoading(true);
+    
     try {
-        // Get user ID
-        const savedUser = localStorage.getItem('irya_stone_user');
-        if (savedUser) {
-            const user = JSON.parse(savedUser);
-            orderData.userId = user.uid;
+        // Initialize Firebase
+        const firebaseInitialized = await initializeFirebase();
+        
+        if (!firebaseInitialized) {
+            console.log('⚠️ Firebase not initialized, using localStorage only');
+        }
+        
+        // Get current user
+        const userData = localStorage.getItem('irya_stone_user');
+        const currentUser = userData ? JSON.parse(userData) : null;
+        
+        if (currentUser) {
+            orderData.userId = currentUser.uid;
+            orderData.userName = currentUser.displayName || 'Guest User';
+            orderData.userEmail = currentUser.email || '';
         } else {
+            // Create guest user
             let guestId = localStorage.getItem('irya_guest_id');
             if (!guestId) {
                 guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 localStorage.setItem('irya_guest_id', guestId);
             }
             orderData.userId = guestId;
+            orderData.userName = 'Guest User';
+            orderData.userEmail = '';
         }
         
-        console.log("📋 User ID:", orderData.userId);
+        console.log("📋 User Info:", {
+            userId: orderData.userId,
+            userName: orderData.userName,
+            userEmail: orderData.userEmail
+        });
         
-        // Check if Buy Now flow
+        // Check if this is a Buy Now flow
         const urlParams = new URLSearchParams(window.location.search);
-        orderData.isBuyNow = urlParams.get('buynow') === 'true';
+        const isBuyNow = urlParams.get('buynow') === 'true';
+        const userIdParam = urlParams.get('user');
         
-        if (orderData.isBuyNow) {
-            document.getElementById('buyNowSection').style.display = 'block';
-            loadBuyNowData();
-        } else {
-            loadCartData();
+        // Use user ID from URL if provided
+        if (userIdParam && !orderData.userId.includes('guest')) {
+            orderData.userId = userIdParam;
         }
         
-        // Initialize bank reference
-        document.getElementById('bankReference').textContent = 
-            `IRYA-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
+        if (isBuyNow) {
+            console.log("🛒 This is a Buy Now flow");
+            orderData.isBuyNow = true;
+            await loadBuyNowData();
+        } else {
+            console.log("🛒 This is a regular cart checkout");
+            await loadCartData();
+        }
         
-        // Setup payment method
-        selectPaymentMethod('stripe');
+        // Load saved addresses
+        await loadSavedAddresses();
         
-        // Update cart badge
-        updateCartBadge();
+        // Setup UI
+        setupCheckoutUI();
         
-        console.log('✅ Checkout initialized successfully');
+        // Setup scroll handling
+        setupScrollHandling();
+        
+        // Setup notifications
+        checkNotifications();
+        
+        console.log('✅ Checkout page initialized successfully');
         
     } catch (error) {
-        console.error('❌ Error initializing:', error);
-        showError('Failed to load checkout data');
+        console.error('❌ Error initializing checkout:', error);
+        showError('Failed to load checkout. Please try again.');
+    } finally {
+        showLoading(false);
     }
 });
 
 // ============================================
-// DATA LOADING - SIMPLIFIED
+// DATA LOADING FUNCTIONS - UPDATED FIX
 // ============================================
 
-function loadBuyNowData() {
+async function loadBuyNowData() {
     try {
-        console.log('🛒 Loading Buy Now data...');
+        console.log('📦 Loading Buy Now data...');
+        console.log("🆔 User ID for Buy Now:", orderData.userId);
         
-        // Try multiple sources
-        let product = null;
+        // Show Buy Now section
+        document.getElementById('buyNowSection').style.display = 'block';
         
-        // 1. Check sessionStorage first
-        const sessionProduct = sessionStorage.getItem('irya_buynow_product');
-        if (sessionProduct) {
-            product = JSON.parse(sessionProduct);
-            console.log('✅ Loaded from sessionStorage');
+        // Update back button to go to product page
+        const backButton = document.getElementById('backButton');
+        const backToCartButton = document.getElementById('backToCartButton');
+        
+        if (backButton) {
+            backButton.href = 'javascript:history.back()';
+            backButton.innerHTML = '<i class="fas fa-arrow-left"></i> <span>Back to Product</span>';
         }
         
-        // 2. Check localStorage with user key
-        if (!product && orderData.userId) {
+        if (backToCartButton) {
+            backToCartButton.href = 'javascript:history.back()';
+            backToCartButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Product';
+        }
+        
+        let buyNowProduct = null;
+        let buyNowSource = 'unknown';
+        
+        // ✅ FIX: CHECK MULTIPLE SOURCES FOR BUY NOW DATA
+        
+        // Source 1: Check sessionStorage first (most recent)
+        const sessionProduct = sessionStorage.getItem('irya_buynow_product');
+        if (sessionProduct) {
+            try {
+                buyNowProduct = JSON.parse(sessionProduct);
+                buyNowSource = 'sessionStorage';
+                console.log('✅ Loaded Buy Now from sessionStorage');
+            } catch (e) {
+                console.error('❌ Error parsing sessionStorage data:', e);
+            }
+        }
+        
+        // Source 2: Check localStorage with user key
+        if (!buyNowProduct && orderData.userId) {
             const buyNowKey = 'irya_buynow_cart_' + orderData.userId;
             const userBuyNow = localStorage.getItem(buyNowKey);
             if (userBuyNow) {
-                const items = JSON.parse(userBuyNow);
-                if (items && items.length > 0) {
-                    product = items[0];
-                    console.log('✅ Loaded from localStorage user key');
+                try {
+                    const items = JSON.parse(userBuyNow);
+                    if (items && items.length > 0) {
+                        buyNowProduct = items[0];
+                        buyNowSource = 'localStorage_user';
+                        console.log('✅ Loaded Buy Now from localStorage user key');
+                    }
+                } catch (e) {
+                    console.error('❌ Error parsing localStorage user data:', e);
                 }
             }
         }
         
-        // 3. Check universal localStorage
-        if (!product) {
+        // Source 3: Check universal localStorage key
+        if (!buyNowProduct) {
             const universalBuyNow = localStorage.getItem('irya_current_buynow');
             if (universalBuyNow) {
-                product = JSON.parse(universalBuyNow);
-                console.log('✅ Loaded from universal localStorage');
+                try {
+                    buyNowProduct = JSON.parse(universalBuyNow);
+                    buyNowSource = 'localStorage_universal';
+                    console.log('✅ Loaded Buy Now from universal localStorage');
+                } catch (e) {
+                    console.error('❌ Error parsing universal localStorage:', e);
+                }
             }
         }
         
-        if (!product) {
-            console.warn('⚠️ No Buy Now product found');
-            return;
+        // Source 4: Check sessionStorage backup
+        if (!buyNowProduct) {
+            const sessionBackup = sessionStorage.getItem('irya_current_buynow');
+            if (sessionBackup) {
+                try {
+                    buyNowProduct = JSON.parse(sessionBackup);
+                    buyNowSource = 'sessionStorage_backup';
+                    console.log('✅ Loaded Buy Now from sessionStorage backup');
+                } catch (e) {
+                    console.error('❌ Error parsing sessionStorage backup:', e);
+                }
+            }
         }
         
-        // Create order item
-        orderData.items = [{
-            id: product.id || 'buynow_' + Date.now(),
-            name: product.stone_name || product.name || 'Stone Product',
-            price: parseFloat(product.price) || 0,
-            quantity: product.quantity || 1,
-            image: product.image || 'https://images.unsplash.com/photo-1544931170-3ca1337cce88',
-            category: product.category || '',
-            isBuyNow: true
-        }];
+        // Source 5: Check URL parameters
+        if (!buyNowProduct) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productParam = urlParams.get('product');
+            if (productParam) {
+                try {
+                    buyNowProduct = JSON.parse(decodeURIComponent(productParam));
+                    buyNowSource = 'url_parameter';
+                    console.log('✅ Loaded Buy Now from URL parameter');
+                } catch (e) {
+                    console.error('❌ Error parsing URL product:', e);
+                }
+            }
+        }
         
+        if (!buyNowProduct) {
+            console.error('❌ No Buy Now product found in any storage location');
+            console.log('🔍 Storage check:');
+            console.log('- sessionStorage irya_buynow_product:', sessionStorage.getItem('irya_buynow_product') ? 'EXISTS' : 'NOT FOUND');
+            console.log('- sessionStorage irya_current_buynow:', sessionStorage.getItem('irya_current_buynow') ? 'EXISTS' : 'NOT FOUND');
+            console.log('- localStorage irya_current_buynow:', localStorage.getItem('irya_current_buynow') ? 'EXISTS' : 'NOT FOUND');
+            console.log('- localStorage with user key:', localStorage.getItem('irya_buynow_cart_' + orderData.userId) ? 'EXISTS' : 'NOT FOUND');
+            
+            throw new Error('No Buy Now product found. Please try again from product page.');
+        }
+        
+        console.log(`✅ Buy Now product loaded from ${buyNowSource}:`, buyNowProduct);
+        
+        // Process Buy Now product
+        orderData.buyNowProduct = buyNowProduct;
+        
+        // Create order item
+        const orderItem = {
+            id: buyNowProduct.id,
+            uniqueId: buyNowProduct.uniqueId || `buynow_${buyNowProduct.id}_${Date.now()}`,
+            name: buyNowProduct.stone_name || buyNowProduct.name || 'Stone Product',
+            price: parseFloat(buyNowProduct.price) || 0,
+            quantity: buyNowProduct.quantity || 1,
+            image: buyNowProduct.image || getDefaultImage(buyNowProduct.category),
+            category: buyNowProduct.category || '',
+            calculationData: buyNowProduct.calculationData || null,
+            customRequirements: buyNowProduct.customRequirements || '',
+            isBuyNow: true,
+            totalPrice: buyNowProduct.totalPrice || (buyNowProduct.price * (buyNowProduct.quantity || 1))
+        };
+        
+        orderData.items = [orderItem];
+        
+        // Calculate totals
         calculateOrderTotals();
+        
+        // Update cart badge
+        updateCartBadge();
+        
+        // Render order items
         renderOrderItems();
         
+        console.log('✅ Buy Now data loaded successfully. Items:', orderData.items.length);
+        
     } catch (error) {
-        console.error('❌ Error loading Buy Now:', error);
+        console.error('❌ Error loading Buy Now data:', error);
+        showError(error.message || 'Buy Now item not found. Please try again from product page.');
+        
+        // Show error with options
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            z-index: 9999;
+            max-width: 90%;
+            width: 300px;
+        `;
+        
+        errorDiv.innerHTML = `
+            <div style="color: #ff4757; font-size: 48px; margin-bottom: 15px;">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2 style="color: #333; margin-bottom: 10px;">Buy Now Error</h2>
+            <p style="color: #666; margin-bottom: 20px;">${error.message || 'Item not found'}</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <a href="products.html" style="
+                    display: block;
+                    background: #c9a227;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 20px;
+                    text-decoration: none;
+                    font-weight: 500;
+                ">
+                    Browse Products
+                </a>
+                <button onclick="window.history.back()" style="
+                    display: block;
+                    background: #f8f9fa;
+                    color: #666;
+                    padding: 10px 20px;
+                    border-radius: 20px;
+                    text-decoration: none;
+                    font-weight: 500;
+                    border: 1px solid #ddd;
+                    cursor: pointer;
+                ">
+                    Go Back
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(errorDiv);
     }
 }
 
-function loadCartData() {
+async function loadCartData() {
     try {
         console.log('🛒 Loading cart data...');
         
+        // Try multiple sources for cart data
         let cartItems = [];
+        let dataSource = 'unknown';
         
-        // 1. Try user's cart
-        if (orderData.userId) {
-            const cartKey = 'irya_cart_' + orderData.userId;
-            const cartData = localStorage.getItem(cartKey);
-            if (cartData) {
-                cartItems = JSON.parse(cartData);
-                console.log(`✅ Loaded ${cartItems.length} items from cart`);
+        // Method 1: Checkout data from cart page
+        const checkoutData = sessionStorage.getItem('irya_checkout_data');
+        if (checkoutData) {
+            try {
+                const parsedData = JSON.parse(checkoutData);
+                cartItems = parsedData.items || [];
+                dataSource = 'checkout_data';
+                console.log(`✅ Loaded ${cartItems.length} items from checkout_data`);
+            } catch (e) {
+                console.error('❌ Error parsing checkout data:', e);
             }
         }
         
-        // 2. Try checkout data
+        // Method 2: LocalStorage cart with user ID
+        if (cartItems.length === 0 && orderData.userId) {
+            const cartKey = 'irya_cart_' + orderData.userId;
+            const cartData = localStorage.getItem(cartKey);
+            if (cartData) {
+                try {
+                    cartItems = JSON.parse(cartData);
+                    dataSource = 'localStorage_cart';
+                    console.log(`✅ Loaded ${cartItems.length} items from localStorage`);
+                } catch (e) {
+                    console.error('❌ Error parsing cart data:', e);
+                }
+            }
+        }
+        
+        // Method 3: Legacy cart key (for backward compatibility)
         if (cartItems.length === 0) {
-            const checkoutData = sessionStorage.getItem('irya_checkout_data');
-            if (checkoutData) {
-                const data = JSON.parse(checkoutData);
-                cartItems = data.items || [];
-                console.log(`✅ Loaded ${cartItems.length} items from checkout data`);
+            const legacyCartKey = 'irya_local_cart_' + orderData.userId;
+            const legacyCartData = localStorage.getItem(legacyCartKey);
+            if (legacyCartData) {
+                try {
+                    cartItems = JSON.parse(legacyCartData);
+                    dataSource = 'legacy_cart';
+                    console.log(`✅ Loaded ${cartItems.length} items from legacy cart`);
+                } catch (e) {
+                    console.error('❌ Error parsing legacy cart:', e);
+                }
+            }
+        }
+        
+        // Method 4: Backup checkout data
+        if (cartItems.length === 0) {
+            const backupData = localStorage.getItem('irya_checkout_backup');
+            if (backupData) {
+                try {
+                    const parsedData = JSON.parse(backupData);
+                    cartItems = parsedData.items || [];
+                    dataSource = 'backup_data';
+                    console.log(`✅ Loaded ${cartItems.length} items from backup`);
+                } catch (e) {
+                    console.error('❌ Error parsing backup data:', e);
+                }
             }
         }
         
         if (cartItems.length === 0) {
             console.log('🛒 Cart is empty');
-            showEmptyCartMessage();
-            return;
+            throw new Error('Your cart is empty. Please add items first.');
         }
         
-        // Process items
+        // Process cart items
         orderData.items = cartItems.map(item => ({
-            id: item.id || item.uniqueId || 'item_' + Date.now() + Math.random(),
-            name: item.stone_name || item.name || 'Stone Product',
+            id: item.id,
+            uniqueId: item.uniqueId || item.id,
+            name: item.stone_name || item.name || item.stoneName || 'Stone Product',
             price: parseFloat(item.price) || 0,
             quantity: item.quantity || 1,
-            image: item.image || 'https://images.unsplash.com/photo-1544931170-3ca1337cce88',
+            image: item.image || getDefaultImage(item.category),
             category: item.category || '',
+            calculationData: item.calculationData || null,
+            customRequirements: item.customRequirements || '',
             isBuyNow: false
         }));
         
+        console.log(`✅ Processed ${orderData.items.length} cart items from ${dataSource}`);
+        
+        // Calculate totals
         calculateOrderTotals();
+        
+        // Update cart badge
+        updateCartBadge();
+        
+        // Render order items
         renderOrderItems();
+        
+        console.log(`✅ Cart data loaded successfully. Items: ${orderData.items.length}`);
         
     } catch (error) {
         console.error('❌ Error loading cart:', error);
-        showEmptyCartMessage();
+        showError('Your cart is empty. Please add items first.');
+        
+        // Show empty cart message
+        document.getElementById('orderItems').innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 48px; color: var(--text-light); opacity: 0.5; margin-bottom: 15px;">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3 style="color: var(--stone-dark); margin-bottom: 10px;">Your Cart is Empty</h3>
+                <p style="color: var(--text-light); margin-bottom: 20px;">${error.message || 'Please add items to your cart first.'}</p>
+                <a href="products.html" style="
+                    display: inline-block;
+                    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 20px;
+                    text-decoration: none;
+                    font-weight: 500;
+                ">
+                    <i class="fas fa-gem"></i> Browse Products
+                </a>
+            </div>
+        `;
+        
+        // Disable checkout button
+        document.getElementById('placeOrderBtn').disabled = true;
     }
 }
 
-function showEmptyCartMessage() {
-    document.getElementById('orderItems').innerHTML = `
-        <div style="text-align: center; padding: 40px 20px;">
-            <div style="font-size: 48px; color: var(--text-light); opacity: 0.5; margin-bottom: 15px;">
-                <i class="fas fa-shopping-cart"></i>
-            </div>
-            <h3 style="color: var(--stone-dark); margin-bottom: 10px;">Your Cart is Empty</h3>
-            <p style="color: var(--text-light); margin-bottom: 20px;">Please add items to your cart first.</p>
-            <a href="products.html" style="
-                display: inline-block;
-                background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
-                color: white;
-                padding: 10px 20px;
-                border-radius: 20px;
-                text-decoration: none;
-                font-weight: 500;
-            ">
-                <i class="fas fa-gem"></i> Browse Products
-            </a>
-        </div>
-    `;
-    
-    document.getElementById('placeOrderBtn').disabled = true;
-}
-
-// ============================================
-// ORDER CALCULATIONS
-// ============================================
-
 function calculateOrderTotals() {
-    if (orderData.items.length === 0) return;
+    if (orderData.items.length === 0) {
+        orderData.subtotal = 0;
+        orderData.shipping = 0;
+        orderData.tax = 0;
+        orderData.total = 0;
+        orderData.advancePayment = 0;
+        orderData.platformFee = 0;
+        orderData.netAdvance = 0;
+        return;
+    }
     
     // Calculate subtotal
     orderData.subtotal = orderData.items.reduce((total, item) => {
-        return total + (item.price * item.quantity);
+        let itemTotal = (item.price || 0) * (item.quantity || 1);
+        
+        if (item.calculationData) {
+            const calc = item.calculationData;
+            if (calc.mode === 'area') {
+                const area = (calc.length || 1) * (calc.width || 1);
+                itemTotal = (item.price || 0) * area * (item.quantity || 1);
+            } else if (calc.mode === 'weight') {
+                const weight = calc.weight || 1;
+                itemTotal = (item.price || 0) * weight * (item.quantity || 1);
+            }
+        }
+        
+        return total + itemTotal;
     }, 0);
     
-    // Shipping: free over £500
+    // Calculate shipping (free over £500, otherwise £25)
     orderData.shipping = orderData.subtotal > 500 ? 0 : 25;
     
-    // Tax: 20% VAT
+    // Calculate tax (20% VAT)
     orderData.tax = orderData.subtotal * 0.2;
     
-    // Total
+    // Calculate total
     orderData.total = orderData.subtotal + orderData.shipping + orderData.tax;
     
-    // Advance payment: 30%
+    // Calculate advance payment (30%)
     orderData.advancePayment = orderData.total * 0.3;
     
+    // Calculate platform fees (2.5% + £0.30)
+    orderData.platformFee = (orderData.advancePayment * 0.025) + 0.30;
+    
+    // Calculate net advance (after fees)
+    orderData.netAdvance = orderData.advancePayment - orderData.platformFee;
+    
+    console.log('💰 Order totals calculated:', {
+        subtotal: orderData.subtotal,
+        shipping: orderData.shipping,
+        tax: orderData.tax,
+        total: orderData.total,
+        advance: orderData.advancePayment,
+        platformFee: orderData.platformFee,
+        netAdvance: orderData.netAdvance
+    });
+}
+
+function updateCartBadge() {
+    const totalItems = orderData.items.reduce((total, item) => total + (item.quantity || 1), 0);
+    
+    const headerBadge = document.getElementById('headerCartBadge');
+    const bottomBadge = document.getElementById('bottomCartBadge');
+    
+    if (headerBadge) {
+        headerBadge.textContent = totalItems > 99 ? '99+' : totalItems;
+        headerBadge.style.display = totalItems > 0 ? 'flex' : 'none';
+    }
+    
+    if (bottomBadge) {
+        bottomBadge.textContent = totalItems > 99 ? '99+' : totalItems;
+        bottomBadge.style.display = totalItems > 0 ? 'flex' : 'none';
+    }
+}
+
+// ============================================
+// FIREBASE ORDER SAVING FUNCTIONS
+// ============================================
+
+async function saveOrderToFirebase(orderObj) {
+    try {
+        if (!firebaseDB || !orderData.userId) {
+            console.log('⚠️ Firebase not available or user not logged in');
+            return null;
+        }
+        
+        console.log('💾 Saving order to Firebase...');
+        
+        // Prepare data for Firestore
+        const orderId = orderObj.orderId;
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        const userId = orderData.userId;
+        
+        // 1. First ensure user document exists
+        const userRef = firebaseDB.collection('users').doc(userId);
+        const userDoc = await userRef.get();
+        
+        if (!userDoc.exists) {
+            // Create user document if it doesn't exist
+            await userRef.set({
+                userId: userId,
+                userName: orderData.userName,
+                userEmail: orderData.userEmail || '',
+                createdAt: timestamp,
+                updatedAt: timestamp,
+                totalOrders: 0,
+                totalSpent: 0
+            });
+            console.log('✅ Created new user document');
+        }
+        
+        // 2. Save to user's orders collection
+        const userOrderRef = firebaseDB.collection('users').doc(userId)
+            .collection('orders').doc(orderId);
+        
+        const orderDataForFirebase = {
+            orderId: orderId,
+            orderNumber: orderObj.orderNumber,
+            userId: userId,
+            userName: orderData.userName,
+            userEmail: orderData.userEmail || '',
+            items: orderObj.items.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                image: item.image,
+                category: item.category,
+                isBuyNow: item.isBuyNow || false,
+                calculationData: item.calculationData || null
+            })),
+            subtotal: orderObj.subtotal,
+            shipping: orderObj.shipping,
+            tax: orderObj.tax,
+            total: orderObj.total,
+            advancePayment: orderObj.advancePayment,
+            remainingPayment: orderObj.remainingPayment,
+            platformFee: orderData.platformFee,
+            netAdvance: orderData.netAdvance,
+            shippingDetails: orderObj.shippingDetails,
+            paymentMethod: orderObj.paymentMethod,
+            paymentStatus: orderObj.paymentStatus,
+            orderStatus: orderObj.orderStatus,
+            paymentReference: orderObj.paymentReference,
+            notes: orderObj.notes || '',
+            isBuyNow: orderObj.isBuyNow || false,
+            paymentConfirmDeadline: orderObj.paymentConfirmDeadline,
+            autoCancelTime: orderObj.autoCancelTime,
+            refundPolicy: orderObj.refundPolicy,
+            createdAt: timestamp,
+            updatedAt: timestamp
+        };
+        
+        await userOrderRef.set(orderDataForFirebase);
+        console.log('✅ Order saved to user collection');
+        
+        // 3. Save to addresses subcollection if provided
+        const addressData = {
+            fullName: document.getElementById('shippingName').value,
+            email: document.getElementById('shippingEmail').value,
+            phone: document.getElementById('shippingPhone').value,
+            address1: document.getElementById('shippingAddress1').value,
+            address2: document.getElementById('shippingAddress2').value || '',
+            city: document.getElementById('shippingCity').value,
+            state: document.getElementById('shippingState').value,
+            postalCode: document.getElementById('shippingPostalCode').value,
+            country: document.getElementById('shippingCountry').value,
+            isDefault: document.getElementById('saveAddress')?.checked || false,
+            orderId: orderId,
+            createdAt: timestamp
+        };
+        
+        if (addressData.fullName && addressData.address1) {
+            const addressRef = firebaseDB.collection('users').doc(userId)
+                .collection('addresses').doc(`address_${Date.now()}`);
+            
+            await addressRef.set(addressData);
+            console.log('✅ Address saved to user collection');
+        }
+        
+        // 4. Save to payments subcollection
+        const paymentId = `payment_${Date.now()}`;
+        const paymentData = {
+            paymentId: paymentId,
+            orderId: orderId,
+            orderNumber: orderObj.orderNumber,
+            amount: orderData.advancePayment,
+            platformFee: orderData.platformFee,
+            netAmount: orderData.netAdvance,
+            paymentMethod: selectedPaymentMethod,
+            status: selectedPaymentMethod === 'bank' ? 'pending' : 'paid',
+            paymentReference: selectedPaymentMethod === 'bank' ? orderObj.paymentReference : null,
+            currency: 'GBP',
+            userId: userId,
+            userEmail: orderData.userEmail || '',
+            createdAt: timestamp,
+            confirmedAt: selectedPaymentMethod === 'bank' ? null : timestamp,
+            confirmDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            refundPolicy: 'If payment not confirmed within 24 hours, 100% refund after deducting platform fees (2.5% + £0.30)',
+            bankCharges: 0.50
+        };
+        
+        const paymentRef = firebaseDB.collection('users').doc(userId)
+            .collection('payments').doc(paymentId);
+        
+        await paymentRef.set(paymentData);
+        console.log('✅ Payment saved to user collection');
+        
+        // 5. Update user document with order count
+        await userRef.update({
+            lastOrderId: orderId,
+            lastOrderDate: timestamp,
+            totalOrders: firebase.firestore.FieldValue.increment(1),
+            totalSpent: firebase.firestore.FieldValue.increment(orderObj.total),
+            updatedAt: timestamp
+        });
+        
+        console.log('✅ User document updated');
+        
+        return {
+            orderId: orderId,
+            paymentId: paymentId,
+            userId: userId
+        };
+        
+    } catch (error) {
+        console.error('❌ Error saving to Firebase:', error);
+        throw error;
+    }
+}
+
+// ============================================
+// ORDER PROCESSING - UPDATED
+// ============================================
+
+async function placeOrder() {
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    
+    try {
+        // Validate all steps
+        if (!validateCurrentStep()) {
+            return;
+        }
+        
+        // Validate terms acceptance
+        if (!document.getElementById('acceptTerms').checked) {
+            showError('Please accept the Terms & Conditions');
+            return;
+        }
+        
+        // Validate items
+        if (orderData.items.length === 0) {
+            showError('Your order is empty');
+            return;
+        }
+        
+        // Disable button
+        placeOrderBtn.disabled = true;
+        placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        
+        // Show processing modal
+        const processingModal = document.getElementById('processingModal');
+        const processingMessage = document.getElementById('processingMessage');
+        
+        processingMessage.textContent = selectedPaymentMethod === 'bank' 
+            ? 'Creating your order...' 
+            : 'Processing your payment...';
+        
+        processingModal.style.display = 'flex';
+        
+        // Generate order data
+        const orderId = 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        const orderNumber = 'IRYA-' + Date.now().toString().slice(-8);
+        const paymentReference = selectedPaymentMethod === 'bank' 
+            ? `IRYA-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`
+            : null;
+        
+        // Prepare order object
+        const orderObj = {
+            orderId: orderId,
+            orderNumber: orderNumber,
+            userId: orderData.userId,
+            items: orderData.items,
+            subtotal: orderData.subtotal,
+            shipping: orderData.shipping,
+            tax: orderData.tax,
+            total: orderData.total,
+            advancePayment: orderData.advancePayment,
+            remainingPayment: orderData.total - orderData.advancePayment,
+            shippingDetails: {
+                name: document.getElementById('shippingName').value,
+                email: document.getElementById('shippingEmail').value,
+                phone: document.getElementById('shippingPhone').value,
+                address: [
+                    document.getElementById('shippingAddress1').value,
+                    document.getElementById('shippingAddress2').value,
+                    document.getElementById('shippingCity').value,
+                    document.getElementById('shippingState').value,
+                    document.getElementById('shippingPostalCode').value
+                ].filter(Boolean).join(', '),
+                country: document.getElementById('shippingCountry').value
+            },
+            paymentMethod: selectedPaymentMethod,
+            paymentStatus: selectedPaymentMethod === 'bank' ? 'pending' : 'paid',
+            orderStatus: selectedPaymentMethod === 'bank' ? 'payment_pending' : 'confirmed',
+            notes: document.getElementById('orderNotes').value || '',
+            isBuyNow: orderData.isBuyNow,
+            createdAt: new Date().toISOString(),
+            paymentReference: paymentReference,
+            // Payment confirmation details
+            paymentConfirmDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            autoCancelTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            refundPolicy: 'If payment not confirmed within 24 hours, order will be cancelled and refund processed after deducting platform fees (2.5% + £0.30) and bank charges (£0.50)'
+        };
+        
+        console.log('📝 Order object prepared:', orderObj);
+        
+        // Save order to Firebase
+        let firebaseResult = null;
+        try {
+            firebaseResult = await saveOrderToFirebase(orderObj);
+            console.log('✅ Firebase save successful:', firebaseResult);
+        } catch (firebaseError) {
+            console.error('❌ Firebase save failed:', firebaseError);
+            // Continue with local save even if Firebase fails
+        }
+        
+        // Always save to localStorage as backup
+        await saveOrderToLocalStorage(orderObj, firebaseResult);
+        
+        // Clear cart data
+        clearOrderData();
+        
+        // Hide processing modal
+        processingModal.style.display = 'none';
+        
+        // Show success based on payment method
+        if (selectedPaymentMethod === 'bank') {
+            showBankModal(orderObj, firebaseResult);
+        } else {
+            showSuccessModal(orderObj, firebaseResult);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error processing order:', error);
+        showError('Payment processing failed. Please try again.');
+        
+        // Hide modal and re-enable button
+        document.getElementById('processingModal').style.display = 'none';
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order & Pay Advance';
+    }
+}
+
+async function saveOrderToLocalStorage(orderObj, firebaseResult) {
+    try {
+        // Save to user's orders
+        const ordersKey = 'irya_user_orders_' + orderData.userId;
+        let userOrders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
+        userOrders.unshift(orderObj);
+        localStorage.setItem(ordersKey, JSON.stringify(userOrders));
+        
+        // Save last order for quick access
+        localStorage.setItem('irya_last_order_id', orderObj.orderId);
+        localStorage.setItem('irya_last_order_data', JSON.stringify(orderObj));
+        
+        // Save user info if not already saved
+        localStorage.setItem('irya_user_name', orderData.userName);
+        if (orderData.userEmail) {
+            localStorage.setItem('irya_user_email', orderData.userEmail);
+        }
+        
+        // Save Firebase IDs if available
+        if (firebaseResult) {
+            localStorage.setItem('irya_firebase_order_id', firebaseResult.orderId);
+            localStorage.setItem('irya_firebase_payment_id', firebaseResult.paymentId);
+            localStorage.setItem('irya_firebase_user_id', firebaseResult.userId);
+        }
+        
+        console.log('✅ Order saved to localStorage');
+        
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+    }
+}
+
+function clearOrderData() {
+    try {
+        if (orderData.isBuyNow) {
+            // Clear all Buy Now data
+            console.log('🧹 Clearing Buy Now data...');
+            
+            // Clear sessionStorage
+            sessionStorage.removeItem('irya_buynow_product');
+            sessionStorage.removeItem('irya_current_buynow');
+            sessionStorage.removeItem('irya_is_buynow_flow');
+            sessionStorage.removeItem('irya_buynow_product_id');
+            sessionStorage.removeItem('irya_buynow_quantity');
+            sessionStorage.removeItem('irya_buynow_calc_data');
+            sessionStorage.removeItem('irya_buynow_custom_req');
+            sessionStorage.removeItem('irya_checkout_user_id');
+            
+            // Clear localStorage
+            localStorage.removeItem('irya_current_buynow');
+            localStorage.removeItem('irya_buynow_cart_' + orderData.userId);
+            localStorage.removeItem('irya_buynow_simple_cart');
+            
+            console.log('✅ Buy Now data cleared');
+        } else {
+            // Clear regular cart data
+            console.log('🧹 Clearing cart data...');
+            
+            const cartKey = 'irya_cart_' + orderData.userId;
+            localStorage.removeItem(cartKey);
+            
+            // Also clear legacy cart key
+            const legacyCartKey = 'irya_local_cart_' + orderData.userId;
+            localStorage.removeItem(legacyCartKey);
+            
+            // Clear checkout data
+            sessionStorage.removeItem('irya_checkout_data');
+            localStorage.removeItem('irya_checkout_backup');
+            
+            console.log('✅ Cart data cleared');
+        }
+        
+        // Update cart badge
+        updateCartBadge();
+        
+    } catch (error) {
+        console.error('Error clearing order data:', error);
+    }
+}
+
+// ============================================
+// UI FUNCTIONS
+// ============================================
+
+function setupCheckoutUI() {
+    // Set default payment method
+    selectPaymentMethod('stripe');
+    
+    // Set up card input formatting
+    setupCardInputs();
+    
+    // Update order summary
     updateOrderSummaryUI();
+    
+    // Enable checkout button if items exist
+    if (orderData.items.length > 0) {
+        document.getElementById('checkoutBtn').disabled = false;
+        document.getElementById('placeOrderBtn').disabled = false;
+    }
+}
+
+function renderOrderItems() {
+    const container = document.getElementById('orderItems');
+    
+    if (orderData.items.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;">No items in order</p>';
+        return;
+    }
+    
+    let itemsHTML = '';
+    
+    orderData.items.forEach((item, index) => {
+        let itemTotal = (item.price || 0) * (item.quantity || 1);
+        let metaInfo = '';
+        
+        if (item.calculationData) {
+            const calc = item.calculationData;
+            if (calc.mode === 'area') {
+                const area = (calc.length || 1) * (calc.width || 1);
+                itemTotal = (item.price || 0) * area * (item.quantity || 1);
+                metaInfo = `${area.toFixed(2)} sq ft × ${item.quantity}`;
+            } else if (calc.mode === 'weight') {
+                const weight = calc.weight || 1;
+                itemTotal = (item.price || 0) * weight * (item.quantity || 1);
+                metaInfo = `${weight.toFixed(2)} kg × ${item.quantity}`;
+            }
+        }
+        
+        if (!metaInfo) {
+            metaInfo = `Quantity: ${item.quantity}`;
+        }
+        
+        if (item.customRequirements) {
+            metaInfo += ` · Custom order`;
+        }
+        
+        itemsHTML += `
+            <div class="order-item">
+                <div class="order-item-image">
+                    <img src="${item.image}" alt="${item.name}" 
+                         onerror="this.src='${getDefaultImage(item.category)}'">
+                </div>
+                <div class="order-item-details">
+                    <div class="order-item-name">${item.name}</div>
+                    <div class="order-item-meta">${metaInfo}</div>
+                    <div class="order-item-price">${formatPrice(itemTotal)}</div>
+                    ${item.isBuyNow ? `<div class="order-item-total" style="color: var(--primary-gold); font-size: 11px; margin-top: 2px;"><i class="fas fa-bolt"></i> Buy Now</div>` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = itemsHTML;
 }
 
 function updateOrderSummaryUI() {
@@ -938,40 +2441,93 @@ function updateOrderSummaryUI() {
     document.getElementById('advanceAmount').textContent = formatPrice(orderData.advancePayment);
 }
 
-// ============================================
-// ORDER RENDERING
-// ============================================
-
-function renderOrderItems() {
-    const container = document.getElementById('orderItems');
+function updateReviewContent() {
+    const reviewContent = document.getElementById('reviewContent');
     
-    if (orderData.items.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--text-light);">No items in order</p>';
-        return;
-    }
+    const shippingName = document.getElementById('shippingName').value || 'Not provided';
+    const shippingEmail = document.getElementById('shippingEmail').value || 'Not provided';
+    const shippingPhone = document.getElementById('shippingPhone').value || 'Not provided';
+    const shippingAddress = [
+        document.getElementById('shippingAddress1').value,
+        document.getElementById('shippingAddress2').value,
+        document.getElementById('shippingCity').value,
+        document.getElementById('shippingState').value,
+        document.getElementById('shippingPostalCode').value
+    ].filter(Boolean).join(', ');
     
-    let itemsHTML = '';
+    const paymentMethodNames = {
+        'stripe': 'Credit/Debit Card',
+        'paypal': 'PayPal',
+        'bank': 'Bank Transfer'
+    };
     
-    orderData.items.forEach(item => {
-        const itemTotal = item.price * item.quantity;
-        
-        itemsHTML += `
-            <div class="order-item">
-                <div class="order-item-image">
-                    <img src="${item.image}" alt="${item.name}" 
-                         onerror="this.src='https://images.unsplash.com/photo-1544931170-3ca1337cce88'">
+    const notes = document.getElementById('orderNotes').value;
+    
+    // Platform fees info
+    const platformFee = orderData.platformFee;
+    const netAdvance = orderData.netAdvance;
+    
+    reviewContent.innerHTML = `
+        <div style="display: grid; gap: 15px;">
+            ${orderData.isBuyNow ? `
+                <div style="padding: 15px; background: linear-gradient(135deg, rgba(201, 162, 39, 0.1), rgba(240, 215, 124, 0.05)); border-radius: 8px; border-left: 4px solid var(--primary-gold);">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 24px; height: 24px; background: var(--primary-gold); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600; color: var(--stone-dark);">Buy Now Order</div>
+                            <div style="font-size: 11px; color: var(--text-light);">Direct purchase from product page</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="order-item-details">
-                    <div style="font-weight: 600;">${item.name}</div>
-                    <div style="font-size: 12px; color: var(--text-light);">Quantity: ${item.quantity}</div>
-                    <div style="font-weight: 600; color: var(--primary-gold);">${formatPrice(itemTotal)}</div>
-                    ${item.isBuyNow ? `<div style="color: var(--primary-gold); font-size: 11px;"><i class="fas fa-bolt"></i> Buy Now</div>` : ''}
+            ` : ''}
+            
+            <!-- Platform Fees Info -->
+            <div style="padding: 15px; background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
+                <h4 style="margin-bottom: 8px; font-size: 14px; color: var(--warning-orange);">Payment Details</h4>
+                <div style="font-size: 12px; line-height: 1.6;">
+                    <p><strong>Advance Amount:</strong> ${formatPrice(orderData.advancePayment)}</p>
+                    <p><strong>Platform Fee (2.5% + £0.30):</strong> ${formatPrice(platformFee)}</p>
+                    <p><strong>Net Advance:</strong> ${formatPrice(netAdvance)}</p>
+                    ${selectedPaymentMethod === 'bank' ? `<p><strong>Bank Charges:</strong> £0.50</p>` : ''}
+                    <p style="color: var(--error-red); margin-top: 8px; font-size: 11px;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        If payment not confirmed within 24 hours: Refund = Advance - Platform Fee - Bank Charges
+                    </p>
                 </div>
             </div>
-        `;
-    });
-    
-    container.innerHTML = itemsHTML;
+            
+            <!-- Shipping Details -->
+            <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
+                <h4 style="margin-bottom: 10px; font-size: 14px; color: var(--stone-dark);">Shipping Details</h4>
+                <div style="font-size: 12px; line-height: 1.6;">
+                    <p><strong>Name:</strong> ${shippingName}</p>
+                    <p><strong>Email:</strong> ${shippingEmail}</p>
+                    <p><strong>Phone:</strong> ${shippingPhone}</p>
+                    <p><strong>Address:</strong> ${shippingAddress || 'Not provided'}</p>
+                    ${notes ? `<p style="margin-top: 8px;"><strong>Notes:</strong> ${notes}</p>` : ''}
+                </div>
+            </div>
+            
+            <!-- Payment Details -->
+            <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
+                <h4 style="margin-bottom: 10px; font-size: 14px; color: var(--stone-dark);">Payment Method</h4>
+                <div style="font-size: 12px; line-height: 1.6;">
+                    <p><strong>Method:</strong> ${paymentMethodNames[selectedPaymentMethod] || selectedPaymentMethod}</p>
+                    ${selectedPaymentMethod === 'bank' ? `
+                        <p style="color: var(--warning-orange); margin-top: 5px;">
+                            <i class="fas fa-clock"></i> Confirmation takes 1-3 business days
+                        </p>
+                    ` : `
+                        <p style="color: var(--success-green); margin-top: 5px;">
+                            <i class="fas fa-bolt"></i> Instant confirmation
+                        </p>
+                    `}
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // ============================================
@@ -979,19 +2535,13 @@ function renderOrderItems() {
 // ============================================
 
 function goToStep(stepNumber) {
-    // Validate current step
-    if (stepNumber > 1 && !validateStep(currentStep)) {
+    if (!validateCurrentStep()) {
         return;
     }
     
-    // Update UI
     updateStepUI(stepNumber);
     currentStep = stepNumber;
-    
-    // Update review content if step 3
-    if (stepNumber === 3) {
-        updateReviewContent();
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function updateStepUI(stepNumber) {
@@ -1008,13 +2558,28 @@ function updateStepUI(stepNumber) {
             if (stepLine) stepLine.classList.remove('active');
         }
         
-        stepContent.style.display = i === stepNumber ? 'block' : 'none';
+        if (stepContent) {
+            stepContent.classList.toggle('active', i === stepNumber);
+        }
+    }
+    
+    if (stepNumber === 3) {
+        updateReviewContent();
     }
 }
 
-function validateStep(stepNumber) {
-    if (stepNumber === 1) {
-        const requiredFields = ['shippingName', 'shippingEmail', 'shippingPhone', 'shippingAddress1'];
+function validateCurrentStep() {
+    if (currentStep === 1) {
+        const requiredFields = [
+            'shippingName',
+            'shippingEmail',
+            'shippingPhone',
+            'shippingAddress1',
+            'shippingCity',
+            'shippingPostalCode',
+            'shippingState'
+        ];
+        
         for (const fieldId of requiredFields) {
             const field = document.getElementById(fieldId);
             if (!field.value.trim()) {
@@ -1023,9 +2588,58 @@ function validateStep(stepNumber) {
                 return false;
             }
         }
-        return true;
+        
+        const email = document.getElementById('shippingEmail').value;
+        if (!isValidEmail(email)) {
+            showError('Please enter a valid email address');
+            document.getElementById('shippingEmail').focus();
+            return false;
+        }
+        
+    } else if (currentStep === 2) {
+        if (!selectedPaymentMethod) {
+            showError('Please select a payment method');
+            return false;
+        }
+        
+        if (selectedPaymentMethod === 'stripe') {
+            const cardNumber = document.getElementById('cardNumber')?.value.replace(/\s+/g, '');
+            const cardExpiry = document.getElementById('cardExpiry')?.value;
+            const cardCvc = document.getElementById('cardCvc')?.value;
+            const cardName = document.getElementById('cardName')?.value;
+            
+            if (!cardNumber || cardNumber.length < 16) {
+                showError('Please enter a valid card number');
+                document.getElementById('cardNumber').focus();
+                return false;
+            }
+            
+            if (!cardExpiry || !/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+                showError('Please enter a valid expiry date (MM/YY)');
+                document.getElementById('cardExpiry').focus();
+                return false;
+            }
+            
+            if (!cardCvc || cardCvc.length < 3) {
+                showError('Please enter a valid CVC');
+                document.getElementById('cardCvc').focus();
+                return false;
+            }
+            
+            if (!cardName.trim()) {
+                showError('Please enter cardholder name');
+                document.getElementById('cardName').focus();
+                return false;
+            }
+        }
     }
+    
     return true;
+}
+
+function isValidEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
 }
 
 // ============================================
@@ -1035,7 +2649,6 @@ function validateStep(stepNumber) {
 function selectPaymentMethod(method) {
     selectedPaymentMethod = method;
     
-    // Update UI
     document.querySelectorAll('.payment-method').forEach(el => {
         el.classList.remove('selected');
     });
@@ -1045,264 +2658,177 @@ function selectPaymentMethod(method) {
         methodElement.classList.add('selected');
     }
     
-    // Show/hide details
-    document.getElementById('bankDetails').style.display = 
-        method === 'bank' ? 'block' : 'none';
-}
-
-// ============================================
-// REVIEW CONTENT
-// ============================================
-
-function updateReviewContent() {
-    const container = document.getElementById('reviewContent');
+    document.getElementById('bankDetails').style.display = method === 'bank' ? 'block' : 'none';
+    document.getElementById('cardDetails').style.display = method === 'stripe' ? 'block' : 'none';
     
-    const name = document.getElementById('shippingName').value || 'Not provided';
-    const email = document.getElementById('shippingEmail').value || 'Not provided';
-    const phone = document.getElementById('shippingPhone').value || 'Not provided';
-    const address = document.getElementById('shippingAddress1').value || 'Not provided';
-    const city = document.getElementById('shippingCity').value || 'Not provided';
-    const country = document.getElementById('shippingCountry').value || 'Not provided';
-    
-    const paymentMethod = selectedPaymentMethod === 'bank' ? 'Bank Transfer' : 'Credit/Debit Card';
-    
-    // Calculate platform fee (2.5% + £0.30)
-    const platformFee = (orderData.advancePayment * 0.025) + 0.30;
-    const netAdvance = orderData.advancePayment - platformFee;
-    
-    container.innerHTML = `
-        <div style="display: grid; gap: 15px;">
-            <!-- Shipping Details -->
-            <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
-                <h4 style="margin-bottom: 10px;">Shipping Details</h4>
-                <div style="font-size: 12px;">
-                    <p><strong>Name:</strong> ${name}</p>
-                    <p><strong>Email:</strong> ${email}</p>
-                    <p><strong>Phone:</strong> ${phone}</p>
-                    <p><strong>Address:</strong> ${address}, ${city}, ${country}</p>
-                </div>
-            </div>
-            
-            <!-- Payment Details -->
-            <div style="padding: 15px; background: var(--bg-light); border-radius: 8px;">
-                <h4 style="margin-bottom: 10px;">Payment Details</h4>
-                <div style="font-size: 12px;">
-                    <p><strong>Method:</strong> ${paymentMethod}</p>
-                    <p><strong>Advance Amount:</strong> ${formatPrice(orderData.advancePayment)}</p>
-                    <p><strong>Platform Fee:</strong> ${formatPrice(platformFee)}</p>
-                    <p><strong>Net Advance:</strong> ${formatPrice(netAdvance)}</p>
-                    ${selectedPaymentMethod === 'bank' ? '<p style="color: var(--warning-orange);"><i class="fas fa-clock"></i> Confirmation required within 24 hours</p>' : ''}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// ============================================
-// ORDER PROCESSING
-// ============================================
-
-function placeOrder() {
-    try {
-        // Validate
-        if (!validateStep(currentStep)) return;
-        
-        if (!document.getElementById('acceptTerms').checked) {
-            showError('Please accept the Terms & Conditions');
-            return;
-        }
-        
-        if (orderData.items.length === 0) {
-            showError('Your order is empty');
-            return;
-        }
-        
-        // Generate order data
-        const orderId = 'order_' + Date.now();
-        const orderNumber = 'IRYA-' + Date.now().toString().slice(-8);
-        const paymentReference = selectedPaymentMethod === 'bank' 
-            ? document.getElementById('bankReference').textContent
-            : null;
-        
-        const orderObj = {
-            orderId: orderId,
-            orderNumber: orderNumber,
-            userId: orderData.userId,
-            items: orderData.items,
-            subtotal: orderData.subtotal,
-            shipping: orderData.shipping,
-            tax: orderData.tax,
-            total: orderData.total,
-            advancePayment: orderData.advancePayment,
-            remainingPayment: orderData.total - orderData.advancePayment,
-            shippingDetails: {
-                name: document.getElementById('shippingName').value,
-                email: document.getElementById('shippingEmail').value,
-                phone: document.getElementById('shippingPhone').value,
-                address: document.getElementById('shippingAddress1').value,
-                city: document.getElementById('shippingCity').value,
-                country: document.getElementById('shippingCountry').value
-            },
-            paymentMethod: selectedPaymentMethod,
-            paymentStatus: selectedPaymentMethod === 'bank' ? 'pending' : 'paid',
-            orderStatus: selectedPaymentMethod === 'bank' ? 'payment_pending' : 'confirmed',
-            isBuyNow: orderData.isBuyNow,
-            paymentReference: paymentReference,
-            createdAt: new Date().toISOString()
-        };
-        
-        // Save order
-        saveOrder(orderObj);
-        
-        // Clear cart data
-        clearCartData();
-        
-        // Show success
-        showSuccess(orderObj);
-        
-    } catch (error) {
-        console.error('❌ Error placing order:', error);
-        showError('Failed to place order. Please try again.');
+    if (method === 'bank') {
+        const reference = `IRYA-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
+        document.getElementById('bankReference').textContent = reference;
     }
 }
 
-function saveOrder(orderObj) {
-    // Save to localStorage
-    const ordersKey = 'irya_user_orders_' + orderData.userId;
-    let userOrders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
-    userOrders.unshift(orderObj);
-    localStorage.setItem(ordersKey, JSON.stringify(userOrders));
-    
-    // Save last order
-    localStorage.setItem('irya_last_order_id', orderObj.orderId);
-    localStorage.setItem('irya_last_order_data', JSON.stringify(orderObj));
-    
-    console.log('✅ Order saved:', orderObj.orderNumber);
-}
-
-function clearCartData() {
-    if (orderData.isBuyNow) {
-        // Clear Buy Now data
-        sessionStorage.removeItem('irya_buynow_product');
-        localStorage.removeItem('irya_buynow_cart_' + orderData.userId);
-    } else {
-        // Clear cart data
-        localStorage.removeItem('irya_cart_' + orderData.userId);
-    }
-    
-    updateCartBadge();
-}
-
-function showSuccess(orderObj) {
-    const modal = document.getElementById('successModal');
-    const message = document.getElementById('successMessage');
-    const details = document.getElementById('successDetails');
-    
-    const platformFee = (orderData.advancePayment * 0.025) + 0.30;
-    const netAdvance = orderData.advancePayment - platformFee;
-    
-    message.textContent = selectedPaymentMethod === 'bank' 
-        ? 'Order created! Please complete bank transfer.' 
-        : 'Payment successful! Order confirmed.';
-    
-    details.innerHTML = `
-        <p><strong>Order Number:</strong> ${orderObj.orderNumber}</p>
-        <p><strong>Total:</strong> ${formatPrice(orderObj.total)}</p>
-        <p><strong>Advance Paid:</strong> ${formatPrice(orderObj.advancePayment)}</p>
-        <p><strong>Platform Fee:</strong> ${formatPrice(platformFee)}</p>
-        <p><strong>Net Received:</strong> ${formatPrice(netAdvance)}</p>
-        <p><strong>Remaining:</strong> ${formatPrice(orderObj.remainingPayment)}</p>
-        <p><strong>Payment Method:</strong> ${selectedPaymentMethod === 'bank' ? 'Bank Transfer' : 'Card'}</p>
-        ${selectedPaymentMethod === 'bank' ? `<p><strong>Reference:</strong> ${orderObj.paymentReference}</p>` : ''}
-    `;
-    
-    modal.style.display = 'flex';
-}
-
-// ============================================
-// INTERNATIONAL PAYMENT SETUP
-// ============================================
-
-/* 
-For receiving international payments, you need:
-
-1. BUSINESS BANK ACCOUNT:
-   - Get a business account that supports international transfers
-   - HSBC, Barclays, Revolut Business, Wise Business all support this
-   - You'll need:
-     • Account holder name
-     • IBAN (International Bank Account Number)
-     • SWIFT/BIC code
-     • Bank address
-
-2. STRIPE ACCOUNT (for card payments):
-   - Sign up at stripe.com
-   - Add your business details
-   - Connect your business bank account
-   - Enable international payments
-   - Get your publishable key
-
-3. PAYPAL BUSINESS ACCOUNT:
-   - Create business account
-   - Link your business bank account
-   - Enable international payments
-
-4. Important Documents Needed:
-   - Business registration certificate
-   - Tax registration/VAT number
-   - Business address proof
-   - Director/owner identification
-   - Bank account confirmation letter
-*/
-
-// Example Stripe Integration (you need to add your Stripe publishable key)
-async function processStripePayment(amount, currency = 'GBP') {
-    // This is just an example - you need to set up Stripe properly
-    /*
-    const stripe = Stripe('YOUR_PUBLISHABLE_KEY');
-    
-    try {
-        const response = await fetch('/create-payment-intent', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                amount: Math.round(amount * 100), // Convert to cents
-                currency: currency,
-                metadata: {
-                    userId: orderData.userId,
-                    orderType: orderData.isBuyNow ? 'buynow' : 'cart'
-                }
-            })
+function setupCardInputs() {
+    const cardNumberInput = document.getElementById('cardNumber');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formatted = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += value[i];
+            }
+            e.target.value = formatted.substring(0, 19);
         });
-        
-        const { clientSecret } = await response.json();
-        
-        const result = await stripe.confirmCardPayment(clientSecret, {
-            payment_method: {
-                card: elements.getElement(CardNumberElement),
-                billing_details: {
-                    name: document.getElementById('shippingName').value,
-                    email: document.getElementById('shippingEmail').value,
-                    address: {
-                        line1: document.getElementById('shippingAddress1').value,
-                        city: document.getElementById('shippingCity').value,
-                        country: document.getElementById('shippingCountry').value
-                    }
-                }
+    }
+    
+    const expiryInput = document.getElementById('cardExpiry');
+    if (expiryInput) {
+        expiryInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/gi, '');
+            if (value.length >= 2) {
+                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                e.target.value = value;
             }
         });
-        
-        if (result.error) {
-            throw new Error(result.error.message);
-        }
-        
-        return result.paymentIntent;
-        
-    } catch (error) {
-        console.error('Stripe payment error:', error);
-        throw error;
     }
-    */
+}
+
+// ============================================
+// MODAL FUNCTIONS - UPDATED
+// ============================================
+
+function showSuccessModal(orderObj, firebaseResult) {
+    const successModal = document.getElementById('successModal');
+    const successMessage = document.getElementById('successMessage');
+    const successDetails = document.getElementById('successDetails');
+    
+    successMessage.textContent = 'Payment Successful! Your order is confirmed.';
+    
+    const firebaseInfo = firebaseResult ? 
+        `<p><strong>Order ID:</strong> ${orderObj.orderNumber}</p>` : 
+        '<p><em>Order saved locally</em></p>';
+    
+    successDetails.innerHTML = `
+        ${firebaseInfo}
+        <p><strong>Total Amount:</strong> ${formatPrice(orderObj.total)}</p>
+        <p><strong>Advance Paid:</strong> ${formatPrice(orderData.advancePayment)}</p>
+        <p><strong>Platform Fee:</strong> ${formatPrice(orderData.platformFee)}</p>
+        <p><strong>Net Received:</strong> ${formatPrice(orderData.netAdvance)}</p>
+        <p><strong>Remaining:</strong> ${formatPrice(orderObj.remainingPayment)}</p>
+        <p><strong>Payment Method:</strong> Credit/Debit Card</p>
+        <p><strong>Order Type:</strong> ${orderObj.isBuyNow ? 'Buy Now' : 'Cart Checkout'}</p>
+        <p style="color: var(--success-green); margin-top: 8px;">
+            <i class="fas fa-check-circle"></i> Advance payment confirmed
+        </p>
+    `;
+    
+    successModal.style.display = 'flex';
+}
+
+function showBankModal(orderObj, firebaseResult) {
+    const bankModal = document.getElementById('bankModal');
+    const bankDetails = document.getElementById('bankModalDetails');
+    
+    const firebaseInfo = firebaseResult ? 
+        `<p><strong>Order ID:</strong> ${orderObj.orderNumber}</p>` : 
+        '<p><strong>Order ID:</strong> ' + orderObj.orderNumber + '</p>';
+    
+    // Calculate refund amount if cancelled (after 24 hours)
+    const refundAmount = orderData.advancePayment - orderData.platformFee - 0.50;
+    
+    bankDetails.innerHTML = `
+        ${firebaseInfo}
+        <p><strong>Order Type:</strong> ${orderObj.isBuyNow ? 'Buy Now' : 'Cart Checkout'}</p>
+        <p><strong>Advance Amount:</strong> ${formatPrice(orderData.advancePayment)}</p>
+        <p><strong>Bank:</strong> HSBC UK</p>
+        <p><strong>Account:</strong> IRYA STONE LTD</p>
+        <p><strong>Account No:</strong> 12345678</p>
+        <p><strong>Sort Code:</strong> 40-04-15</p>
+        <p><strong>Reference:</strong> ${orderObj.paymentReference}</p>
+        <div style="margin-top: 15px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
+            <p style="color: var(--error-red); font-size: 11px; margin-bottom: 5px;">
+                <i class="fas fa-exclamation-triangle"></i> Payment Confirmation Policy
+            </p>
+            <p style="font-size: 10px; color: var(--text-light); line-height: 1.3;">
+                • Confirm payment within 24 hours<br>
+                • Platform fee: ${formatPrice(orderData.platformFee)} (2.5% + £0.30)<br>
+                • Bank charges: £0.50<br>
+                • If not confirmed: Refund = ${formatPrice(refundAmount)}<br>
+                • Auto-cancel after 24 hours
+            </p>
+        </div>
+    `;
+    
+    bankModal.style.display = 'flex';
+}
+
+function copyBankDetails() {
+    const orderNumber = document.querySelector('#bankModalDetails p:nth-child(1)').textContent.replace('Order ID: ', '');
+    const advanceAmount = document.querySelector('#bankModalDetails p:nth-child(3)').textContent.replace('Advance Amount: ', '');
+    const reference = document.querySelector('#bankModalDetails p:nth-child(9)').textContent.replace('Reference: ', '');
+    
+    const detailsText = `IRYA STONE - Bank Transfer Details
+Order Number: ${orderNumber}
+Advance Amount: ${advanceAmount}
+Bank: HSBC UK
+Account: IRYA STONE LTD
+Account No: 12345678
+Sort Code: 40-04-15
+Reference: ${reference}
+
+Important: Please confirm payment within 24 hours.
+If payment not confirmed, order will be cancelled automatically.`;
+    
+    navigator.clipboard.writeText(detailsText).then(() => {
+        showNotification('Bank details copied to clipboard!');
+    });
+}
+
+function closeBankModal() {
+    document.getElementById('bankModal').style.display = 'none';
+    
+    // Show modified success modal
+    const successModal = document.getElementById('successModal');
+    const successMessage = document.getElementById('successMessage');
+    const successDetails = document.getElementById('successDetails');
+    
+    const orderData = JSON.parse(localStorage.getItem('irya_last_order_data') || '{}');
+    
+    successMessage.textContent = 'Order Created Successfully!';
+    successDetails.innerHTML = `
+        <p><strong>Order Number:</strong> ${orderData.orderNumber || 'Pending'}</p>
+        <p><strong>Advance Amount:</strong> ${formatPrice(orderData.advancePayment || 0)}</p>
+        <p><strong>Payment Method:</strong> Bank Transfer</p>
+        <p><strong>Payment Reference:</strong> ${orderData.paymentReference || 'N/A'}</p>
+        <p><strong>Order Type:</strong> ${orderData.isBuyNow ? 'Buy Now' : 'Cart Checkout'}</p>
+        <div style="padding: 10px; background: rgba(245, 158, 11, 0.1); border-radius: 6px; margin-top: 10px;">
+            <p style="color: var(--warning-orange); font-size: 11px;">
+                <i class="fas fa-clock"></i> Complete bank transfer within 24 hours
+            </p>
+            <p style="font-size: 10px; color: var(--text-light); margin-top: 5px;">
+                Order will auto-cancel after 24 hours if payment not confirmed
+            </p>
+        </div>
+    `;
+    
+    successModal.style.display = 'flex';
+}
+
+function viewOrder() {
+    const orderId = localStorage.getItem('irya_last_order_id');
+    const userId = orderData.userId;
+    
+    if (orderId && userId) {
+        // Pass user ID to orders page for filtering
+        window.location.href = `orders.html?user_id=${userId}&order_id=${orderId}`;
+    } else {
+        window.location.href = 'orders.html';
+    }
+}
+
+function goToHome() {
+    window.location.href = 'index.html';
 }
 
 // ============================================
@@ -1314,40 +2840,130 @@ function formatPrice(price) {
     return `£${parseFloat(price).toFixed(2)}`;
 }
 
+function getDefaultImage(category) {
+    const categoryLower = (category || '').toLowerCase();
+    
+    if (categoryLower.includes('sand')) {
+        return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
+    } else if (categoryLower.includes('kota')) {
+        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300';
+    } else if (categoryLower.includes('granite')) {
+        return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300';
+    }
+    
+    return 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300';
+}
+
+function showLoading(show) {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = show ? 'block' : 'none';
+    }
+}
+
+function showNotification(message) {
+    const notification = document.getElementById('notification');
+    if (!notification) return;
+    
+    notification.textContent = message;
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
 function showError(message) {
     const errorDiv = document.getElementById('errorMessage');
+    if (!errorDiv) return;
+    
     errorDiv.textContent = message;
     errorDiv.style.display = 'block';
     
     setTimeout(() => {
         errorDiv.style.display = 'none';
-    }, 3000);
+    }, 5000);
 }
 
-function updateCartBadge() {
-    const badge = document.getElementById('headerCartBadge');
-    if (!badge) return;
+async function loadSavedAddresses() {
+    try {
+        const addressesKey = 'irya_saved_addresses_' + orderData.userId;
+        const addressesData = localStorage.getItem(addressesKey);
+        
+        if (addressesData) {
+            const addresses = JSON.parse(addressesData);
+            if (addresses.length > 0) {
+                const address = addresses[0];
+                fillAddressForm(address);
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error loading addresses:', error);
+    }
+}
+
+function fillAddressForm(address) {
+    if (!address) return;
     
-    const count = orderData.items.reduce((total, item) => total + item.quantity, 0);
-    badge.textContent = count;
-    badge.style.display = count > 0 ? 'flex' : 'none';
+    document.getElementById('shippingName').value = address.fullName || '';
+    document.getElementById('shippingEmail').value = address.email || '';
+    document.getElementById('shippingPhone').value = address.phone || '';
+    document.getElementById('shippingCountry').value = address.country || 'GB';
+    document.getElementById('shippingAddress1').value = address.address1 || '';
+    document.getElementById('shippingAddress2').value = address.address2 || '';
+    document.getElementById('shippingCity').value = address.city || '';
+    document.getElementById('shippingPostalCode').value = address.postalCode || '';
+    document.getElementById('shippingState').value = address.state || '';
 }
 
-function viewOrder() {
-    const orderId = localStorage.getItem('irya_last_order_id');
-    window.location.href = `orders.html?order_id=${orderId}`;
+function setupScrollHandling() {
+    let lastScrollTop = 0;
+    const header = document.getElementById('mainHeader');
+    const bottomNav = document.getElementById('bottomNav');
+    
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop < 10) {
+            header.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+            return;
+        }
+        
+        if (scrollTop > lastScrollTop) {
+            if (scrollTop > 100) {
+                header.classList.add('hidden');
+                bottomNav.classList.add('hidden');
+            }
+        } else {
+            header.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+        }
+        
+        lastScrollTop = scrollTop;
+    }, { passive: true });
 }
 
-function goToHome() {
-    window.location.href = 'index.html';
+function checkNotifications() {
+    const notifications = JSON.parse(localStorage.getItem('irya_notifications') || '[]');
+    const unreadCount = notifications.filter(n => !n.read).length;
+    
+    const notificationBadge = document.getElementById('notificationBadge');
+    if (notificationBadge && unreadCount > 0) {
+        notificationBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+        notificationBadge.style.display = 'flex';
+    }
 }
 
 // ============================================
-// GLOBAL FUNCTIONS
+// MAKE FUNCTIONS GLOBALLY AVAILABLE
 // ============================================
 window.selectPaymentMethod = selectPaymentMethod;
 window.goToStep = goToStep;
 window.placeOrder = placeOrder;
+window.copyBankDetails = copyBankDetails;
+window.closeBankModal = closeBankModal;
 window.viewOrder = viewOrder;
 window.goToHome = goToHome;
 </script>
