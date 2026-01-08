@@ -30,6 +30,7 @@
     --text-dark: #222222;
     --text-light: #666666;
     --white: #ffffff;
+    --product-bg: #f8f5f0; /* Classic sandstone background */
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
     --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
     --shadow-lg: 0 8px 20px rgba(0,0,0,0.12);
@@ -457,10 +458,6 @@ header.show {
 }
 
 /* ============================================
-   CATEGORIES SECTION REMOVED
-============================================ */
-
-/* ============================================
    LATEST TRENDING PRODUCTS - COMPACT STYLE
 ============================================ */
 .trending-section {
@@ -551,9 +548,9 @@ header.show {
 
 .trending-image-container {
     width: 100%;
-    height: 220px;
+    height: 100%;
     overflow: hidden;
-    background: var(--bg-light);
+    background: var(--product-bg);
     position: relative;
     display: flex;
     align-items: center;
@@ -564,14 +561,15 @@ header.show {
 .trending-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain; /* Changed to contain for proper image display */
     transition: transform 0.5s ease;
 }
 
 .trending-card:hover .trending-image {
-    transform: scale(1.08);
+    transform: scale(1.05);
 }
 
+/* Add badge back for new products */
 .trending-badge {
     position: absolute;
     top: 8px;
@@ -676,7 +674,7 @@ header.show {
 }
 
 /* ============================================
-   PRODUCT CARD UPDATED STRUCTURE - STONE NAME ABOVE IMAGE
+   PRODUCT CARD UPDATED STRUCTURE - CLASSIC DESIGN
 ============================================ */
 .product-grid {
     display: grid;
@@ -689,18 +687,31 @@ header.show {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    background: var(--product-bg);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: 1px solid #e8e2d8;
+}
+
+.product-card-wrapper:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-gold);
 }
 
 /* Stone name box styling - ABOVE IMAGE */
 .stone-name-box {
     width: 100%;
     padding: 10px 12px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #f5f1eb 100%);
     border-radius: 8px;
-    border: 1px solid #dee2e6;
+    border: 1px solid #e0d9ce;
     text-align: center;
     margin: 0;
     order: 1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .stone-name-box .product-name {
@@ -722,38 +733,39 @@ header.show {
 
 .product-card {
     background: var(--white);
-    border-radius: 12px;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
     transition: var(--transition);
     height: 160px;
     display: block;
     text-decoration: none;
     color: inherit;
     order: 2;
+    border: 1px solid #e0d9ce;
 }
 
 .product-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .product-image-container {
     width: 100%;
     height: 160px;
     overflow: hidden;
-    background: var(--bg-light);
-    border-radius: 10px;
+    background: var(--white);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px;
+    padding: 0;
 }
 
 .product-image {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: contain; /* Changed to contain for proper image display */
     transition: transform 0.5s ease;
 }
 
@@ -832,20 +844,9 @@ header.show {
     border-color: #f59e0b;
 }
 
-/* Price styling */
+/* Remove price display */
 .product-price {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--primary-gold);
-    text-align: center;
-    margin-top: 5px;
-    order: 4;
-}
-
-.product-price .currency {
-    font-size: 11px;
-    color: var(--text-light);
-    margin-right: 2px;
+    display: none;
 }
 
 /* ============================================
@@ -1162,13 +1163,13 @@ header.show {
         height: 250px;
     }
     
-    .trending-image-container {
-        height: 250px;
-    }
-    
     .product-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 15px;
+    }
+    
+    .product-card-wrapper {
+        padding: 15px;
     }
     
     .product-card {
@@ -1192,10 +1193,6 @@ header.show {
         font-size: 12px;
         min-width: 110px;
     }
-    
-    .product-price {
-        font-size: 14px;
-    }
 }
 
 @media (min-width: 1024px) {
@@ -1206,6 +1203,7 @@ header.show {
     
     .trending-slide {
         flex: 0 0 280px;
+        height: 280px;
     }
 }
 
@@ -1292,12 +1290,12 @@ header.show {
         height: 200px;
     }
     
-    .trending-image-container {
-        height: 200px;
-    }
-    
     .product-grid {
         gap: 10px;
+    }
+    
+    .product-card-wrapper {
+        padding: 10px;
     }
     
     .product-card {
@@ -1329,10 +1327,6 @@ header.show {
     
     .usage-btn i {
         font-size: 11px;
-    }
-    
-    .product-price {
-        font-size: 12px;
     }
     
     .bottom-nav {
@@ -1431,8 +1425,8 @@ header.show {
             <a href="#products" class="signin-btn">
                 <i class="fas fa-gem"></i> Shop Now
             </a>
-            <a href="#trending" class="signin-btn" style="background: transparent; border: 1px solid white;">
-                <i class="fas fa-info-circle"></i> Learn More
+            <a href="products.html" class="signin-btn" style="background: transparent; border: 1px solid white;">
+                <i class="fas fa-th-large"></i> All Products
             </a>
         </div>
     </div>
@@ -2139,12 +2133,6 @@ function getDefaultImage(category) {
     return 'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp';
 }
 
-function formatPrice(price) {
-    // Convert to Rupees (assuming 1 GBP = 100 INR for demo)
-    const priceInRupees = price * 100;
-    return `₹${priceInRupees.toFixed(0)}`;
-}
-
 function getProductUsageButtons(product) {
     const usage = (product.usage || '').toLowerCase();
     const uses = [];
@@ -2154,7 +2142,8 @@ function getProductUsageButtons(product) {
         type: 'wall',
         text: 'Wall Cladding',
         icon: 'fas fa-wall',
-        class: 'wall-cladding-btn'
+        class: 'wall-cladding-btn',
+        url: `products.html?stone_name=${encodeURIComponent(product.stone_name)}&usage=wall`
     });
     
     // Always add Flooring button
@@ -2162,7 +2151,8 @@ function getProductUsageButtons(product) {
         type: 'floor',
         text: 'Flooring',
         icon: 'fas fa-th-large',
-        class: 'flooring-btn'
+        class: 'flooring-btn',
+        url: `products.html?stone_name=${encodeURIComponent(product.stone_name)}&usage=floor`
     });
     
     // Add Other button only if usage doesn't contain wall or floor
@@ -2171,7 +2161,8 @@ function getProductUsageButtons(product) {
             type: 'other',
             text: 'Other Uses',
             icon: 'fas fa-ellipsis-h',
-            class: 'other-btn'
+            class: 'other-btn',
+            url: `products.html?stone_name=${encodeURIComponent(product.stone_name)}&usage=other`
         });
     }
     
@@ -2179,7 +2170,7 @@ function getProductUsageButtons(product) {
 }
 
 // ============================================
-// TRENDING PRODUCTS FETCHING
+// TRENDING PRODUCTS FETCHING - FIXED
 // ============================================
 
 async function loadTrendingProducts() {
@@ -2191,29 +2182,46 @@ async function loadTrendingProducts() {
         
         console.log('Loading trending sandstone products from Firebase...');
         
-        // Filter for sandstone products with latest="new"
-        const trendingQuery = await firebaseDB.collection("products")
-            .where("latest", "==", "new")
-            .where("category", "in", ["Sand Stone", "Sandstone", "sandstone"])
-            .limit(10)
-            .get();
+        // Get all products and filter client-side for trending (latest = "new")
+        const querySnapshot = await firebaseDB.collection("products").get();
         
         trendingProducts = [];
         
-        if (!trendingQuery.empty) {
-            trendingQuery.forEach((doc) => {
+        if (!querySnapshot.empty) {
+            const allProductsTemp = [];
+            
+            querySnapshot.forEach((doc) => {
                 const productId = doc.id;
                 const data = doc.data();
                 
                 const product = createProductObject(productId, data);
                 if (product.is_active) {
-                    trendingProducts.push(product);
+                    allProductsTemp.push(product);
                 }
             });
             
-            console.log(`Loaded ${trendingProducts.length} trending sandstone products`);
+            // Filter products where latest = "new" (Firestore data)
+            const newProducts = allProductsTemp.filter(product => {
+                const latest = (product.latest || '').toLowerCase();
+                return latest === 'new';
+            });
+            
+            // If no products with latest="new", use sandstone products
+            if (newProducts.length > 0) {
+                trendingProducts = newProducts.slice(0, 10);
+                console.log(`Loaded ${trendingProducts.length} products with latest="new"`);
+            } else {
+                // Fallback: get sandstone products
+                const sandstoneProducts = allProductsTemp.filter(product => {
+                    const category = (product.category || '').toLowerCase();
+                    return category.includes('sand') || category.includes('stone');
+                }).slice(0, 10);
+                
+                trendingProducts = sandstoneProducts;
+                console.log(`Loaded ${trendingProducts.length} sandstone products as trending`);
+            }
         } else {
-            console.log('No trending sandstone products found');
+            console.log('No products found');
         }
         
         if (trendingProducts.length > 0) {
@@ -2267,11 +2275,12 @@ function displayTrendingProducts() {
     
     const trendingHTML = trendingProducts.map(product => {
         const productImage = getProductImage(product);
+        const showNewBadge = (product.latest || '').toLowerCase() === 'new';
         
         return `
             <div class="trending-slide">
                 <a href="product-details.html?id=${product.id}" class="trending-card">
-                    <div class="trending-badge">New</div>
+                    ${showNewBadge ? '<div class="trending-badge">New</div>' : ''}
                     <div class="trending-image-container">
                         <img src="${productImage}" 
                              alt="${product.stone_name}" 
@@ -2297,28 +2306,35 @@ function loadFallbackTrendingProducts() {
             stone_name: 'Autumn Brown',
             category: 'Sand Stone',
             image: 'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp',
-            price: 89.99
+            latest: 'new'
         },
         {
             id: 'trend2',
             stone_name: 'Raj Green',
             category: 'Sand Stone',
             image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300',
-            price: 95.50
+            latest: 'new'
         },
         {
             id: 'trend3',
             stone_name: 'Modak Yellow',
             category: 'Sand Stone',
             image: 'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=400&h=300',
-            price: 87.75
+            latest: 'new'
         },
         {
             id: 'trend4',
             stone_name: 'Crystal White',
             category: 'Sand Stone',
             image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300',
-            price: 102.25
+            latest: 'new'
+        },
+        {
+            id: 'trend5',
+            stone_name: 'Desert Beige',
+            category: 'Sand Stone',
+            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300',
+            latest: 'new'
         }
     ];
     
@@ -2326,7 +2342,7 @@ function loadFallbackTrendingProducts() {
         return `
             <div class="trending-slide">
                 <a href="products.html" class="trending-card">
-                    <div class="trending-badge">Trending</div>
+                    <div class="trending-badge">New</div>
                     <div class="trending-image-container">
                         <img src="${product.image}" 
                              alt="${product.stone_name}" 
@@ -2455,19 +2471,17 @@ async function loadAllProducts() {
         try {
             console.log('Fetching sandstone products from Firebase...');
             
-            // Query for sandstone products only
-            const querySnapshot = await firebaseDB.collection("products")
-                .where("category", "in", ["Sand Stone", "Sandstone", "sandstone", "Sandstone", "SANDSTONE"])
-                .get();
+            // Get all products and filter client-side
+            const querySnapshot = await firebaseDB.collection("products").get();
             
             if (querySnapshot.empty) {
-                console.log('No sandstone products found in Firestore');
+                console.log('No products found in Firestore');
                 showNoProducts();
                 showLoading(false);
                 return;
             }
             
-            console.log(`Found ${querySnapshot.size} sandstone products`);
+            console.log(`Found ${querySnapshot.size} products`);
             
             const productMap = new Map();
             
@@ -2486,9 +2500,15 @@ async function loadAllProducts() {
                 }
             });
             
-            allProducts = Array.from(productMap.values());
+            const allProductsTemp = Array.from(productMap.values());
             
-            console.log(`Loaded ${allProducts.length} unique sandstone products from Firebase`);
+            // Filter for sandstone products client-side
+            allProducts = allProductsTemp.filter(product => {
+                const category = (product.category || '').toLowerCase();
+                return category.includes('sand') || category.includes('stone');
+            });
+            
+            console.log(`Loaded ${allProducts.length} sandstone products from Firebase`);
             
             if (allProducts.length === 0) {
                 showNoProducts();
@@ -2528,7 +2548,7 @@ function displayProducts(products) {
         // Generate buttons HTML
         const buttonsHTML = usageButtons.map(button => {
             return `
-                <a href="products.html?stone_name=${encodeURIComponent(product.stone_name)}&usage=${button.type}" 
+                <a href="${button.url}" 
                    class="usage-btn ${button.class}"
                    onclick="event.stopPropagation();">
                     <i class="${button.icon}"></i> ${button.text}
@@ -2554,10 +2574,6 @@ function displayProducts(products) {
                              loading="lazy">
                     </div>
                 </a>
-                
-                <div class="product-price">
-                    <span class="currency">Price:</span> ${formatPrice(product.price)} / ${product.price_unit || 'piece'}
-                </div>
                 
                 <div class="usage-buttons-container">
                     <div class="usage-buttons">
@@ -2643,6 +2659,58 @@ function showDefaultProducts() {
             size: '60x60cm',
             images: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300'],
             usage: 'Paving, Landscaping'
+        },
+        {
+            id: 'default5',
+            stone_name: 'Sandstone Desert Beige',
+            category: 'Sand Stone',
+            description: 'Beige sandstone for exterior cladding',
+            price: 91.80,
+            price_unit: 'sqm',
+            color: 'Beige',
+            finish: 'Natural',
+            size: '40x20cm',
+            images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300'],
+            usage: 'Wall Cladding, Flooring'
+        },
+        {
+            id: 'default6',
+            stone_name: 'Sandstone Copper Red',
+            category: 'Sand Stone',
+            description: 'Red sandstone for decorative purposes',
+            price: 98.50,
+            price_unit: 'sqm',
+            color: 'Red',
+            finish: 'Polished',
+            size: '30x30cm',
+            images: ['https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300'],
+            usage: 'Wall Cladding'
+        },
+        {
+            id: 'default7',
+            stone_name: 'Sandstone Slate Grey',
+            category: 'Sand Stone',
+            description: 'Grey sandstone for modern architecture',
+            price: 94.25,
+            price_unit: 'sqm',
+            color: 'Grey',
+            finish: 'Honed',
+            size: '60x30cm',
+            images: ['https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=400&h=300'],
+            usage: 'Flooring, Paving'
+        },
+        {
+            id: 'default8',
+            stone_name: 'Sandstone Heritage Brown',
+            category: 'Sand Stone',
+            description: 'Traditional brown sandstone for heritage buildings',
+            price: 105.75,
+            price_unit: 'sqm',
+            color: 'Brown',
+            finish: 'Natural',
+            size: '40x40cm',
+            images: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300'],
+            usage: 'Wall Cladding, Flooring'
         }
     ].slice(0, 8);
     
@@ -2680,7 +2748,6 @@ function searchProducts(query) {
                     <div class="search-result-info">
                         <div class="search-result-name">${product.stone_name}</div>
                         <div class="search-result-category">${product.category || 'Sand Stone'}</div>
-                        <div class="search-result-price">${formatPrice(product.price)}</div>
                     </div>
                 </a>
             `;
