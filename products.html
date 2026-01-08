@@ -741,7 +741,7 @@ header.show {
 }
 
 /* ============================================
-   UPDATED PRODUCT CARD - No Price, No Quick View
+   UPDATED PRODUCT CARD - With View More Details
 ============================================ */
 
 .product-card {
@@ -756,7 +756,7 @@ header.show {
     text-decoration: none;
     color: inherit;
     display: block;
-    height: 350px; /* Slightly reduced height */
+    height: 380px; /* Increased height for description */
     transform-style: preserve-3d;
     perspective: 1000px;
 }
@@ -776,9 +776,6 @@ header.show {
     background: #ffffff; /* White background for brightness */
     border-radius: 16px 16px 0 0;
 }
-
-/* NO overlay/shadow - Image bright as is */
-/* .product-image-overlay removed */
 
 /* Premium image slideshow */
 .image-slideshow {
@@ -805,19 +802,15 @@ header.show {
     opacity: 1;
 }
 
-/* NO badges/tags on image */
-
-/* Product Actions REMOVED */
-
 /* Premium Product Info */
 .product-info {
     padding: 20px;
     position: relative;
     z-index: 2;
-    height: calc(350px - 200px); /* Calculate remaining height */
+    height: calc(380px - 200px); /* Calculate remaining height */
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Changed from space-between */
+    justify-content: space-between;
 }
 
 .product-name-container {
@@ -854,6 +847,13 @@ header.show {
     font-size: 10px;
 }
 
+/* Description with View More */
+.description-container {
+    flex-grow: 1;
+    margin-bottom: 12px;
+    position: relative;
+}
+
 .product-description {
     font-size: 12px;
     color: var(--text-dark);
@@ -862,12 +862,38 @@ header.show {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    flex-grow: 1;
+    margin-bottom: 5px;
 }
 
-/* Price Section REMOVED */
+/* View More Details Button */
+.view-more-btn {
+    background: transparent;
+    color: var(--primary-gold);
+    border: 1px solid var(--primary-gold);
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+    text-decoration: none;
+    width: fit-content;
+    margin-top: 5px;
+}
 
-/* Quick View Button REMOVED */
+.view-more-btn:hover {
+    background: var(--primary-gold);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(201, 162, 39, 0.3);
+}
+
+.view-more-btn i {
+    font-size: 10px;
+}
 
 /* ============================================
    NO PRODUCTS MESSAGE - Enhanced
@@ -1165,7 +1191,7 @@ header.show {
     }
     
     .product-card {
-        height: 360px;
+        height: 400px;
     }
     
     .product-image-container {
@@ -1178,6 +1204,11 @@ header.show {
     
     .product-description {
         font-size: 13px;
+    }
+    
+    .view-more-btn {
+        font-size: 12px;
+        padding: 7px 14px;
     }
     
     .bottom-nav {
@@ -1274,7 +1305,7 @@ header.show {
     }
     
     .product-card {
-        height: 320px;
+        height: 360px;
     }
     
     .product-image-container {
@@ -1287,6 +1318,11 @@ header.show {
     
     .product-description {
         font-size: 12px;
+    }
+    
+    .view-more-btn {
+        font-size: 11px;
+        padding: 5px 10px;
     }
     
     .bottom-nav {
@@ -1312,7 +1348,7 @@ header.show {
     }
     
     .product-card {
-        height: 320px;
+        height: 360px;
         max-width: 300px;
         margin: 0 auto;
     }
@@ -1356,8 +1392,6 @@ header.show {
         <a href="notification.html" class="action-btn" title="Notifications">
             <i class="fas fa-bell"></i>
         </a>
-        
-        <!-- Cart Icon REMOVED -->
         
         <!-- User Profile / Sign In Button -->
         <div class="user-profile" id="userProfile">
@@ -1509,19 +1543,19 @@ let imageSlideshows = {};
 
 // Filter variables
 let currentCategory = 'all';
-let currentTypeFilter = 'all'; // ADDED: Type filter
+let currentTypeFilter = 'all';
 let currentUsageFilter = 'all';
 let currentColorFilter = 'all';
 let currentSort = 'newest';
 
 // Smart filter data
 let availableCategories = [];
-let availableTypes = []; // ADDED: Types array
+let availableTypes = [];
 let availableUses = [];
 let availableColors = [];
 
 // ============================================
-// URL FILTER HANDLING - FOR STONE NAME AND TYPE
+// URL FILTER HANDLING - FIXED LOGIC
 // ============================================
 
 function checkUrlFilters() {
@@ -1529,9 +1563,9 @@ function checkUrlFilters() {
     
     console.log("🔍 Checking URL parameters:", Object.fromEntries(urlParams.entries()));
     
-    // Get stone_name and type from URL (from index.html buttons)
+    // Get stone_name and usage from URL (from index.html buttons)
     const stoneName = urlParams.get('stone_name');
-    const type = urlParams.get('type'); // Changed from usage to type
+    const usage = urlParams.get('usage'); // Changed from type to usage
     
     if (stoneName) {
         console.log(`📝 Found stone_name in URL: ${stoneName}`);
@@ -1553,20 +1587,20 @@ function checkUrlFilters() {
         }
     }
     
-    if (type) {
-        console.log(`📝 Found type in URL: ${type}`);
+    if (usage) {
+        console.log(`📝 Found usage in URL: ${usage}`);
         
-        // Set type filter
-        currentTypeFilter = type.toLowerCase();
+        // Set usage filter (not type filter)
+        currentUsageFilter = usage.toLowerCase();
         
-        // Try to find matching option in type filter dropdown
-        const typeFilter = document.getElementById('typeFilter');
-        if (typeFilter) {
+        // Try to find matching option in usage filter dropdown
+        const usageFilter = document.getElementById('usageFilter');
+        if (usageFilter) {
             // Check if option exists
-            for (let i = 0; i < typeFilter.options.length; i++) {
-                if (typeFilter.options[i].value.toLowerCase() === type.toLowerCase()) {
-                    typeFilter.value = typeFilter.options[i].value;
-                    currentTypeFilter = typeFilter.options[i].value;
+            for (let i = 0; i < usageFilter.options.length; i++) {
+                if (usageFilter.options[i].value.toLowerCase() === usage.toLowerCase()) {
+                    usageFilter.value = usageFilter.options[i].value;
+                    currentUsageFilter = usageFilter.options[i].value;
                     break;
                 }
             }
@@ -1576,28 +1610,28 @@ function checkUrlFilters() {
         if (stoneName) {
             const pageMainTitle = document.getElementById('pageMainTitle');
             if (pageMainTitle) {
-                pageMainTitle.textContent = `${stoneName} - ${type}`;
+                pageMainTitle.textContent = `${stoneName} - ${usage}`;
             }
             
             const productsTitle = document.getElementById('productsTitle');
             if (productsTitle) {
-                productsTitle.textContent = `${stoneName} (${type})`;
+                productsTitle.textContent = `${stoneName} (${usage})`;
             }
             
             const filterNameText = document.getElementById('filterNameText');
             if (filterNameText) {
-                filterNameText.textContent = `${stoneName} (${type})`;
+                filterNameText.textContent = `${stoneName} (${usage})`;
             }
         } else {
-            // Only type exists
+            // Only usage exists
             const pageMainTitle = document.getElementById('pageMainTitle');
             if (pageMainTitle) {
-                pageMainTitle.textContent = `${type} Products`;
+                pageMainTitle.textContent = `${usage} Products`;
             }
             
             const filterNameText = document.getElementById('filterNameText');
             if (filterNameText) {
-                filterNameText.textContent = `${type}`;
+                filterNameText.textContent = `${usage}`;
             }
         }
     }
@@ -1873,7 +1907,7 @@ function toggleFilters() {
 }
 
 // ============================================
-// LOAD SMART FILTERS (WITH TYPE)
+// LOAD SMART FILTERS (WITH TYPE AND USAGE)
 // ============================================
 
 async function loadSmartFilters() {
@@ -1891,7 +1925,7 @@ async function loadSmartFilters() {
         }
         
         const categoriesSet = new Set();
-        const typesSet = new Set(); // ADDED: Types set
+        const typesSet = new Set();
         const usesSet = new Set();
         const colorsSet = new Set();
         
@@ -1902,14 +1936,14 @@ async function loadSmartFilters() {
                 categoriesSet.add(data.category);
             }
             
-            // ADDED: Type filter data
             if (data.type && data.type.trim() !== '') {
                 typesSet.add(data.type);
             }
             
-            const usage = data.usage || data.uses || data.application;
+            // Extract usage from usage field (comma separated)
+            const usage = data.usage || data.uses || data.application || '';
             if (usage && usage.trim() !== '') {
-                const usesArray = usage.split(',').map(u => u.trim()).filter(u => u !== '');
+                const usesArray = usage.split(',').map(u => u.trim().toLowerCase()).filter(u => u !== '');
                 usesArray.forEach(u => usesSet.add(u));
             }
             
@@ -1919,7 +1953,7 @@ async function loadSmartFilters() {
         });
         
         availableCategories = Array.from(categoriesSet).sort();
-        availableTypes = Array.from(typesSet).sort(); // ADDED: Types array
+        availableTypes = Array.from(typesSet).sort();
         availableUses = Array.from(usesSet).sort();
         availableColors = Array.from(colorsSet).sort();
         
@@ -1947,7 +1981,7 @@ function populateFilterOptions() {
         });
     }
     
-    // Type filter (ADDED)
+    // Type filter
     const typeFilter = document.getElementById('typeFilter');
     if (typeFilter) {
         while (typeFilter.options.length > 1) {
@@ -1972,7 +2006,7 @@ function populateFilterOptions() {
         availableUses.forEach(use => {
             const option = document.createElement('option');
             option.value = use;
-            option.textContent = use;
+            option.textContent = use.charAt(0).toUpperCase() + use.slice(1);
             usageFilter.appendChild(option);
         });
     }
@@ -1995,8 +2029,8 @@ function populateFilterOptions() {
 
 function populateDefaultFilters() {
     const defaultCategories = ['Sand Stone', 'Kota Stone', 'Granite', 'Marble', 'Limestone', 'Slate'];
-    const defaultTypes = ['standard', 'custom', 'premium', 'natural']; // ADDED: Default types
-    const defaultUses = ['Flooring', 'Wall Cladding', 'Kitchen Countertops', 'Staircase', 'Garden Paving'];
+    const defaultTypes = ['standard', 'custom', 'premium', 'natural'];
+    const defaultUses = ['wall cladding', 'flooring', 'kitchen countertops', 'staircase', 'garden paving'];
     const defaultColors = ['Gray', 'Brown', 'Black', 'White', 'Green', 'Blue', 'Red', 'Yellow'];
     
     availableCategories = defaultCategories;
@@ -2008,7 +2042,7 @@ function populateDefaultFilters() {
 }
 
 // ============================================
-// PRODUCT LOADING WITH FILTERS (WITH TYPE)
+// PRODUCT LOADING WITH FILTERS - FIXED LOGIC
 // ============================================
 
 async function loadProductsFromFirebase() {
@@ -2051,7 +2085,7 @@ async function loadProductsFromFirebase() {
                         thickness: data.thickness || '',
                         color: data.color || '',
                         usage: data.usage || data.uses || '',
-                        type: data.type || '', // ADDED: Type field
+                        type: data.type || '',
                         sub_category: data.sub_category || '',
                         length: data.length || '',
                         width: data.width || '',
@@ -2109,27 +2143,54 @@ function applyAllFiltersClientSide() {
     
     let filteredProducts = [...allProducts];
     
-    // Get URL parameters for stone_name and type
+    // Get URL parameters for stone_name and usage
     const urlParams = new URLSearchParams(window.location.search);
     const stoneName = urlParams.get('stone_name');
-    const type = urlParams.get('type');
+    const usage = urlParams.get('usage'); // This is the usage from index.html buttons
     
-    // Filter by stone_name from URL
+    console.log(`🔍 URL Parameters - stone_name: ${stoneName}, usage: ${usage}`);
+    
+    // Filter by stone_name from URL (EXACT MATCH OR PARTIAL)
     if (stoneName) {
         console.log(`🔍 Filtering by stone_name: ${stoneName}`);
+        // Use exact match for stone_name
         filteredProducts = filteredProducts.filter(product => 
             product.stone_name && product.stone_name.toLowerCase().includes(stoneName.toLowerCase())
         );
         console.log(`📊 After stone_name filter: ${filteredProducts.length} products`);
     }
     
-    // Filter by type from URL (from index.html buttons)
-    if (type && type !== 'all') {
-        console.log(`🔍 Filtering by type: ${type}`);
-        filteredProducts = filteredProducts.filter(product => 
-            product.type && product.type.toLowerCase() === type.toLowerCase()
-        );
-        console.log(`📊 After type filter: ${filteredProducts.length} products`);
+    // Filter by usage from URL (from index.html buttons - wall cladding, flooring, other)
+    if (usage && usage !== 'all') {
+        console.log(`🔍 Filtering by usage from URL: ${usage}`);
+        
+        // Convert usage to lowercase for comparison
+        const searchUsage = usage.toLowerCase();
+        
+        // Check if it's wall cladding or flooring or other
+        if (searchUsage === 'wall' || searchUsage === 'wall cladding') {
+            filteredProducts = filteredProducts.filter(product => {
+                if (!product.usage) return false;
+                const productUsage = product.usage.toLowerCase();
+                return productUsage.includes('wall') || productUsage.includes('cladding');
+            });
+        } else if (searchUsage === 'floor' || searchUsage === 'flooring') {
+            filteredProducts = filteredProducts.filter(product => {
+                if (!product.usage) return false;
+                const productUsage = product.usage.toLowerCase();
+                return productUsage.includes('floor');
+            });
+        } else if (searchUsage === 'other') {
+            filteredProducts = filteredProducts.filter(product => {
+                if (!product.usage) return false;
+                const productUsage = product.usage.toLowerCase();
+                return !productUsage.includes('wall') && 
+                       !productUsage.includes('cladding') && 
+                       !productUsage.includes('floor');
+            });
+        }
+        
+        console.log(`📊 After URL usage filter: ${filteredProducts.length} products`);
     }
     
     // Apply category filter
@@ -2150,9 +2211,12 @@ function applyAllFiltersClientSide() {
     
     // Apply usage filter (from dropdown)
     if (currentUsageFilter !== 'all') {
-        filteredProducts = filteredProducts.filter(product => 
-            product.usage && product.usage.toLowerCase().includes(currentUsageFilter.toLowerCase())
-        );
+        filteredProducts = filteredProducts.filter(product => {
+            if (!product.usage) return false;
+            const productUsage = product.usage.toLowerCase();
+            const filterUsage = currentUsageFilter.toLowerCase();
+            return productUsage.includes(filterUsage);
+        });
         console.log(`📊 After usage dropdown filter: ${filteredProducts.length} products`);
     }
     
@@ -2189,7 +2253,7 @@ function updateFilterDisplay() {
     // Get URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const stoneName = urlParams.get('stone_name');
-    const type = urlParams.get('type');
+    const usage = urlParams.get('usage');
     
     // Default values
     let displayText = 'All Products';
@@ -2198,34 +2262,40 @@ function updateFilterDisplay() {
     
     // If stone_name exists in URL, use it as primary filter
     if (stoneName) {
-        if (type) {
-            displayText = `${stoneName} (${type})`;
-            pageTitle = `${stoneName} - ${type}`;
-            productsDisplayTitle = `${stoneName} (${type})`;
+        if (usage) {
+            const usageText = usage === 'wall' ? 'Wall Cladding' : 
+                            usage === 'floor' ? 'Flooring' : 
+                            usage === 'other' ? 'Other Uses' : usage;
+            displayText = `${stoneName} (${usageText})`;
+            pageTitle = `${stoneName} - ${usageText}`;
+            productsDisplayTitle = `${stoneName} (${usageText})`;
         } else {
             displayText = stoneName;
             pageTitle = stoneName;
             productsDisplayTitle = stoneName;
         }
-    } else if (type) {
-        // Only type exists
-        displayText = `${type} Products`;
-        pageTitle = `${type} Products`;
-        productsDisplayTitle = `${type} Products`;
+    } else if (usage) {
+        // Only usage exists
+        const usageText = usage === 'wall' ? 'Wall Cladding' : 
+                        usage === 'floor' ? 'Flooring' : 
+                        usage === 'other' ? 'Other Uses' : usage;
+        displayText = `${usageText} Products`;
+        pageTitle = `${usageText} Products`;
+        productsDisplayTitle = `${usageText} Products`;
     } else {
         // No URL parameters, use dropdown filters
-        if (currentCategory !== 'all' && currentTypeFilter !== 'all') {
-            displayText = `${currentCategory} (${currentTypeFilter})`;
-            pageTitle = `${currentCategory} - ${currentTypeFilter}`;
-            productsDisplayTitle = `${currentCategory} (${currentTypeFilter})`;
+        if (currentCategory !== 'all' && currentUsageFilter !== 'all') {
+            displayText = `${currentCategory} (${currentUsageFilter})`;
+            pageTitle = `${currentCategory} - ${currentUsageFilter}`;
+            productsDisplayTitle = `${currentCategory} (${currentUsageFilter})`;
         } else if (currentCategory !== 'all') {
             displayText = currentCategory;
             pageTitle = currentCategory;
             productsDisplayTitle = currentCategory;
-        } else if (currentTypeFilter !== 'all') {
-            displayText = `${currentTypeFilter} Products`;
-            pageTitle = `${currentTypeFilter} Products`;
-            productsDisplayTitle = `${currentTypeFilter} Products`;
+        } else if (currentUsageFilter !== 'all') {
+            displayText = `${currentUsageFilter} Products`;
+            pageTitle = `${currentUsageFilter} Products`;
+            productsDisplayTitle = `${currentUsageFilter} Products`;
         }
     }
     
@@ -2240,7 +2310,8 @@ function updateFilterDisplay() {
                             currentUsageFilter !== 'all' || 
                             currentColorFilter !== 'all' || 
                             currentSort !== 'newest' ||
-                            stoneName !== null;
+                            stoneName !== null ||
+                            usage !== null;
     
     if (hasActiveFilters) {
         clearAllBtn.style.display = 'flex';
@@ -2255,7 +2326,7 @@ function updateSelectedFilters() {
     
     const urlParams = new URLSearchParams(window.location.search);
     const stoneName = urlParams.get('stone_name');
-    const type = urlParams.get('type');
+    const usage = urlParams.get('usage');
     
     const activeFilters = [];
     
@@ -2264,8 +2335,11 @@ function updateSelectedFilters() {
         activeFilters.push({ type: 'stone', value: stoneName });
     }
     
-    if (type && type !== 'all') {
-        activeFilters.push({ type: 'type', value: type });
+    if (usage && usage !== 'all') {
+        const usageText = usage === 'wall' ? 'Wall Cladding' : 
+                        usage === 'floor' ? 'Flooring' : 
+                        usage === 'other' ? 'Other Uses' : usage;
+        activeFilters.push({ type: 'usage', value: usageText });
     }
     
     // Add dropdown filters
@@ -2273,7 +2347,7 @@ function updateSelectedFilters() {
         activeFilters.push({ type: 'Category', value: currentCategory });
     }
     
-    if (currentTypeFilter !== 'all' && (!type || currentTypeFilter !== type)) {
+    if (currentTypeFilter !== 'all') {
         activeFilters.push({ type: 'Type', value: currentTypeFilter });
     }
     
@@ -2313,12 +2387,12 @@ function removeFilter(filterType) {
         urlParams.delete('stone_name');
         const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
         window.history.replaceState({}, '', newUrl);
-    } else if (filterType === 'type') {
-        urlParams.delete('type');
+    } else if (filterType === 'usage') {
+        urlParams.delete('usage');
         const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
         window.history.replaceState({}, '', newUrl);
-        currentTypeFilter = 'all';
-        document.getElementById('typeFilter').value = 'all';
+        currentUsageFilter = 'all';
+        document.getElementById('usageFilter').value = 'all';
     } else {
         switch(filterType.toLowerCase()) {
             case 'category':
@@ -2363,7 +2437,7 @@ function clearAllFilters() {
     // Clear URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     urlParams.delete('stone_name');
-    urlParams.delete('type');
+    urlParams.delete('usage');
     const newUrl = window.location.pathname;
     window.history.replaceState({}, '', newUrl);
     
@@ -2387,7 +2461,7 @@ function updateProductsCount(count) {
 }
 
 // ============================================
-// PRODUCT DISPLAY - NO PRICE, NO QUICK VIEW
+// PRODUCT DISPLAY - WITH VIEW MORE DETAILS
 // ============================================
 
 function displayProducts(products) {
@@ -2417,12 +2491,13 @@ function displayProducts(products) {
         `).join('');
         
         // Truncate description to reasonable length
-        const description = product.description || '';
-        const truncatedDescription = description.length > 120 ? 
-            description.substring(0, 120) + '...' : description;
+        const description = product.description || 'No description available';
+        const truncatedDescription = description.length > 100 ? 
+            description.substring(0, 100) + '...' : description;
+        const showViewMore = description.length > 100;
         
         return `
-            <a href="product-details.html?id=${encodeURIComponent(product.id)}" class="product-card" data-id="${product.id}">
+            <div class="product-card" data-id="${product.id}">
                 <div class="product-image-container">
                     <div class="image-slideshow" id="slideshow-${product.id}">
                         ${imagesHTML}
@@ -2438,13 +2513,19 @@ function displayProducts(products) {
                         </div>
                     </div>
                     
-                    <div class="product-description">
-                        ${truncatedDescription}
+                    <div class="description-container">
+                        <div class="product-description">
+                            ${truncatedDescription}
+                        </div>
+                        
+                        ${showViewMore ? `
+                            <a href="product-details.html?id=${encodeURIComponent(product.id)}" class="view-more-btn">
+                                <i class="fas fa-eye"></i> View More Details
+                            </a>
+                        ` : ''}
                     </div>
-                    
-                    <!-- NO price section, NO quick view button -->
                 </div>
-            </a>
+            </div>
         `;
     }).join('');
     
@@ -2456,6 +2537,17 @@ function displayProducts(products) {
         if (images.length > 1) {
             initializeImageSlideshow(product.id, images);
         }
+    });
+    
+    // Add click event to entire product card
+    document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Don't trigger if clicking on view more button
+            if (!e.target.closest('.view-more-btn')) {
+                const productId = this.getAttribute('data-id');
+                window.location.href = `product-details.html?id=${encodeURIComponent(productId)}`;
+            }
+        });
     });
 }
 
@@ -2542,7 +2634,7 @@ function loadDefaultProducts() {
             id: 'default1',
             stone_name: 'Calle Blasted Cotton',
             category: 'Sand Stone',
-            description: 'Sandstone This stone is a natural sedimentary stone known for its durability, natural beauty, and versatile applications. It is formed over millions of years from compacted sand grains, giving it a unique texture and earthy appearance.',
+            description: 'Sandstone This stone is a natural sedimentary stone known for its durability, natural beauty, and versatile applications. It is formed over millions of years from compacted sand grains, giving it a unique texture and earthy appearance. Sandstone is widely used in both residential and commercial projects due to its strength, weather resistance, and timeless appeal.',
             price: 45.00,
             images: [
                 'https://lh3.googleusercontent.com/d/1BwlSW-Zqd2NvTJKzTDL0GK3S9qQgaf7_'
@@ -2557,7 +2649,7 @@ function loadDefaultProducts() {
             id: 'default2',
             stone_name: 'Premium Sandstone',
             category: 'Sand Stone',
-            description: 'High quality sandstone for various applications with excellent durability and natural finish.',
+            description: 'High quality sandstone for various applications with excellent durability and natural finish. Perfect for both indoor and outdoor use.',
             price: 35.00,
             images: [
                 'https://images.unsplash.com/photo-1544931170-3ca1337cce88?auto=format&fit=crop&w=400&h=300'
@@ -2716,7 +2808,7 @@ function setupEventListeners() {
         clearAllFiltersBtn.addEventListener('click', clearAllFilters);
     }
     
-    // Updated filter IDs to include typeFilter
+    // Updated filter IDs
     const filterIds = ['categoryFilter', 'typeFilter', 'usageFilter', 'colorFilter', 'sortFilter'];
     
     filterIds.forEach(filterId => {
