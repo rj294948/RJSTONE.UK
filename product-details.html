@@ -1081,12 +1081,6 @@ header.show {
     user-select: none;
 }
 
-/* Mobile Pinch Zoom */
-.fullscreen-image.zoomable {
-    cursor: move;
-    transform-origin: 0 0;
-}
-
 /* Image Navigation Controls */
 .fullscreen-nav {
     position: absolute;
@@ -1228,16 +1222,6 @@ header.show {
 .zoom-btn:hover {
     background: rgba(201, 162, 39, 0.8);
     transform: scale(1.1);
-}
-
-/* Mobile Touch Area */
-.touch-zoom-area {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
 }
 
 /* RESPONSIVE */
@@ -1599,19 +1583,286 @@ let firebaseApp, firebaseDB, firebaseAuth;
 let currentProduct = null;
 let allProducts = [];
 let similarProducts = [];
-let cartSystem = null;
 
 // ============================================
 // ALL ZOOM SYSTEMS VARIABLES
 // ============================================
 
-let currentZoomMode = 'hover'; // hover, lens, sidepanel
+let currentZoomMode = 'hover';
 let currentImageIndex = 0;
 let imageZoomLevel = 1;
-let isDragging = false;
-let startX, startY, translateX = 0, translateY = 0;
-let pinchStartDistance = 0;
-let pinchStartZoom = 1;
+
+// ============================================
+// FIXED CART SYSTEM
+// ============================================
+
+class CartSystem {
+    constructor() {
+        this.localCartKey = 'irya_local_cart';
+        this.buyNowKey = 'irya_buynow';
+        this.firestoreCartPath = 'userCarts';
+        this.cartItems = [];
+        this.buyNowItem = null;
+        this.currentUser = null;
+    }
+    
+    async init() {
+        try {
+            // Get current user
+            this.currentUser = firebaseAuth ? firebaseAuth.currentUser : null;
+            
+            if (this.currentUser) {
+                await this.syncCartWithFirestore();
+            } else {
+                await this.loadLocalCart();
+            }
+            
+            this.updateCartBadge();
+            return this;
+        } catch (error) {
+            console.error('Error initializing cart:', error);
+            await this.loadLocalCart();
+            return this;
+        }
+    }
+    
+    async syncCartWithFirestore() {
+        try {
+            if (!firebaseDB || !this.currentUser) return;
+            
+            const userId = this.currentUser.uid;
+            const cartDoc = await firebaseDB.collection(this.firestoreCartPath).doc(userId).get();
+            
+            if (cartDoc.exists) {
+                const data = cartDoc.data();
+                this.cartItems = data.items || [];
+                console.log('🔄 Cart synced from Firestore:', this.cartItems.length, 'items');
+            } else {
+                // Check if local cart exists
+                await this.loadLocalCart();
+                if (this.cartItems.length > 0) {
+                    await this.saveCartToFirestore();
+                }
+            }
+        } catch (error) {
+            console.error('Error syncing cart with Firestore:', error);
+            await this.loadLocalCart();
+        }
+    }
+    
+    async loadLocalCart() {
+        try {
+            const userId = localStorage.getItem('irya_user_id') || 'guest';
+            const cartKey = `${this.localCartKey}_${userId}`;
+            const cartData = localStorage.getItem(cartKey);
+            this.cartItems = cartData ? JSON.parse(cartData) : [];
+            console.log('📦 Local cart loaded:', this.cartItems.length, 'items');
+        } catch (error) {
+            console.error('Error loading local cart:', error);
+            this.cartItems = [];
+        }
+    }
+    
+    async saveCartToFirestore() {
+        try {
+            if (!firebaseDB || !this.currentUser) return false;
+            
+            const userId = this.currentUser.uid;
+            const userEmail = this.currentUser.email || '';
+            const userName = this.currentUser.displayName || 'User';
+            
+            // Calculate totals
+            const subtotal = this.cartItems.reduce((sum, item) => 
+                sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.2;
+            const total = subtotal + tax;
+            const advancePayment = total * 0.3;
+            
+            const cartData = {
+                userId: userId,
+                userEmail: userEmail,
+                userName: userName,
+                items: this.cartItems.map(item => ({
+                    id: item.id,
+                    uniqueId: item.uniqueId || `${item.id}_${Date.now()}`,
+                    name: item.name,
+                    stone_name: item.stoneName || item.name,
+                    price: item.price,
+                    priceUnit: item.priceUnit,
+                    image: item.image,
+                    category: item.category,
+                    description: item.description || '',
+                    quantity: item.quantity,
+                    addedAt: item.addedAt || new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                })),
+                itemCount: this.cartItems.reduce((count, item) => count + item.quantity, 0),
+                subtotal: subtotal,
+                tax: tax,
+                total: total,
+                totalAmount: subtotal,
+                advancePayment: advancePayment,
+                lastUpdated: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            await firebaseDB.collection(this.firestoreCartPath).doc(userId).set(cartData, { merge: true });
+            console.log('✅ Cart saved to Firestore');
+            return true;
+        } catch (error) {
+            console.error('Error saving cart to Firestore:', error);
+            return false;
+        }
+    }
+    
+    async saveCartToLocal() {
+        try {
+            const userId = localStorage.getItem('irya_user_id') || 'guest';
+            const cartKey = `${this.localCartKey}_${userId}`;
+            localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
+            return true;
+        } catch (error) {
+            console.error('Error saving local cart:', error);
+            return false;
+        }
+    }
+    
+    async saveCart() {
+        try {
+            // Always save to local first
+            await this.saveCartToLocal();
+            
+            // If user is logged in, save to Firestore
+            if (this.currentUser && firebaseDB) {
+                await this.saveCartToFirestore();
+            }
+            
+            this.updateCartBadge();
+            return true;
+        } catch (error) {
+            console.error('Error saving cart:', error);
+            return false;
+        }
+    }
+    
+    async addToCart(product) {
+        try {
+            console.log(`📦 Adding to cart: ${product.stone_name || product.name}`);
+            
+            // Create cart item
+            const newItem = {
+                id: product.id,
+                uniqueId: `${product.id}_${Date.now()}`,
+                name: product.stone_name || product.name || 'Stone Product',
+                stoneName: product.stone_name || product.name,
+                price: parseFloat(product.price) || 0,
+                priceUnit: product.price_unit || 'piece',
+                image: getProductImage(product),
+                category: product.category || 'Natural Stone',
+                description: product.description || '',
+                quantity: 1,
+                addedAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Check if product already exists
+            const existingIndex = this.cartItems.findIndex(item => item.id === product.id);
+            
+            if (existingIndex !== -1) {
+                // Update quantity
+                this.cartItems[existingIndex].quantity += 1;
+                this.cartItems[existingIndex].updatedAt = new Date().toISOString();
+            } else {
+                // Add new item
+                this.cartItems.push(newItem);
+            }
+            
+            await this.saveCart();
+            showNotification(`${product.stone_name || product.name} added to cart!`);
+            return true;
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            showError('Failed to add to cart');
+            return false;
+        }
+    }
+    
+    async addSimilarToCart(productId) {
+        try {
+            const product = similarProducts.find(p => p.id === productId);
+            if (product) {
+                return await this.addToCart(product);
+            }
+            return false;
+        } catch (error) {
+            console.error('Error adding similar product to cart:', error);
+            return false;
+        }
+    }
+    
+    async processBuyNow(product, quantity = 1, calculationData = null) {
+        try {
+            console.log("🚀 Processing Buy Now for:", product.stone_name || product.name);
+            
+            // Create buy now item
+            const buyNowItem = {
+                id: product.id,
+                stone_name: product.stone_name || product.name,
+                name: product.stone_name || product.name,
+                price: parseFloat(product.price) || 0,
+                priceUnit: product.price_unit || 'piece',
+                image: getProductImage(product),
+                category: product.category || 'Natural Stone',
+                description: product.description || '',
+                quantity: quantity,
+                calculationData: calculationData,
+                isBuyNow: true,
+                totalPrice: product.price * quantity,
+                addedAt: new Date().toISOString()
+            };
+            
+            // Save to localStorage
+            localStorage.setItem(this.buyNowKey, JSON.stringify(buyNowItem));
+            
+            // Also save to sessionStorage for checkout
+            sessionStorage.setItem('irya_buynow_product', JSON.stringify(buyNowItem));
+            sessionStorage.setItem('irya_is_buynow_flow', 'true');
+            
+            // Save with user ID
+            const userId = localStorage.getItem('irya_user_id') || 'guest';
+            localStorage.setItem(`irya_buynow_cart_${userId}`, JSON.stringify([buyNowItem]));
+            
+            console.log("✅ Buy Now data saved successfully");
+            return true;
+        } catch (error) {
+            console.error('❌ Buy Now error:', error);
+            showError('Failed to process Buy Now');
+            return false;
+        }
+    }
+    
+    getCartCount() {
+        return this.cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
+    }
+    
+    updateCartBadge() {
+        const count = this.getCartCount();
+        const cartBadge = document.getElementById('cartBadge');
+        const bottomCartBadge = document.getElementById('bottomCartBadge');
+        
+        if (cartBadge) {
+            cartBadge.textContent = count > 99 ? '99+' : count;
+            cartBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
+        
+        if (bottomCartBadge) {
+            bottomCartBadge.textContent = count > 99 ? '99+' : count;
+            bottomCartBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+}
+
+let cartSystem = null;
 
 // ============================================
 // ZOOM SYSTEM FUNCTIONS
@@ -1641,7 +1892,7 @@ function setZoomMode(mode) {
             if (window.innerWidth > 767) {
                 initSidePanelZoom();
             } else {
-                setZoomMode('hover'); // Fallback to hover on mobile
+                setZoomMode('hover');
                 showNotification('Side panel zoom is available on desktop only');
             }
             break;
@@ -1654,27 +1905,23 @@ function resetZoomSystems() {
     const lens = document.getElementById('zoomLens');
     const result = document.getElementById('zoomResult');
     
+    if (!mainImage) return;
+    
     // Reset image
     mainImage.style.transform = 'scale(1)';
     mainImage.style.cursor = 'zoom-in';
     
     // Hide lens and result
-    lens.style.display = 'none';
-    result.style.display = 'none';
-    
-    // Remove event listeners
-    mainImage.onmousemove = null;
-    mainImage.onmouseenter = null;
-    mainImage.onmouseleave = null;
-    mainImage.ontouchstart = null;
-    mainImage.ontouchmove = null;
-    mainImage.ontouchend = null;
+    if (lens) lens.style.display = 'none';
+    if (result) result.style.display = 'none';
 }
 
 // 1. HOVER ZOOM (CSS Scale Zoom)
 function initHoverZoom() {
     const mainImage = document.getElementById('mainProductImage');
     const wrapper = document.getElementById('mainImageWrapper');
+    
+    if (!mainImage || !wrapper) return;
     
     // Set cursor
     mainImage.style.cursor = 'zoom-in';
@@ -1696,6 +1943,8 @@ function initLensZoom() {
     const img = document.getElementById('mainProductImage');
     const lens = document.getElementById('zoomLens');
     const result = document.getElementById('zoomResult');
+    
+    if (!img || !lens || !result) return;
     
     // Calculate the ratio between result DIV and lens
     const cx = result.offsetWidth / lens.offsetWidth;
@@ -1758,6 +2007,8 @@ function initSidePanelZoom() {
     const img = document.getElementById('mainProductImage');
     const result = document.getElementById('zoomResult');
     
+    if (!img || !result) return;
+    
     // Show result panel
     result.style.display = 'block';
     result.style.backgroundImage = "url('" + img.src + "')";
@@ -1784,121 +2035,11 @@ function initSidePanelZoom() {
     });
 }
 
-// 4. FULLSCREEN ZOOM (Lightbox with Mobile Pinch)
-function initFullscreenZoom() {
-    const fullscreenImage = document.getElementById('fullscreenImage');
-    if (!fullscreenImage) return;
-    
-    // Reset zoom
-    imageZoomLevel = 1;
-    translateX = 0;
-    translateY = 0;
-    fullscreenImage.style.transform = `scale(${imageZoomLevel}) translate(${translateX}px, ${translateY}px)`;
-    
-    // Add touch events for pinch zoom
-    fullscreenImage.addEventListener('touchstart', handleTouchStart, { passive: false });
-    fullscreenImage.addEventListener('touchmove', handleTouchMove, { passive: false });
-    fullscreenImage.addEventListener('touchend', handleTouchEnd);
-    
-    // Add mouse events for drag
-    fullscreenImage.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    
-    // Add wheel zoom
-    fullscreenImage.addEventListener('wheel', handleWheel, { passive: false });
-}
-
-// Touch events for pinch zoom
-function handleTouchStart(e) {
-    if (e.touches.length === 2) {
-        // Pinch gesture
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        pinchStartDistance = Math.hypot(
-            touch2.clientX - touch1.clientX,
-            touch2.clientY - touch1.clientY
-        );
-        pinchStartZoom = imageZoomLevel;
-    } else if (e.touches.length === 1) {
-        // Drag gesture
-        isDragging = true;
-        startX = e.touches[0].clientX - translateX;
-        startY = e.touches[0].clientY - translateY;
-    }
-}
-
-function handleTouchMove(e) {
-    e.preventDefault();
-    
-    if (e.touches.length === 2) {
-        // Pinch zoom
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        const distance = Math.hypot(
-            touch2.clientX - touch1.clientX,
-            touch2.clientY - touch1.clientY
-        );
-        
-        if (pinchStartDistance > 0) {
-            const scale = distance / pinchStartDistance;
-            imageZoomLevel = Math.max(0.5, Math.min(3, pinchStartZoom * scale));
-            updateFullscreenImageTransform();
-        }
-    } else if (e.touches.length === 1 && isDragging) {
-        // Drag
-        translateX = e.touches[0].clientX - startX;
-        translateY = e.touches[0].clientY - startY;
-        updateFullscreenImageTransform();
-    }
-}
-
-function handleTouchEnd() {
-    isDragging = false;
-    pinchStartDistance = 0;
-}
-
-// Mouse events for drag
-function handleMouseDown(e) {
-    e.preventDefault();
-    isDragging = true;
-    startX = e.clientX - translateX;
-    startY = e.clientY - translateY;
-}
-
-function handleMouseMove(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    translateX = e.clientX - startX;
-    translateY = e.clientY - startY;
-    updateFullscreenImageTransform();
-}
-
-function handleMouseUp() {
-    isDragging = false;
-}
-
-// Wheel zoom
-function handleWheel(e) {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    imageZoomLevel = Math.max(0.5, Math.min(3, imageZoomLevel * delta));
-    updateFullscreenImageTransform();
-}
-
-// Update fullscreen image transform
-function updateFullscreenImageTransform() {
-    const fullscreenImage = document.getElementById('fullscreenImage');
-    if (fullscreenImage) {
-        fullscreenImage.style.transform = `scale(${imageZoomLevel}) translate(${translateX}px, ${translateY}px)`;
-        fullscreenImage.style.cursor = imageZoomLevel > 1 ? 'grab' : 'zoom-in';
-        fullscreenImage.style.cursor = isDragging ? 'grabbing' : fullscreenImage.style.cursor;
-    }
-}
-
 // Zoom controls
 function zoomInImage() {
     const mainImage = document.getElementById('mainProductImage');
+    if (!mainImage) return;
+    
     if (currentZoomMode === 'hover') {
         imageZoomLevel = Math.min(3, imageZoomLevel + 0.5);
         mainImage.style.transform = `scale(${imageZoomLevel})`;
@@ -1908,6 +2049,8 @@ function zoomInImage() {
 
 function zoomOutImage() {
     const mainImage = document.getElementById('mainProductImage');
+    if (!mainImage) return;
+    
     if (currentZoomMode === 'hover') {
         imageZoomLevel = Math.max(1, imageZoomLevel - 0.5);
         mainImage.style.transform = `scale(${imageZoomLevel})`;
@@ -1917,16 +2060,15 @@ function zoomOutImage() {
 
 function resetZoomImage() {
     const mainImage = document.getElementById('mainProductImage');
+    if (!mainImage) return;
+    
     imageZoomLevel = 1;
-    translateX = 0;
-    translateY = 0;
     mainImage.style.transform = 'scale(1)';
     mainImage.style.cursor = 'zoom-in';
-    updateFullscreenImageTransform();
 }
 
 // ============================================
-// ENHANCED FULLSCREEN VIEWER
+// FULLSCREEN VIEWER
 // ============================================
 
 function createFullscreenModal() {
@@ -1941,8 +2083,7 @@ function createFullscreenModal() {
             </button>
             
             <div class="fullscreen-image-container">
-                <img src="" alt="" class="fullscreen-image zoomable" id="fullscreenImage">
-                <div class="touch-zoom-area" id="touchZoomArea"></div>
+                <img src="" alt="" class="fullscreen-image" id="fullscreenImage">
                 <div class="image-counter" id="imageCounter">1 / 1</div>
             </div>
             
@@ -1968,7 +2109,6 @@ function createFullscreenModal() {
     
     if (!document.getElementById('fullscreenModal')) {
         document.body.insertAdjacentHTML('beforeend', fullscreenModalHTML);
-        initFullscreenZoom();
     }
 }
 
@@ -1978,9 +2118,6 @@ function openFullscreenModal(initialIndex = 0) {
     createFullscreenModal();
     
     currentImageIndex = initialIndex;
-    imageZoomLevel = 1;
-    translateX = 0;
-    translateY = 0;
     
     updateFullscreenImage();
     
@@ -1996,22 +2133,17 @@ function closeFullscreenModal() {
     }
     document.body.style.overflow = 'auto';
     currentImageIndex = 0;
-    imageZoomLevel = 1;
 }
 
 function updateFullscreenImage() {
     const fullscreenImage = document.getElementById('fullscreenImage');
     const imageCounter = document.getElementById('imageCounter');
-    const thumbnails = document.querySelectorAll('.fullscreen-thumb');
     const thumbnailsContainer = document.getElementById('fullscreenThumbnails');
     
     if (!fullscreenImage || !currentProduct.images[currentImageIndex]) return;
     
     fullscreenImage.src = currentProduct.images[currentImageIndex];
     fullscreenImage.alt = currentProduct.stone_name || 'Product Image';
-    
-    // Reset transform
-    fullscreenImage.style.transform = `scale(${imageZoomLevel}) translate(${translateX}px, ${translateY}px)`;
     
     if (imageCounter) {
         imageCounter.textContent = `${currentImageIndex + 1} / ${currentProduct.images.length}`;
@@ -2027,17 +2159,12 @@ function updateFullscreenImage() {
         `).join('');
         thumbnailsContainer.style.display = 'flex';
     }
-    
-    thumbnails.forEach((thumb, index) => {
-        thumb.classList.toggle('active', index === currentImageIndex);
-    });
 }
 
 function nextFullscreenImage() {
     if (!currentProduct || !currentProduct.images) return;
     
     currentImageIndex = (currentImageIndex + 1) % currentProduct.images.length;
-    resetFullscreenZoom();
     updateFullscreenImage();
 }
 
@@ -2045,50 +2172,348 @@ function prevFullscreenImage() {
     if (!currentProduct || !currentProduct.images) return;
     
     currentImageIndex = (currentImageIndex - 1 + currentProduct.images.length) % currentProduct.images.length;
-    resetFullscreenZoom();
     updateFullscreenImage();
 }
 
 function switchFullscreenImage(index) {
     if (index >= 0 && index < currentProduct.images.length) {
         currentImageIndex = index;
-        resetFullscreenZoom();
         updateFullscreenImage();
     }
 }
 
 function fullscreenZoomIn() {
-    imageZoomLevel = Math.min(3, imageZoomLevel + 0.5);
-    updateFullscreenImageTransform();
+    const fullscreenImage = document.getElementById('fullscreenImage');
+    if (fullscreenImage) {
+        const currentScale = parseFloat(fullscreenImage.style.transform.replace('scale(', '').replace(')', '')) || 1;
+        fullscreenImage.style.transform = `scale(${Math.min(3, currentScale + 0.5)})`;
+    }
 }
 
 function fullscreenZoomOut() {
-    imageZoomLevel = Math.max(0.5, imageZoomLevel - 0.5);
-    updateFullscreenImageTransform();
+    const fullscreenImage = document.getElementById('fullscreenImage');
+    if (fullscreenImage) {
+        const currentScale = parseFloat(fullscreenImage.style.transform.replace('scale(', '').replace(')', '')) || 1;
+        fullscreenImage.style.transform = `scale(${Math.max(0.5, currentScale - 0.5)})`;
+    }
 }
 
 function fullscreenResetZoom() {
-    resetFullscreenZoom();
-}
-
-function resetFullscreenZoom() {
-    imageZoomLevel = 1;
-    translateX = 0;
-    translateY = 0;
-    updateFullscreenImageTransform();
+    const fullscreenImage = document.getElementById('fullscreenImage');
+    if (fullscreenImage) {
+        fullscreenImage.style.transform = 'scale(1)';
+    }
 }
 
 // ============================================
-// [REST OF THE CODE REMAINS SAME AS BEFORE]
+// SEARCH FUNCTIONALITY
 // ============================================
 
-// [Previous code for Firebase, Cart, Search, Product Details, Similar Products, etc. remains exactly the same]
-// Only replacing from line 1200 onwards...
+let searchTimeout = null;
 
-// Note: Due to character limit, I'm including the rest of the code in the next message.
-// The functions for Firebase, Cart, Search, Product Details, Similar Products, etc.
-// remain exactly the same as in the previous complete code.
-// I'll continue from the UTILITY FUNCTIONS section:
+// Search Input Handler
+function handleSearchInput(e) {
+    const query = e.target.value.trim();
+    
+    clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+        hideSearchResults();
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        performSearch(query);
+    }, 300);
+}
+
+// Perform Search
+function performSearch(query) {
+    if (!query || query.length < 2) {
+        hideSearchResults();
+        return;
+    }
+    
+    const results = allProducts.filter(product => {
+        const searchText = query.toLowerCase();
+        return (
+            (product.name && product.name.toLowerCase().includes(searchText)) ||
+            (product.category && product.category.toLowerCase().includes(searchText)) ||
+            (product.usage && product.usage.toLowerCase().includes(searchText)) ||
+            (product.description && product.description.toLowerCase().includes(searchText)) ||
+            (product.type && product.type.toLowerCase().includes(searchText))
+        );
+    });
+    
+    displaySearchResults(results, query);
+}
+
+// Display Search Results
+function displaySearchResults(results, query) {
+    const container = document.getElementById('searchResults');
+    if (!container) return;
+    
+    if (results.length === 0) {
+        container.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <p>No products found for "${query}"</p>
+            </div>
+        `;
+    } else {
+        const resultsHTML = results.slice(0, 5).map(product => `
+            <a href="product-details.html?id=${product.id}" class="search-result-item">
+                <div class="search-result-image">
+                    <img src="${product.image}" alt="${product.name}" 
+                         onerror="this.src='${getDefaultImage(product.category)}'">
+                </div>
+                <div class="search-result-info">
+                    <div class="search-result-name">${product.name}</div>
+                    <div class="search-result-category">${product.category}</div>
+                </div>
+                <div class="search-result-price">£${product.price.toFixed(2)}</div>
+            </a>
+        `).join('');
+        
+        container.innerHTML = resultsHTML;
+    }
+    
+    container.classList.add('active');
+}
+
+// Hide Search Results
+function hideSearchResults() {
+    const container = document.getElementById('searchResults');
+    if (container) {
+        container.classList.remove('active');
+    }
+}
+
+// Initialize Search
+async function initializeSearch() {
+    try {
+        if (!firebaseDB) {
+            await initializeFirebase();
+        }
+        
+        const querySnapshot = await firebaseDB.collection("products").get();
+        allProducts = [];
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            allProducts.push({
+                id: doc.id,
+                name: data.stone_name || data.name || 'Stone Product',
+                category: data.category || 'Natural Stone',
+                price: parseFloat(data.price) || 0,
+                priceUnit: data.price_unit || 'piece',
+                image: getProductImage(data),
+                usage: data.usage || data.uses || '',
+                description: data.description || '',
+                type: data.type || ''
+            });
+        });
+        
+        console.log(`✅ ${allProducts.length} products loaded for search`);
+        
+        const searchInput = document.getElementById('searchInput');
+        const searchIcon = document.getElementById('searchIcon');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', handleSearchInput);
+        }
+        
+        if (searchIcon) {
+            searchIcon.addEventListener('click', () => performSearch(searchInput.value));
+        }
+        
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performSearch(searchInput.value);
+                }
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error loading products for search:', error);
+    }
+}
+
+// ============================================
+// SIMILAR PRODUCTS
+// ============================================
+
+async function loadSimilarProducts() {
+    try {
+        if (!currentProduct || !currentProduct.type || !firebaseDB) {
+            document.getElementById('similarProductsSection').style.display = 'none';
+            return;
+        }
+        
+        const querySnapshot = await firebaseDB
+            .collection("products")
+            .where("type", "==", currentProduct.type)
+            .limit(6)
+            .get();
+        
+        if (querySnapshot.empty) {
+            document.getElementById('similarProductsSection').style.display = 'none';
+            return;
+        }
+        
+        similarProducts = [];
+        
+        querySnapshot.forEach((doc) => {
+            if (doc.id === currentProduct.id) return;
+            
+            const data = doc.data();
+            similarProducts.push({
+                id: doc.id,
+                stone_name: data.stone_name || data.name || 'Stone Product',
+                category: data.category || 'Natural Stone',
+                price: parseFloat(data.price) || 0,
+                price_unit: data.price_unit || 'piece',
+                color: data.color || '',
+                finish: data.finish || '',
+                type: data.type || '',
+                usage: data.usage || data.uses || '',
+                images: data.images ? data.images : (data.image ? [data.image] : []),
+                image: data.image || ''
+            });
+        });
+        
+        if (similarProducts.length < 3) {
+            await loadSimilarByCategory();
+        }
+        
+        if (similarProducts.length > 0) {
+            displaySimilarProducts();
+        } else {
+            document.getElementById('similarProductsSection').style.display = 'none';
+        }
+        
+    } catch (error) {
+        console.error('Error loading similar products:', error);
+        await loadSimilarByCategory();
+    }
+}
+
+async function loadSimilarByCategory() {
+    try {
+        if (!currentProduct || !currentProduct.category || !firebaseDB) return;
+        
+        const querySnapshot = await firebaseDB
+            .collection("products")
+            .where("category", "==", currentProduct.category)
+            .limit(6)
+            .get();
+        
+        querySnapshot.forEach((doc) => {
+            if (doc.id === currentProduct.id || 
+                similarProducts.some(p => p.id === doc.id)) return;
+            
+            const data = doc.data();
+            similarProducts.push({
+                id: doc.id,
+                stone_name: data.stone_name || data.name || 'Stone Product',
+                category: data.category || 'Natural Stone',
+                price: parseFloat(data.price) || 0,
+                price_unit: data.price_unit || 'piece',
+                color: data.color || '',
+                finish: data.finish || '',
+                type: data.type || '',
+                usage: data.usage || data.uses || '',
+                images: data.images ? data.images : (data.image ? [data.image] : []),
+                image: data.image || ''
+            });
+        });
+        
+    } catch (error) {
+        console.error('Error loading similar by category:', error);
+    }
+}
+
+function displaySimilarProducts() {
+    const container = document.getElementById('similarProductsGrid');
+    
+    if (!container || similarProducts.length === 0) {
+        document.getElementById('similarProductsSection').style.display = 'none';
+        return;
+    }
+    
+    // Show section title with type
+    const sectionTitle = document.querySelector('.similar-products h2');
+    if (sectionTitle && currentProduct.type) {
+        sectionTitle.innerHTML = `<i class="fas fa-gem"></i> Similar ${currentProduct.type.charAt(0).toUpperCase() + currentProduct.type.slice(1)} Products`;
+    }
+    
+    const productsHTML = similarProducts.slice(0, 6).map(product => {
+        const productImage = getProductImage(product);
+        const productType = product.type ? product.type.charAt(0).toUpperCase() + product.type.slice(1) : 'Product';
+        
+        return `
+            <a href="product-details.html?id=${product.id}" class="similar-product-card">
+                <div class="card-image-container">
+                    <img src="${productImage}" alt="${product.stone_name}" 
+                         class="card-image"
+                         onerror="this.src='${getDefaultImage(product.category)}'"
+                         loading="lazy">
+                    <button class="add-cart-icon" onclick="addSimilarToCart('${product.id}', event)">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                </div>
+                <div class="product-info-overlay">
+                    <div class="product-name">${product.stone_name}</div>
+                    <div class="product-price">£${product.price.toFixed(2)}</div>
+                    ${product.finish ? `<div class="product-category">${product.finish}</div>` : ''}
+                    ${product.type ? `<div class="product-category" style="font-size: 9px; opacity: 0.7;">${productType}</div>` : ''}
+                </div>
+            </a>
+        `;
+    }).join('');
+    
+    container.innerHTML = productsHTML;
+    document.getElementById('similarProductsSection').style.display = 'block';
+}
+
+async function addSimilarToCart(productId, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    
+    try {
+        showLoading(true);
+        
+        // Find the product
+        const product = similarProducts.find(p => p.id === productId);
+        if (!product) return;
+        
+        // Add to cart
+        await cartSystem.addToCart(product);
+        
+        // Visual feedback
+        if (event) {
+            const icon = event.target.closest('.add-cart-icon');
+            if (icon) {
+                icon.innerHTML = '<i class="fas fa-check"></i>';
+                icon.style.background = '#10b981';
+                
+                setTimeout(() => {
+                    icon.innerHTML = '<i class="fas fa-cart-plus"></i>';
+                    icon.style.background = 'var(--primary-gold)';
+                }, 1000);
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error adding similar product to cart:', error);
+        showError('Failed to add to cart');
+    } finally {
+        showLoading(false);
+    }
+}
 
 // ============================================
 // UTILITY FUNCTIONS
@@ -2366,6 +2791,333 @@ function changeMainImage(imageUrl, thumbnailElement, index = 0) {
 }
 
 // ============================================
+// BUY NOW MODAL FUNCTIONS
+// ============================================
+
+function openBuyNowModal() {
+    if (!currentProduct) return;
+    
+    const modalContent = document.getElementById('modalCalculatorContent');
+    modalContent.innerHTML = `
+        <h4 style="margin-bottom: 15px; font-size: 15px;">
+            <i class="fas fa-gem"></i> ${currentProduct.stone_name}
+        </h4>
+        
+        <div class="calculator-tabs">
+            <div class="calc-tab active" data-mode="piece" onclick="switchCalcMode('piece', this)">
+                <i class="fas fa-cube"></i> Quantity
+            </div>
+            <div class="calc-tab" data-mode="area" onclick="switchCalcMode('area', this)">
+                <i class="fas fa-ruler-combined"></i> Area Wise
+            </div>
+            ${currentProduct.weight_per_unit ? `
+                <div class="calc-tab" data-mode="weight" onclick="switchCalcMode('weight', this)">
+                    <i class="fas fa-weight"></i> Weight Wise
+                </div>
+            ` : ''}
+        </div>
+        
+        <div id="calculatorInputs">
+            <div class="input-group">
+                <label><i class="fas fa-boxes"></i> Quantity (Minimum: ${currentProduct.min_order})</label>
+                <input type="number" id="calcQuantity" min="${currentProduct.min_order}" 
+                       value="${currentProduct.min_order}" oninput="calculateModalPrice()">
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('buyNowModal').classList.add('active');
+    calculateModalPrice();
+}
+
+function closeBuyNowModal() {
+    document.getElementById('buyNowModal').classList.remove('active');
+}
+
+function switchCalcMode(mode, element) {
+    document.querySelectorAll('.calc-tab').forEach(tab => tab.classList.remove('active'));
+    element.classList.add('active');
+    
+    const calculatorInputs = document.getElementById('calculatorInputs');
+    let inputsHTML = '';
+    
+    switch(mode) {
+        case 'area':
+            inputsHTML = `
+                <div class="input-group">
+                    <label><i class="fas fa-ruler-horizontal"></i> Length (ft)</label>
+                    <input type="number" id="calcLength" value="1" oninput="calculateModalPrice()">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-ruler-vertical"></i> Width (ft)</label>
+                    <input type="number" id="calcWidth" value="1" oninput="calculateModalPrice()">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-boxes"></i> Quantity (Minimum: ${currentProduct.min_order})</label>
+                    <input type="number" id="calcQuantity" min="${currentProduct.min_order}" 
+                           value="${currentProduct.min_order}" oninput="calculateModalPrice()">
+                </div>
+            `;
+            break;
+            
+        case 'weight':
+            inputsHTML = `
+                <div class="input-group">
+                    <label><i class="fas fa-weight-hanging"></i> Weight (kg)</label>
+                    <input type="number" id="calcWeight" value="1" oninput="calculateModalPrice()">
+                </div>
+            `;
+            break;
+            
+        default:
+            inputsHTML = `
+                <div class="input-group">
+                    <label><i class="fas fa-boxes"></i> Quantity (Minimum: ${currentProduct.min_order})</label>
+                    <input type="number" id="calcQuantity" min="${currentProduct.min_order}" 
+                           value="${currentProduct.min_order}" oninput="calculateModalPrice()">
+                </div>
+            `;
+            break;
+    }
+    
+    calculatorInputs.innerHTML = inputsHTML;
+    calculateModalPrice();
+}
+
+function calculateModalPrice() {
+    if (!currentProduct) return;
+    
+    const activeTab = document.querySelector('.calc-tab.active');
+    const mode = activeTab ? activeTab.dataset.mode : 'piece';
+    
+    let quantity = 1;
+    let totalPrice = 0;
+    let calculationData = { mode: mode };
+    
+    switch(mode) {
+        case 'area':
+            const length = parseFloat(document.getElementById('calcLength')?.value) || 1;
+            const width = parseFloat(document.getElementById('calcWidth')?.value) || 1;
+            quantity = parseInt(document.getElementById('calcQuantity')?.value) || currentProduct.min_order;
+            const area = length * width;
+            totalPrice = currentProduct.price * area * quantity;
+            calculationData.length = length;
+            calculationData.width = width;
+            calculationData.area = area;
+            calculationData.quantity = quantity;
+            break;
+            
+        case 'weight':
+            const weight = parseFloat(document.getElementById('calcWeight')?.value) || 1;
+            totalPrice = currentProduct.price * weight;
+            calculationData.weight = weight;
+            break;
+            
+        case 'piece':
+        default:
+            quantity = parseInt(document.getElementById('calcQuantity')?.value) || currentProduct.min_order;
+            totalPrice = currentProduct.price * quantity;
+            calculationData.quantity = quantity;
+            break;
+    }
+    
+    // Ensure minimum order quantity
+    if (quantity < currentProduct.min_order) {
+        quantity = currentProduct.min_order;
+        document.getElementById('calcQuantity').value = quantity;
+        calculateModalPrice();
+        return;
+    }
+    
+    const advancePayment = totalPrice * 0.3;
+    const remainingPayment = totalPrice * 0.7;
+    
+    const calculationResult = document.getElementById('calculationResult');
+    calculationResult.innerHTML = `
+        <div class="result-row">
+            <span>Unit Price:</span>
+            <span>£${currentProduct.price.toFixed(2)} per ${currentProduct.price_unit}</span>
+        </div>
+        ${mode === 'area' ? `
+            <div class="result-row">
+                <span>Area:</span>
+                <span>${calculationData.area?.toFixed(2) || '0.00'} sq ft</span>
+            </div>
+        ` : ''}
+        ${mode === 'weight' ? `
+            <div class="result-row">
+                <span>Weight:</span>
+                <span>${calculationData.weight?.toFixed(2) || '0.00'} kg</span>
+            </div>
+        ` : ''}
+        <div class="result-row">
+            <span>Quantity:</span>
+            <span>${quantity}</span>
+        </div>
+        <div class="result-row">
+            <span>Subtotal:</span>
+            <span>£${totalPrice.toFixed(2)}</span>
+        </div>
+        <div class="result-row total">
+            <span>Total Amount:</span>
+            <span>£${totalPrice.toFixed(2)}</span>
+        </div>
+        <div class="result-row">
+            <span>Advance (30%):</span>
+            <span>£${advancePayment.toFixed(2)}</span>
+        </div>
+        <div class="result-row">
+            <span>Ready to Ship (70%):</span>
+            <span>£${remainingPayment.toFixed(2)}</span>
+        </div>
+    `;
+    
+    window.currentModalCalculation = calculationData;
+    window.currentModalTotal = totalPrice;
+    window.currentModalQuantity = quantity;
+}
+
+// ============================================
+// PROCEED TO CHECKOUT
+// ============================================
+
+async function proceedToCheckout() {
+    if (!currentProduct) return;
+    
+    try {
+        showLoading(true);
+        console.log("🚀 Starting checkout process...");
+        
+        // Get calculation data from modal
+        const quantity = window.currentModalQuantity || currentProduct.min_order;
+        const calculationData = window.currentModalCalculation || { 
+            mode: 'piece', 
+            quantity: quantity 
+        };
+        
+        // Process Buy Now
+        const success = await cartSystem.processBuyNow(
+            currentProduct, 
+            quantity, 
+            calculationData
+        );
+        
+        if (success) {
+            closeBuyNowModal();
+            showNotification('Redirecting to checkout...');
+            
+            // Small delay to ensure data is saved
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Redirect to checkout
+            const userId = localStorage.getItem('irya_user_id') || 'guest';
+            window.location.href = `checkout.html?buynow=true&user=${userId}&product_id=${currentProduct.id}`;
+            
+        } else {
+            showError('Failed to process Buy Now');
+        }
+    } catch (error) {
+        console.error('❌ Checkout error:', error);
+        showError('Failed to process checkout: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
+// CART FUNCTIONS
+// ============================================
+
+async function addToCart() {
+    if (!currentProduct || !cartSystem) return;
+    
+    try {
+        showLoading(true);
+        await cartSystem.addToCart(currentProduct);
+    } catch (error) {
+        console.error('Add to cart error:', error);
+        showError('Failed to add to cart');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
+// SCROLL HANDLING
+// ============================================
+
+let lastScrollTop = 0;
+let isHeaderVisible = true;
+let scrollThreshold = 100;
+let debounceTimeout;
+
+function handleScroll() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const header = document.getElementById('mainHeader');
+    const bottomNav = document.getElementById('bottomNav');
+    
+    if (!header || !bottomNav) return;
+    
+    if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+    }
+    
+    debounceTimeout = setTimeout(() => {
+        if (scrollTop < 50) {
+            header.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+            header.classList.add('show');
+            bottomNav.classList.add('show');
+            isHeaderVisible = true;
+            return;
+        }
+        
+        if (scrollTop > lastScrollTop) {
+            if (scrollTop > scrollThreshold && isHeaderVisible) {
+                header.classList.add('hidden');
+                bottomNav.classList.add('hidden');
+                header.classList.remove('show');
+                bottomNav.classList.remove('show');
+                isHeaderVisible = false;
+            }
+        } else {
+            if (!isHeaderVisible) {
+                header.classList.remove('hidden');
+                bottomNav.classList.remove('hidden');
+                header.classList.add('show');
+                bottomNav.classList.add('show');
+                isHeaderVisible = true;
+            }
+        }
+        
+        if (scrollTop > 100) {
+            header.classList.add('scrolled');
+            bottomNav.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+            bottomNav.classList.remove('scrolled');
+        }
+        
+        lastScrollTop = scrollTop;
+    }, 100);
+}
+
+// ============================================
+// NOTIFICATION BADGE UPDATE
+// ============================================
+
+function updateNotificationBadge() {
+    const notifications = JSON.parse(localStorage.getItem('irya_notifications') || '[]');
+    const unreadCount = notifications.filter(n => !n.read).length;
+    
+    const notificationBadge = document.getElementById('notificationBadge');
+    if (notificationBadge && unreadCount > 0) {
+        notificationBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+        notificationBadge.style.display = 'flex';
+    }
+}
+
+// ============================================
 // INITIALIZATION
 // ============================================
 
@@ -2389,7 +3141,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     firebaseAuth.onAuthStateChanged(async (user) => {
         console.log('Auth state changed:', user ? 'Logged in' : 'Logged out');
         
-        // Initialize Cart System with user
+        // Initialize Cart System
         cartSystem = new CartSystem();
         await cartSystem.init();
         
@@ -2473,163 +3225,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Handle window resize
     window.addEventListener('resize', function() {
         if (currentZoomMode === 'sidepanel' && window.innerWidth <= 767) {
-            setZoomMode('hover'); // Switch to hover zoom on mobile
+            setZoomMode('hover');
         }
     });
     
     // Initial scroll check
     handleScroll();
 });
-
-// ============================================
-// [OTHER FUNCTIONS LIKE CART, SEARCH, SIMILAR PRODUCTS]
-// ============================================
-// These functions remain exactly the same as in the previous complete code
-// I'm including the most important ones below:
-
-// CartSystem Class (same as before)
-class CartSystem {
-    constructor() {
-        this.localCartKey = 'irya_local_cart';
-        this.buyNowKey = 'irya_buynow';
-        this.firestoreCartPath = 'userCarts';
-        this.cartItems = [];
-        this.buyNowItem = null;
-        this.currentUser = null;
-    }
-    
-    async init() {
-        try {
-            this.currentUser = firebaseAuth.currentUser;
-            
-            if (this.currentUser) {
-                await this.syncCartWithFirestore();
-            } else {
-                await this.loadLocalCart();
-            }
-            
-            this.updateCartBadge();
-            return this;
-        } catch (error) {
-            console.error('Error initializing cart:', error);
-            await this.loadLocalCart();
-            return this;
-        }
-    }
-    
-    // ... [rest of cart functions remain same]
-}
-
-// Search functionality (same as before)
-let searchTimeout = null;
-
-async function initializeSearch() {
-    try {
-        if (!firebaseDB) {
-            await initializeFirebase();
-        }
-        
-        const querySnapshot = await firebaseDB.collection("products").get();
-        allProducts = [];
-        
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            allProducts.push({
-                id: doc.id,
-                name: data.stone_name || data.name || 'Stone Product',
-                category: data.category || 'Natural Stone',
-                price: parseFloat(data.price) || 0,
-                priceUnit: data.price_unit || 'piece',
-                image: getProductImage(data),
-                usage: data.usage || data.uses || '',
-                description: data.description || '',
-                type: data.type || ''
-            });
-        });
-        
-        console.log(`✅ ${allProducts.length} products loaded for search`);
-        
-        const searchInput = document.getElementById('searchInput');
-        const searchIcon = document.getElementById('searchIcon');
-        
-        if (searchInput) {
-            searchInput.addEventListener('input', handleSearchInput);
-        }
-        
-        if (searchIcon) {
-            searchIcon.addEventListener('click', () => performSearch(searchInput.value));
-        }
-        
-        if (searchInput) {
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    performSearch(searchInput.value);
-                }
-            });
-        }
-        
-    } catch (error) {
-        console.error('Error loading products for search:', error);
-    }
-}
-
-// Similar Products (type-based - same as before)
-async function loadSimilarProducts() {
-    try {
-        if (!currentProduct || !currentProduct.type || !firebaseDB) {
-            document.getElementById('similarProductsSection').style.display = 'none';
-            return;
-        }
-        
-        const querySnapshot = await firebaseDB
-            .collection("products")
-            .where("type", "==", currentProduct.type)
-            .limit(6)
-            .get();
-        
-        if (querySnapshot.empty) {
-            document.getElementById('similarProductsSection').style.display = 'none';
-            return;
-        }
-        
-        similarProducts = [];
-        
-        querySnapshot.forEach((doc) => {
-            if (doc.id === currentProduct.id) return;
-            
-            const data = doc.data();
-            similarProducts.push({
-                id: doc.id,
-                stone_name: data.stone_name || data.name || 'Stone Product',
-                category: data.category || 'Natural Stone',
-                price: parseFloat(data.price) || 0,
-                price_unit: data.price_unit || 'piece',
-                color: data.color || '',
-                finish: data.finish || '',
-                type: data.type || '',
-                usage: data.usage || data.uses || '',
-                images: data.images ? data.images : (data.image ? [data.image] : []),
-                image: data.image || ''
-            });
-        });
-        
-        if (similarProducts.length < 3) {
-            await loadSimilarByCategory();
-        }
-        
-        if (similarProducts.length > 0) {
-            displaySimilarProducts();
-        } else {
-            document.getElementById('similarProductsSection').style.display = 'none';
-        }
-        
-    } catch (error) {
-        console.error('Error loading similar products:', error);
-        await loadSimilarByCategory();
-    }
-}
-
-// ... [rest of the functions remain same as previous code]
 </script>
 </body>
 </html>
