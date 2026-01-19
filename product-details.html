@@ -1285,12 +1285,13 @@ let allProducts = [];
 let similarProducts = [];
 let cartSystem = null;
 
-// ============================================
-// SIMPLE ZOOM SYSTEM (LIKE YOUR SAMPLE)
+
+/// ============================================
+// SIMPLE HOVER ZOOM SYSTEM (Updated)
 // ============================================
 
 let currentImageIndex = 0;
-let imageZoomLevel = 1;
+let imageZoomLevel = 2; // Hover zoom factor
 let isZooming = false;
 let zoomContainer, mainImage;
 
@@ -1300,83 +1301,48 @@ function initZoomSystem() {
     mainImage = document.getElementById('mainProductImage');
     
     if (!zoomContainer || !mainImage) return;
-    
-    // Mouse enter - show zoom cursor
+
+    // Mouse enter - start zoom
     zoomContainer.addEventListener('mouseenter', function() {
-        this.style.cursor = 'zoom-in';
+        isZooming = true;
+        zoomContainer.style.cursor = 'zoom-in';
+        mainImage.style.transform = `scale(${imageZoomLevel})`;
     });
-    
-    // Mouse leave - reset cursor
-    zoomContainer.addEventListener('mouseleave', function() {
-        this.style.cursor = 'default';
-        resetZoom();
-    });
-    
-    // Click to toggle zoom
-    zoomContainer.addEventListener('click', function(e) {
-        if (isZooming) {
-            resetZoom();
-        } else {
-            zoomImage(e);
-        }
-    });
-    
-    // Mouse move for zoom area
+
+    // Mouse move - move zoom focus
     zoomContainer.addEventListener('mousemove', function(e) {
-        if (isZooming) {
-            moveZoom(e);
-        }
+        if (!isZooming) return;
+
+        const rect = zoomContainer.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / zoomContainer.offsetWidth) * 100;
+        const y = ((e.clientY - rect.top) / zoomContainer.offsetHeight) * 100;
+        mainImage.style.transformOrigin = `${x}% ${y}%`;
+        mainImage.style.transform = `scale(${imageZoomLevel})`;
     });
-    
-    // Touch events for mobile
+
+    // Mouse leave - reset zoom
+    zoomContainer.addEventListener('mouseleave', function() {
+        isZooming = false;
+        mainImage.style.transform = 'scale(1)';
+        mainImage.style.transformOrigin = 'center center';
+        zoomContainer.style.cursor = 'default';
+    });
+
+    // Touch events for mobile (pinch not included, simple toggle)
     zoomContainer.addEventListener('touchstart', function(e) {
         e.preventDefault();
-        if (isZooming) {
-            resetZoom();
-        } else {
-            const touch = e.touches[0];
-            zoomImage({ clientX: touch.clientX, clientY: touch.clientY });
-        }
+        const touch = e.touches[0];
+        const rect = zoomContainer.getBoundingClientRect();
+        const x = ((touch.clientX - rect.left) / zoomContainer.offsetWidth) * 100;
+        const y = ((touch.clientY - rect.top) / zoomContainer.offsetHeight) * 100;
+        mainImage.style.transformOrigin = `${x}% ${y}%`;
+        mainImage.style.transform = `scale(${imageZoomLevel})`;
     });
-}
 
-// Zoom image
-function zoomImage(e) {
-    if (!mainImage) return;
-    
-    isZooming = true;
-    imageZoomLevel = 2;
-    zoomContainer.style.cursor = 'zoom-out';
-    
-    // Calculate zoom center based on click position
-    const rect = zoomContainer.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / zoomContainer.offsetWidth) * 100;
-    const y = ((e.clientY - rect.top) / zoomContainer.offsetHeight) * 100;
-    
-    mainImage.style.transform = `scale(${imageZoomLevel})`;
-    mainImage.style.transformOrigin = `${x}% ${y}%`;
-}
-
-// Move zoom area
-function moveZoom(e) {
-    if (!isZooming || !mainImage) return;
-    
-    const rect = zoomContainer.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / zoomContainer.offsetWidth) * 100;
-    const y = ((e.clientY - rect.top) / zoomContainer.offsetHeight) * 100;
-    
-    mainImage.style.transformOrigin = `${x}% ${y}%`;
-}
-
-// Reset zoom
-function resetZoom() {
-    if (!mainImage) return;
-    
-    isZooming = false;
-    imageZoomLevel = 1;
-    mainImage.style.transform = 'scale(1)';
-    mainImage.style.transformOrigin = 'center center';
-    zoomContainer.style.cursor = 'zoom-in';
+    zoomContainer.addEventListener('touchend', function(e) {
+        mainImage.style.transform = 'scale(1)';
+        mainImage.style.transformOrigin = 'center center';
+    });
 }
 
 // ============================================
@@ -1385,10 +1351,10 @@ function resetZoom() {
 
 function openFullscreenModal(initialIndex = 0) {
     if (!currentProduct || !currentProduct.images || currentProduct.images.length === 0) return;
-    
+
     currentImageIndex = initialIndex;
     updateFullscreenImage();
-    
+
     const modal = document.getElementById('fullscreenModal');
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -1406,12 +1372,12 @@ function closeFullscreenModal() {
 function updateFullscreenImage() {
     const fullscreenImage = document.getElementById('fullscreenImage');
     const imageCounter = document.getElementById('imageCounter');
-    
+
     if (!fullscreenImage || !currentProduct.images[currentImageIndex]) return;
-    
+
     fullscreenImage.src = currentProduct.images[currentImageIndex];
     fullscreenImage.alt = currentProduct.stone_name || 'Product Image';
-    
+
     if (imageCounter) {
         imageCounter.textContent = `${currentImageIndex + 1} / ${currentProduct.images.length}`;
     }
@@ -1419,17 +1385,24 @@ function updateFullscreenImage() {
 
 function nextFullscreenImage() {
     if (!currentProduct || !currentProduct.images) return;
-    
+
     currentImageIndex = (currentImageIndex + 1) % currentProduct.images.length;
     updateFullscreenImage();
 }
 
 function prevFullscreenImage() {
     if (!currentProduct || !currentProduct.images) return;
-    
+
     currentImageIndex = (currentImageIndex - 1 + currentProduct.images.length) % currentProduct.images.length;
     updateFullscreenImage();
 }
+
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    initZoomSystem();
+});
 
 // ============================================
 // CART SYSTEM
