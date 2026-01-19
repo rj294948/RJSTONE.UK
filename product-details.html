@@ -249,27 +249,6 @@ header.show {
     transform: scale(1.05);
 }
 
-.cart-badge, .notification-badge {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: #ff4757;
-    color: var(--white);
-    font-size: 9px;
-    font-weight: 600;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    display: none;
-}
-
-.notification-badge {
-    background: #4285f4;
-}
-
 /* PRODUCT CONTAINER */
 .product-container {
     margin-top: 60px;
@@ -405,8 +384,20 @@ header.show {
     padding: 4px 10px;
     border-radius: 12px;
     font-size: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     border: 1px solid var(--border-color);
+}
+
+/* PRODUCT DESCRIPTION - Moved below image */
+.product-description {
+    margin-bottom: 15px;
+    line-height: 1.5;
+    color: var(--text-dark);
+    font-size: 14px;
+    padding: 12px;
+    background: var(--bg-light);
+    border-radius: 8px;
+    border-left: 3px solid var(--primary-gold);
 }
 
 .price-section {
@@ -426,16 +417,6 @@ header.show {
 .price-unit {
     font-size: 12px;
     color: var(--gold-dark);
-}
-
-.product-description {
-    margin-bottom: 15px;
-    line-height: 1.5;
-    color: var(--text-dark);
-    font-size: 13px;
-    padding: 10px;
-    background: var(--bg-light);
-    border-radius: 8px;
 }
 
 /* SPECIFICATIONS */
@@ -499,12 +480,23 @@ header.show {
 }
 
 .btn-secondary {
-    background: #2c3e50;
+    background: #25D366;
     color: var(--white);
 }
 
 .btn-secondary:hover {
-    background: #1a252f;
+    background: #1da851;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.btn-whatsapp {
+    background: #25D366;
+    color: var(--white);
+}
+
+.btn-whatsapp:hover {
+    background: #1da851;
     transform: translateY(-2px);
     box-shadow: var(--shadow);
 }
@@ -707,10 +699,53 @@ header.show {
     margin-right: 5px;
 }
 
+/* WHATSAPP FLOATING ICON */
+.whatsapp-float {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: #25D366;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 998;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    transition: var(--transition);
+    border: 3px solid white;
+    text-decoration: none;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(37, 211, 102, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+    }
+}
+
+.whatsapp-float:hover {
+    background: #1da851;
+    transform: scale(1.1);
+}
+
+.whatsapp-float i {
+    font-size: 28px;
+}
+
 /* FILTER ICON FOR SIMILAR PRODUCTS */
 .filter-icon {
     position: fixed;
-    bottom: 100px;
+    bottom: 150px;
     right: 20px;
     width: 50px;
     height: 50px;
@@ -1140,6 +1175,14 @@ header.show {
 <!-- Notification -->
 <div class="notification" id="notification"></div>
 
+<!-- WhatsApp Floating Icon -->
+<a href="https://wa.me/917737740207?text=Hello%20IRYA%20STONE%2C%20I%20would%20like%20to%20enquire%20about%20your%20products" 
+   class="whatsapp-float" 
+   target="_blank" 
+   title="Chat on WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+</a>
+
 <!-- Enquiry Modal -->
 <div class="enquiry-modal" id="enquiryModal">
     <div class="enquiry-content">
@@ -1276,12 +1319,6 @@ header.show {
         <a href="#" class="action-btn" onclick="openEnquiryModal(event)">
             <i class="fas fa-envelope"></i>
         </a>
-        
-        <!-- Notification Icon -->
-        <a href="notification.html" class="action-btn" style="position: relative;">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge" id="notificationBadge">0</span>
-        </a>
     </div>
 </header>
 
@@ -1315,8 +1352,8 @@ header.show {
             <button class="btn btn-primary" onclick="openEnquiryModal(event)">
                 <i class="fas fa-envelope"></i> Send Enquiry
             </button>
-            <button class="btn btn-secondary" onclick="window.location.href='tel:+917737740207'">
-                <i class="fas fa-phone"></i> Call Now
+            <button class="btn btn-whatsapp" onclick="openWhatsApp()">
+                <i class="fab fa-whatsapp"></i> WhatsApp
             </button>
         </div>
     </div>
@@ -1349,13 +1386,13 @@ header.show {
         <i class="fas fa-search"></i>
         <span>Search</span>
     </a>
-    <a href="account.html" class="nav-btn">
-        <i class="fas fa-user"></i>
-        <span>Account</span>
-    </a>
     <a href="#" class="nav-btn" onclick="openEnquiryModal(event)">
         <i class="fas fa-envelope"></i>
         <span>Enquiry</span>
+    </a>
+    <a href="#" class="nav-btn" onclick="openWhatsApp()">
+        <i class="fab fa-whatsapp"></i>
+        <span>WhatsApp</span>
     </a>
 </div>
 
@@ -1489,6 +1526,28 @@ function prevFullscreenImage() {
 }
 
 // ============================================
+// WHATSAPP FUNCTION
+// ============================================
+
+function openWhatsApp() {
+    let message = "Hello IRYA STONE,\n\n";
+    
+    if (currentProduct) {
+        message += `I'm interested in: ${currentProduct.stone_name}\n`;
+        message += `Type: ${currentProduct.type || 'Not specified'}\n`;
+        message += `Price: £${currentProduct.price.toFixed(2)} per ${currentProduct.price_unit}\n\n`;
+    }
+    
+    message += "Please provide more details about:\n- Pricing\n- Availability\n- Minimum order quantity\n- Delivery options\n\n";
+    message += "Looking forward to your response!";
+    
+    const encodedMessage = encodeURIComponent(message);
+    const phoneNumber = "917737740207";
+    
+    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+}
+
+// ============================================
 // ENQUIRY SYSTEM
 // ============================================
 
@@ -1503,6 +1562,14 @@ function openEnquiryModal(event) {
     // Set product details in form
     document.getElementById('enquiryProductId').value = currentProduct.id;
     document.getElementById('enquiryProductName').value = currentProduct.stone_name;
+    
+    // Set auto-generated message
+    let message = `I'm interested in: ${currentProduct.stone_name}\n`;
+    message += `Type: ${currentProduct.type || 'Not specified'}\n`;
+    message += `Please provide details about pricing, availability, and delivery options.\n\n`;
+    message += `Additional Requirements: `;
+    
+    document.getElementById('enquiryMessage').value = message;
     
     // Open modal
     document.getElementById('enquiryModal').classList.add('active');
@@ -1534,51 +1601,34 @@ async function submitEnquiry(event) {
             status: 'pending'
         };
         
-        // Send email via EmailJS or similar service
-        await sendEnquiryEmail(enquiryData);
-        
-        // Also save to Firebase if available
+        // Save to Firebase
         if (firebaseDB) {
             await firebaseDB.collection('enquiries').add(enquiryData);
         }
         
-        showNotification('Enquiry sent successfully! We will contact you within 24 hours.');
+        // Also send WhatsApp message
+        const whatsappMessage = `*New Enquiry Received*%0A%0A` +
+                               `*Product:* ${enquiryData.productName}%0A` +
+                               `*Name:* ${enquiryData.name}%0A` +
+                               `*Phone:* ${enquiryData.phone}%0A` +
+                               `*Email:* ${enquiryData.email}%0A` +
+                               `*Type:* ${enquiryData.enquiryType}%0A` +
+                               `*Quantity:* ${enquiryData.quantity}%0A` +
+                               `*Message:* ${enquiryData.message.replace(/\n/g, '%0A')}`;
+        
+        // Open WhatsApp with pre-filled message
+        window.open(`https://wa.me/917737740207?text=${whatsappMessage}`, '_blank');
+        
+        showNotification('Enquiry submitted! We will contact you within 24 hours.');
         closeEnquiryModal();
         document.getElementById('enquiryForm').reset();
         
     } catch (error) {
         console.error('Error submitting enquiry:', error);
-        showError('Failed to send enquiry. Please try again or call +91 77377 40207');
+        showError('Failed to send enquiry. Please try WhatsApp or call +91 77377 40207');
     } finally {
         showLoading(false);
     }
-}
-
-async function sendEnquiryEmail(enquiryData) {
-    // Use EmailJS or your email service
-    // This is a placeholder - implement your email sending logic
-    const emailData = {
-        to: 'ravijain236129@gmail.com',
-        subject: `New Enquiry for ${enquiryData.productName}`,
-        body: `
-            New Product Enquiry Received:
-            
-            Product: ${enquiryData.productName}
-            Name: ${enquiryData.name}
-            Email: ${enquiryData.email}
-            Phone: ${enquiryData.phone}
-            Enquiry Type: ${enquiryData.enquiryType}
-            Quantity: ${enquiryData.quantity}
-            Requirements: ${enquiryData.requirements}
-            Message: ${enquiryData.message}
-            
-            Time: ${new Date().toLocaleString()}
-        `
-    };
-    
-    // Implement your email sending logic here
-    console.log('Email would be sent:', emailData);
-    return Promise.resolve();
 }
 
 // ============================================
@@ -1598,19 +1648,24 @@ function closeFilterModal() {
 function populateFilterOptions() {
     const types = new Set();
     similarProducts.forEach(product => {
-        if (product.type) {
+        if (product.type && product.type.trim() !== '') {
             types.add(product.type);
         }
     });
     
     const typeFilterOptions = document.getElementById('typeFilterOptions');
     if (typeFilterOptions) {
-        typeFilterOptions.innerHTML = Array.from(types).map(type => `
-            <div class="filter-option">
-                <input type="checkbox" id="type_${type.replace(/\s+/g, '_')}" value="${type}" onchange="applyFilters()">
-                <label for="type_${type.replace(/\s+/g, '_')}">${type}</label>
-            </div>
-        `).join('');
+        const typeArray = Array.from(types);
+        if (typeArray.length > 0) {
+            typeFilterOptions.innerHTML = typeArray.map(type => `
+                <div class="filter-option">
+                    <input type="checkbox" id="type_${type.replace(/\s+/g, '_')}" value="${type}" onchange="applyFilters()">
+                    <label for="type_${type.replace(/\s+/g, '_')}">${type}</label>
+                </div>
+            `).join('');
+        } else {
+            typeFilterOptions.innerHTML = '<div style="padding: 10px; color: var(--text-light); font-size: 12px;">No types available for filtering</div>';
+        }
     }
 }
 
@@ -1832,13 +1887,15 @@ function displayProductDetails() {
         `).join('');
     }
     
-    // Display product info with description right after image
+    // Display product info with description RIGHT AFTER IMAGE (as requested)
     if (productInfo) {
         productInfo.innerHTML = `
             <h1>${currentProduct.stone_name}</h1>
             <div class="product-category-badge">${currentProduct.category}</div>
             
+            <!-- DESCRIPTION MOVED TO TOP - RIGHT AFTER IMAGE -->
             <div class="product-description">
+                <strong>Description:</strong><br>
                 ${currentProduct.description}
             </div>
             
@@ -1915,7 +1972,7 @@ function changeMainImage(imageUrl, thumbnailElement, index = 0) {
 }
 
 // ============================================
-// SIMILAR PRODUCTS
+// SIMILAR PRODUCTS - FIXED: Now shows by product type
 // ============================================
 
 async function loadSimilarProducts() {
@@ -1925,12 +1982,27 @@ async function loadSimilarProducts() {
             return;
         }
         
-        const querySnapshot = await firebaseDB.collection("products")
-            .where("category", "==", "Sandstone") // Changed to only show Sandstone
-            .limit(20)
-            .get();
+        console.log('Loading similar products for type:', currentProduct.type);
+        
+        let query;
+        
+        if (currentProduct.type && currentProduct.type.trim() !== '') {
+            // Load products with SAME TYPE as current product
+            query = firebaseDB.collection("products")
+                .where("type", "==", currentProduct.type)
+                .where("category", "==", "Sandstone")
+                .limit(20);
+        } else {
+            // If no type, load all sandstone products
+            query = firebaseDB.collection("products")
+                .where("category", "==", "Sandstone")
+                .limit(20);
+        }
+        
+        const querySnapshot = await query.get();
         
         if (querySnapshot.empty) {
+            console.log('No similar products found');
             document.getElementById('similarProductsSection').style.display = 'none';
             return;
         }
@@ -1948,15 +2020,19 @@ async function loadSimilarProducts() {
                 type: data.type || '',
                 price: parseFloat(data.price) || 0,
                 price_unit: data.price_unit || 'piece',
-                image: getProductImage(data)
+                image: getProductImage(data),
+                description: data.description || ''
             });
         });
+        
+        console.log(`Found ${similarProducts.length} similar products`);
         
         if (similarProducts.length > 0) {
             filteredSimilarProducts = [...similarProducts];
             populateFilterOptions();
             displaySimilarProducts();
         } else {
+            console.log('No similar products to display');
             document.getElementById('similarProductsSection').style.display = 'none';
         }
         
@@ -2029,8 +2105,11 @@ function performSearch(query) {
         const searchText = query.toLowerCase();
         const productName = (product.name || '').toLowerCase();
         const productType = (product.type || '').toLowerCase();
+        const productCategory = (product.category || '').toLowerCase();
         
-        return productName.includes(searchText) || productType.includes(searchText);
+        return productName.includes(searchText) || 
+               productType.includes(searchText) ||
+               productCategory.includes(searchText);
     });
     
     displaySearchResults(results, query);
@@ -2089,6 +2168,7 @@ function handleScroll() {
     const header = document.getElementById('mainHeader');
     const bottomNav = document.getElementById('bottomNav');
     const filterIcon = document.querySelector('.filter-icon');
+    const whatsappIcon = document.querySelector('.whatsapp-float');
     
     if (!header || !bottomNav) return;
     
@@ -2097,7 +2177,8 @@ function handleScroll() {
         if (scrollTop < 50) {
             header.classList.remove('hidden');
             bottomNav.classList.remove('hidden');
-            if (filterIcon) filterIcon.style.bottom = '100px';
+            if (filterIcon) filterIcon.style.bottom = '150px';
+            if (whatsappIcon) whatsappIcon.style.bottom = '80px';
             isHeaderVisible = true;
             return;
         }
@@ -2107,13 +2188,15 @@ function handleScroll() {
                 header.classList.add('hidden');
                 bottomNav.classList.add('hidden');
                 if (filterIcon) filterIcon.style.bottom = '20px';
+                if (whatsappIcon) whatsappIcon.style.bottom = '20px';
                 isHeaderVisible = false;
             }
         } else {
             if (!isHeaderVisible) {
                 header.classList.remove('hidden');
                 bottomNav.classList.remove('hidden');
-                if (filterIcon) filterIcon.style.bottom = '100px';
+                if (filterIcon) filterIcon.style.bottom = '150px';
+                if (whatsappIcon) whatsappIcon.style.bottom = '80px';
                 isHeaderVisible = true;
             }
         }
@@ -2194,6 +2277,7 @@ async function initializeSearch() {
         // Only load Sandstone products for search
         const querySnapshot = await firebaseDB.collection("products")
             .where("category", "==", "Sandstone")
+            .limit(50)
             .get();
         
         allProducts = [];
