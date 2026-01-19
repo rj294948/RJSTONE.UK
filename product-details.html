@@ -39,9 +39,10 @@ body {
     color: var(--text-dark);
     font-size: 14px;
     padding-bottom: 60px;
+    overflow-x: hidden;
 }
 
-/* HEADER - HOME PAGE STYLE WITH SCROLL */
+/* HEADER */
 header {
     position: fixed;
     top: 0;
@@ -96,7 +97,7 @@ header.show {
     font-family: 'Roboto Slab', serif;
 }
 
-/* Search Bar - Home Page Style */
+/* Search Bar */
 .search-box {
     flex: 1;
     margin: 0 10px;
@@ -278,11 +279,12 @@ header.show {
     padding: 10px;
 }
 
-/* PRODUCT GALLERY */
+/* PRODUCT GALLERY WITH ZOOM */
 .product-gallery {
     margin-bottom: 15px;
 }
 
+/* Main Image Container with Zoom */
 .main-image-wrapper {
     width: 100%;
     height: 280px;
@@ -302,10 +304,38 @@ header.show {
     object-fit: contain;
     padding: 10px;
     transition: transform 0.3s ease;
+    cursor: zoom-in;
 }
 
-.main-image:hover {
-    transform: scale(1.02);
+/* Zoom Lens for Desktop */
+.img-zoom-lens {
+    position: absolute;
+    border: 2px solid var(--primary-gold);
+    background: rgba(201, 162, 39, 0.1);
+    pointer-events: none;
+    z-index: 5;
+    display: none;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+/* Zoom Result for Desktop */
+.img-zoom-result {
+    position: absolute;
+    top: 0;
+    left: 105%;
+    width: 300px;
+    height: 300px;
+    border: 2px solid var(--primary-gold);
+    border-radius: 8px;
+    background: white;
+    background-repeat: no-repeat;
+    z-index: 100;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    display: none;
+    overflow: hidden;
 }
 
 /* Multiple Images Indicator */
@@ -324,6 +354,7 @@ header.show {
     z-index: 2;
 }
 
+/* Thumbnails Container */
 .thumbnails-container {
     display: flex;
     gap: 8px;
@@ -343,9 +374,15 @@ header.show {
     cursor: pointer;
     background: var(--bg-light);
     position: relative;
+    transition: var(--transition);
 }
 
 .thumbnail.active {
+    border-color: var(--primary-gold);
+    transform: scale(1.05);
+}
+
+.thumbnail:hover {
     border-color: var(--primary-gold);
 }
 
@@ -356,7 +393,7 @@ header.show {
     padding: 2px;
 }
 
-/* PRODUCT INFO - WITH BUTTONS BELOW */
+/* PRODUCT INFO */
 .product-info-section {
     background: var(--white);
     border-radius: 12px;
@@ -484,7 +521,7 @@ header.show {
     box-shadow: var(--shadow);
 }
 
-/* BOTTOM NAV - WITH SCROLL */
+/* BOTTOM NAV */
 .bottom-nav {
     position: fixed;
     left: 0;
@@ -1127,6 +1164,12 @@ header.show {
     }
 }
 
+@media (max-width: 767px) {
+    .img-zoom-result {
+        display: none !important;
+    }
+}
+
 @media (max-width: 480px) {
     .main-image-wrapper {
         height: 220px;
@@ -1265,7 +1308,7 @@ header.show {
             <span class="cart-badge" id="cartBadge">0</span>
         </a>
         
-        <!-- Notification Icon (Home Icon की जगह) -->
+        <!-- Notification Icon -->
         <a href="notification.html" class="action-btn" style="position: relative;">
             <i class="fas fa-bell"></i>
             <span class="notification-badge" id="notificationBadge">0</span>
@@ -1275,10 +1318,12 @@ header.show {
 
 <!-- Product Details -->
 <div class="product-container">
-    <!-- Product Gallery -->
+    <!-- Product Gallery with Zoom -->
     <div class="product-gallery">
-        <div class="main-image-wrapper">
+        <div class="main-image-wrapper" id="mainImageWrapper">
             <img src="" alt="" class="main-image" id="mainProductImage">
+            <div class="img-zoom-lens" id="zoomLens"></div>
+            <div class="img-zoom-result" id="zoomResult"></div>
             <div class="multiple-images-indicator" id="multipleImagesIndicator" style="display: none;">
                 <i class="fas fa-layer-group"></i> <span id="imageCount">0</span>
             </div>
@@ -1295,7 +1340,7 @@ header.show {
             <!-- Product info will be loaded here -->
         </div>
         
-        <!-- Action Buttons (Product Info के नीचे) -->
+        <!-- Action Buttons -->
         <div class="product-actions">
             <button class="btn btn-primary" onclick="addToCart()">
                 <i class="fas fa-cart-plus"></i> Add to Cart
@@ -1635,13 +1680,105 @@ class CartSystem {
 }
 
 // ============================================
+// IMAGE ZOOM FUNCTIONALITY (LIKE YOUR SAMPLE)
+// ============================================
+
+function initImageZoom(imgID, resultID, lensID) {
+    var img, lens, result, cx, cy;
+    img = document.getElementById(imgID);
+    result = document.getElementById(resultID);
+    
+    if (!img || !result) return;
+    
+    // Create lens if doesn't exist
+    lens = document.getElementById(lensID);
+    if (!lens) {
+        lens = document.createElement("DIV");
+        lens.setAttribute("class", "img-zoom-lens");
+        lens.setAttribute("id", lensID);
+        img.parentElement.insertBefore(lens, img);
+    }
+    
+    // Calculate the ratio between result DIV and lens
+    cx = result.offsetWidth / lens.offsetWidth;
+    cy = result.offsetHeight / lens.offsetHeight;
+    
+    // Set background properties for the result DIV
+    result.style.backgroundImage = "url('" + img.src + "')";
+    result.style.backgroundSize = (img.width * cx) + "px " + (img.height * cy) + "px";
+    
+    // Execute a function when someone moves the cursor over the image, or the lens
+    lens.addEventListener("mousemove", moveLens);
+    img.addEventListener("mousemove", moveLens);
+    
+    // For touch screens
+    lens.addEventListener("touchmove", moveLens);
+    img.addEventListener("touchmove", moveLens);
+    
+    function moveLens(e) {
+        var pos, x, y;
+        e.preventDefault();
+        
+        // Get the cursor's x and y positions
+        pos = getCursorPos(e);
+        
+        // Calculate the position of the lens
+        x = pos.x - (lens.offsetWidth / 2);
+        y = pos.y - (lens.offsetHeight / 2);
+        
+        // Prevent the lens from being positioned outside the image
+        if (x > img.width - lens.offsetWidth) { x = img.width - lens.offsetWidth; }
+        if (x < 0) { x = 0; }
+        if (y > img.height - lens.offsetHeight) { y = img.height - lens.offsetHeight; }
+        if (y < 0) { y = 0; }
+        
+        // Set the position of the lens
+        lens.style.left = x + "px";
+        lens.style.top = y + "px";
+        
+        // Display what the lens "sees"
+        result.style.backgroundPosition = "-" + (x * cx) + "px -" + (y * cy) + "px";
+    }
+    
+    function getCursorPos(e) {
+        var a, x = 0, y = 0;
+        e = e || window.event;
+        
+        // Get the x and y positions of the image
+        a = img.getBoundingClientRect();
+        
+        // Calculate the cursor's x and y coordinates, relative to the image
+        x = e.pageX - a.left;
+        y = e.pageY - a.top;
+        
+        // Consider any page scrolling
+        x = x - window.pageXOffset;
+        y = y - window.pageYOffset;
+        
+        return { x: x, y: y };
+    }
+    
+    // Show/hide zoom on mouse enter/leave
+    img.addEventListener("mouseenter", function() {
+        if (window.innerWidth > 767) { // Only on desktop
+            lens.style.display = "block";
+            result.style.display = "block";
+        }
+    });
+    
+    img.addEventListener("mouseleave", function() {
+        lens.style.display = "none";
+        result.style.display = "none";
+    });
+}
+
+// ============================================
 // ENHANCED FULLSCREEN IMAGE VIEWER
 // ============================================
 
 let currentImageIndex = 0;
 let imageZoom = 1;
 
-// Create enhanced fullscreen modal dynamically
 function createFullscreenModal() {
     const fullscreenModalHTML = `
         <div class="fullscreen-modal" id="fullscreenModal">
@@ -1680,7 +1817,6 @@ function createFullscreenModal() {
         </div>
     `;
     
-    // Insert modal into body if not exists
     if (!document.getElementById('fullscreenModal')) {
         document.body.insertAdjacentHTML('beforeend', fullscreenModalHTML);
     }
@@ -1698,10 +1834,8 @@ function openFullscreenModal(initialIndex = 0) {
     const fullscreenImage = document.getElementById('fullscreenImage');
     const thumbnailsContainer = document.getElementById('fullscreenThumbnails');
     
-    // Update main image
     updateFullscreenImage();
     
-    // Create thumbnails
     if (thumbnailsContainer && currentProduct.images.length > 1) {
         thumbnailsContainer.innerHTML = currentProduct.images.map((img, index) => `
             <div class="fullscreen-thumb ${index === currentImageIndex ? 'active' : ''}" 
@@ -1735,17 +1869,14 @@ function updateFullscreenImage() {
     
     if (!fullscreenImage || !currentProduct.images[currentImageIndex]) return;
     
-    // Update image
     fullscreenImage.src = currentProduct.images[currentImageIndex];
     fullscreenImage.style.transform = `scale(${imageZoom})`;
     fullscreenImage.alt = currentProduct.stone_name || 'Product Image';
     
-    // Update counter
     if (imageCounter) {
         imageCounter.textContent = `${currentImageIndex + 1} / ${currentProduct.images.length}`;
     }
     
-    // Update active thumbnail
     thumbnails.forEach((thumb, index) => {
         thumb.classList.toggle('active', index === currentImageIndex);
     });
@@ -1810,7 +1941,6 @@ function toggleZoom() {
 let searchTimeout = null;
 
 async function initializeSearch() {
-    // Load all products for search
     try {
         if (!firebaseDB) {
             await initializeFirebase();
@@ -1829,13 +1959,13 @@ async function initializeSearch() {
                 priceUnit: data.price_unit || 'piece',
                 image: getProductImage(data),
                 usage: data.usage || data.uses || '',
-                description: data.description || ''
+                description: data.description || '',
+                type: data.type || ''
             });
         });
         
         console.log(`✅ ${allProducts.length} products loaded for search`);
         
-        // Setup search event listeners
         const searchInput = document.getElementById('searchInput');
         const searchIcon = document.getElementById('searchIcon');
         
@@ -1887,7 +2017,8 @@ function performSearch(query) {
             (product.name && product.name.toLowerCase().includes(searchText)) ||
             (product.category && product.category.toLowerCase().includes(searchText)) ||
             (product.usage && product.usage.toLowerCase().includes(searchText)) ||
-            (product.description && product.description.toLowerCase().includes(searchText))
+            (product.description && product.description.toLowerCase().includes(searchText)) ||
+            (product.type && product.type.toLowerCase().includes(searchText))
         );
     });
     
@@ -1959,6 +2090,7 @@ async function loadProductDetails(productId) {
             id: doc.id,
             stone_name: data.stone_name || data.name || 'Stone Product',
             category: data.category || 'Natural Stone',
+            type: data.type || '',
             description: data.description || 'Premium quality natural stone.',
             price: parseFloat(data.price) || 0,
             price_unit: data.price_unit || 'piece',
@@ -2007,6 +2139,18 @@ function displayProductDetails() {
         
         // Add click handler for fullscreen
         mainImage.parentElement.onclick = () => openFullscreenModal(0);
+        
+        // Initialize zoom after image loads
+        mainImage.onload = function() {
+            if (window.innerWidth > 767) { // Only on desktop
+                initImageZoom('mainProductImage', 'zoomResult', 'zoomLens');
+            }
+        };
+        
+        // Trigger load event in case image is already cached
+        if (mainImage.complete) {
+            mainImage.onload();
+        }
     }
     
     // Show multiple images indicator
@@ -2043,6 +2187,13 @@ function displayProductDetails() {
             </div>
             
             <div class="specs-grid">
+                ${currentProduct.type ? `
+                    <div class="spec-item">
+                        <div class="spec-label">Type</div>
+                        <div class="spec-value">${currentProduct.type}</div>
+                    </div>
+                ` : ''}
+                
                 ${currentProduct.color ? `
                     <div class="spec-item">
                         <div class="spec-label">Color</div>
@@ -2102,20 +2253,32 @@ function changeMainImage(imageUrl, thumbnailElement, index = 0) {
     if (index !== undefined) {
         currentImageIndex = index;
     }
+    
+    // Reinitialize zoom for new image
+    setTimeout(() => {
+        if (window.innerWidth > 767) {
+            initImageZoom('mainProductImage', 'zoomResult', 'zoomLens');
+        }
+    }, 100);
 }
 
 // ============================================
-// LOAD SIMILAR PRODUCTS
+// LOAD SIMILAR PRODUCTS (TYPE-BASED)
 // ============================================
 
 async function loadSimilarProducts() {
     try {
-        if (!currentProduct || !currentProduct.usage || !firebaseDB) {
+        if (!currentProduct || !currentProduct.type || !firebaseDB) {
             document.getElementById('similarProductsSection').style.display = 'none';
             return;
         }
         
-        const querySnapshot = await firebaseDB.collection("products").get();
+        // Fetch products with same type from Firestore
+        const querySnapshot = await firebaseDB
+            .collection("products")
+            .where("type", "==", currentProduct.type)
+            .limit(6)
+            .get();
         
         if (querySnapshot.empty) {
             document.getElementById('similarProductsSection').style.display = 'none';
@@ -2123,49 +2286,31 @@ async function loadSimilarProducts() {
         }
         
         similarProducts = [];
-        const currentUses = currentProduct.usage.split(',').map(u => u.trim().toLowerCase()).filter(u => u);
         
         querySnapshot.forEach((doc) => {
-            if (doc.id !== currentProduct.id) {
-                const data = doc.data();
-                const productUsage = (data.usage || data.uses || '').toLowerCase();
-                
-                // Check if product has similar usage
-                let isSimilar = false;
-                
-                // Priority 1: Check for "Wall Cladding" specifically
-                if (currentUses.includes('wall cladding') && productUsage.includes('wall cladding')) {
-                    isSimilar = true;
-                }
-                // Priority 2: Check for other matching uses
-                else {
-                    currentUses.forEach(use => {
-                        if (productUsage.includes(use) || use.includes(productUsage)) {
-                            isSimilar = true;
-                        }
-                    });
-                }
-                
-                // Priority 3: Check by category if still not similar
-                if (!isSimilar && data.category === currentProduct.category) {
-                    isSimilar = true;
-                }
-                
-                if (isSimilar) {
-                    similarProducts.push({
-                        id: doc.id,
-                        stone_name: data.stone_name || data.name,
-                        category: data.category || 'Natural Stone',
-                        price: parseFloat(data.price) || 0,
-                        price_unit: data.price_unit || 'piece',
-                        color: data.color || '',
-                        usage: data.usage || data.uses || '',
-                        images: data.images ? data.images : (data.image ? [data.image] : []),
-                        image: data.image || ''
-                    });
-                }
-            }
+            // Skip current product
+            if (doc.id === currentProduct.id) return;
+            
+            const data = doc.data();
+            similarProducts.push({
+                id: doc.id,
+                stone_name: data.stone_name || data.name || 'Stone Product',
+                category: data.category || 'Natural Stone',
+                price: parseFloat(data.price) || 0,
+                price_unit: data.price_unit || 'piece',
+                color: data.color || '',
+                finish: data.finish || '',
+                type: data.type || '',
+                usage: data.usage || data.uses || '',
+                images: data.images ? data.images : (data.image ? [data.image] : []),
+                image: data.image || ''
+            });
         });
+        
+        // If not enough similar products by type, fetch by category
+        if (similarProducts.length < 3) {
+            await loadSimilarByCategory();
+        }
         
         if (similarProducts.length > 0) {
             displaySimilarProducts();
@@ -2175,7 +2320,45 @@ async function loadSimilarProducts() {
         
     } catch (error) {
         console.error('Error loading similar products:', error);
-        document.getElementById('similarProductsSection').style.display = 'none';
+        // Fallback to category-based
+        await loadSimilarByCategory();
+    }
+}
+
+// Fallback function to load by category
+async function loadSimilarByCategory() {
+    try {
+        if (!currentProduct || !currentProduct.category || !firebaseDB) return;
+        
+        const querySnapshot = await firebaseDB
+            .collection("products")
+            .where("category", "==", currentProduct.category)
+            .limit(6)
+            .get();
+        
+        querySnapshot.forEach((doc) => {
+            // Skip current product and already added products
+            if (doc.id === currentProduct.id || 
+                similarProducts.some(p => p.id === doc.id)) return;
+            
+            const data = doc.data();
+            similarProducts.push({
+                id: doc.id,
+                stone_name: data.stone_name || data.name || 'Stone Product',
+                category: data.category || 'Natural Stone',
+                price: parseFloat(data.price) || 0,
+                price_unit: data.price_unit || 'piece',
+                color: data.color || '',
+                finish: data.finish || '',
+                type: data.type || '',
+                usage: data.usage || data.uses || '',
+                images: data.images ? data.images : (data.image ? [data.image] : []),
+                image: data.image || ''
+            });
+        });
+        
+    } catch (error) {
+        console.error('Error loading similar by category:', error);
     }
 }
 
@@ -2187,19 +2370,15 @@ function displaySimilarProducts() {
         return;
     }
     
-    // Sort by relevance (products with "Wall Cladding" first)
-    similarProducts.sort((a, b) => {
-        const aUses = (a.usage || '').toLowerCase();
-        const bUses = (b.usage || '').toLowerCase();
-        
-        if (aUses.includes('wall cladding') && !bUses.includes('wall cladding')) return -1;
-        if (!aUses.includes('wall cladding') && bUses.includes('wall cladding')) return 1;
-        return 0;
-    });
+    // Show section title with type
+    const sectionTitle = document.querySelector('.similar-products h2');
+    if (sectionTitle && currentProduct.type) {
+        sectionTitle.innerHTML = `<i class="fas fa-gem"></i> Similar ${currentProduct.type.charAt(0).toUpperCase() + currentProduct.type.slice(1)} Products`;
+    }
     
     const productsHTML = similarProducts.slice(0, 6).map(product => {
         const productImage = getProductImage(product);
-        const shortUsage = (product.usage || '').split(',')[0] || 'General Use';
+        const productType = product.type ? product.type.charAt(0).toUpperCase() + product.type.slice(1) : 'Product';
         
         return `
             <a href="product-details.html?id=${product.id}" class="similar-product-card">
@@ -2215,7 +2394,8 @@ function displaySimilarProducts() {
                 <div class="product-info-overlay">
                     <div class="product-name">${product.stone_name}</div>
                     <div class="product-price">£${product.price.toFixed(2)}</div>
-                    ${product.category ? `<div class="product-category">${shortUsage}</div>` : ''}
+                    ${product.finish ? `<div class="product-category">${product.finish}</div>` : ''}
+                    ${product.type ? `<div class="product-category" style="font-size: 9px; opacity: 0.7;">${productType}</div>` : ''}
                 </div>
             </a>
         `;
@@ -2784,6 +2964,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Initial scroll check
     handleScroll();
+    
+    // Handle window resize for zoom
+    window.addEventListener('resize', function() {
+        if (currentProduct && currentProduct.images.length > 0) {
+            // Reinitialize zoom on resize
+            if (window.innerWidth > 767) {
+                initImageZoom('mainProductImage', 'zoomResult', 'zoomLens');
+            } else {
+                // Hide zoom elements on mobile
+                document.getElementById('zoomLens').style.display = 'none';
+                document.getElementById('zoomResult').style.display = 'none';
+            }
+        }
+    });
 });
 </script>
 </body>
