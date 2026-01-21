@@ -276,7 +276,7 @@ header.show {
     padding: 15px;
     display: grid;
     grid-template-columns: 1fr;
-    gap: 15px; /* Reduced gap */
+    gap: 15px;
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
@@ -285,8 +285,8 @@ header.show {
 @media (min-width: 768px) {
     .product-container {
         grid-template-columns: 1fr 1fr;
-        gap: 15px; /* Reduced gap */
-        padding: 15px;
+        gap: 20px;
+        padding: 20px;
     }
 }
 
@@ -294,7 +294,7 @@ header.show {
 .product-gallery {
     background: var(--white);
     border-radius: 12px;
-    padding: 15px; /* Reduced padding */
+    padding: 15px;
     box-shadow: var(--shadow);
     position: relative;
     overflow: visible;
@@ -307,9 +307,9 @@ header.show {
     position: relative;
     border-radius: 12px;
     background: var(--bg-light);
-    margin-bottom: 12px; /* Reduced margin */
+    margin-bottom: 12px;
     overflow: visible;
-    height: 320px; /* COMPACT SIZE (was 400px) */
+    height: 320px;
 }
 
 .main-image-wrapper {
@@ -330,7 +330,7 @@ header.show {
     transition: transform 0.3s ease;
 }
 
-/* HOVER BOX - VISIBLE NOW */
+/* HOVER BOX */
 .hover-box {
     position: absolute;
     width: 100px;
@@ -349,24 +349,28 @@ header.show {
     display: block;
 }
 
-/* ZOOM PANEL - FIXED POSITION, VISIBLE, CORRECTED */
+/* ZOOM PANEL - NEW POSITION (FLOATING OVER) */
 .zoom-panel {
-    position: absolute;
-    top: 0;
-    left: calc(100% + 15px); /* Right side with gap */
-    width: 320px; /* SAME AS main-image-container height */
-    height: 320px; /* SAME AS main-image-container height */
+    position: fixed; /* Changed from absolute to fixed */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
     background: var(--white);
     border: 2px solid var(--primary-gold);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-    z-index: 1002; /* Increased z-index */
+    box-shadow: 0 5px 30px rgba(0,0,0,0.25);
+    z-index: 9999; /* Very high z-index */
     display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .zoom-panel.active {
     display: block;
+    opacity: 1;
 }
 
 .zoom-image-container {
@@ -431,7 +435,7 @@ header.show {
 
 .thumbnail {
     flex: 0 0 auto;
-    width: 60px; /* Smaller thumbnails */
+    width: 60px;
     height: 60px;
     border-radius: 6px;
     overflow: hidden;
@@ -468,18 +472,18 @@ header.show {
 .product-info-section {
     background: var(--white);
     border-radius: 12px;
-    padding: 15px; /* Reduced padding */
+    padding: 15px;
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    gap: 12px; /* COMPACT GAP */
+    gap: 12px;
     height: fit-content;
     position: sticky;
     top: 70px;
 }
 
 .product-info h1 {
-    font-size: 18px; /* Smaller size */
+    font-size: 18px;
     margin-bottom: 6px;
     color: var(--stone-dark);
     font-family: 'Roboto Slab', serif;
@@ -533,7 +537,7 @@ header.show {
 }
 
 .price-value {
-    font-size: 20px; /* Smaller size */
+    font-size: 20px;
     font-weight: 700;
     color: var(--primary-gold);
 }
@@ -1248,7 +1252,8 @@ header.show {
     }
     
     .zoom-panel {
-        display: none !important;
+        width: 300px;
+        height: 300px;
     }
     
     .thumbnail {
@@ -1283,6 +1288,11 @@ header.show {
 @media (max-width: 480px) {
     .main-image-container {
         height: 240px;
+    }
+    
+    .zoom-panel {
+        width: 280px;
+        height: 280px;
     }
     
     .thumbnail {
@@ -1358,41 +1368,6 @@ header.show {
 @media (max-width: 768px) {
     .mobile-zoom-btn {
         display: flex;
-    }
-}
-
-/* Ensure zoom panel is visible on desktop - FIXED */
-@media (min-width: 768px) {
-    .product-gallery {
-        position: relative;
-        overflow: visible !important;
-    }
-    
-    .zoom-panel {
-        position: absolute;
-        display: none;
-        top: 0 !important;
-        left: calc(100% + 15px) !important;
-        z-index: 1002 !important;
-    }
-    
-    .zoom-panel.active {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-    
-    /* Prevent zoom panel from being hidden by other elements */
-    .product-container {
-        overflow: visible !important;
-        position: relative;
-    }
-}
-
-/* Fix for zoom panel positioning when product gallery is at edge */
-@media (min-width: 768px) and (max-width: 1100px) {
-    .zoom-panel {
-        left: calc(100% + 10px) !important;
     }
 }
 </style>
