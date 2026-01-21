@@ -331,7 +331,7 @@ header.show {
     padding: 10px;
 }
 
-/* HOVER BOX */
+/* HOVER BOX - FIXED POSITIONING */
 .hover-box {
     position: absolute;
     width: 150px;
@@ -343,13 +343,15 @@ header.show {
     box-shadow: 0 0 15px rgba(0,0,0,0.3);
     border-radius: 4px;
     display: none;
+    top: 0;
+    left: 0;
 }
 
 .hover-box.active {
     display: block;
 }
 
-/* ZOOM PANEL - FLOATING OVER */
+/* ZOOM PANEL - FIXED BLINKING ISSUE */
 .zoom-panel {
     position: fixed;
     top: 50%;
@@ -363,14 +365,14 @@ header.show {
     overflow: hidden;
     box-shadow: 0 8px 40px rgba(0,0,0,0.3);
     z-index: 9999;
-    display: none;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .zoom-panel.active {
-    display: block;
     opacity: 1;
+    visibility: visible;
 }
 
 .zoom-image-container {
@@ -388,6 +390,7 @@ header.show {
     max-width: none;
     transform: scale(2.5);
     transform-origin: 0 0;
+    transition: transform 0.1s ease;
 }
 
 /* Multiple Images Indicator */
@@ -711,143 +714,7 @@ header.show {
     font-size: 16px;
 }
 
-/* ENQUIRY MODAL */
-.enquiry-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.enquiry-modal.active {
-    display: flex;
-}
-
-.enquiry-content {
-    background: var(--white);
-    border-radius: 12px;
-    width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(50px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-.enquiry-header {
-    padding: 20px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--primary-gold);
-    color: white;
-    border-radius: 12px 12px 0 0;
-}
-
-.enquiry-header h3 {
-    font-size: 18px;
-    color: var(--white);
-}
-
-.close-enquiry {
-    background: none;
-    border: none;
-    font-size: 22px;
-    cursor: pointer;
-    color: var(--white);
-    opacity: 0.8;
-}
-
-.close-enquiry:hover {
-    opacity: 1;
-}
-
-.enquiry-body {
-    padding: 25px;
-}
-
-.enquiry-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-group label {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-dark);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-    padding: 12px 15px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 15px;
-    transition: var(--transition);
-    font-family: 'Poppins', sans-serif;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-    outline: none;
-    border-color: var(--primary-gold);
-    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.2);
-}
-
-.form-group textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-.required {
-    color: #ff4757;
-}
-
-.enquiry-note {
-    background: linear-gradient(135deg, #fff8e1, #fff3cd);
-    padding: 15px;
-    border-radius: 8px;
-    font-size: 14px;
-    color: var(--gold-dark);
-    border: 1px solid rgba(201, 162, 39, 0.3);
-    margin: 15px 0;
-    line-height: 1.6;
-}
-
-.enquiry-note i {
-    margin-right: 8px;
-}
+/* ENQUIRY MODAL - REMOVED AS PER REQUIREMENT */
 
 /* WHATSAPP FLOATING ICON */
 .whatsapp-float {
@@ -922,7 +789,7 @@ header.show {
     font-size: 25px;
 }
 
-/* SIMILAR PRODUCTS - 5 PER ROW ON DESKTOP */
+/* SIMILAR PRODUCTS - FIXED IMAGE STRETCH */
 .similar-products {
     margin-top: 40px;
     padding: 25px;
@@ -979,7 +846,7 @@ header.show {
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-height: 280px;
+    min-height: 320px; /* Increased height for better layout */
 }
 
 .similar-product-card:hover {
@@ -990,19 +857,25 @@ header.show {
 
 .card-image-container {
     width: 100%;
-    height: 160px;
+    height: 200px; /* Fixed height for consistent images */
     overflow: hidden;
     position: relative;
     flex-shrink: 0;
     background: var(--bg-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
 }
 
+/* FIXED: Images stretch properly without blank spaces */
 .card-image {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: contain; /* Changed from cover to contain */
     transition: transform 0.5s ease;
-    padding: 15px;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .similar-product-card:hover .card-image {
@@ -1017,6 +890,7 @@ header.show {
     flex-direction: column;
     justify-content: space-between;
     border-top: 1px solid var(--border-color);
+    min-height: 120px; /* Minimum height for info section */
 }
 
 .product-name {
@@ -1031,6 +905,7 @@ header.show {
     -webkit-box-orient: vertical;
     overflow: hidden;
     min-height: 42px;
+    flex-grow: 1;
 }
 
 .product-price {
@@ -1039,6 +914,7 @@ header.show {
     color: var(--primary-gold);
     font-family: 'Roboto Slab', serif;
     margin-bottom: 5px;
+    margin-top: auto;
 }
 
 .product-price .price-unit {
@@ -1054,7 +930,7 @@ header.show {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    margin-top: auto;
+    margin-top: 8px;
     padding-top: 8px;
     border-top: 1px solid var(--border-color);
 }
@@ -1137,7 +1013,11 @@ header.show {
     }
     
     .card-image-container {
-        height: 140px;
+        height: 160px;
+    }
+    
+    .similar-product-card {
+        min-height: 280px;
     }
     
     .product-info-section {
@@ -1180,7 +1060,11 @@ header.show {
     }
     
     .card-image-container {
-        height: 120px;
+        height: 140px;
+    }
+    
+    .similar-product-card {
+        min-height: 250px;
     }
     
     .product-info h1 {
@@ -1250,7 +1134,16 @@ header.show {
     }
 }
 
-/* Filter styles removed for brevity - they remain the same */
+/* TOUCH SUPPORT FOR MOBILE */
+.touch-active {
+    cursor: pointer !important;
+}
+
+.touch-zoom-active {
+    cursor: zoom-in !important;
+}
+
+/* Remove modal styles as email opens directly */
 </style>
 </head>
 
@@ -1301,8 +1194,8 @@ header.show {
             <span class="notification-badge" id="notificationBadge">0</span>
         </a>
         
-        <!-- Enquiry Icon -->
-        <a href="#" class="action-btn" onclick="openEnquiryModal(event, 'whatsapp')">
+        <!-- Email Icon - Direct Email -->
+        <a href="#" class="action-btn" onclick="openDirectEmail()">
             <i class="fas fa-envelope"></i>
         </a>
     </div>
@@ -1349,14 +1242,11 @@ header.show {
             <button class="btn btn-email" onclick="openDirectEmail()">
                 <i class="fas fa-envelope"></i> Email Enquiry
             </button>
-            <button class="btn btn-primary" onclick="openEnquiryModal(event, 'form')">
-                <i class="fas fa-edit"></i> Fill Enquiry Form
-            </button>
         </div>
     </div>
 </div>
 
-<!-- Similar Products - 5 PER ROW ON DESKTOP -->
+<!-- Similar Products - FIXED IMAGE STRETCH -->
 <div class="similar-products" id="similarProductsSection">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2><i class="fas fa-gem"></i> Similar Products</h2>
@@ -1367,7 +1257,7 @@ header.show {
         </div>
     </div>
     <div class="similar-products-grid" id="similarProductsGrid">
-        <!-- Similar products will be loaded here - 5 PER ROW ON DESKTOP -->
+        <!-- Similar products will be loaded here - Images will stretch properly -->
     </div>
 </div>
 
@@ -1390,9 +1280,9 @@ header.show {
         <span>Notifications</span>
         <span class="notification-badge" id="bottomNotificationBadge">0</span>
     </a>
-    <a href="#" class="nav-btn" onclick="openEnquiryModal(event, 'whatsapp')">
+    <a href="#" class="nav-btn" onclick="openDirectEmail()">
         <i class="fas fa-envelope"></i>
-        <span>Enquiry</span>
+        <span>Email</span>
     </a>
 </div>
 
@@ -1423,7 +1313,7 @@ let similarProducts = [];
 let filteredSimilarProducts = [];
 
 // ============================================
-// FIXED ZOOM SYSTEM (From your old code)
+// FIXED ZOOM SYSTEM - NO BLINKING
 // ============================================
 
 function initZoomSystem() {
@@ -1449,30 +1339,56 @@ function initZoomSystem() {
         zoomImage.src = mainImage.src;
     }
 
-    // Mouse event handlers
-    wrapper.addEventListener('mouseenter', function(e) {
-        if (window.innerWidth <= 768) return;
+    // Mouse event handlers for desktop
+    if (window.innerWidth > 768) {
+        wrapper.addEventListener('mouseenter', function(e) {
+            console.log('🖱️ Mouse entered image');
+            hoverBox.style.display = 'block';
+            zoomPanel.classList.add('active');
+            updateZoom(e);
+        });
+
+        wrapper.addEventListener('mousemove', function(e) {
+            updateZoom(e);
+        });
+
+        wrapper.addEventListener('mouseleave', function() {
+            hoverBox.style.display = 'none';
+            zoomPanel.classList.remove('active');
+        });
+    } else {
+        // Touch events for mobile
+        let isZooming = false;
         
-        console.log('🖱️ Mouse entered image');
-        hoverBox.style.display = 'block';
-        zoomPanel.classList.add('active');
-        updateZoom(e);
-    });
-
-    wrapper.addEventListener('mousemove', function(e) {
-        if (window.innerWidth <= 768) return;
-        updateZoom(e);
-    });
-
-    wrapper.addEventListener('mouseleave', function() {
-        hoverBox.style.display = 'none';
-        zoomPanel.classList.remove('active');
-    });
+        wrapper.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            wrapper.classList.add('touch-zoom-active');
+        });
+        
+        wrapper.addEventListener('touchend', function() {
+            wrapper.classList.remove('touch-zoom-active');
+        });
+        
+        wrapper.addEventListener('click', function(e) {
+            if (!isZooming) {
+                toggleMobileZoom();
+                isZooming = true;
+                setTimeout(() => { isZooming = false; }, 300);
+            }
+        });
+    }
 
     function updateZoom(e) {
         const rect = wrapper.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        let x, y;
+        
+        if (e.type.includes('touch')) {
+            x = e.touches[0].clientX - rect.left;
+            y = e.touches[0].clientY - rect.top;
+        } else {
+            x = e.clientX - rect.left;
+            y = e.clientY - rect.top;
+        }
         
         const boxSize = 150;
         const zoomLevel = 2.5;
@@ -1523,72 +1439,109 @@ function initZoomSystem() {
     console.log('✅ Zoom system initialized successfully');
 }
 
-// Mobile zoom function
+// Mobile zoom function - FIXED
 function toggleMobileZoom() {
     const mainImage = document.getElementById('mainProductImage');
-    if (mainImage.style.transform === 'scale(2)') {
+    const zoomPanel = document.getElementById('zoomPanel');
+    
+    if (window.innerWidth > 768) return;
+    
+    if (mainImage.classList.contains('zoomed')) {
+        mainImage.classList.remove('zoomed');
         mainImage.style.transform = 'scale(1)';
+        zoomPanel.classList.remove('active');
     } else {
+        mainImage.classList.add('zoomed');
         mainImage.style.transform = 'scale(2)';
         mainImage.style.transformOrigin = 'center center';
+        zoomPanel.classList.add('active');
     }
 }
 
 // ============================================
-// EMAIL SYSTEM - LIKE WHATSAPP (Open Gmail)
+// EMAIL SYSTEM - OPEN DIRECTLY (LIKE WHATSAPP)
 // ============================================
 
 function openDirectEmail() {
-    if (!currentProduct) return;
+    if (!currentProduct) {
+        showNotification('Please wait, product details are loading...');
+        return;
+    }
     
-    const subject = `Enquiry for ${currentProduct.stone_name} - IRYA STONE`;
-    const body = `Dear IRYA STONE Team,
+    // Pre-fill email details
+    const productName = currentProduct.stone_name || currentProduct.name || 'Stone Product';
+    const productType = currentProduct.type || 'Natural Stone';
+    const productColor = currentProduct.color || 'Various';
+    const productPrice = currentProduct.price ? currentProduct.price.toFixed(2) : '0.00';
+    const priceUnit = currentProduct.price_unit || 'piece';
+    
+    // Create email body with Stone details
+    const subject = encodeURIComponent(`Enquiry for ${productName} - Sandstone from IRYA STONE`);
+    const body = encodeURIComponent(`Dear IRYA STONE Team,
 
-I am interested in the following product:
+I am interested in the following sandstone product:
 
-Product: ${currentProduct.stone_name}
-Type: ${currentProduct.type || 'Not specified'}
-Color: ${currentProduct.color || 'Not specified'}
-Price: ₹${currentProduct.price.toFixed(2)} per ${currentProduct.price_unit}
+Product Name: ${productName}
+Product Type: ${productType}
+Color: ${productColor}
+Price: ₹${productPrice} per ${priceUnit}
 
-Please provide details about:
-1. Pricing and available discounts
+Please provide me with the following details:
+1. Sample availability
 2. Minimum order quantity
-3. Delivery options and timeline
-4. Sample availability
-5. Customization options
+3. Available sizes and thickness
+4. Delivery timeline
+5. Payment terms
+6. Customization options
 
-Looking forward to your response.
+I am looking for sandstone for:
+[Please specify: Flooring/Wall Cladding/Paving/Other]
+
+Project Details:
+- Location: 
+- Quantity Required: 
+- Timeline: 
+
+Please send me your catalog and price list.
 
 Best regards,
 [Your Name]
-[Your Company/Project]
-[Your Contact Number]`;
+[Company Name]
+[Contact Number]
+[Email Address]`);
 
-    // Open default email client with pre-filled details
-    window.location.href = `mailto:ravi.jain236129@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    // Open default email client
+    const mailtoLink = `mailto:ravi.jain236129@gmail.com?subject=${subject}&body=${body}`;
+    window.open(mailtoLink, '_blank');
     
-    // Add notification
-    showNotification('📧 Opening email client... Please send the pre-filled email.');
+    showNotification('📧 Opening email client... Please send the pre-filled email enquiry.');
 }
 
 // WhatsApp function
 function openDirectWhatsApp() {
-    if (!currentProduct) return;
+    if (!currentProduct) {
+        showNotification('Please wait, product details are loading...');
+        return;
+    }
+    
+    const productName = currentProduct.stone_name || currentProduct.name || 'Stone Product';
+    const productType = currentProduct.type || 'Natural Stone';
+    const productPrice = currentProduct.price ? currentProduct.price.toFixed(2) : '0.00';
+    const priceUnit = currentProduct.price_unit || 'piece';
     
     let message = `*New Enquiry - IRYA STONE*%0A%0A`;
-    message += `*Product:* ${currentProduct.stone_name}%0A`;
-    message += `*Type:* ${currentProduct.type || 'Not specified'}%0A`;
-    message += `*Price:* ₹${currentProduct.price.toFixed(2)} per ${currentProduct.price_unit}%0A%0A`;
-    message += `I'm interested in this product. Please provide details about:%0A`;
-    message += `- Pricing and discounts%0A`;
-    message += `- Availability%0A`;
-    message += `- Minimum order quantity%0A`;
-    message += `- Delivery options%0A%0A`;
+    message += `*Product:* ${productName}%0A`;
+    message += `*Type:* ${productType}%0A`;
+    message += `*Price:* ₹${productPrice} per ${priceUnit}%0A%0A`;
+    message += `I'm interested in this sandstone product. Please provide details about:%0A`;
+    message += `1. Sample availability%0A`;
+    message += `2. Minimum order quantity%0A`;
+    message += `3. Available sizes%0A`;
+    message += `4. Delivery options%0A`;
+    message += `5. Best price%0A%0A`;
     message += `Looking forward to your response!`;
     
     window.open(`https://wa.me/917737740207?text=${message}`, '_blank');
-    
     showNotification('📱 Opening WhatsApp... Please send the pre-filled message.');
 }
 
@@ -1716,17 +1669,17 @@ async function loadProductDetails(productId) {
         currentProduct = {
             id: doc.id,
             stone_name: data.stone_name || data.name || 'Stone Product',
-            category: data.category || 'Natural Stone',
+            category: data.category || 'Sandstone',
             type: data.type || '',
-            description: data.description || 'Premium quality natural stone.',
+            description: data.description || 'Premium quality sandstone. Perfect for flooring, wall cladding, and landscaping.',
             price: parseFloat(data.price) || 0,
-            price_unit: data.price_unit || 'piece',
+            price_unit: data.price_unit || 'square foot',
             finish: data.finish || '',
             size: data.size || '',
             thickness: data.thickness || '',
             color: data.color || '',
-            usage: data.usage || data.uses || 'General Use',
-            min_order: data.min_order || 1,
+            usage: data.usage || data.uses || 'Flooring, Wall Cladding',
+            min_order: data.min_order || 100,
             images: []
         };
         
@@ -1803,22 +1756,32 @@ function displayProductDetails() {
         `).join('');
     }
     
-    // Display product description
+    // Display product description - SANDSTONE SPECIFIC
     if (productDescriptionBox) {
         productDescriptionBox.innerHTML = `
             <h3><i class="fas fa-info-circle"></i> Product Description</h3>
             <div class="product-description-content">
-                ${currentProduct.description || 'Premium quality natural stone. Perfect for flooring, wall cladding, and other construction applications. Durable, weather-resistant, and available in various finishes.'}
+                ${currentProduct.description || `Premium quality Indian sandstone. ${currentProduct.color ? currentProduct.color + ' ' : ''}sandstone is known for its durability, natural beauty, and slip-resistant properties. Ideal for outdoor paving, patio flooring, garden pathways, and wall cladding applications.`}
+                
+                <br><br>
+                <strong>Key Features:</strong>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li>Natural and durable sandstone</li>
+                    <li>Weather-resistant and long-lasting</li>
+                    <li>Available in various sizes and finishes</li>
+                    <li>Low maintenance required</li>
+                    <li>Eco-friendly natural stone</li>
+                </ul>
             </div>
         `;
     }
     
-    // Display product info
+    // Display product info - SANDSTONE FOCUSED
     if (productInfo) {
         productInfo.innerHTML = `
             <h1>${currentProduct.stone_name}</h1>
             <div class="product-category-badge">
-                <i class="fas fa-gem"></i> ${currentProduct.category}
+                <i class="fas fa-gem"></i> ${currentProduct.category || 'Sandstone'}
             </div>
             
             <div class="price-section">
@@ -1829,7 +1792,7 @@ function displayProductDetails() {
             <div class="specs-grid">
                 ${currentProduct.type ? `
                     <div class="spec-item">
-                        <div class="spec-label"><i class="fas fa-tag"></i> Type</div>
+                        <div class="spec-label"><i class="fas fa-tag"></i> Stone Type</div>
                         <div class="spec-value">${currentProduct.type}</div>
                     </div>
                 ` : ''}
@@ -1843,14 +1806,14 @@ function displayProductDetails() {
                 
                 ${currentProduct.finish ? `
                     <div class="spec-item">
-                        <div class="spec-label"><i class="fas fa-brush"></i> Finish</div>
+                        <div class="spec-label"><i class="fas fa-brush"></i> Surface Finish</div>
                         <div class="spec-value">${currentProduct.finish}</div>
                     </div>
                 ` : ''}
                 
                 ${currentProduct.size ? `
                     <div class="spec-item">
-                        <div class="spec-label"><i class="fas fa-ruler-combined"></i> Size</div>
+                        <div class="spec-label"><i class="fas fa-ruler-combined"></i> Available Sizes</div>
                         <div class="spec-value">${currentProduct.size}</div>
                     </div>
                 ` : ''}
@@ -1864,7 +1827,7 @@ function displayProductDetails() {
                 
                 ${currentProduct.usage ? `
                     <div class="spec-item">
-                        <div class="spec-label"><i class="fas fa-hammer"></i> Usage</div>
+                        <div class="spec-label"><i class="fas fa-hammer"></i> Recommended Use</div>
                         <div class="spec-value">${currentProduct.usage}</div>
                     </div>
                 ` : ''}
@@ -1872,9 +1835,14 @@ function displayProductDetails() {
                 ${currentProduct.min_order ? `
                     <div class="spec-item">
                         <div class="spec-label"><i class="fas fa-box"></i> Minimum Order</div>
-                        <div class="spec-value">${currentProduct.min_order} ${currentProduct.price_unit}</div>
+                        <div class="spec-value">${currentProduct.min_order} ${currentProduct.price_unit}s</div>
                     </div>
                 ` : ''}
+                
+                <div class="spec-item">
+                    <div class="spec-label"><i class="fas fa-shield-alt"></i> Quality</div>
+                    <div class="spec-value">Premium Grade A</div>
+                </div>
             </div>
         `;
     }
@@ -1908,7 +1876,7 @@ function changeMainImage(imageUrl, thumbnailElement, index = 0) {
 }
 
 // ============================================
-// SIMILAR PRODUCTS - 5 PER ROW ON DESKTOP
+// SIMILAR PRODUCTS - FIXED IMAGE STRETCH
 // ============================================
 
 async function loadSimilarProducts() {
@@ -1940,12 +1908,12 @@ async function loadSimilarProducts() {
             const product = {
                 id: doc.id,
                 stone_name: data.stone_name || data.name || 'Stone Product',
-                category: data.category || 'Sand Stone',
+                category: data.category || 'Sandstone',
                 type: data.type || '',
                 color: data.color || '',
                 finish: data.finish || '',
                 price: parseFloat(data.price) || 0,
-                price_unit: data.price_unit || 'piece',
+                price_unit: data.price_unit || 'square foot',
                 image: getProductImage(data),
                 description: data.description || '',
                 size: data.size || '',
@@ -1958,7 +1926,19 @@ async function loadSimilarProducts() {
         console.log(`Found ${similarProducts.length} similar products`);
         
         if (similarProducts.length > 0) {
-            filteredSimilarProducts = similarProducts;
+            // Filter similar products by category (sandstone)
+            filteredSimilarProducts = similarProducts.filter(product => 
+                product.category.toLowerCase().includes('sand') || 
+                product.category.toLowerCase().includes('stone')
+            );
+            
+            // If not enough sandstone products, show all
+            if (filteredSimilarProducts.length < 4) {
+                filteredSimilarProducts = similarProducts.slice(0, 10);
+            } else {
+                filteredSimilarProducts = filteredSimilarProducts.slice(0, 10);
+            }
+            
             displaySimilarProducts();
         } else {
             console.log('No similar products to display');
@@ -1984,6 +1964,7 @@ function displaySimilarProducts() {
             <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-light);">
                 <i class="fas fa-search" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
                 <p>No similar products found</p>
+                <p style="font-size: 12px; margin-top: 10px;">Check back later for more sandstone options</p>
             </div>
         `;
     } else {
@@ -1996,7 +1977,8 @@ function displaySimilarProducts() {
                         <img src="${productImage}" alt="${product.stone_name}" 
                              class="card-image"
                              onerror="this.src='${getDefaultImage(product.category)}'"
-                             loading="lazy">
+                             loading="lazy"
+                             style="object-fit: contain; padding: 10px;">
                     </div>
                     <div class="product-info-overlay">
                         <div class="product-name">${product.stone_name}</div>
@@ -2054,6 +2036,18 @@ $(document).ready(async function() {
             performSearch($('#searchInput').val());
         }
     });
+    
+    // Hide zoom panel when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.zoom-panel').length && 
+            !$(e.target).closest('.main-image-container').length) {
+            $('#zoomPanel').removeClass('active');
+            $('.hover-box').hide();
+        }
+    });
+    
+    // Prevent zoom panel from blinking
+    $('.zoom-panel').css('transition', 'opacity 0.2s ease, visibility 0.2s ease');
 });
 
 // ============================================
@@ -2105,7 +2099,7 @@ function displaySearchResults(results, query) {
         container.innerHTML = `
             <div class="no-results">
                 <i class="fas fa-search"></i>
-                <p>No products found for "${query}"</p>
+                <p>No sandstone products found for "${query}"</p>
             </div>
         `;
     } else {
@@ -2113,7 +2107,8 @@ function displaySearchResults(results, query) {
             <a href="product-details.html?id=${product.id}" class="search-result-item">
                 <div class="search-result-image">
                     <img src="${product.image}" alt="${product.name}" 
-                         onerror="this.src='${getDefaultImage(product.category)}'">
+                         onerror="this.src='${getDefaultImage(product.category)}'"
+                         style="object-fit: contain;">
                 </div>
                 <div class="search-result-info">
                     <div class="search-result-name">${product.name}</div>
