@@ -374,13 +374,13 @@ header.show {
     display: block;
 }
 
-/* ZOOM PANEL - ABSOLUTE POSITION */
+/* ZOOM PANEL - BOTTOM RIGHT POSITION */
 .zoom-panel {
     position: absolute;
-    top: 0;
-    left: 105%;
-    width: 400px;
-    height: 400px;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+    height: 300px;
     background: var(--white);
     border: 2px solid var(--primary-gold);
     border-radius: 8px;
@@ -1015,7 +1015,37 @@ header.show {
     font-size: 25px;
 }
 
-/* Filter Icon */
+/* FILTER FLOATING ICON */
+.filter-float {
+    position: fixed;
+    bottom: 220px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: var(--primary-gold);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 998;
+    box-shadow: 0 4px 15px rgba(201, 162, 39, 0.4);
+    transition: var(--transition);
+    border: 2px solid white;
+    text-decoration: none;
+}
+
+.filter-float:hover {
+    background: var(--gold-dark);
+    transform: scale(1.1);
+}
+
+.filter-float i {
+    font-size: 25px;
+}
+
+/* Filter Icon in similar products */
 .filter-icon {
     background: var(--primary-gold);
     color: white;
@@ -1610,10 +1640,10 @@ header.show {
     }
     
     .zoom-panel {
-        width: 300px;
-        height: 300px;
-        left: 100%;
-        top: 0;
+        width: 250px;
+        height: 250px;
+        bottom: 10px;
+        right: 10px;
     }
     
     .thumbnail {
@@ -1669,20 +1699,34 @@ header.show {
     }
     
     .whatsapp-float,
-    .email-float {
+    .email-float,
+    .filter-float {
         width: 50px;
         height: 50px;
-        bottom: 70px;
         right: 15px;
     }
     
-    .whatsapp-float i,
-    .email-float i {
-        font-size: 20px;
+    .whatsapp-float {
+        bottom: 130px;
     }
     
     .email-float {
-        bottom: 130px;
+        bottom: 190px;
+    }
+    
+    .filter-float {
+        bottom: 250px;
+        display: flex;
+    }
+    
+    .whatsapp-float i,
+    .email-float i,
+    .filter-float i {
+        font-size: 20px;
+    }
+    
+    .filter-icon {
+        display: none;
     }
 }
 
@@ -1692,10 +1736,10 @@ header.show {
     }
     
     .zoom-panel {
-        width: 250px;
-        height: 250px;
-        left: 100%;
-        top: 0;
+        width: 200px;
+        height: 200px;
+        bottom: 5px;
+        right: 5px;
     }
     
     .thumbnail {
@@ -1735,6 +1779,29 @@ header.show {
         margin-right: 10px;
         padding: 15px;
     }
+    
+    .whatsapp-float {
+        bottom: 120px;
+    }
+    
+    .email-float {
+        bottom: 180px;
+    }
+    
+    .filter-float {
+        bottom: 240px;
+    }
+}
+
+/* Desktop specific */
+@media (min-width: 768px) {
+    .filter-float {
+        display: none;
+    }
+    
+    .filter-icon {
+        display: flex;
+    }
 }
 </style>
 </head>
@@ -1755,6 +1822,11 @@ header.show {
 <!-- Email Floating Icon -->
 <div class="email-float" onclick="openEmailEnquiryModal()" title="Send Email Enquiry">
     <i class="fas fa-envelope"></i>
+</div>
+
+<!-- Filter Floating Icon -->
+<div class="filter-float" onclick="openFilterModal()" title="Filter Products">
+    <i class="fas fa-filter"></i>
 </div>
 
 <!-- Zoom Panel Container -->
@@ -1847,6 +1919,68 @@ header.show {
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Modal -->
+<div class="filter-modal" id="filterModal">
+    <div class="filter-content">
+        <div class="filter-header">
+            <h3><i class="fas fa-filter"></i> Filter Products</h3>
+            <button class="close-filter" onclick="closeFilterModal()">&times;</button>
+        </div>
+        <div class="filter-body">
+            <!-- Sort Options -->
+            <div class="filter-section">
+                <h4><i class="fas fa-sort"></i> Sort By</h4>
+                <div class="filter-options">
+                    <label class="filter-option">
+                        <input type="radio" name="sortBy" value="price_asc" checked>
+                        <span>Price: Low to High</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="sortBy" value="price_desc">
+                        <span>Price: High to Low</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="sortBy" value="name_asc">
+                        <span>Name: A to Z</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Type Filter -->
+            <div class="filter-section">
+                <h4><i class="fas fa-tag"></i> Stone Type</h4>
+                <div class="filter-options" id="typeFilterOptions">
+                    <!-- Type options will be populated dynamically -->
+                </div>
+            </div>
+            
+            <!-- Color Filter -->
+            <div class="filter-section">
+                <h4><i class="fas fa-palette"></i> Color</h4>
+                <div class="filter-options" id="colorFilterOptions">
+                    <!-- Color options will be populated dynamically -->
+                </div>
+            </div>
+            
+            <!-- Finish Filter -->
+            <div class="filter-section">
+                <h4><i class="fas fa-brush"></i> Finish</h4>
+                <div class="filter-options" id="finishFilterOptions">
+                    <!-- Finish options will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button class="clear-all-filters" onclick="clearAllFilters()">
+                <i class="fas fa-trash"></i> Clear All
+            </button>
+            <button class="btn-submit" onclick="closeFilterModal()">
+                Done
+            </button>
         </div>
     </div>
 </div>
@@ -1944,68 +2078,6 @@ header.show {
         <!-- Active filter tags will appear here -->
     </div>
     
-    <!-- Filter Modal -->
-    <div class="filter-modal" id="filterModal">
-        <div class="filter-content">
-            <div class="filter-header">
-                <h3><i class="fas fa-filter"></i> Filter Products</h3>
-                <button class="close-filter" onclick="closeFilterModal()">&times;</button>
-            </div>
-            <div class="filter-body">
-                <!-- Sort Options -->
-                <div class="filter-section">
-                    <h4><i class="fas fa-sort"></i> Sort By</h4>
-                    <div class="filter-options">
-                        <label class="filter-option">
-                            <input type="radio" name="sortBy" value="price_asc" checked>
-                            <span>Price: Low to High</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="sortBy" value="price_desc">
-                            <span>Price: High to Low</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="sortBy" value="name_asc">
-                            <span>Name: A to Z</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <!-- Type Filter -->
-                <div class="filter-section">
-                    <h4><i class="fas fa-tag"></i> Stone Type</h4>
-                    <div class="filter-options" id="typeFilterOptions">
-                        <!-- Type options will be populated dynamically -->
-                    </div>
-                </div>
-                
-                <!-- Color Filter -->
-                <div class="filter-section">
-                    <h4><i class="fas fa-palette"></i> Color</h4>
-                    <div class="filter-options" id="colorFilterOptions">
-                        <!-- Color options will be populated dynamically -->
-                    </div>
-                </div>
-                
-                <!-- Finish Filter -->
-                <div class="filter-section">
-                    <h4><i class="fas fa-brush"></i> Finish</h4>
-                    <div class="filter-options" id="finishFilterOptions">
-                        <!-- Finish options will be populated dynamically -->
-                    </div>
-                </div>
-            </div>
-            <div class="filter-actions">
-                <button class="clear-all-filters" onclick="clearAllFilters()">
-                    <i class="fas fa-trash"></i> Clear All
-                </button>
-                <button class="btn-submit" onclick="closeFilterModal()">
-                    Done
-                </button>
-            </div>
-        </div>
-    </div>
-    
     <div class="similar-products-grid" id="similarProductsGrid">
         <!-- Similar products will be loaded here with frameless images -->
     </div>
@@ -2070,27 +2142,23 @@ let lastScrollTop = 0;
 let scrollTimeout;
 const header = document.getElementById('mainHeader');
 const bottomNav = document.getElementById('bottomNav');
-const scrollThreshold = 60; // Minimum scroll before hiding
-const hideDelay = 200; // Delay before hiding
+const scrollThreshold = 60;
+const hideDelay = 200;
 
 function handleScroll() {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const scrollDirection = scrollTop > lastScrollTop ? 'down' : 'up';
     const scrollDistance = Math.abs(scrollTop - lastScrollTop);
     
-    // Clear any existing timeout
     clearTimeout(scrollTimeout);
     
-    // Show header and bottom nav when scrolling up
     if (scrollDirection === 'up') {
         header.classList.remove('hidden');
         bottomNav.classList.remove('hidden');
         header.classList.add('show');
         bottomNav.classList.add('show');
     } 
-    // Hide header and bottom nav when scrolling down beyond threshold
     else if (scrollDirection === 'down' && scrollDistance > scrollThreshold) {
-        // Delay hiding to prevent flickering during quick scrolls
         scrollTimeout = setTimeout(() => {
             header.classList.add('hidden');
             bottomNav.classList.add('hidden');
@@ -2102,22 +2170,19 @@ function handleScroll() {
     lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
 }
 
-// Add scroll event listener with throttling
 let scrollThrottleTimeout;
 window.addEventListener('scroll', () => {
     if (!scrollThrottleTimeout) {
         scrollThrottleTimeout = setTimeout(() => {
             handleScroll();
             scrollThrottleTimeout = null;
-        }, 100); // Throttle to 100ms
+        }, 100);
     }
 });
 
-// Show header and bottom nav when mouse moves (desktop only)
 let mouseMoveTimeout;
 if (window.innerWidth > 768) {
     document.addEventListener('mousemove', (e) => {
-        // Only show if mouse is near top or bottom of screen
         const isNearTop = e.clientY < 100;
         const isNearBottom = window.innerHeight - e.clientY < 100;
         
@@ -2128,7 +2193,6 @@ if (window.innerWidth > 768) {
             header.classList.add('show');
             bottomNav.classList.add('show');
             
-            // Hide again after 3 seconds if not near edges
             mouseMoveTimeout = setTimeout(() => {
                 if (!isNearTop && !isNearBottom && lastScrollTop > scrollThreshold) {
                     header.classList.add('hidden');
@@ -2165,32 +2229,45 @@ function closeFilterModal() {
 function initializeFilterOptions() {
     if (similarProducts.length === 0) return;
     
-    // Collect unique types
+    // Collect unique types - FILTER BY CURRENT PRODUCT TYPE
+    const currentProductType = currentProduct?.type || '';
     const types = new Set();
     const colors = new Set();
     const finishes = new Set();
     
+    // First, show products with the same type as current product
     similarProducts.forEach(product => {
         if (product.type) types.add(product.type);
         if (product.color) colors.add(product.color);
         if (product.finish) finishes.add(product.finish);
     });
     
-    // Populate type filters
+    // Populate type filters - HIGHLIGHT CURRENT PRODUCT TYPE
     const typeContainer = document.getElementById('typeFilterOptions');
     if (typeContainer) {
-        typeContainer.innerHTML = Array.from(types).sort().map(type => {
+        const typeOptions = Array.from(types).sort();
+        typeContainer.innerHTML = typeOptions.map(type => {
             const isChecked = activeFilters.types.includes(type) ? 'checked' : '';
+            const isCurrentType = type === currentProductType;
+            const productCount = similarProducts.filter(p => p.type === type).length;
+            
             return `
-                <label class="filter-option">
+                <label class="filter-option" style="${isCurrentType ? 'border-left: 4px solid var(--primary-gold); padding-left: 15px;' : ''}">
                     <input type="checkbox" value="${type}" ${isChecked} onchange="toggleFilter('types', '${type}')">
-                    <span>${type}</span>
-                    <span class="filter-count">
-                        (${similarProducts.filter(p => p.type === type).length})
-                    </span>
+                    <span>${type} ${isCurrentType ? '(Current)' : ''}</span>
+                    <span class="filter-count">(${productCount})</span>
                 </label>
             `;
         }).join('');
+        
+        // Auto-check current product type if not already checked
+        if (currentProductType && !activeFilters.types.includes(currentProductType)) {
+            setTimeout(() => {
+                toggleFilter('types', currentProductType);
+                const checkbox = document.querySelector(`input[value="${currentProductType}"]`);
+                if (checkbox) checkbox.checked = true;
+            }, 100);
+        }
     }
     
     // Populate color filters
@@ -2198,13 +2275,12 @@ function initializeFilterOptions() {
     if (colorContainer) {
         colorContainer.innerHTML = Array.from(colors).sort().map(color => {
             const isChecked = activeFilters.colors.includes(color) ? 'checked' : '';
+            const productCount = similarProducts.filter(p => p.color === color).length;
             return `
                 <label class="filter-option">
                     <input type="checkbox" value="${color}" ${isChecked} onchange="toggleFilter('colors', '${color}')">
                     <span>${color}</span>
-                    <span class="filter-count">
-                        (${similarProducts.filter(p => p.color === color).length})
-                    </span>
+                    <span class="filter-count">(${productCount})</span>
                 </label>
             `;
         }).join('');
@@ -2215,13 +2291,12 @@ function initializeFilterOptions() {
     if (finishContainer) {
         finishContainer.innerHTML = Array.from(finishes).sort().map(finish => {
             const isChecked = activeFilters.finishes.includes(finish) ? 'checked' : '';
+            const productCount = similarProducts.filter(p => p.finish === finish).length;
             return `
                 <label class="filter-option">
                     <input type="checkbox" value="${finish}" ${isChecked} onchange="toggleFilter('finishes', '${finish}')">
                     <span>${finish}</span>
-                    <span class="filter-count">
-                        (${similarProducts.filter(p => p.finish === finish).length})
-                    </span>
+                    <span class="filter-count">(${productCount})</span>
                 </label>
             `;
         }).join('');
@@ -2264,13 +2339,20 @@ function clearAllFilters() {
         sortBy: 'price_asc'
     };
     
-    // Uncheck all checkboxes
     document.querySelectorAll('#typeFilterOptions input[type="checkbox"]').forEach(cb => cb.checked = false);
     document.querySelectorAll('#colorFilterOptions input[type="checkbox"]').forEach(cb => cb.checked = false);
     document.querySelectorAll('#finishFilterOptions input[type="checkbox"]').forEach(cb => cb.checked = false);
     
-    // Reset sort
     document.querySelector('input[value="price_asc"]').checked = true;
+    
+    // Auto-check current product type after clearing
+    if (currentProduct?.type) {
+        setTimeout(() => {
+            toggleFilter('types', currentProduct.type);
+            const checkbox = document.querySelector(`input[value="${currentProduct.type}"]`);
+            if (checkbox) checkbox.checked = true;
+        }, 100);
+    }
     
     applyFilters();
     updateFilterTags();
@@ -2308,7 +2390,6 @@ function updateFilterTags() {
 function removeFilter(category, value) {
     activeFilters[category] = activeFilters[category].filter(item => item !== value);
     
-    // Uncheck corresponding checkbox
     const checkbox = document.querySelector(`input[value="${value}"]`);
     if (checkbox) checkbox.checked = false;
     
@@ -2370,7 +2451,6 @@ function applyFilters() {
 // IMAGE MANAGEMENT SYSTEM
 // ============================================
 
-// Function to detect image aspect ratio and apply appropriate class
 function detectAndApplyAspectRatio(imageElement) {
     if (!imageElement.complete) {
         imageElement.onload = function() {
@@ -2387,13 +2467,11 @@ function applyAspectRatioClass(img) {
     const naturalHeight = img.naturalHeight;
     const aspectRatio = naturalWidth / naturalHeight;
     
-    // Remove any existing aspect ratio classes
     img.classList.remove(
         'aspect-ratio-2-4', 'aspect-ratio-4-3', 'aspect-ratio-3-2',
         'aspect-ratio-1-1', 'aspect-ratio-16-9', 'aspect-ratio-9-16'
     );
     
-    // Apply appropriate aspect ratio class
     if (Math.abs(aspectRatio - 0.5) < 0.1) {
         img.classList.add('aspect-ratio-2-4');
     } else if (Math.abs(aspectRatio - 1.333) < 0.1) {
@@ -2410,7 +2488,7 @@ function applyAspectRatioClass(img) {
 }
 
 // ============================================
-// ZOOM SYSTEM - TOUCH SUPPORT FOR MOBILE
+// ZOOM SYSTEM - DESKTOP & MOBILE
 // ============================================
 
 function initZoomSystem() {
@@ -2421,9 +2499,8 @@ function initZoomSystem() {
     const hoverBox = document.getElementById("hoverBox");
     const zoomPanel = document.getElementById("zoomPanel");
     const zoomImage = document.getElementById("zoomImage");
-    const zoomContainer = document.getElementById("zoomContainer");
 
-    if (!mainImage || !wrapper || !hoverBox || !zoomPanel || !zoomImage || !zoomContainer) {
+    if (!mainImage || !wrapper || !hoverBox || !zoomPanel || !zoomImage) {
         console.error("❌ Zoom elements missing!");
         return;
     }
@@ -2443,98 +2520,98 @@ function initZoomSystem() {
     let zoomLevel = 3;
     let touchStartX = 0;
     let touchStartY = 0;
-    let lastTouchX = 0;
-    let lastTouchY = 0;
 
-    // Position zoom container near the image
-    const positionZoomContainer = () => {
-        const mainImageRect = mainImage.getBoundingClientRect();
-        const containerRect = wrapper.getBoundingClientRect();
-        
-        // Position zoom container to the right of the image
-        zoomContainer.style.position = 'absolute';
-        zoomContainer.style.left = (mainImageRect.width + 20) + 'px';
-        zoomContainer.style.top = '0';
-        zoomContainer.style.zIndex = '1000';
-    };
+    // Desktop hover zoom
+    wrapper.addEventListener('mouseenter', function(e) {
+        console.log('🖱️ Mouse entered image');
+        isZoomActive = true;
+        updateZoom(e);
+    });
 
-    // Mouse event handlers for desktop
-    if (window.innerWidth > 768) {
-        wrapper.addEventListener('mouseenter', function(e) {
-            console.log('🖱️ Mouse entered image');
-            isZoomActive = true;
-            positionZoomContainer();
+    wrapper.addEventListener('mousemove', function(e) {
+        if (isZoomActive) {
             updateZoom(e);
-        });
+        }
+    });
 
-        wrapper.addEventListener('mousemove', function(e) {
-            if (isZoomActive) {
-                updateZoom(e);
-            }
-        });
+    wrapper.addEventListener('mouseleave', function() {
+        isZoomActive = false;
+        hoverBox.style.display = 'none';
+        zoomPanel.classList.remove('active');
+    });
 
-        wrapper.addEventListener('mouseleave', function() {
-            isZoomActive = false;
-            hoverBox.style.display = 'none';
-            zoomPanel.classList.remove('active');
-        });
-    } else {
-        // Touch events for mobile - Enhanced for continuous touch movement
-        wrapper.addEventListener('touchstart', function(e) {
+    // Touch events for mobile - WORK SAME ON DESKTOP TOO
+    let lastTouchTime = 0;
+    let touchStartTime = 0;
+    
+    wrapper.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 1) {
             e.preventDefault();
-            if (e.touches.length === 1) {
-                isTouchZooming = true;
-                const touch = e.touches[0];
-                touchStartX = touch.clientX;
-                touchStartY = touch.clientY;
-                lastTouchX = touch.clientX;
-                lastTouchY = touch.clientY;
-                
-                // Position zoom container
-                positionZoomContainer();
-                
-                // Show zoom panel
-                zoomPanel.classList.add('active');
-                updateZoom(e);
-            }
-        }, { passive: false });
+            isTouchZooming = true;
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = Date.now();
+            
+            // Position zoom panel at bottom right
+            const rect = wrapper.getBoundingClientRect();
+            zoomPanel.style.position = 'absolute';
+            zoomPanel.style.bottom = '10px';
+            zoomPanel.style.right = '10px';
+            zoomPanel.style.top = 'auto';
+            zoomPanel.style.left = 'auto';
+            
+            // Show zoom panel
+            zoomPanel.classList.add('active');
+            updateZoom(e);
+        }
+    }, { passive: false });
 
-        wrapper.addEventListener('touchmove', function(e) {
-            if (isTouchZooming && e.touches.length === 1) {
-                e.preventDefault();
-                updateZoom(e);
-                lastTouchX = e.touches[0].clientX;
-                lastTouchY = e.touches[0].clientY;
-            }
-        }, { passive: false });
+    wrapper.addEventListener('touchmove', function(e) {
+        if (isTouchZooming && e.touches.length === 1) {
+            e.preventDefault();
+            updateZoom(e);
+        }
+    }, { passive: false });
 
-        wrapper.addEventListener('touchend', function(e) {
-            if (isTouchZooming) {
-                isTouchZooming = false;
-                hoverBox.style.display = 'none';
-                zoomPanel.classList.remove('active');
+    wrapper.addEventListener('touchend', function(e) {
+        if (isTouchZooming) {
+            const touchDuration = Date.now() - touchStartTime;
+            
+            // Check for tap (short touch)
+            if (touchDuration < 300) {
+                const currentTime = Date.now();
+                if (currentTime - lastTouchTime < 300) {
+                    // Double tap detected
+                    toggleMobileZoom();
+                }
+                lastTouchTime = currentTime;
             }
-        });
-
-        wrapper.addEventListener('touchcancel', function(e) {
+            
             isTouchZooming = false;
             hoverBox.style.display = 'none';
             zoomPanel.classList.remove('active');
-        });
+        }
+    });
 
-        // Double tap to toggle zoom on mobile
-        let lastTap = 0;
-        wrapper.addEventListener('touchend', function(e) {
-            const currentTime = new Date().getTime();
-            const tapLength = currentTime - lastTap;
-            if (tapLength < 300 && tapLength > 0) {
-                // Double tap detected
+    wrapper.addEventListener('touchcancel', function(e) {
+        isTouchZooming = false;
+        hoverBox.style.display = 'none';
+        zoomPanel.classList.remove('active');
+    });
+
+    // Click for desktop touch devices (like touchscreen laptops)
+    wrapper.addEventListener('click', function(e) {
+        if (window.innerWidth > 768 && 'ontouchstart' in window) {
+            // This is a touchscreen desktop/laptop
+            const currentTime = Date.now();
+            if (currentTime - lastTouchTime < 300) {
+                // Double click on touchscreen desktop
                 toggleMobileZoom();
-                e.preventDefault();
             }
-            lastTap = currentTime;
-        });
-    }
+            lastTouchTime = currentTime;
+        }
+    });
 
     function updateZoom(e) {
         const rect = wrapper.getBoundingClientRect();
@@ -2597,12 +2674,7 @@ function initZoomSystem() {
         if (zoomImage) {
             zoomImage.src = mainImage.src;
         }
-        // Position zoom container after image loads
-        setTimeout(positionZoomContainer, 100);
     };
-
-    // Reposition on resize
-    window.addEventListener('resize', positionZoomContainer);
 
     console.log('✅ Zoom system initialized successfully');
 }
@@ -2611,8 +2683,6 @@ function initZoomSystem() {
 function toggleMobileZoom() {
     const mainImage = document.getElementById('mainProductImage');
     const zoomPanel = document.getElementById('zoomPanel');
-    
-    if (window.innerWidth > 768) return;
     
     if (mainImage.classList.contains('zoomed')) {
         mainImage.classList.remove('zoomed');
@@ -2627,7 +2697,7 @@ function toggleMobileZoom() {
 }
 
 // ============================================
-// EMAIL ENQUIRY FORM
+// EMAIL ENQUIRY FORM - FIXED FOR PC
 // ============================================
 
 function openEmailEnquiryModal() {
@@ -2663,7 +2733,7 @@ function getEnquiryTypeLabel(type) {
     return labels[type] || type;
 }
 
-// Handle form submission
+// Handle form submission - FIXED FOR PC GMAIL
 document.getElementById('emailEnquiryForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -2735,13 +2805,46 @@ document.getElementById('emailEnquiryForm').addEventListener('submit', function(
     body += `${phone}\n`;
     body += `${email}`;
     
-    // Open email client
+    // Create mailto link with proper encoding
     const mailtoLink = `mailto:ravi.jain236129@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailtoLink, '_blank');
+    
+    // For PC - open in new tab/window to avoid Gmail blank screen issue
+    if (window.innerWidth > 768) {
+        // Create a form to submit (works better for desktop Gmail)
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'https://mail.google.com/mail/?view=cm&fs=1&tf=1';
+        form.target = '_blank';
+        
+        const toInput = document.createElement('input');
+        toInput.type = 'hidden';
+        toInput.name = 'to';
+        toInput.value = 'ravi.jain236129@gmail.com';
+        form.appendChild(toInput);
+        
+        const subjectInput = document.createElement('input');
+        subjectInput.type = 'hidden';
+        subjectInput.name = 'su';
+        subjectInput.value = subject;
+        form.appendChild(subjectInput);
+        
+        const bodyInput = document.createElement('input');
+        bodyInput.type = 'hidden';
+        bodyInput.name = 'body';
+        bodyInput.value = body;
+        form.appendChild(bodyInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    } else {
+        // For mobile - use standard mailto
+        window.location.href = mailtoLink;
+    }
     
     // Close modal and show notification
     closeEmailEnquiryModal();
-    showNotification('📧 Opening email client... Form details are pre-filled. Please click Send!');
+    showNotification('📧 Opening email... Please send the pre-filled message.');
     
     // Reset form after a delay
     setTimeout(() => {
@@ -2927,6 +3030,7 @@ async function loadProductDetails(productId) {
         
         displayProductDetails();
         await loadSimilarProducts();
+        await loadAllProductsForSearch(); // Load all products for search
         
         // Initialize zoom system after image loads
         setTimeout(() => {
@@ -2938,6 +3042,43 @@ async function loadProductDetails(productId) {
         showError('Failed to load product details');
     } finally {
         showLoading(false);
+    }
+}
+
+// Load all products for search functionality
+async function loadAllProductsForSearch() {
+    try {
+        if (!firebaseDB) return;
+        
+        const querySnapshot = await firebaseDB.collection("products")
+            .limit(100) // Limit to 100 products for search
+            .get();
+        
+        if (querySnapshot.empty) {
+            console.log('No products found for search');
+            return;
+        }
+        
+        allProducts = [];
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const product = {
+                id: doc.id,
+                name: data.stone_name || data.name || 'Stone Product',
+                type: data.type || '',
+                category: data.category || 'Sandstone',
+                price: parseFloat(data.price) || 0,
+                image: getProductImage(data)
+            };
+            
+            allProducts.push(product);
+        });
+        
+        console.log(`Loaded ${allProducts.length} products for search`);
+        
+    } catch (error) {
+        console.error('Error loading products for search:', error);
     }
 }
 
@@ -3116,7 +3257,7 @@ function changeMainImage(imageUrl, thumbnailElement, index = 0) {
 }
 
 // ============================================
-// SIMILAR PRODUCTS - FRAMELESS IMAGES
+// SIMILAR PRODUCTS - FILTER BY TYPE
 // ============================================
 
 async function loadSimilarProducts() {
@@ -3167,13 +3308,29 @@ async function loadSimilarProducts() {
         console.log(`Found ${similarProducts.length} similar products`);
         
         if (similarProducts.length > 0) {
-            // Filter similar products by category (sandstone)
-            filteredSimilarProducts = similarProducts.filter(product => 
-                product.category.toLowerCase().includes('sand') || 
-                product.category.toLowerCase().includes('stone')
-            );
+            // Filter similar products by CURRENT PRODUCT TYPE
+            const currentType = currentProduct.type || '';
+            if (currentType) {
+                filteredSimilarProducts = similarProducts.filter(product => 
+                    product.type === currentType
+                );
+                
+                // If not enough products with same type, show all sandstone products
+                if (filteredSimilarProducts.length < 4) {
+                    filteredSimilarProducts = similarProducts.filter(product => 
+                        product.category.toLowerCase().includes('sand') || 
+                        product.category.toLowerCase().includes('stone')
+                    );
+                }
+            } else {
+                // If no type specified, show all sandstone products
+                filteredSimilarProducts = similarProducts.filter(product => 
+                    product.category.toLowerCase().includes('sand') || 
+                    product.category.toLowerCase().includes('stone')
+                );
+            }
             
-            // If not enough sandstone products, show all
+            // If still not enough products, show all
             if (filteredSimilarProducts.length < 4) {
                 filteredSimilarProducts = similarProducts.slice(0, 10);
             } else {
@@ -3282,6 +3439,98 @@ function displaySimilarProducts() {
 }
 
 // ============================================
+// SEARCH FUNCTIONALITY - FROM FIREBASE
+// ============================================
+
+let searchTimeout = null;
+
+function handleSearchInput(e) {
+    const query = e.target.value.trim();
+    clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+        hideSearchResults();
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        performSearch(query);
+    }, 300);
+}
+
+function performSearch(query) {
+    if (!query || query.length < 2) {
+        hideSearchResults();
+        return;
+    }
+    
+    // Search in all products loaded from Firebase
+    const results = allProducts.filter(product => {
+        const searchText = query.toLowerCase();
+        const productName = (product.name || '').toLowerCase();
+        const productType = (product.type || '').toLowerCase();
+        const productCategory = (product.category || '').toLowerCase();
+        
+        return productName.includes(searchText) || 
+               productType.includes(searchText) ||
+               productCategory.includes(searchText);
+    });
+    
+    displaySearchResults(results, query);
+}
+
+function displaySearchResults(results, query) {
+    const container = document.getElementById('searchResults');
+    if (!container) return;
+    
+    if (results.length === 0) {
+        container.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <p>No sandstone products found for "${query}"</p>
+                <p style="font-size: 11px; margin-top: 5px;">Try different keywords</p>
+            </div>
+        `;
+    } else {
+        const resultsHTML = results.slice(0, 5).map(product => `
+            <a href="product-details.html?id=${product.id}" class="search-result-item">
+                <div class="search-result-image">
+                    <img src="${product.image}" alt="${product.name}" 
+                         onerror="this.src='${getDefaultImage(product.category)}'"
+                         style="object-fit: cover;">
+                </div>
+                <div class="search-result-info">
+                    <div class="search-result-name">${product.name}</div>
+                    <div class="search-result-category">${product.type || product.category}</div>
+                </div>
+                <div class="search-result-price">₹${product.price.toFixed(2)}</div>
+            </a>
+        `).join('');
+        
+        container.innerHTML = resultsHTML;
+    }
+    
+    container.classList.add('active');
+}
+
+function hideSearchResults() {
+    const container = document.getElementById('searchResults');
+    if (container) {
+        container.classList.remove('active');
+    }
+}
+
+// Close search results when clicking outside
+document.addEventListener('click', function(e) {
+    const searchBox = document.querySelector('.search-box');
+    const searchResults = document.getElementById('searchResults');
+    
+    if (searchBox && searchResults && !searchBox.contains(e.target)) {
+        hideSearchResults();
+    }
+});
+
+// ============================================
 // INITIALIZATION
 // ============================================
 
@@ -3336,88 +3585,36 @@ $(document).ready(async function() {
             closeFilterModal();
         }
     });
-});
-
-// ============================================
-// SEARCH FUNCTIONALITY
-// ============================================
-
-let searchTimeout = null;
-
-function handleSearchInput(e) {
-    const query = e.target.value.trim();
-    clearTimeout(searchTimeout);
     
-    if (query.length < 2) {
-        hideSearchResults();
-        return;
-    }
-    
-    searchTimeout = setTimeout(() => {
-        performSearch(query);
-    }, 300);
-}
-
-function performSearch(query) {
-    if (!query || query.length < 2) {
-        hideSearchResults();
-        return;
-    }
-    
-    // Search in all products
-    const results = allProducts.filter(product => {
-        const searchText = query.toLowerCase();
-        const productName = (product.name || '').toLowerCase();
-        const productType = (product.type || '').toLowerCase();
-        const productCategory = (product.category || '').toLowerCase();
-        
-        return productName.includes(searchText) || 
-               productType.includes(searchText) ||
-               productCategory.includes(searchText);
+    // Hide floating icons when modal is open
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === 'class') {
+                const emailModal = document.getElementById('emailEnquiryModal');
+                const filterModal = document.getElementById('filterModal');
+                
+                if (emailModal && emailModal.classList.contains('active')) {
+                    document.querySelectorAll('.whatsapp-float, .email-float, .filter-float').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                } else if (filterModal && filterModal.classList.contains('active')) {
+                    document.querySelectorAll('.whatsapp-float, .email-float, .filter-float').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                } else {
+                    document.querySelectorAll('.whatsapp-float, .email-float, .filter-float').forEach(el => {
+                        el.style.display = 'flex';
+                    });
+                }
+            }
+        });
     });
     
-    displaySearchResults(results, query);
-}
-
-function displaySearchResults(results, query) {
-    const container = document.getElementById('searchResults');
-    if (!container) return;
-    
-    if (results.length === 0) {
-        container.innerHTML = `
-            <div class="no-results">
-                <i class="fas fa-search"></i>
-                <p>No sandstone products found for "${query}"</p>
-            </div>
-        `;
-    } else {
-        const resultsHTML = results.slice(0, 5).map(product => `
-            <a href="product-details.html?id=${product.id}" class="search-result-item">
-                <div class="search-result-image">
-                    <img src="${product.image}" alt="${product.name}" 
-                         onerror="this.src='${getDefaultImage(product.category)}'"
-                         style="object-fit: cover;">
-                </div>
-                <div class="search-result-info">
-                    <div class="search-result-name">${product.name}</div>
-                    <div class="search-result-category">${product.type || product.category}</div>
-                </div>
-                <div class="search-result-price">₹${product.price.toFixed(2)}</div>
-            </a>
-        `).join('');
-        
-        container.innerHTML = resultsHTML;
-    }
-    
-    container.classList.add('active');
-}
-
-function hideSearchResults() {
-    const container = document.getElementById('searchResults');
-    if (container) {
-        container.classList.remove('active');
-    }
-}
+    const emailModal = document.getElementById('emailEnquiryModal');
+    const filterModal = document.getElementById('filterModal');
+    if (emailModal) observer.observe(emailModal, { attributes: true });
+    if (filterModal) observer.observe(filterModal, { attributes: true });
+});
 </script>
 </body>
 </html>
