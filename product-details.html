@@ -2363,7 +2363,7 @@ const zoomStyles = `
     border-radius: 6px;
     box-shadow: 0 0 0 1px rgba(255,255,255,0.8) inset,
                 0 4px 20px rgba(201,162,39,0.3);
-    transition: all 0.15s cubic-bezier(0.4,0,0.2,1);
+    transition: all 0.05s linear;
     cursor: crosshair;
 }
 #hoverBox.active { display:block; }
@@ -2380,7 +2380,7 @@ const zoomStyles = `
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px) scale(0.98);
-    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    transition: all 0.2s ease-out;
     pointer-events: none;
 }
 #zoomPanel.active {
@@ -2397,7 +2397,6 @@ const zoomStyles = `
     will-change: transform;
 }
 `;
-
 const styleEl = document.createElement('style');
 styleEl.textContent = zoomStyles;
 document.head.appendChild(styleEl);
@@ -2413,20 +2412,22 @@ function initZoomSystem() {
 
     if(!mainImage||!wrapper||!hoverBox||!zoomPanel||!zoomImage) return;
 
-    const hoverRatio = 0.5; // 50% hover box
-    const zoomLevel = 1; // 200% zoom
+    const hoverRatio = 0.4; // hover box size relative to image
+    const zoomLevel = 2; // zoom multiplier
     const zoomPanelSize = 350;
     const zoomPanelGap = 10;
+    const smoothFactor = 0.2; // smaller = slower, bigger = faster
 
     let isZoomActive=false, isTouchZooming=false, isMobileZoomToggled=false;
-    let lastTouchTime=0, isImageLoaded=false, lastCursorX=0, lastCursorY=0;
+    let lastTouchTime=0, isImageLoaded=false;
+    let targetX=0,targetY=0,currentX=0,currentY=0;
 
     function initializeZoom(){
-        isImageLoaded = true;
+        isImageLoaded=true;
         zoomImage.src = mainImage.src;
         resetZoom();
-        updateHoverBoxPosition();
         setupEventListeners();
+        animateHoverBox();
     }
 
     function resetZoom(){
@@ -2436,147 +2437,158 @@ function initZoomSystem() {
         isZoomActive=false; isTouchZooming=false;
     }
 
-    function updateHoverBoxPosition(cursorX=null, cursorY=null){
+    function updateHoverBox(cursorX=null,cursorY=null){
         if(!isImageLoaded) return;
-        const rect=wrapper.getBoundingClientRect();
-        const boxWidth = rect.width*hoverRatio;
-        const boxHeight = rect.height*hoverRatio;
+        const rect = wrapper.getBoundingClientRect();
+        const boxWidth = rect.width * hoverRatio;
+        const boxHeight = rect.height * hoverRatio;
 
-        let boxX, boxY;
         if(cursorX!==null && cursorY!==null){
-            boxX=cursorX-boxWidth/2;
-            boxY=cursorY-boxHeight/2;
-            boxX=Math.max(0, Math.min(boxX, rect.width-boxWidth));
-            boxY=Math.max(0, Math.min(boxY, rect.height-boxHeight));
-            lastCursorX=cursorX; lastCursorY=cursorY;
+            targetX = Math.max(0, Math.min(cursorX - boxWidth/2, rect.width - boxWidth));
+            targetY = Math.max(0, Math.min(cursorY - boxHeight/2, rect.height - boxHeight));
         } else {
-            boxX=(rect.width-boxWidth)/2;
-            boxY=(rect.height-boxHeight)/2;
+            targetX = (rect.width-boxWidth)/2;
+            targetY = (rect.height-boxHeight)/2;
         }
 
-        hoverBox.style.width=boxWidth+'px';
-        hoverBox.style.height=boxHeight+'px';
-        hoverBox.style.left=boxX+'px';
-        hoverBox.style.top=boxY+'px';
-
-        return {boxX,boxY,boxWidth,boxHeight};
+        hoverBox.style.width = boxWidth+'px';
+        hoverBox.style.height = boxHeight+'px';
     }
 
     function positionZoomPanel(rect){
-        const vw=window.innerWidth, vh=window.innerHeight;
-        let left=rect.right+zoomPanelGap;
-        let top=rect.top+(rect.height/2)-zoomPanelSize/2;
+        const vw = window.innerWidth, vh = window.innerHeight;
+        let left = rect.right + zoomPanelGap;
+        let top = rect.top + rect.height/2 - zoomPanelSize/2;
 
-        if(left+zoomPanelSize>vw-20) left=rect.left-zoomPanelSize-zoomPanelGap;
-        if(top<20) top=20;
-        if(top+zoomPanelSize>vh-20) top=vh-zoomPanelSize-20;
+        if(left + zoomPanelSize > vw - 20) left = rect.left - zoomPanelSize - zoomPanelGap;
+        if(top < 20) top = 20;
+        if(top + zoomPanelSize > vh - 20) top = vh - zoomPanelSize - 20;
 
-        zoomPanel.style.left=left+'px';
-        zoomPanel.style.top=top+'px';
-        zoomPanel.style.width=zoomPanelSize+'px';
-        zoomPanel.style.height=zoomPanelSize+'px';
+        zoomPanel.style.left = left+'px';
+        zoomPanel.style.top = top+'px';
     }
 
-    function updateZoomView(cursorX,cursorY,rect){
+    function updateZoomImage(){
         if(!isImageLoaded) return;
-        const boxInfo = updateHoverBoxPosition(cursorX,cursorY);
-        const percentX = boxInfo.boxX / (rect.width-boxInfo.boxWidth);
-        const percentY = boxInfo.boxY / (rect.height-boxInfo.boxHeight);
-        const clampedX = Math.max(0, Math.min(1, percentX));
-        const clampedY = Math.max(0, Math.min(1, percentY));
+        const rect = wrapper.getBoundingClientRect();
+        const boxWidth = rect.width * hoverRatio;
+        const boxHeight = rect.height * hoverRatio;
 
-        const zoomWidth = mainImage.naturalWidth*zoomLevel;
-        const zoomHeight = mainImage.naturalHeight*zoomLevel;
+        // smooth movement
+        currentX += (targetX - currentX) * smoothFactor;
+        currentY += (targetY - currentY) * smoothFactor;
 
-        const translateX = -clampedX*(zoomWidth-zoomPanelSize);
-        const translateY = -clampedY*(zoomHeight-zoomPanelSize);
+        hoverBox.style.left = currentX + 'px';
+        hoverBox.style.top = currentY + 'px';
 
-        zoomImage.style.width=zoomWidth+'px';
-        zoomImage.style.height=zoomHeight+'px';
-        zoomImage.style.transform=`translate(${translateX}px,${translateY}px)`;
+        // exact mapping
+        const scaleX = mainImage.naturalWidth / rect.width;
+        const scaleY = mainImage.naturalHeight / rect.height;
+
+        zoomImage.style.width = mainImage.naturalWidth*zoomLevel+'px';
+        zoomImage.style.height = mainImage.naturalHeight*zoomLevel+'px';
+
+        const translateX = -currentX*scaleX*zoomLevel;
+        const translateY = -currentY*scaleY*zoomLevel;
+
+        zoomImage.style.transform = `translate(${translateX}px, ${translateY}px)`;
 
         positionZoomPanel(rect);
+
+        requestAnimationFrame(updateZoomImage);
     }
 
-    function showZoom(){ hoverBox.style.display='block'; hoverBox.classList.add('active'); zoomPanel.classList.add('active'); positionZoomPanel(wrapper.getBoundingClientRect()); }
+    function showZoom(){
+        hoverBox.style.display='block'; hoverBox.classList.add('active');
+        zoomPanel.classList.add('active');
+        const rect = wrapper.getBoundingClientRect();
+        positionZoomPanel(rect);
+    }
     function hideZoom(){ hoverBox.style.display='none'; hoverBox.classList.remove('active'); zoomPanel.classList.remove('active'); }
 
     function toggleMobileZoom(){
-        isMobileZoomToggled=!isMobileZoomToggled;
+        isMobileZoomToggled = !isMobileZoomToggled;
         if(isMobileZoomToggled){
             showZoom();
-            const rect=wrapper.getBoundingClientRect();
-            updateZoomView(rect.width/2,rect.height/2,rect);
+            const rect = wrapper.getBoundingClientRect();
+            updateHoverBox(rect.width/2, rect.height/2);
         } else hideZoom();
     }
 
     function handleMouseMove(e){
-        if(!isZoomActive||isMobileZoomToggled) return;
-        const rect=wrapper.getBoundingClientRect();
-        const x=e.clientX-rect.left, y=e.clientY-rect.top;
-        if(x>=0 && x<=rect.width && y>=0 && y<=rect.height) updateZoomView(x,y,rect);
+        if(!isZoomActive || isMobileZoomToggled) return;
+        const rect = wrapper.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        updateHoverBox(x,y);
     }
 
     function handleTouchMove(e){
-        if(!isTouchZooming||isMobileZoomToggled) return;
+        if(!isTouchZooming || isMobileZoomToggled) return;
         e.preventDefault();
-        const rect=wrapper.getBoundingClientRect();
-        const touch=e.touches[0];
-        updateZoomView(touch.clientX-rect.left, touch.clientY-rect.top, rect);
+        const rect = wrapper.getBoundingClientRect();
+        const touch = e.touches[0];
+        updateHoverBox(touch.clientX-rect.left, touch.clientY-rect.top);
     }
 
     function setupEventListeners(){
         wrapper.addEventListener('mouseenter',()=>{
             if(window.innerWidth>768 && !isMobileZoomToggled){
-                isZoomActive=true; showZoom();
-                const rect=wrapper.getBoundingClientRect();
-                updateZoomView(lastCursorX||rect.width/2,lastCursorY||rect.height/2,rect);
+                isZoomActive = true;
+                showZoom();
             }
         });
-        wrapper.addEventListener('mousemove',handleMouseMove);
-        wrapper.addEventListener('mouseleave',()=>{
-            isZoomActive=false; if(!isMobileZoomToggled) hideZoom();
+        wrapper.addEventListener('mousemove', handleMouseMove);
+        wrapper.addEventListener('mouseleave', ()=>{
+            isZoomActive = false;
+            if(!isMobileZoomToggled) hideZoom();
         });
 
-        wrapper.addEventListener('touchstart',(e)=>{
+        wrapper.addEventListener('touchstart', (e)=>{
             e.preventDefault();
             if(e.touches.length===1){
-                const now=Date.now();
-                if(now-lastTouchTime<300){ toggleMobileZoom(); lastTouchTime=0; }
-                else{ lastTouchTime=now; isTouchZooming=true; showZoom();
-                      const rect=wrapper.getBoundingClientRect();
-                      const touch=e.touches[0];
-                      updateZoomView(touch.clientX-rect.left,touch.clientY-rect.top,rect); }
+                const now = Date.now();
+                if(now - lastTouchTime < 300){
+                    toggleMobileZoom();
+                    lastTouchTime = 0;
+                } else {
+                    lastTouchTime = now;
+                    isTouchZooming = true;
+                    showZoom();
+                }
             }
-        },{passive:false});
+        }, {passive:false});
 
-        wrapper.addEventListener('touchmove',handleTouchMove,{passive:false});
-        wrapper.addEventListener('touchend',()=>{
-            isTouchZooming=false; if(!isMobileZoomToggled) hideZoom();
+        wrapper.addEventListener('touchmove', handleTouchMove, {passive:false});
+        wrapper.addEventListener('touchend', ()=>{
+            isTouchZooming = false;
+            if(!isMobileZoomToggled) hideZoom();
         });
 
-        window.addEventListener('resize',()=>{
-            const rect=wrapper.getBoundingClientRect();
-            if(isZoomActive||isMobileZoomToggled) updateZoomView(lastCursorX||rect.width/2,lastCursorY||rect.height/2,rect);
+        window.addEventListener('resize', ()=>{
+            const rect = wrapper.getBoundingClientRect();
+            positionZoomPanel(rect);
         });
 
-        const obs=new MutationObserver(()=>{
+        // observe image changes
+        const obs = new MutationObserver(()=>{
             if(mainImage.src!==zoomImage.src){
                 zoomImage.src=mainImage.src;
-                zoomImage.onload=()=>{
-                    const rect=wrapper.getBoundingClientRect();
-                    if(isZoomActive||isMobileZoomToggled) updateZoomView(lastCursorX||rect.width/2,lastCursorY||rect.height/2,rect);
-                };
             }
         });
         obs.observe(mainImage,{attributes:true,attributeFilter:['src']});
     }
 
-    if(mainImage.complete && mainImage.naturalWidth>0) initializeZoom();
-    else mainImage.onload=initializeZoom;
+    function animateHoverBox(){
+        requestAnimationFrame(animateHoverBox);
+        updateZoomImage();
+    }
 
-    window.toggleMobileZoom=toggleMobileZoom;
-    window.resetZoom=resetZoom;
+    if(mainImage.complete && mainImage.naturalWidth>0) initializeZoom();
+    else mainImage.onload = initializeZoom;
+
+    window.toggleMobileZoom = toggleMobileZoom;
+    window.resetZoom = resetZoom;
 }
 
 // Initialize globally
