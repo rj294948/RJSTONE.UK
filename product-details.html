@@ -2351,11 +2351,11 @@ function initAutoHideHeaderFooter() {
 }
 
 // ============================================
-// ZOOM SYSTEM - FIXED POSITION & CORRECT FOCUS
+// PROFESSIONAL ZOOM SYSTEM - PERFECT CALCULATIONS
 // ============================================
 
 function initZoomSystem() {
-    console.log('🚀 Initializing zoom system with fixed position...');
+    console.log('🔍 Initializing professional zoom system...');
     
     const mainImage = document.getElementById("mainProductImage");
     const wrapper = document.getElementById("mainImageWrapper");
@@ -2368,258 +2368,331 @@ function initZoomSystem() {
         return;
     }
 
-    // Configuration - REDUCED ZOOM LEVEL
-    const hoverRatio = 0.25; // Exactly 25%
-    const zoomLevel = 1.25; // REDUCED: 125% zoom (was 300%)
-    const zoomPanelGap = 5; // 5px gap from image
+    // Configuration - Professional settings
+    const hoverRatio = 0.25; // Exactly 25% of image
+    const zoomLevel = 2; // 200% zoom (optimal for detail view)
+    const zoomPanelGap = 10; // 10px gap from image
+    const zoomPanelSize = 300; // Fixed panel size
 
-    // Wait for image to load
-    if (!mainImage.complete) {
-        mainImage.onload = function() {
-            initializeZoom();
-        };
-    } else {
-        initializeZoom();
-    }
+    let isZoomActive = false;
+    let isTouchZooming = false;
+    let isMobileZoomToggled = false;
+    let lastTouchTime = 0;
+    let isImageLoaded = false;
 
+    // Initialize when image loads
     function initializeZoom() {
-        console.log('✅ Main image loaded, initializing zoom...');
+        console.log('✅ Image loaded, setting up zoom...');
         
-        // Reset elements
-        hoverBox.style.display = 'none';
-        hoverBox.classList.remove('active');
-        zoomPanel.classList.remove('active');
+        if (!mainImage.naturalWidth || !mainImage.naturalHeight) {
+            console.warn('⚠️ Image dimensions not available');
+            return;
+        }
+        
+        isImageLoaded = true;
         
         // Set zoom image source
         zoomImage.src = mainImage.src;
         
-        let isZoomActive = false;
-        let isTouchZooming = false;
-        let isMobileZoomToggled = false;
-        let lastTouchTime = 0;
+        // Reset states
+        resetZoom();
         
-        // FIXED: Calculate hover box position once (center of image)
+        // Calculate initial positions
+        updateLayout();
+        
+        // Set up event listeners
+        setupEventListeners();
+        
+        console.log('✅ Professional zoom system ready');
+    }
+
+    // Reset zoom to initial state
+    function resetZoom() {
+        hoverBox.style.display = 'none';
+        hoverBox.classList.remove('active');
+        zoomPanel.classList.remove('active');
+        isZoomActive = false;
+        isTouchZooming = false;
+    }
+
+    // Calculate and update all positions
+    function updateLayout() {
+        if (!isImageLoaded) return;
+        
         const imageRect = wrapper.getBoundingClientRect();
+        
+        // Calculate hover box (25% of image, centered)
         const boxWidth = imageRect.width * hoverRatio;
         const boxHeight = imageRect.height * hoverRatio;
         const boxX = (imageRect.width - boxWidth) / 2;
         const boxY = (imageRect.height - boxHeight) / 2;
         
-        // Set hover box to fixed center position
-        hoverBox.style.width = boxWidth + 'px';
-        hoverBox.style.height = boxHeight + 'px';
-        hoverBox.style.left = boxX + 'px';
-        hoverBox.style.top = boxY + 'px';
+        // Set hover box position (fixed center)
+        hoverBox.style.width = `${boxWidth}px`;
+        hoverBox.style.height = `${boxHeight}px`;
+        hoverBox.style.left = `${boxX}px`;
+        hoverBox.style.top = `${boxY}px`;
+        
+        // Position zoom panel (right side of image)
+        positionZoomPanel(imageRect);
+        
+        // Set zoom image size
+        zoomImage.style.width = `${mainImage.naturalWidth * zoomLevel}px`;
+        zoomImage.style.height = `${mainImage.naturalHeight * zoomLevel}px`;
+    }
 
+    // Position zoom panel to the right of image
+    function positionZoomPanel(imageRect) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Calculate panel position
+        let panelLeft = imageRect.right + zoomPanelGap;
+        let panelTop = imageRect.top + (imageRect.height / 2) - (zoomPanelSize / 2);
+        
+        // Check if panel fits on right side
+        if (panelLeft + zoomPanelSize > viewportWidth - 20) {
+            // If not, position on left side
+            panelLeft = imageRect.left - zoomPanelSize - zoomPanelGap;
+        }
+        
+        // Ensure panel stays within viewport vertically
+        if (panelTop < 20) {
+            panelTop = 20;
+        } else if (panelTop + zoomPanelSize > viewportHeight - 20) {
+            panelTop = viewportHeight - zoomPanelSize - 20;
+        }
+        
+        // Apply styles
+        zoomPanel.style.left = `${panelLeft}px`;
+        zoomPanel.style.top = `${panelTop}px`;
+        zoomPanel.style.width = `${zoomPanelSize}px`;
+        zoomPanel.style.height = `${zoomPanelSize}px`;
+    }
+
+    // Calculate and update zoom view based on cursor
+    function updateZoomView(cursorX, cursorY, imageRect) {
+        if (!isImageLoaded) return;
+        
+        // Get hover box bounds relative to image
+        const boxWidth = imageRect.width * hoverRatio;
+        const boxHeight = imageRect.height * hoverRatio;
+        const boxX = (imageRect.width - boxWidth) / 2;
+        const boxY = (imageRect.height - boxHeight) / 2;
+        
+        // Calculate cursor position relative to hover box
+        const cursorInBoxX = cursorX - boxX;
+        const cursorInBoxY = cursorY - boxY;
+        
+        // Calculate percentage position within hover box (0 to 1)
+        const percentX = cursorInBoxX / boxWidth;
+        const percentY = cursorInBoxY / boxHeight;
+        
+        // Clamp percentages to ensure they stay within bounds
+        const clampedPercentX = Math.max(0, Math.min(1, percentX));
+        const clampedPercentY = Math.max(0, Math.min(1, percentY));
+        
+        // Calculate zoom image dimensions
+        const zoomImgWidth = mainImage.naturalWidth * zoomLevel;
+        const zoomImgHeight = mainImage.naturalHeight * zoomLevel;
+        
+        // PERFECT CALCULATION: Map cursor position to zoom image
+        // The zoom panel shows the area around the cursor's position
+        const translateX = -(clampedPercentX * zoomImgWidth - (zoomPanelSize / 2));
+        const translateY = -(clampedPercentY * zoomImgHeight - (zoomPanelSize / 2));
+        
+        // Apply smooth transform
+        zoomImage.style.transform = `translate(${translateX}px, ${translateY}px)`;
+        
+        // Optional: Add smooth transition for movement
+        zoomImage.style.transition = 'transform 0.1s ease-out';
+        
+        // Debug log (optional)
+        // console.log(`Cursor: (${cursorX}, ${cursorY}) | Percent: (${clampedPercentX.toFixed(2)}, ${clampedPercentY.toFixed(2)}) | Translate: (${translateX.toFixed(0)}, ${translateY.toFixed(0)})`);
+    }
+
+    // Handle mouse movement
+    function handleMouseMove(e) {
+        if (!isZoomActive || isMobileZoomToggled) return;
+        
+        const imageRect = wrapper.getBoundingClientRect();
+        const cursorX = e.clientX - imageRect.left;
+        const cursorY = e.clientY - imageRect.top;
+        
+        // Ensure cursor is within image bounds
+        if (cursorX >= 0 && cursorX <= imageRect.width && 
+            cursorY >= 0 && cursorY <= imageRect.height) {
+            updateZoomView(cursorX, cursorY, imageRect);
+        }
+    }
+
+    // Handle touch movement
+    function handleTouchMove(e) {
+        if (!isTouchZooming || isMobileZoomToggled) return;
+        
+        e.preventDefault();
+        
+        const imageRect = wrapper.getBoundingClientRect();
+        const touch = e.touches[0];
+        const cursorX = touch.clientX - imageRect.left;
+        const cursorY = touch.clientY - imageRect.top;
+        
+        // Ensure touch is within image bounds
+        if (cursorX >= 0 && cursorX <= imageRect.width && 
+            cursorY >= 0 && cursorY <= imageRect.height) {
+            updateZoomView(cursorX, cursorY, imageRect);
+        }
+    }
+
+    // Toggle mobile zoom on/off
+    function toggleMobileZoom() {
+        if (isMobileZoomToggled) {
+            // Zoom OFF
+            isMobileZoomToggled = false;
+            hideZoom();
+        } else {
+            // Zoom ON
+            isMobileZoomToggled = true;
+            showZoom();
+            
+            // Center view initially
+            const imageRect = wrapper.getBoundingClientRect();
+            const centerX = imageRect.width / 2;
+            const centerY = imageRect.height / 2;
+            updateZoomView(centerX, centerY, imageRect);
+        }
+    }
+
+    // Show zoom elements
+    function showZoom() {
+        hoverBox.style.display = 'block';
+        hoverBox.classList.add('active');
+        zoomPanel.classList.add('active');
+        
+        // Position zoom panel
+        const imageRect = wrapper.getBoundingClientRect();
+        positionZoomPanel(imageRect);
+    }
+
+    // Hide zoom elements
+    function hideZoom() {
+        hoverBox.style.display = 'none';
+        hoverBox.classList.remove('active');
+        zoomPanel.classList.remove('active');
+    }
+
+    // Set up all event listeners
+    function setupEventListeners() {
         // Desktop hover events
-        wrapper.addEventListener('mouseenter', function() {
+        wrapper.addEventListener('mouseenter', () => {
             if (window.innerWidth > 768 && !isMobileZoomToggled) {
                 isZoomActive = true;
                 showZoom();
             }
         });
 
-        wrapper.addEventListener('mousemove', function(e) {
-            if (isZoomActive && window.innerWidth > 768 && !isMobileZoomToggled) {
-                updateZoomPosition(e);
+        wrapper.addEventListener('mousemove', handleMouseMove);
+
+        wrapper.addEventListener('mouseleave', () => {
+            isZoomActive = false;
+            if (!isMobileZoomToggled) {
+                hideZoom();
             }
         });
 
-        wrapper.addEventListener('mouseleave', function() {
-            isZoomActive = false;
-            hideZoom();
-        });
-
         // Touch events for mobile
-        wrapper.addEventListener('touchstart', function(e) {
+        wrapper.addEventListener('touchstart', (e) => {
             e.preventDefault();
             
             if (e.touches.length === 1) {
-                const currentTime = new Date().getTime();
+                const currentTime = Date.now();
                 const tapLength = currentTime - lastTouchTime;
                 
-                // Double tap detection (less than 300ms between taps)
                 if (tapLength < 300 && tapLength > 0) {
-                    // Double tap - toggle mobile zoom
+                    // Double tap - toggle zoom
                     toggleMobileZoom();
                     lastTouchTime = 0;
                 } else {
-                    // Single tap - start touch zooming
+                    // Single tap - start zoom
                     lastTouchTime = currentTime;
                     isTouchZooming = true;
-                    updateZoomPosition(e);
+                    showZoom();
+                    
+                    // Update view for initial touch position
+                    const imageRect = wrapper.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    const cursorX = touch.clientX - imageRect.left;
+                    const cursorY = touch.clientY - imageRect.top;
+                    updateZoomView(cursorX, cursorY, imageRect);
                 }
             }
         }, { passive: false });
 
-        wrapper.addEventListener('touchmove', function(e) {
-            if (isTouchZooming && e.touches.length === 1) {
-                e.preventDefault();
-                updateZoomPosition(e);
-            }
-        }, { passive: false });
+        wrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
 
-        wrapper.addEventListener('touchend', function() {
+        wrapper.addEventListener('touchend', () => {
             isTouchZooming = false;
             if (!isMobileZoomToggled) {
                 hideZoom();
             }
         });
 
-        // Main update function - ONLY updates zoom view based on cursor
-        function updateZoomPosition(e) {
-            if (!isZoomActive && !isTouchZooming && !isMobileZoomToggled) return;
-            
-            // Get current image dimensions
-            const currentImageRect = wrapper.getBoundingClientRect();
-            
-            // Calculate cursor position relative to image
-            let cursorX, cursorY;
-            
-            if (e.type.includes('touch')) {
-                const touch = e.touches[0];
-                cursorX = touch.clientX - currentImageRect.left;
-                cursorY = touch.clientY - currentImageRect.top;
-            } else {
-                cursorX = e.clientX - currentImageRect.left;
-                cursorY = e.clientY - currentImageRect.top;
-            }
-            
-            // Ensure cursor is within image bounds
-            cursorX = Math.max(0, Math.min(cursorX, currentImageRect.width));
-            cursorY = Math.max(0, Math.min(cursorY, currentImageRect.height));
-            
-            // Calculate the position in the zoomed image based on cursor
-            updateZoomView(cursorX, cursorY, currentImageRect);
-        }
-        
-        function updateZoomView(cursorX, cursorY, imageRect) {
-            // Calculate what part of the zoomed image to show
-            // Based on cursor position relative to hover box
-            
-            // Get hover box position (fixed center)
-            const hoverBoxRect = hoverBox.getBoundingClientRect();
-            const relativeBoxX = hoverBoxRect.left - imageRect.left;
-            const relativeBoxY = hoverBoxRect.top - imageRect.top;
-            
-            // Calculate cursor position relative to hover box
-            const cursorInBoxX = cursorX - relativeBoxX;
-            const cursorInBoxY = cursorY - relativeBoxY;
-            
-            // Calculate what percentage of hover box the cursor is in
-            const percentX = cursorInBoxX / hoverBoxRect.width;
-            const percentY = cursorInBoxY / hoverBoxRect.height;
-            
-            // Constrain percentages to 0-1
-            const clampedPercentX = Math.max(0, Math.min(1, percentX));
-            const clampedPercentY = Math.max(0, Math.min(1, percentY));
-            
-            // Update zoom panel position (right side of image)
-            updateZoomPanelPosition(imageRect);
-            
-            // Calculate zoom image translation
-            if (mainImage.naturalWidth && mainImage.naturalHeight) {
-                const zoomImgWidth = mainImage.naturalWidth * zoomLevel;
-                const zoomImgHeight = mainImage.naturalHeight * zoomLevel;
-                const zoomPanelWidth = 300;
-                const zoomPanelHeight = 300;
-                
-                // CORRECTED: Calculate translation based on cursor position in hover box
-                // This shows the area where the cursor is pointing
-                const translateX = -(clampedPercentX * zoomImgWidth - zoomPanelWidth / 2);
-                const translateY = -(clampedPercentY * zoomImgHeight - zoomPanelHeight / 2);
-                
-                // Apply styles to zoom image
-                zoomImage.style.width = zoomImgWidth + 'px';
-                zoomImage.style.height = zoomImgHeight + 'px';
-                zoomImage.style.transform = `translate(${translateX}px, ${translateY}px)`;
-                
-                console.log(`Cursor: ${cursorX},${cursorY} | Box: ${relativeBoxX},${relativeBoxY} | Percent: ${clampedPercentX.toFixed(2)},${clampedPercentY.toFixed(2)} | Translate: ${translateX.toFixed(0)},${translateY.toFixed(0)}`);
-            }
-        }
-        
-        function updateZoomPanelPosition(imageRect) {
-            // Position zoom panel on right side of image
-            const zoomPanelWidth = 300;
-            const zoomPanelHeight = 300;
-            
-            // Set zoom panel left = image.right + 5px (gap)
-            const imageRight = imageRect.right;
-            const zoomPanelLeft = imageRight + zoomPanelGap;
-            
-            // Center zoom panel vertically with image
-            let zoomPanelTop = imageRect.top + (imageRect.height / 2) - (zoomPanelHeight / 2);
-            
-            // Ensure zoom panel never overflows viewport
-            zoomPanelTop = Math.max(0, Math.min(zoomPanelTop, window.innerHeight - zoomPanelHeight));
-            
-            // Set zoom panel position
-            zoomPanel.style.left = zoomPanelLeft + 'px';
-            zoomPanel.style.top = zoomPanelTop + 'px';
-            zoomPanel.style.width = zoomPanelWidth + 'px';
-            zoomPanel.style.height = zoomPanelHeight + 'px';
-        }
-        
-        function showZoom() {
-            hoverBox.style.display = 'block';
-            hoverBox.classList.add('active');
-            zoomPanel.classList.add('active');
-            
-            // Initial zoom view centered
-            const imageRect = wrapper.getBoundingClientRect();
-            const centerX = imageRect.width / 2;
-            const centerY = imageRect.height / 2;
-            updateZoomView(centerX, centerY, imageRect);
-        }
-        
-        function hideZoom() {
-            hoverBox.style.display = 'none';
-            hoverBox.classList.remove('active');
-            zoomPanel.classList.remove('active');
-        }
-        
-        function toggleMobileZoom() {
-            if (isMobileZoomToggled) {
-                // Zoom OFF
-                isMobileZoomToggled = false;
-                hideZoom();
-            } else {
-                // Zoom ON
-                isMobileZoomToggled = true;
-                showZoom();
-            }
-        }
-
         // Handle window resize
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function() {
-                // Recalculate hover box position on resize
-                const newImageRect = wrapper.getBoundingClientRect();
-                const newBoxWidth = newImageRect.width * hoverRatio;
-                const newBoxHeight = newImageRect.height * hoverRatio;
-                const newBoxX = (newImageRect.width - newBoxWidth) / 2;
-                const newBoxY = (newImageRect.height - newBoxHeight) / 2;
-                
-                hoverBox.style.width = newBoxWidth + 'px';
-                hoverBox.style.height = newBoxHeight + 'px';
-                hoverBox.style.left = newBoxX + 'px';
-                hoverBox.style.top = newBoxY + 'px';
-                
-                if (isMobileZoomToggled || isZoomActive) {
-                    const centerX = newImageRect.width / 2;
-                    const centerY = newImageRect.height / 2;
-                    updateZoomView(centerX, centerY, newImageRect);
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (isImageLoaded) {
+                    updateLayout();
+                    
+                    // Update zoom view if active
+                    if (isZoomActive || isMobileZoomToggled) {
+                        const imageRect = wrapper.getBoundingClientRect();
+                        const centerX = imageRect.width / 2;
+                        const centerY = imageRect.height / 2;
+                        updateZoomView(centerX, centerY, imageRect);
+                    }
                 }
-            }, 250);
+            }, 150);
         });
 
-        // Make toggleMobileZoom available globally
-        window.toggleMobileZoom = toggleMobileZoom;
+        // Handle image source changes (when switching thumbnails)
+        const imageObserver = new MutationObserver(() => {
+            if (mainImage.src !== zoomImage.src) {
+                zoomImage.src = mainImage.src;
+                
+                // Wait for zoom image to load
+                zoomImage.onload = () => {
+                    if (isImageLoaded) {
+                        updateLayout();
+                        
+                        if (isZoomActive || isMobileZoomToggled) {
+                            const imageRect = wrapper.getBoundingClientRect();
+                            const centerX = imageRect.width / 2;
+                            const centerY = imageRect.height / 2;
+                            updateZoomView(centerX, centerY, imageRect);
+                        }
+                    }
+                };
+            }
+        });
         
-        console.log('✅ Zoom system initialized with fixed position box (125% zoom)');
+        imageObserver.observe(mainImage, { attributes: true, attributeFilter: ['src'] });
     }
+
+    // Initialize based on image loading state
+    if (mainImage.complete && mainImage.naturalWidth > 0) {
+        initializeZoom();
+    } else {
+        mainImage.onload = initializeZoom;
+        mainImage.onerror = () => {
+            console.error('❌ Failed to load main image');
+        };
+    }
+
+    // Make functions available globally if needed
+    window.toggleMobileZoom = toggleMobileZoom;
+    window.resetZoom = resetZoom;
 }
 
 // ============================================
