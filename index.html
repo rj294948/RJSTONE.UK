@@ -458,7 +458,7 @@ header.show {
 }
 
 /* ============================================
-   LATEST TRENDING PRODUCTS - UPDATED COMPACT STYLE
+   LATEST TRENDING PRODUCTS - COMPACT STYLE
 ============================================ */
 .trending-section {
     background: var(--white);
@@ -508,32 +508,42 @@ header.show {
     position: relative;
 }
 
-.trending-row {
-    display: flex;
-    padding: 0 15px;
-    gap: 0; /* NO GAP between images */
-}
-
-.trending-item {
-    flex: 0 0 50%; /* 2 items per row */
-    height: 220px;
+.trending-slider {
     position: relative;
     overflow: hidden;
+    padding: 0 15px;
+}
+
+.trending-track {
+    display: flex;
+    gap: 10px;
+    transition: transform 0.5s ease;
+    padding: 5px 0;
+}
+
+.trending-slide {
+    flex: 0 0 220px;
+    height: 220px;
 }
 
 .trending-card {
-    width: 100%;
-    height: 100%;
     background: var(--white);
+    border-radius: 12px;
     overflow: hidden;
+    box-shadow: var(--shadow-md);
     transition: var(--transition);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     cursor: pointer;
     text-decoration: none;
     color: inherit;
     position: relative;
-    display: block;
-    margin: 0;
-    padding: 0;
+}
+
+.trending-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
 }
 
 .trending-image-container {
@@ -542,162 +552,50 @@ header.show {
     overflow: hidden;
     background: var(--product-bg);
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
 
-/* PPT Animation Effects */
 .trending-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    transition: none;
+    object-fit: contain; /* Changed to contain for proper image display */
+    transition: transform 0.5s ease;
 }
 
-.trending-image.active {
-    opacity: 1;
-    z-index: 1;
+.trending-card:hover .trending-image {
+    transform: scale(1.05);
 }
 
-/* PPT Animation Classes */
-@keyframes appear {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes blinds {
-    0% { 
-        opacity: 0;
-        clip-path: inset(0 100% 0 0);
-    }
-    100% { 
-        opacity: 1;
-        clip-path: inset(0 0 0 0);
-    }
-}
-
-@keyframes wipe {
-    0% { 
-        opacity: 0;
-        clip-path: inset(0 0 0 100%);
-    }
-    100% { 
-        opacity: 1;
-        clip-path: inset(0 0 0 0);
-    }
-}
-
-@keyframes windowOpen {
-    0% { 
-        opacity: 0;
-        clip-path: inset(50% 50% 50% 50%);
-    }
-    100% { 
-        opacity: 1;
-        clip-path: inset(0 0 0 0);
-    }
-}
-
-@keyframes windowClose {
-    0% { 
-        opacity: 1;
-        clip-path: inset(0 0 0 0);
-    }
-    100% { 
-        opacity: 0;
-        clip-path: inset(50% 50% 50% 50%);
-    }
-}
-
-@keyframes tileBreak {
-    0% { 
-        opacity: 0;
-        transform: scale(0) rotate(0deg);
-        clip-path: polygon(0 0, 50% 0, 50% 50%, 0 50%);
-    }
-    100% { 
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-    }
-}
-
-@keyframes sandBlur {
-    0% { 
-        opacity: 0;
-        filter: blur(20px);
-        transform: scale(1.1);
-    }
-    100% { 
-        opacity: 1;
-        filter: blur(0);
-        transform: scale(1);
-    }
-}
-
-@keyframes slideLeft {
-    0% { 
-        opacity: 0;
-        transform: translateX(100%);
-    }
-    100% { 
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideRight {
-    0% { 
-        opacity: 0;
-        transform: translateX(-100%);
-    }
-    100% { 
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes fadeZoom {
-    0% { 
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    100% { 
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes dissolve {
-    0% { 
-        opacity: 0;
-        filter: brightness(200%) contrast(50%);
-    }
-    100% { 
-        opacity: 1;
-        filter: brightness(100%) contrast(100%);
-    }
-}
-
-/* Remove the trending badge completely */
+/* Add badge back for new products */
 .trending-badge {
-    display: none !important;
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #ff4757;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 9px;
+    font-weight: 600;
+    z-index: 2;
 }
 
+/* Remove name from trending cards */
 .trending-content {
     display: none;
 }
 
-.trending-controls {
+.slider-controls {
     display: flex;
     justify-content: center;
     gap: 15px;
     margin-top: 15px;
 }
 
-.trending-btn {
+.slider-btn {
     width: 35px;
     height: 35px;
     border-radius: 50%;
@@ -712,19 +610,19 @@ header.show {
     font-size: 14px;
 }
 
-.trending-btn:hover {
+.slider-btn:hover {
     background: var(--gold-dark);
     transform: scale(1.1);
 }
 
-.trending-dots {
+.slider-dots {
     display: flex;
     justify-content: center;
     gap: 6px;
     margin-top: 12px;
 }
 
-.trending-dot {
+.slider-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -733,13 +631,13 @@ header.show {
     transition: var(--transition);
 }
 
-.trending-dot.active {
+.slider-dot.active {
     background: var(--primary-gold);
     transform: scale(1.2);
 }
 
 /* ============================================
-   ALL PRODUCTS SECTION - UPDATED WITH PPT EFFECTS
+   ALL PRODUCTS SECTION
 ============================================ */
 .products-section {
     background: var(--white);
@@ -776,7 +674,7 @@ header.show {
 }
 
 /* ============================================
-   PRODUCT CARD UPDATED STRUCTURE WITH PPT EFFECTS
+   PRODUCT CARD UPDATED STRUCTURE - CLASSIC DESIGN
 ============================================ */
 .product-grid {
     display: grid;
@@ -845,7 +743,6 @@ header.show {
     color: inherit;
     order: 2;
     border: 1px solid #e0d9ce;
-    position: relative;
 }
 
 .product-card:hover {
@@ -859,24 +756,21 @@ header.show {
     overflow: hidden;
     background: var(--white);
     border-radius: 8px;
-    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
 
-/* Product PPT Animation Images */
 .product-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    transition: none;
+    object-fit: contain; /* Changed to contain for proper image display */
+    transition: transform 0.5s ease;
 }
 
-.product-image.active {
-    opacity: 1;
-    z-index: 1;
+.product-card:hover .product-image {
+    transform: scale(1.08);
 }
 
 /* Usage buttons container - FIXED BUTTONS with conditional display */
@@ -956,7 +850,7 @@ header.show {
 }
 
 /* ============================================
-   BOTTOM NAVIGATION WITH MORE SECTION
+   BOTTOM NAVIGATION
 ============================================ */
 .bottom-nav {
     position: fixed;
@@ -1023,70 +917,37 @@ header.show {
     font-size: 16px;
 }
 
-/* Removed cart badge styles */
-/* .cart-badge {
-    display: none !important;
-} */
-
-.notification-badge {
-    display: none !important;
-}
-
-/* ============================================
-   MORE SECTION (Footer-like)
-============================================ */
-.more-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.9));
-    padding: 20px 15px;
-    margin-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.more-title {
-    text-align: center;
-    color: var(--primary-gold);
-    font-size: 16px;
+.cart-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #ff4757;
+    color: var(--white);
+    font-size: 9px;
     font-weight: 600;
-    margin-bottom: 15px;
-    font-family: 'Roboto Slab', serif;
-}
-
-.more-links {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-}
-
-.more-link {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: 10px;
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    padding: 10px 12px;
-    border-radius: 8px;
-    transition: var(--transition);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    justify-content: center;
 }
 
-.more-link:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--primary-gold);
-    transform: translateY(-2px);
-    border-color: var(--primary-gold);
-}
-
-.more-link i {
-    font-size: 14px;
-    width: 20px;
-    text-align: center;
-    color: var(--primary-gold);
-}
-
-.more-link span {
-    font-size: 13px;
-    font-weight: 500;
+.notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #4285f4;
+    color: var(--white);
+    font-size: 9px;
+    font-weight: 600;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
 }
 
 /* ============================================
@@ -1297,7 +1158,8 @@ header.show {
         font-size: 17px !important;
     }
     
-    .trending-item {
+    .trending-slide {
+        flex: 0 0 250px;
         height: 250px;
     }
     
@@ -1331,10 +1193,6 @@ header.show {
         font-size: 12px;
         min-width: 110px;
     }
-    
-    .more-links {
-        grid-template-columns: repeat(3, 1fr);
-    }
 }
 
 @media (min-width: 1024px) {
@@ -1343,12 +1201,9 @@ header.show {
         gap: 15px;
     }
     
-    .trending-item {
+    .trending-slide {
+        flex: 0 0 280px;
         height: 280px;
-    }
-    
-    .more-links {
-        grid-template-columns: repeat(6, 1fr);
     }
 }
 
@@ -1430,7 +1285,8 @@ header.show {
         font-size: 15px !important;
     }
     
-    .trending-item {
+    .trending-slide {
+        flex: 0 0 200px;
         height: 200px;
     }
     
@@ -1487,20 +1343,6 @@ header.show {
     .nav-btn i {
         font-size: 14px;
     }
-    
-    .more-links {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-    
-    .more-link {
-        padding: 8px 10px;
-        font-size: 12px;
-    }
-    
-    .more-link i {
-        font-size: 12px;
-    }
 }
 
 @media (max-width: 360px) {
@@ -1555,9 +1397,16 @@ header.show {
 
     <!-- Header Actions -->
     <div style="display: flex; gap: 8px; align-items: center;">
+        <!-- Cart Icon -->
+        <a href="cart.html" class="action-btn" style="position: relative;">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge" id="cartBadge">0</span>
+        </a>
+        
         <!-- Notification Icon -->
         <a href="#" class="action-btn" id="notificationBtn" style="position: relative;">
             <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notificationBadge">0</span>
         </a>
         
         <!-- User Profile / Sign In Button -->
@@ -1583,7 +1432,7 @@ header.show {
     </div>
 </section>
 
-<!-- Latest Trending Products - UPDATED COMPACT STYLE -->
+<!-- Latest Trending Products - COMPACT STYLE -->
 <section class="trending-section" id="trending">
     <div class="section-title-wrapper">
         <h2><i class="fas fa-fire"></i> Trending Now</h2>
@@ -1591,8 +1440,24 @@ header.show {
     </div>
     
     <div class="trending-container">
-        <div class="trending-row" id="trendingRow">
-            <!-- Trending products will be loaded here - 2 per row -->
+        <div class="trending-slider">
+            <div class="trending-track" id="trendingTrack">
+                <!-- Trending products will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Slider Controls -->
+        <div class="slider-controls">
+            <button class="slider-btn" id="prevTrendingBtn">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="slider-btn" id="nextTrendingBtn">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <div class="slider-dots" id="trendingDots">
+            <!-- Dots will be generated dynamically -->
         </div>
     </div>
 </section>
@@ -1618,37 +1483,6 @@ header.show {
     </div>
 </section>
 
-<!-- More Section (Footer-like) -->
-<section class="more-section">
-    <h3 class="more-title">More</h3>
-    <div class="more-links">
-        <a href="about.html" class="more-link">
-            <i class="fas fa-info-circle"></i>
-            <span>About Us</span>
-        </a>
-        <a href="contact.html" class="more-link">
-            <i class="fas fa-envelope"></i>
-            <span>Contact Us</span>
-        </a>
-        <a href="support.html" class="more-link">
-            <i class="fas fa-headset"></i>
-            <span>Help / Support</span>
-        </a>
-        <a href="privacy.html" class="more-link">
-            <i class="fas fa-shield-alt"></i>
-            <span>Privacy Policy</span>
-        </a>
-        <a href="terms.html" class="more-link">
-            <i class="fas fa-file-contract"></i>
-            <span>Terms & Conditions</span>
-        </a>
-        <a href="legal.html" class="more-link">
-            <i class="fas fa-balance-scale"></i>
-            <span>Policy / Legal</span>
-        </a>
-    </div>
-</section>
-
 <!-- Bottom Menu -->
 <div class="bottom-nav" id="bottomNav">
     <a href="index.html" class="nav-btn active">
@@ -1667,9 +1501,10 @@ header.show {
         <i class="fas fa-user"></i>
         <span>Account</span>
     </a>
-    <a href="#more" class="nav-btn">
-        <i class="fas fa-ellipsis-h"></i>
-        <span>More</span>
+    <a href="cart.html" class="nav-btn">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Cart</span>
+        <span class="cart-badge" id="bottomCartBadge">0</span>
     </a>
 </div>
 
@@ -1692,312 +1527,15 @@ const firebaseConfig = {
 let firebaseApp, firebaseDB, firebaseAuth;
 let allProducts = [];
 let trendingProducts = [];
+let cartSystem = null;
 let authSystem = null;
 
-// PPT Animation System Variables
-let pptAnimations = {
-    trending: {
-        intervals: [],
-        currentImages: {},
-        hoverStates: {},
-        imageIndices: {}
-    },
-    products: {
-        intervals: [],
-        currentImages: {},
-        hoverStates: {},
-        imageIndices: {}
-    }
-};
+// Trending Slider Variables
+let currentTrendingSlide = 0;
+let trendingSlideInterval = null;
 
 // ============================================
-// PPT ANIMATION SYSTEM
-// ============================================
-
-class PPTAnimationSystem {
-    constructor() {
-        this.effects = [
-            'appear',
-            'blinds',
-            'wipe',
-            'windowOpen',
-            'windowClose',
-            'tileBreak',
-            'sandBlur',
-            'slideLeft',
-            'slideRight',
-            'fadeZoom',
-            'dissolve'
-        ];
-        this.defaultImage = 'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp';
-    }
-    
-    getRandomEffect() {
-        return this.effects[Math.floor(Math.random() * this.effects.length)];
-    }
-    
-    applyEffect(element, effect) {
-        // Clear any existing animation
-        element.style.animation = '';
-        
-        // Apply new animation
-        const duration = 1 + Math.random() * 1; // 1-2 seconds
-        element.style.animation = `${effect} ${duration}s ease forwards`;
-    }
-    
-    getProductImages(product) {
-        const images = [];
-        
-        // Add product.images if available
-        if (Array.isArray(product.images) && product.images.length > 0) {
-            images.push(...product.images);
-        }
-        
-        // Add product.image if available
-        if (typeof product.image === 'string' && product.image.trim() !== '') {
-            images.push(product.image);
-        }
-        
-        // Add default images based on category
-        const categoryLower = (product.category || '').toLowerCase();
-        
-        if (categoryLower.includes('sand') || categoryLower.includes('stone')) {
-            images.push(
-                'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp',
-                'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&h=600',
-                'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=800&h=600',
-                'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&h=600',
-                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&h=600'
-            );
-        }
-        
-        // Remove duplicates and empty strings
-        return [...new Set(images.filter(img => img && img.trim()))];
-    }
-    
-    startTrendingAnimation(productId, container, product) {
-        const images = this.getProductImages(product);
-        
-        if (images.length <= 1) {
-            // If only one image, just show it
-            container.innerHTML = `
-                <a href="product-details.html?id=${product.id}" class="trending-card">
-                    <div class="trending-image-container">
-                        <img src="${images[0] || this.defaultImage}" 
-                             alt="${product.stone_name}" 
-                             class="trending-image active"
-                             onerror="this.src='${this.defaultImage}'">
-                    </div>
-                </a>
-            `;
-            return;
-        }
-        
-        // Create image elements for all images
-        const imageElements = images.map((img, index) => `
-            <img src="${img}" 
-                 alt="${product.stone_name}" 
-                 class="trending-image ${index === 0 ? 'active' : ''}"
-                 onerror="this.src='${this.defaultImage}'"
-                 style="animation: none;">
-        `).join('');
-        
-        container.innerHTML = `
-            <a href="product-details.html?id=${product.id}" class="trending-card">
-                <div class="trending-image-container">
-                    ${imageElements}
-                </div>
-            </a>
-        `;
-        
-        const imageContainers = container.querySelectorAll('.trending-image');
-        let currentIndex = 0;
-        
-        // Store references
-        pptAnimations.trending.currentImages[productId] = imageContainers;
-        pptAnimations.trending.imageIndices[productId] = 0;
-        pptAnimations.trending.hoverStates[productId] = false;
-        
-        // Set up hover events
-        const card = container.querySelector('.trending-card');
-        if (card) {
-            card.addEventListener('mouseenter', () => {
-                pptAnimations.trending.hoverStates[productId] = true;
-            });
-            
-            card.addEventListener('mouseleave', () => {
-                pptAnimations.trending.hoverStates[productId] = false;
-            });
-        }
-        
-        // Start animation interval
-        const interval = setInterval(() => {
-            if (pptAnimations.trending.hoverStates[productId]) {
-                return; // Pause on hover
-            }
-            
-            const images = pptAnimations.trending.currentImages[productId];
-            if (!images || images.length <= 1) return;
-            
-            const currentImg = images[currentIndex];
-            const nextIndex = (currentIndex + 1) % images.length;
-            const nextImg = images[nextIndex];
-            
-            // Apply random effect to next image
-            const effect = this.getRandomEffect();
-            this.applyEffect(nextImg, effect);
-            
-            // Switch images
-            currentImg.classList.remove('active');
-            nextImg.classList.add('active');
-            
-            currentIndex = nextIndex;
-            pptAnimations.trending.imageIndices[productId] = currentIndex;
-            
-        }, 3000 + Math.random() * 2000); // 3-5 seconds interval
-        
-        pptAnimations.trending.intervals.push({ productId, interval });
-    }
-    
-    startProductAnimation(productId, container, product) {
-        const images = this.getProductImages(product);
-        
-        if (images.length <= 1) {
-            // If only one image, just show it
-            container.innerHTML = `
-                <a href="product-details.html?id=${product.id}" class="product-card">
-                    <div class="product-image-container">
-                        <img src="${images[0] || this.defaultImage}" 
-                             alt="${product.stone_name}" 
-                             class="product-image active"
-                             onerror="this.src='${this.defaultImage}'">
-                    </div>
-                </a>
-            `;
-            return;
-        }
-        
-        // Create image elements for all images
-        const imageElements = images.map((img, index) => `
-            <img src="${img}" 
-                 alt="${product.stone_name}" 
-                 class="product-image ${index === 0 ? 'active' : ''}"
-                 onerror="this.src='${this.defaultImage}'"
-                 style="animation: none;">
-        `).join('');
-        
-        const existingCard = container.querySelector('.product-card');
-        if (existingCard) {
-            const imageContainer = existingCard.querySelector('.product-image-container');
-            if (imageContainer) {
-                imageContainer.innerHTML = imageElements;
-            }
-        } else {
-            container.innerHTML = `
-                <a href="product-details.html?id=${product.id}" class="product-card">
-                    <div class="product-image-container">
-                        ${imageElements}
-                    </div>
-                </a>
-            `;
-        }
-        
-        const imageContainers = container.querySelectorAll('.product-image');
-        let currentIndex = 0;
-        
-        // Store references
-        pptAnimations.products.currentImages[productId] = imageContainers;
-        pptAnimations.products.imageIndices[productId] = 0;
-        pptAnimations.products.hoverStates[productId] = false;
-        
-        // Set up hover events
-        const card = container.querySelector('.product-card');
-        if (card) {
-            card.addEventListener('mouseenter', () => {
-                pptAnimations.products.hoverStates[productId] = true;
-            });
-            
-            card.addEventListener('mouseleave', () => {
-                pptAnimations.products.hoverStates[productId] = false;
-            });
-        }
-        
-        // Start animation interval
-        const interval = setInterval(() => {
-            if (pptAnimations.products.hoverStates[productId]) {
-                return; // Pause on hover
-            }
-            
-            const images = pptAnimations.products.currentImages[productId];
-            if (!images || images.length <= 1) return;
-            
-            const currentImg = images[currentIndex];
-            const nextIndex = (currentIndex + 1) % images.length;
-            const nextImg = images[nextIndex];
-            
-            // Apply random effect to next image
-            const effect = this.getRandomEffect();
-            this.applyEffect(nextImg, effect);
-            
-            // Switch images
-            currentImg.classList.remove('active');
-            nextImg.classList.add('active');
-            
-            currentIndex = nextIndex;
-            pptAnimations.products.imageIndices[productId] = currentIndex;
-            
-        }, 4000 + Math.random() * 3000); // 4-7 seconds interval
-        
-        pptAnimations.products.intervals.push({ productId, interval });
-    }
-    
-    stopAllAnimations() {
-        // Stop trending animations
-        pptAnimations.trending.intervals.forEach(item => {
-            clearInterval(item.interval);
-        });
-        pptAnimations.trending.intervals = [];
-        pptAnimations.trending.currentImages = {};
-        pptAnimations.trending.hoverStates = {};
-        pptAnimations.trending.imageIndices = {};
-        
-        // Stop product animations
-        pptAnimations.products.intervals.forEach(item => {
-            clearInterval(item.interval);
-        });
-        pptAnimations.products.intervals = [];
-        pptAnimations.products.currentImages = {};
-        pptAnimations.products.hoverStates = {};
-        pptAnimations.products.imageIndices = {};
-    }
-    
-    stopProductAnimation(productId) {
-        // Stop specific product animation
-        const trendIndex = pptAnimations.trending.intervals.findIndex(item => item.productId === productId);
-        if (trendIndex > -1) {
-            clearInterval(pptAnimations.trending.intervals[trendIndex].interval);
-            pptAnimations.trending.intervals.splice(trendIndex, 1);
-            delete pptAnimations.trending.currentImages[productId];
-            delete pptAnimations.trending.hoverStates[productId];
-            delete pptAnimations.trending.imageIndices[productId];
-        }
-        
-        const prodIndex = pptAnimations.products.intervals.findIndex(item => item.productId === productId);
-        if (prodIndex > -1) {
-            clearInterval(pptAnimations.products.intervals[prodIndex].interval);
-            pptAnimations.products.intervals.splice(prodIndex, 1);
-            delete pptAnimations.products.currentImages[productId];
-            delete pptAnimations.products.hoverStates[productId];
-            delete pptAnimations.products.imageIndices[productId];
-        }
-    }
-}
-
-// Initialize PPT Animation System
-const pptAnimationSystem = new PPTAnimationSystem();
-
-// ============================================
-// AUTH SYSTEM (Cart system removed)
+// AUTH SYSTEM
 // ============================================
 
 class AuthSystem {
@@ -2006,6 +1544,7 @@ class AuthSystem {
         this.authKey = 'irya_stone_user';
         this.dropdownOpen = false;
         this.guestIdKey = 'irya_guest_id';
+        this.cartGuestIdKey = 'irya_cart_guest_id';
     }
     
     async init() {
@@ -2077,6 +1616,19 @@ class AuthSystem {
         if (!guestId) {
             guestId = 'guest_' + Date.now();
             localStorage.setItem(this.guestIdKey, guestId);
+        }
+        return guestId;
+    }
+    
+    getCartUserId() {
+        if (this.isLoggedIn()) {
+            return this.currentUser.uid;
+        }
+        
+        let guestId = localStorage.getItem(this.cartGuestIdKey);
+        if (!guestId) {
+            guestId = 'cart_guest_' + Date.now();
+            localStorage.setItem(this.cartGuestIdKey, guestId);
         }
         return guestId;
     }
@@ -2192,6 +1744,306 @@ class AuthSystem {
 }
 
 // ============================================
+// CART SYSTEM
+// ============================================
+
+class CartSystem {
+    constructor() {
+        this.localCartKey = 'irya_cart';
+        this.cartItems = [];
+        this.initialized = false;
+    }
+    
+    async init() {
+        if (this.initialized) return this;
+        
+        console.log('🛒 Cart system initializing...');
+        
+        await this.loadCart();
+        this.updateCartBadge();
+        
+        this.initialized = true;
+        return this;
+    }
+    
+    getUserId() {
+        if (!authSystem) {
+            return 'guest_' + Date.now();
+        }
+        
+        return authSystem.getCartUserId();
+    }
+    
+    async loadCart() {
+        try {
+            const userId = this.getUserId();
+            const cartKey = `${this.localCartKey}_${userId}`;
+            
+            console.log(`Loading cart for user: ${userId}`);
+            
+            const cartData = localStorage.getItem(cartKey);
+            
+            if (cartData) {
+                try {
+                    const parsedData = JSON.parse(cartData);
+                    
+                    if (Array.isArray(parsedData)) {
+                        this.cartItems = parsedData;
+                    } else if (parsedData && Array.isArray(parsedData.items)) {
+                        this.cartItems = parsedData.items;
+                    } else {
+                        this.cartItems = [];
+                    }
+                    
+                    console.log(`Loaded ${this.cartItems.length} items from localStorage`);
+                    
+                    this.validateCartItems();
+                    
+                } catch (e) {
+                    console.error('Error parsing cart data:', e);
+                    this.cartItems = [];
+                }
+            } else {
+                this.cartItems = [];
+                console.log('No existing cart data found');
+            }
+            
+            if (authSystem && authSystem.isLoggedIn() && firebaseDB) {
+                console.log('User is logged in, syncing with Firebase');
+                await this.syncWithFirebase(userId);
+            }
+            
+            return this.cartItems;
+            
+        } catch (error) {
+            console.error('Error loading cart:', error);
+            this.cartItems = [];
+            return [];
+        }
+    }
+    
+    validateCartItems() {
+        const originalCount = this.cartItems.length;
+        
+        this.cartItems = this.cartItems.filter(item => {
+            return item && 
+                   item.id && 
+                   item.name &&
+                   typeof item.price === 'number' &&
+                   item.price >= 0 &&
+                   (item.quantity || 1) > 0;
+        });
+        
+        const removedCount = originalCount - this.cartItems.length;
+        if (removedCount > 0) {
+            console.log(`Removed ${removedCount} invalid items`);
+        }
+    }
+    
+    async syncWithFirebase(userId) {
+        try {
+            if (!userId || userId.includes('guest') || !firebaseDB) {
+                return;
+            }
+            
+            const cartDoc = await firebaseDB.collection('userCarts').doc(userId).get();
+            
+            if (cartDoc.exists) {
+                const firebaseData = cartDoc.data();
+                const firebaseItems = firebaseData.items || [];
+                
+                console.log(`Found ${firebaseItems.length} items in Firebase`);
+                
+                await this.mergeCarts(firebaseItems);
+            }
+            
+        } catch (error) {
+            console.error('Error syncing cart with Firebase:', error);
+        }
+    }
+    
+    async mergeCarts(firebaseItems) {
+        if (firebaseItems.length === 0) return;
+        
+        const mergedItems = [...this.cartItems];
+        const existingIds = new Set(this.cartItems.map(item => item.id));
+        
+        firebaseItems.forEach(item => {
+            if (item && item.id && !existingIds.has(item.id)) {
+                mergedItems.push(item);
+                existingIds.add(item.id);
+            }
+        });
+        
+        this.cartItems = mergedItems;
+        await this.saveCart();
+    }
+    
+    async saveCart() {
+        const userId = this.getUserId();
+        const cartKey = `${this.localCartKey}_${userId}`;
+        
+        console.log(`Saving cart for user: ${userId}, items: ${this.cartItems.length}`);
+        
+        this.removeDuplicates();
+        
+        localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
+        
+        if (authSystem && authSystem.isLoggedIn() && firebaseDB) {
+            await this.saveToFirebase(userId);
+        }
+        
+        this.updateCartBadge();
+        return this.cartItems;
+    }
+    
+    async saveToFirebase(userId) {
+        try {
+            if (!userId || userId.includes('guest')) {
+                return;
+            }
+            
+            await firebaseDB.collection('userCarts').doc(userId).set({
+                userId: userId,
+                items: this.cartItems,
+                updatedAt: new Date().toISOString(),
+                itemCount: this.cartItems.length,
+                totalAmount: this.cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0)
+            }, { merge: true });
+            
+        } catch (error) {
+            console.error('Error saving cart to Firebase:', error);
+        }
+    }
+    
+    removeDuplicates() {
+        const uniqueItems = [];
+        const seenIds = new Set();
+        
+        for (const item of this.cartItems) {
+            if (item && item.id && !seenIds.has(item.id)) {
+                seenIds.add(item.id);
+                uniqueItems.push(item);
+            }
+        }
+        
+        if (uniqueItems.length !== this.cartItems.length) {
+            console.log(`Removed ${this.cartItems.length - uniqueItems.length} duplicate items`);
+            this.cartItems = uniqueItems;
+        }
+    }
+    
+    async addToCart(product) {
+        try {
+            console.log(`📦 Adding product to cart: ${product.id} - ${product.stone_name}`);
+            
+            const existingIndex = this.cartItems.findIndex(item => item.id === product.id);
+            
+            if (existingIndex !== -1) {
+                this.cartItems[existingIndex].quantity = (this.cartItems[existingIndex].quantity || 1) + 1;
+                this.cartItems[existingIndex].updatedAt = new Date().toISOString();
+                console.log(`Updated quantity for: ${product.id}, new quantity: ${this.cartItems[existingIndex].quantity}`);
+            } else {
+                const newItem = {
+                    id: product.id,
+                    name: product.stone_name || 'Stone Product',
+                    stoneName: product.stone_name,
+                    price: parseFloat(product.price) || 0,
+                    priceUnit: product.price_unit || 'piece',
+                    image: getProductImage(product),
+                    category: product.category || 'Sand Stone',
+                    description: product.description || '',
+                    quantity: 1,
+                    addedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                
+                this.cartItems.push(newItem);
+                console.log(`Added new product to cart: ${product.id}`);
+            }
+            
+            await this.saveCart();
+            
+            const cartCount = this.getCartCount();
+            showNotification(`${product.stone_name} added to cart! (${cartCount} items)`);
+            return true;
+            
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            showError('Failed to add to cart. Please try again.');
+            return false;
+        }
+    }
+    
+    getCartCount() {
+        return this.cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
+    }
+    
+    getCartTotal() {
+        return this.cartItems.reduce((total, item) => {
+            const price = parseFloat(item.price) || 0;
+            const quantity = item.quantity || 1;
+            return total + (price * quantity);
+        }, 0);
+    }
+    
+    updateCartBadge() {
+        const count = this.getCartCount();
+        const cartBadge = document.getElementById('cartBadge');
+        const bottomCartBadge = document.getElementById('bottomCartBadge');
+        
+        if (cartBadge) {
+            cartBadge.textContent = count > 99 ? '99+' : count;
+            cartBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
+        
+        if (bottomCartBadge) {
+            bottomCartBadge.textContent = count > 99 ? '99+' : count;
+            bottomCartBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+    
+    async removeFromCart(productId) {
+        const initialCount = this.cartItems.length;
+        this.cartItems = this.cartItems.filter(item => item.id !== productId);
+        
+        if (this.cartItems.length < initialCount) {
+            await this.saveCart();
+            console.log(`Removed product: ${productId} from cart`);
+            return true;
+        }
+        return false;
+    }
+    
+    async updateQuantity(productId, newQuantity) {
+        const itemIndex = this.cartItems.findIndex(item => item.id === productId);
+        
+        if (itemIndex !== -1) {
+            if (newQuantity <= 0) {
+                return await this.removeFromCart(productId);
+            }
+            
+            this.cartItems[itemIndex].quantity = newQuantity;
+            this.cartItems[itemIndex].updatedAt = new Date().toISOString();
+            await this.saveCart();
+            return true;
+        }
+        return false;
+    }
+    
+    async clearCart() {
+        this.cartItems = [];
+        await this.saveCart();
+        console.log('🧹 Cart cleared completely');
+        showNotification('Cart cleared!');
+    }
+    
+    getCartItems() {
+        return [...this.cartItems];
+    }
+}
+
+// ============================================
 // FIREBASE INITIALIZATION
 // ============================================
 
@@ -2283,7 +2135,7 @@ function getDefaultImage(category) {
 
 // Function getProductUsageButtons में URLs बदलें:
 function getProductUsageButtons(product) {
-    const usage = (product.usage || '').toLowerCase();
+   const usage = (product.usage || '').toLowerCase();
     const uses = [];
     // Always add Wall Cladding button - TYPE के according URL
     uses.push({
@@ -2318,7 +2170,7 @@ function getProductUsageButtons(product) {
 }
 
 // ============================================
-// TRENDING PRODUCTS FETCHING - UPDATED
+// TRENDING PRODUCTS FETCHING - FIXED
 // ============================================
 
 async function loadTrendingProducts() {
@@ -2374,6 +2226,7 @@ async function loadTrendingProducts() {
         
         if (trendingProducts.length > 0) {
             displayTrendingProducts();
+            setupTrendingSlider();
         } else {
             console.log('No trending products found');
             loadFallbackTrendingProducts();
@@ -2412,7 +2265,7 @@ function createProductObject(id, data) {
 }
 
 function displayTrendingProducts() {
-    const container = document.getElementById('trendingRow');
+    const container = document.getElementById('trendingTrack');
     if (!container) return;
     
     if (trendingProducts.length === 0) {
@@ -2420,42 +2273,31 @@ function displayTrendingProducts() {
         return;
     }
     
-    // Clear any existing intervals
-    pptAnimationSystem.stopAllAnimations();
-    
-    // Display 2 products per row
-    let trendingHTML = '';
-    for (let i = 0; i < trendingProducts.length; i += 2) {
-        const rowProducts = trendingProducts.slice(i, i + 2);
+    const trendingHTML = trendingProducts.map(product => {
+        const productImage = getProductImage(product);
+        const showNewBadge = (product.latest || '').toLowerCase() === 'new';
         
-        trendingHTML += `<div class="trending-row">`;
-        
-        rowProducts.forEach(product => {
-            trendingHTML += `
-                <div class="trending-item" id="trending-item-${product.id}">
-                    <!-- Content will be populated by PPT animation system -->
-                </div>
-            `;
-        });
-        
-        trendingHTML += `</div>`;
-    }
+        return `
+            <div class="trending-slide">
+                <a href="product-details.html?id=${product.id}" class="trending-card">
+                    ${showNewBadge ? '<div class="trending-badge">New</div>' : ''}
+                    <div class="trending-image-container">
+                        <img src="${productImage}" 
+                             alt="${product.stone_name}" 
+                             class="trending-image"
+                             onerror="this.src='${getDefaultImage(product.category)}'"
+                             loading="lazy">
+                    </div>
+                </a>
+            </div>
+        `;
+    }).join('');
     
     container.innerHTML = trendingHTML;
-    
-    // Initialize PPT animations for each trending product
-    setTimeout(() => {
-        trendingProducts.forEach(product => {
-            const itemContainer = document.getElementById(`trending-item-${product.id}`);
-            if (itemContainer) {
-                pptAnimationSystem.startTrendingAnimation(product.id, itemContainer, product);
-            }
-        });
-    }, 100);
 }
 
 function loadFallbackTrendingProducts() {
-    const container = document.getElementById('trendingRow');
+    const container = document.getElementById('trendingTrack');
     if (!container) return;
     
     const fallbackProducts = [
@@ -2470,69 +2312,146 @@ function loadFallbackTrendingProducts() {
             id: 'trend2',
             stone_name: 'Raj Green',
             category: 'Sand Stone',
-            image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&h=600',
+            image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300',
             latest: 'new'
         },
         {
             id: 'trend3',
             stone_name: 'Modak Yellow',
             category: 'Sand Stone',
-            image: 'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=800&h=600',
+            image: 'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=400&h=300',
             latest: 'new'
         },
         {
             id: 'trend4',
             stone_name: 'Crystal White',
             category: 'Sand Stone',
-            image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&h=600',
+            image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300',
             latest: 'new'
         },
         {
             id: 'trend5',
             stone_name: 'Desert Beige',
             category: 'Sand Stone',
-            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&h=600',
+            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300',
             latest: 'new'
         }
     ];
     
-    // Clear any existing intervals
-    pptAnimationSystem.stopAllAnimations();
-    
-    // Display 2 products per row
-    let trendingHTML = '';
-    for (let i = 0; i < fallbackProducts.length; i += 2) {
-        const rowProducts = fallbackProducts.slice(i, i + 2);
-        
-        trendingHTML += `<div class="trending-row">`;
-        
-        rowProducts.forEach(product => {
-            trendingHTML += `
-                <div class="trending-item" id="trending-item-${product.id}">
-                    <!-- Content will be populated by PPT animation system -->
-                </div>
-            `;
-        });
-        
-        trendingHTML += `</div>`;
-    }
+    const trendingHTML = fallbackProducts.map(product => {
+        return `
+            <div class="trending-slide">
+                <a href="products.html" class="trending-card">
+                    <div class="trending-badge">New</div>
+                    <div class="trending-image-container">
+                        <img src="${product.image}" 
+                             alt="${product.stone_name}" 
+                             class="trending-image"
+                             loading="lazy">
+                    </div>
+                </a>
+            </div>
+        `;
+    }).join('');
     
     container.innerHTML = trendingHTML;
     trendingProducts = fallbackProducts;
+    setupTrendingSlider();
+}
+
+function setupTrendingSlider() {
+    const track = document.getElementById('trendingTrack');
+    const prevBtn = document.getElementById('prevTrendingBtn');
+    const nextBtn = document.getElementById('nextTrendingBtn');
+    const dotsContainer = document.getElementById('trendingDots');
     
-    // Initialize PPT animations for fallback products
-    setTimeout(() => {
-        fallbackProducts.forEach(product => {
-            const itemContainer = document.getElementById(`trending-item-${product.id}`);
-            if (itemContainer) {
-                pptAnimationSystem.startTrendingAnimation(product.id, itemContainer, product);
-            }
+    if (!track || trendingProducts.length === 0) return;
+    
+    const calculateSlidesPerView = () => {
+        if (window.innerWidth >= 1024) return 4;
+        if (window.innerWidth >= 768) return 3;
+        if (window.innerWidth >= 480) return 2;
+        return 1;
+    };
+    
+    let slidesPerView = calculateSlidesPerView();
+    let totalSlides = trendingProducts.length;
+    let totalPages = Math.ceil(totalSlides / slidesPerView);
+    
+    dotsContainer.innerHTML = '';
+    for (let i = 0; i < totalPages; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
+        dot.addEventListener('click', () => goToSlide(i));
+        dotsContainer.appendChild(dot);
+    }
+    
+    const updateSlider = () => {
+        const slideWidth = document.querySelector('.trending-slide')?.offsetWidth || 220;
+        const gap = 10;
+        const totalWidth = slideWidth + gap;
+        track.style.transform = `translateX(-${currentTrendingSlide * slidesPerView * totalWidth}px)`;
+        
+        const activePage = Math.floor(currentTrendingSlide / slidesPerView);
+        document.querySelectorAll('.slider-dot').forEach((dot, index) => {
+            dot.classList.toggle('active', index === activePage);
         });
+    };
+    
+    prevBtn.addEventListener('click', () => {
+        if (currentTrendingSlide > 0) {
+            currentTrendingSlide--;
+            updateSlider();
+        }
+    });
+    
+    nextBtn.addEventListener('click', () => {
+        if (currentTrendingSlide < totalSlides - slidesPerView) {
+            currentTrendingSlide++;
+            updateSlider();
+        }
+    });
+    
+    if (trendingSlideInterval) {
+        clearInterval(trendingSlideInterval);
+    }
+    
+    trendingSlideInterval = setInterval(() => {
+        if (currentTrendingSlide >= totalSlides - slidesPerView) {
+            currentTrendingSlide = 0;
+        } else {
+            currentTrendingSlide++;
+        }
+        updateSlider();
+    }, 4000);
+    
+    window.addEventListener('resize', () => {
+        slidesPerView = calculateSlidesPerView();
+        totalPages = Math.ceil(totalSlides / slidesPerView);
+        
+        dotsContainer.innerHTML = '';
+        for (let i = 0; i < totalPages; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);
+        }
+        
+        updateSlider();
+    });
+    
+    function goToSlide(page) {
+        currentTrendingSlide = page * slidesPerView;
+        updateSlider();
+    }
+    
+    setTimeout(() => {
+        updateSlider();
     }, 100);
 }
 
 // ============================================
-// PRODUCTS LOADING & DISPLAY - UPDATED WITH PPT EFFECTS
+// PRODUCTS LOADING & DISPLAY - SANDSTONE ONLY
 // ============================================
 
 async function loadAllProducts() {
@@ -2622,12 +2541,8 @@ function displayProducts(products) {
         return;
     }
     
-    // Clear any existing product animations
-    Object.keys(pptAnimations.products.currentImages).forEach(productId => {
-        pptAnimationSystem.stopProductAnimation(productId);
-    });
-    
     const productsHTML = products.map(product => {
+        const productImage = getProductImage(product);
         const usageButtons = getProductUsageButtons(product);
         
         // Generate buttons HTML
@@ -2650,9 +2565,15 @@ function displayProducts(products) {
                     </div>
                 </div>
                 
-                <div class="product-card-container" id="product-card-${product.id}">
-                    <!-- Product card with images will be populated by PPT animation system -->
-                </div>
+                <a href="product-details.html?id=${product.id}" class="product-card">
+                    <div class="product-image-container">
+                        <img src="${productImage}" 
+                             alt="${product.stone_name}" 
+                             class="product-image" 
+                             onerror="this.src='${getDefaultImage(product.category)}'"
+                             loading="lazy">
+                    </div>
+                </a>
                 
                 <div class="usage-buttons-container">
                     <div class="usage-buttons">
@@ -2664,16 +2585,6 @@ function displayProducts(products) {
     }).join('');
     
     container.innerHTML = productsHTML;
-    
-    // Initialize PPT animations for each product
-    setTimeout(() => {
-        products.forEach(product => {
-            const cardContainer = document.getElementById(`product-card-${product.id}`);
-            if (cardContainer) {
-                pptAnimationSystem.startProductAnimation(product.id, cardContainer, product);
-            }
-        });
-    }, 100);
     
     const viewAllBtn = document.getElementById('viewAllBtn');
     if (viewAllBtn && allProducts.length > 0) {
@@ -2720,7 +2631,7 @@ function showDefaultProducts() {
             color: 'Green',
             finish: 'Polished',
             size: '60x30cm',
-            images: ['https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&h=600'],
+            images: ['https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300'],
             usage: 'Wall Cladding'
         },
         {
@@ -2733,7 +2644,7 @@ function showDefaultProducts() {
             color: 'Yellow',
             finish: 'Natural',
             size: '30x30cm',
-            images: ['https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=800&h=600'],
+            images: ['https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=400&h=300'],
             usage: 'Flooring'
         },
         {
@@ -2746,7 +2657,7 @@ function showDefaultProducts() {
             color: 'White',
             finish: 'Polished',
             size: '60x60cm',
-            images: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&h=600'],
+            images: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300'],
             usage: 'Paving, Landscaping'
         },
         {
@@ -2759,7 +2670,7 @@ function showDefaultProducts() {
             color: 'Beige',
             finish: 'Natural',
             size: '40x20cm',
-            images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&h=600'],
+            images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300'],
             usage: 'Wall Cladding, Flooring'
         },
         {
@@ -2772,7 +2683,7 @@ function showDefaultProducts() {
             color: 'Red',
             finish: 'Polished',
             size: '30x30cm',
-            images: ['https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&h=600'],
+            images: ['https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300'],
             usage: 'Wall Cladding'
         },
         {
@@ -2785,7 +2696,7 @@ function showDefaultProducts() {
             color: 'Grey',
             finish: 'Honed',
             size: '60x30cm',
-            images: ['https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=800&h=600'],
+            images: ['https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=400&h=300'],
             usage: 'Flooring, Paving'
         },
         {
@@ -2798,7 +2709,7 @@ function showDefaultProducts() {
             color: 'Brown',
             finish: 'Natural',
             size: '40x40cm',
-            images: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&h=600'],
+            images: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300'],
             usage: 'Wall Cladding, Flooring'
         }
     ].slice(0, 8);
@@ -2943,6 +2854,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     authSystem = new AuthSystem();
     await authSystem.init();
     
+    cartSystem = new CartSystem();
+    await cartSystem.init();
+    
     console.log('✅ All systems initialized successfully');
     
     await loadAllProducts();
@@ -3009,13 +2923,6 @@ function setupEventListeners() {
     
     window.addEventListener('scroll', handleScroll, { passive: true });
     
-    // Clean up animations when page is hidden
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-            pptAnimationSystem.stopAllAnimations();
-        }
-    });
-    
     handleScroll();
 }
 
@@ -3031,11 +2938,6 @@ function handleNotificationClick(e) {
         window.location.href = 'sign.html';
     }
 }
-
-// Clean up animations on page unload
-window.addEventListener('beforeunload', function() {
-    pptAnimationSystem.stopAllAnimations();
-});
 </script>
 </body>
 </html>
