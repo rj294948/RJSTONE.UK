@@ -30,7 +30,7 @@
     --text-dark: #222222;
     --text-light: #666666;
     --white: #ffffff;
-    --product-bg: #f8f5f0; /* Classic sandstone background */
+    --product-bg: #f8f5f0;
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
     --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
     --shadow-lg: 0 8px 20px rgba(0,0,0,0.12);
@@ -50,6 +50,257 @@ body {
     color: var(--text-dark);
     font-size: 14px;
     scroll-behavior: smooth;
+    padding-bottom: 70px; /* For bottom nav */
+}
+
+/* ============================================
+   ANIMATION & EFFECTS STYLES
+============================================ */
+
+/* Container for image slideshow with effects */
+.image-slideshow {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+}
+
+.slide-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    object-fit: contain !important; /* Force contain for full image display */
+    background: transparent;
+    z-index: 1;
+}
+
+.slide-image.active {
+    opacity: 1;
+    z-index: 2;
+}
+
+.slide-image.next {
+    opacity: 0;
+    z-index: 1;
+}
+
+/* PPT Animation Effects - Enhanced */
+@keyframes pptAppear {
+    0% { 
+        opacity: 0; 
+        transform: scale(0.9); 
+        filter: blur(2px);
+    }
+    100% { 
+        opacity: 1; 
+        transform: scale(1); 
+        filter: blur(0);
+    }
+}
+
+@keyframes pptBlinds {
+    0% { 
+        opacity: 0;
+        clip-path: inset(0 100% 0 0);
+        transform: translateX(-20px);
+    }
+    100% { 
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        transform: translateX(0);
+    }
+}
+
+@keyframes pptRandom {
+    0% { 
+        opacity: 0;
+        transform: translateY(30px) rotate(8deg);
+        filter: blur(8px) brightness(1.2);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateY(0) rotate(0);
+        filter: blur(0) brightness(1);
+    }
+}
+
+@keyframes pptWindow {
+    0% { 
+        opacity: 0;
+        clip-path: circle(0% at 50% 50%);
+        transform: scale(0.8);
+    }
+    100% { 
+        opacity: 1;
+        clip-path: circle(150% at 50% 50%);
+        transform: scale(1);
+    }
+}
+
+@keyframes pptBoxes {
+    0% { 
+        opacity: 0;
+        clip-path: inset(0 0 0 0);
+        transform: scale(1.2);
+    }
+    25% { 
+        opacity: 0.3;
+        clip-path: inset(25% 25% 25% 25%);
+    }
+    50% { 
+        opacity: 0.6;
+        clip-path: inset(12.5% 12.5% 12.5% 12.5%);
+        transform: scale(1);
+    }
+    100% { 
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        transform: scale(1);
+    }
+}
+
+@keyframes pptDust {
+    0% { 
+        opacity: 0;
+        transform: scale(1.3) rotate(10deg);
+        filter: blur(15px) brightness(1.8);
+    }
+    70% { 
+        opacity: 0.7;
+        filter: blur(5px) brightness(1.3);
+    }
+    100% { 
+        opacity: 1;
+        transform: scale(1) rotate(0);
+        filter: blur(0) brightness(1);
+    }
+}
+
+@keyframes pptFade {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes pptSlideUp {
+    0% { 
+        opacity: 0;
+        transform: translateY(40px);
+        filter: blur(5px);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes pptSlideDown {
+    0% { 
+        opacity: 0;
+        transform: translateY(-40px);
+        filter: blur(5px);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes pptZoomIn {
+    0% { 
+        opacity: 0;
+        transform: scale(0.7);
+        filter: blur(3px);
+    }
+    100% { 
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes slideOutDust {
+    0% { 
+        opacity: 1;
+        transform: scale(1) rotate(0);
+        filter: blur(0);
+    }
+    100% { 
+        opacity: 0;
+        transform: scale(1.2) rotate(8deg);
+        filter: blur(12px) brightness(1.4);
+    }
+}
+
+@keyframes slideOutFade {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.95); }
+}
+
+@keyframes slideOutScatter {
+    0% { 
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        transform: scale(1);
+    }
+    100% { 
+        opacity: 0;
+        clip-path: inset(25% 25% 25% 25%);
+        transform: scale(0.85);
+    }
+}
+
+/* Apply animation classes */
+.image-slideshow.appear .slide-image.active {
+    animation: pptAppear 1.2s ease-out;
+}
+
+.image-slideshow.blinds .slide-image.active {
+    animation: pptBlinds 1.2s ease-out;
+}
+
+.image-slideshow.random .slide-image.active {
+    animation: pptRandom 1.2s ease-out;
+}
+
+.image-slideshow.window .slide-image.active {
+    animation: pptWindow 1.2s ease-out;
+}
+
+.image-slideshow.boxes .slide-image.active {
+    animation: pptBoxes 1.5s ease-out;
+}
+
+.image-slideshow.dust .slide-image.active {
+    animation: pptDust 1.5s ease-out;
+}
+
+.image-slideshow.fade .slide-image.active {
+    animation: pptFade 1s ease-out;
+}
+
+.image-slideshow.slide-up .slide-image.active {
+    animation: pptSlideUp 1.2s ease-out;
+}
+
+.image-slideshow.slide-down .slide-image.active {
+    animation: pptSlideDown 1.2s ease-out;
+}
+
+.image-slideshow.zoom-in .slide-image.active {
+    animation: pptZoomIn 1.2s ease-out;
+}
+
+/* Animation for product images */
+.product-image-container .image-slideshow {
+    width: 100%;
+    height: 100%;
 }
 
 /* ============================================
@@ -458,7 +709,7 @@ header.show {
 }
 
 /* ============================================
-   LATEST TRENDING PRODUCTS - COMPACT STYLE
+   TRENDING SECTION - ENHANCED 2-COLUMN LAYOUT
 ============================================ */
 .trending-section {
     background: var(--white);
@@ -467,11 +718,11 @@ header.show {
 }
 
 .trending-section .section-title-wrapper {
-    background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8));
-    padding: 12px 15px !important;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    padding: 20px 10px !important;
     margin: 0 !important;
-    height: 65px;
-    min-height: 65px;
+    height: 80px;
+    min-height: 80px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -482,158 +733,94 @@ header.show {
 }
 
 .trending-section .section-title-wrapper h2 {
-    font-size: 15px !important;
-    font-weight: 600 !important;
-    color: var(--white);
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: var(--primary-gold);
     font-family: 'Roboto Slab', serif;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 12px;
+    text-transform: uppercase;
 }
 
 .trending-section .section-title-wrapper .subtitle {
-    font-size: 11px !important;
+    font-size: 13px !important;
     color: rgba(255, 255, 255, 0.9);
-    margin: 0 auto;
+    margin: 6px auto 0;
     line-height: 1.3;
     font-weight: 400;
-    opacity: 0.9;
+    max-width: 500px;
 }
 
 .trending-container {
-    padding: 15px 0;
-    background: var(--bg-light);
+    padding: 30px 10px;
+    background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
     position: relative;
+    overflow: hidden;
 }
 
 .trending-slider {
     position: relative;
-    overflow: hidden;
-    padding: 0 15px;
+    width: 100%;
+    margin: 0 auto;
 }
 
-.trending-track {
-    display: flex;
-    gap: 10px;
-    transition: transform 0.5s ease;
-    padding: 5px 0;
-}
-
-.trending-slide {
-    flex: 0 0 220px;
-    height: 220px;
-}
-
-.trending-card {
-    background: var(--white);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-    transition: var(--transition);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
+/* Two column layout for trending products - NO MARGIN */
+.trending-two-column {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0; /* NO GAP between images */
+    width: 100%;
     position: relative;
 }
 
+.trending-slide {
+    width: 100%;
+    position: relative;
+    aspect-ratio: 1/1; /* Square aspect ratio for trending */
+}
+
+.trending-card {
+    width: 100%;
+    height: 100%;
+    background: var(--white);
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s ease;
+    border: none;
+}
+
 .trending-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+}
+
+/* Remove all badges including NEW tag */
+.trending-badge, .new-badge {
+    display: none !important;
 }
 
 .trending-image-container {
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    background: var(--product-bg);
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
 }
 
-.trending-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Changed to contain for proper image display */
-    transition: transform 0.5s ease;
-}
-
-.trending-card:hover .trending-image {
-    transform: scale(1.05);
-}
-
-/* Add badge back for new products */
-.trending-badge {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    background: #ff4757;
-    color: white;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 9px;
-    font-weight: 600;
-    z-index: 2;
-}
-
-/* Remove name from trending cards */
-.trending-content {
-    display: none;
-}
-
-.slider-controls {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.slider-btn {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    background: var(--primary-gold);
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-}
-
-.slider-btn:hover {
-    background: var(--gold-dark);
-    transform: scale(1.1);
-}
-
-.slider-dots {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 12px;
-}
-
-.slider-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #e0e0e0;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.slider-dot.active {
-    background: var(--primary-gold);
-    transform: scale(1.2);
+/* Remove rotation controls completely */
+.rotation-controls,
+.rotation-btn,
+.rotation-info {
+    display: none !important;
 }
 
 /* ============================================
@@ -646,11 +833,11 @@ header.show {
 }
 
 .products-section .section-title-wrapper {
-    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.75));
-    padding: 15px 15px !important;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.75));
+    padding: 20px 15px !important;
     margin: 0 !important;
-    height: 70px;
-    min-height: 70px;
+    height: 80px;
+    min-height: 80px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -661,73 +848,76 @@ header.show {
 }
 
 .products-section .section-title-wrapper h2 {
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    margin-bottom: 4px !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin-bottom: 6px !important;
     color: var(--white);
     font-family: 'Roboto Slab', serif;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .products-content {
-    padding: 15px;
+    padding: 20px 15px;
 }
 
 /* ============================================
-   PRODUCT CARD UPDATED STRUCTURE - CLASSIC DESIGN
+   PRODUCT CARD ENHANCEMENTS WITH ANIMATIONS
 ============================================ */
 .product-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin-bottom: 15px;
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
 .product-card-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    background: var(--product-bg);
+    gap: 12px;
+    background: var(--white);
     border-radius: 12px;
-    padding: 12px;
-    box-shadow: var(--shadow-sm);
+    padding: 15px;
+    box-shadow: var(--shadow-md);
     transition: var(--transition);
     border: 1px solid #e8e2d8;
+    position: relative;
+    overflow: hidden;
 }
 
 .product-card-wrapper:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
     border-color: var(--primary-gold);
 }
 
 /* Stone name box styling - ABOVE IMAGE */
 .stone-name-box {
     width: 100%;
-    padding: 10px 12px;
+    padding: 12px 15px;
     background: linear-gradient(135deg, #ffffff 0%, #f5f1eb 100%);
     border-radius: 8px;
     border: 1px solid #e0d9ce;
     text-align: center;
     margin: 0;
     order: 1;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.08);
 }
 
 .stone-name-box .product-name {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
     color: var(--stone-dark);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
     margin: 0;
     line-height: 1.3;
 }
 
 .stone-name-box .stone-icon {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--primary-gold);
 }
 
@@ -735,9 +925,8 @@ header.show {
     background: var(--white);
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-    height: 160px;
+    position: relative;
+    height: 200px; /* Increased height */
     display: block;
     text-decoration: none;
     color: inherit;
@@ -745,69 +934,68 @@ header.show {
     border: 1px solid #e0d9ce;
 }
 
-.product-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+.product-card:hover .product-image-container::after {
+    opacity: 0.1;
 }
 
 .product-image-container {
     width: 100%;
-    height: 160px;
+    height: 100%;
+    position: relative;
     overflow: hidden;
     background: var(--white);
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
 }
 
-.product-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Changed to contain for proper image display */
-    transition: transform 0.5s ease;
+.product-image-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--primary-gold);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 3;
+    pointer-events: none;
 }
 
-.product-card:hover .product-image {
-    transform: scale(1.08);
-}
-
-/* Usage buttons container - FIXED BUTTONS with conditional display */
+/* Usage buttons container */
 .usage-buttons-container {
-    margin-top: 5px;
+    margin-top: 8px;
     order: 3;
 }
 
 .usage-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
     justify-content: center;
 }
 
 .usage-btn {
-    padding: 7px 12px;
-    font-size: 11px;
-    font-weight: 500;
-    border-radius: 18px;
+    padding: 9px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
     border: none;
     cursor: pointer;
     transition: var(--transition);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     position: relative;
     overflow: hidden;
-    min-width: 100px;
+    min-width: 120px;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.12);
 }
 
 .usage-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.18);
 }
 
 /* Button types */
@@ -850,7 +1038,143 @@ header.show {
 }
 
 /* ============================================
-   BOTTOM NAVIGATION
+   FOOTER SECTION - PROFESSIONAL
+============================================ */
+.footer-section {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    color: white;
+    padding: 50px 15px 40px;
+    margin-top: 40px;
+    position: relative;
+    border-top: 4px solid var(--primary-gold);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 35px;
+}
+
+.footer-column {
+    padding: 0 12px;
+}
+
+.footer-section h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 22px;
+    color: var(--primary-gold);
+    font-family: 'Roboto Slab', serif;
+    position: relative;
+    padding-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: 0.5px;
+}
+
+.footer-section h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 45px;
+    height: 3px;
+    background: var(--primary-gold);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 14px;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 5px 0;
+}
+
+.footer-links a:hover {
+    color: var(--primary-gold);
+    transform: translateX(8px);
+}
+
+.footer-links i {
+    font-size: 14px;
+    width: 20px;
+    color: var(--primary-gold);
+    opacity: 0.9;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 35px;
+    margin-top: 50px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.footer-bottom p {
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+.footer-social {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.footer-social a {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 18px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer-social a:hover {
+    color: var(--primary-gold);
+    transform: translateY(-5px) scale(1.1);
+    background: rgba(201, 162, 39, 0.2);
+}
+
+.footer-contact {
+    margin-top: 20px;
+    font-size: 13px;
+    opacity: 0.8;
+    line-height: 1.8;
+}
+
+.footer-contact i {
+    margin: 0 5px;
+    color: var(--primary-gold);
+}
+
+/* ============================================
+   BOTTOM NAVIGATION (CART REMOVED)
 ============================================ */
 .bottom-nav {
     position: fixed;
@@ -861,13 +1185,13 @@ header.show {
     backdrop-filter: blur(15px);
     display: flex;
     justify-content: space-around;
-    padding: 10px 0;
+    padding: 12px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 999;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.35);
     transform: translateY(0);
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.3s ease;
-    height: 65px;
+    height: 70px;
 }
 
 .bottom-nav.scrolled {
@@ -886,68 +1210,42 @@ header.show {
 
 .nav-btn {
     text-align: center;
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.85);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
     transition: var(--transition);
     cursor: pointer;
-    padding: 6px 10px;
-    border-radius: 8px;
-    min-width: 55px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    min-width: 65px;
     text-decoration: none;
-    height: 45px;
+    height: 50px;
     justify-content: center;
     position: relative;
 }
 
 .nav-btn:hover {
     color: var(--primary-gold);
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
 }
 
 .nav-btn.active {
     color: var(--primary-gold);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .nav-btn i {
-    font-size: 16px;
+    font-size: 18px;
 }
 
-.cart-badge {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: #ff4757;
-    color: var(--white);
-    font-size: 9px;
-    font-weight: 600;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
+/* Remove cart badge completely */
+.cart-badge,
 .notification-badge {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: #4285f4;
-    color: var(--white);
-    font-size: 9px;
-    font-weight: 600;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    display: none;
+    display: none !important;
 }
 
 /* ============================================
@@ -978,15 +1276,16 @@ header.show {
     right: 15px;
     background: var(--primary-gold);
     color: white;
-    padding: 10px 15px;
-    border-radius: 6px;
-    box-shadow: var(--shadow-md);
+    padding: 12px 18px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
     z-index: 9999;
     transform: translateX(100%);
     transition: transform 0.3s ease;
-    max-width: 250px;
+    max-width: 280px;
     display: none;
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .notification.show {
@@ -1001,22 +1300,23 @@ header.show {
     transform: translateX(-50%);
     background: #ff4757;
     color: white;
-    padding: 10px 15px;
-    border-radius: 6px;
-    box-shadow: var(--shadow-md);
+    padding: 12px 18px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
     z-index: 9999;
     display: none;
-    max-width: 250px;
+    max-width: 280px;
     text-align: center;
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .scroll-top {
     position: fixed;
-    bottom: 80px;
-    right: 15px;
-    width: 40px;
-    height: 40px;
+    bottom: 85px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
     background: var(--primary-gold);
     color: white;
     border-radius: 50%;
@@ -1028,8 +1328,8 @@ header.show {
     z-index: 998;
     opacity: 0;
     transform: translateY(15px);
-    box-shadow: var(--shadow-sm);
-    font-size: 16px;
+    box-shadow: 0 4px 15px rgba(201, 162, 39, 0.4);
+    font-size: 18px;
 }
 
 .scroll-top.visible {
@@ -1039,61 +1339,65 @@ header.show {
 
 .scroll-top:hover {
     background: var(--gold-dark);
-    transform: translateY(-3px);
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(201, 162, 39, 0.6);
 }
 
 .view-all-container {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 .view-all-btn {
     display: inline-block;
-    padding: 10px 25px;
+    padding: 12px 30px;
     background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
     color: white;
-    border-radius: 20px;
+    border-radius: 25px;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
     transition: var(--transition);
     border: none;
-    font-size: 13px;
+    font-size: 14px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(201, 162, 39, 0.3);
 }
 
 .view-all-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(201, 162, 39, 0.5);
     opacity: 0.95;
 }
 
 .no-products {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 40px 20px;
+    padding: 50px 20px;
     color: var(--text-light);
 }
 
 .no-products i {
-    font-size: 40px;
-    margin-bottom: 15px;
+    font-size: 45px;
+    margin-bottom: 20px;
     opacity: 0.5;
     color: var(--primary-gold);
 }
 
 .no-products h3 {
-    font-size: 16px;
-    margin-bottom: 10px;
+    font-size: 18px;
+    margin-bottom: 15px;
     color: var(--stone-dark);
+    font-weight: 700;
 }
 
 .no-products p {
-    font-size: 13px;
-    max-width: 300px;
+    font-size: 14px;
+    max-width: 350px;
     margin: 0 auto;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 /* ============================================
@@ -1101,247 +1405,308 @@ header.show {
 ============================================ */
 @media (min-width: 768px) {
     header {
-        padding: 10px 20px;
-        height: 65px;
+        padding: 12px 25px;
+        height: 70px;
     }
     
     .logo {
-        min-width: 140px;
+        min-width: 150px;
     }
     
     .logo i {
-        font-size: 20px;
+        font-size: 22px;
     }
     
     .logo span {
-        font-size: 18px;
+        font-size: 20px;
     }
     
     .search-box {
-        max-width: 500px;
+        max-width: 550px;
     }
     
     .search-box input {
-        font-size: 13px;
-        padding: 9px 40px 9px 15px;
+        font-size: 14px;
+        padding: 11px 45px 11px 18px;
     }
     
     .hero {
-        height: 300px;
-        min-height: 300px;
-        padding: 80px 20px 30px;
-        margin-top: 65px;
+        height: 350px;
+        min-height: 350px;
+        padding: 90px 25px 40px;
+        margin-top: 70px;
     }
     
     .hero h1 {
-        font-size: 28px;
+        font-size: 32px;
     }
     
     .hero p {
-        font-size: 15px;
+        font-size: 16px;
+        max-width: 600px;
     }
     
     .hero-buttons .signin-btn {
-        padding: 10px 20px;
-        font-size: 14px;
+        padding: 12px 25px;
+        font-size: 15px;
+    }
+    
+    .trending-slide {
+        aspect-ratio: 1/1; /* Square for trending */
     }
     
     .trending-section .section-title-wrapper,
     .products-section .section-title-wrapper {
-        height: 75px;
-        min-height: 75px;
-        padding: 18px 20px !important;
+        height: 90px;
+        min-height: 90px;
+        padding: 25px 20px !important;
     }
     
     .trending-section .section-title-wrapper h2,
     .products-section .section-title-wrapper h2 {
-        font-size: 17px !important;
+        font-size: 22px !important;
     }
     
-    .trending-slide {
-        flex: 0 0 250px;
-        height: 250px;
+    .trending-section .section-title-wrapper .subtitle {
+        font-size: 15px !important;
     }
     
     .product-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
+        gap: 20px;
     }
     
     .product-card-wrapper {
-        padding: 15px;
+        padding: 18px;
     }
     
     .product-card {
-        height: 180px;
+        height: 240px; /* Increased for desktop */
     }
     
     .product-image-container {
-        height: 180px;
+        height: 240px;
     }
     
     .stone-name-box {
-        padding: 12px 15px;
+        padding: 15px 18px;
     }
     
     .stone-name-box .product-name {
-        font-size: 15px;
+        font-size: 17px;
     }
     
     .usage-btn {
-        padding: 8px 14px;
-        font-size: 12px;
-        min-width: 110px;
+        padding: 10px 18px;
+        font-size: 13px;
+        min-width: 140px;
+    }
+    
+    .footer-content {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 45px;
+    }
+    
+    .footer-column {
+        padding: 0;
+    }
+    
+    .footer-section {
+        padding: 60px 25px 50px;
+    }
+    
+    .footer-section h3 {
+        font-size: 19px;
+    }
+    
+    .footer-links a {
+        font-size: 15px;
+    }
+    
+    .footer-social a {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
     }
 }
 
 @media (min-width: 1024px) {
-    .product-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 15px;
+    .trending-two-column {
+        max-width: 1000px;
+        margin: 0 auto;
     }
     
     .trending-slide {
-        flex: 0 0 280px;
-        height: 280px;
+        aspect-ratio: 1/1;
+    }
+    
+    .product-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+    
+    .footer-content {
+        grid-template-columns: repeat(5, 1fr);
+        max-width: 1400px;
+    }
+    
+    .trending-section .section-title-wrapper h2,
+    .products-section .section-title-wrapper h2 {
+        font-size: 24px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .trending-slide {
+        aspect-ratio: 1/1; /* Square for mobile trending */
+    }
+    
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+    }
+    
+    .trending-section .section-title-wrapper {
+        padding: 15px 8px !important;
+        height: 75px;
+    }
+    
+    .trending-section .section-title-wrapper h2 {
+        font-size: 16px !important;
+    }
+    
+    .trending-section .section-title-wrapper .subtitle {
+        font-size: 12px !important;
     }
 }
 
 @media (max-width: 480px) {
     header {
-        padding: 6px 10px;
-        height: 55px;
-        gap: 5px;
+        padding: 6px 12px;
+        height: 60px;
+        gap: 6px;
     }
     
     .logo {
-        min-width: 100px;
+        min-width: 110px;
     }
     
     .logo i {
-        font-size: 16px;
+        font-size: 17px;
     }
     
     .logo span {
-        font-size: 14px;
+        font-size: 15px;
     }
     
     .search-box {
-        margin: 0 5px;
+        margin: 0 6px;
     }
     
     .search-box input {
-        font-size: 11px;
-        padding: 7px 30px 7px 10px;
+        font-size: 12px;
+        padding: 8px 35px 8px 12px;
     }
     
     .profile-btn,
     .signin-btn {
-        padding: 6px 10px;
-        font-size: 11px;
-        min-width: 60px;
+        padding: 7px 12px;
+        font-size: 12px;
+        min-width: 70px;
     }
     
     .action-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 13px;
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
     }
     
     .hero {
-        height: 240px;
-        min-height: 240px;
-        padding: 60px 12px 20px;
-        margin-top: 55px;
+        height: 250px;
+        min-height: 250px;
+        padding: 70px 15px 25px;
+        margin-top: 60px;
     }
     
     .hero h1 {
-        font-size: 20px;
+        font-size: 22px;
     }
     
     .hero p {
-        font-size: 12px;
-        margin-bottom: 15px;
+        font-size: 13px;
+        margin-bottom: 20px;
     }
     
     .hero-buttons {
-        gap: 6px;
+        gap: 8px;
     }
     
     .hero-buttons .signin-btn {
-        padding: 7px 14px;
-        font-size: 12px;
-    }
-    
-    .trending-section .section-title-wrapper,
-    .products-section .section-title-wrapper {
-        height: 65px;
-        min-height: 65px;
-        padding: 12px 12px !important;
-    }
-    
-    .trending-section .section-title-wrapper h2,
-    .products-section .section-title-wrapper h2 {
-        font-size: 15px !important;
-    }
-    
-    .trending-slide {
-        flex: 0 0 200px;
-        height: 200px;
-    }
-    
-    .product-grid {
-        gap: 10px;
-    }
-    
-    .product-card-wrapper {
-        padding: 10px;
-    }
-    
-    .product-card {
-        height: 150px;
-    }
-    
-    .product-image-container {
-        height: 150px;
-    }
-    
-    .stone-name-box {
-        padding: 8px 10px;
-    }
-    
-    .stone-name-box .product-name {
+        padding: 9px 16px;
         font-size: 13px;
     }
     
+    .trending-slide {
+        aspect-ratio: 1/1; /* Square for mobile */
+    }
+    
+    .product-grid {
+        gap: 12px;
+    }
+    
+    .product-card-wrapper {
+        padding: 12px;
+    }
+    
+    .product-card {
+        height: 180px; /* Adjusted for mobile */
+    }
+    
+    .product-image-container {
+        height: 180px;
+    }
+    
+    .stone-name-box {
+        padding: 10px 12px;
+    }
+    
+    .stone-name-box .product-name {
+        font-size: 14px;
+    }
+    
     .usage-buttons {
-        gap: 5px;
+        gap: 6px;
     }
     
     .usage-btn {
-        padding: 6px 10px;
-        font-size: 10px;
-        min-width: 90px;
-        gap: 4px;
+        padding: 8px 12px;
+        font-size: 11px;
+        min-width: 110px;
+        gap: 5px;
     }
     
     .usage-btn i {
-        font-size: 11px;
+        font-size: 12px;
     }
     
     .bottom-nav {
-        height: 60px;
-        padding: 8px 0;
+        height: 65px;
+        padding: 10px 0;
     }
     
     .nav-btn {
-        min-width: 50px;
-        font-size: 9px;
-        padding: 4px 6px;
+        min-width: 60px;
+        font-size: 10px;
+        padding: 6px 8px;
     }
     
     .nav-btn i {
-        font-size: 14px;
+        font-size: 16px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
     }
 }
 
@@ -1352,14 +1717,18 @@ header.show {
     
     .usage-buttons {
         flex-direction: column;
-        gap: 5px;
+        gap: 6px;
         align-items: center;
     }
     
     .usage-btn {
         width: 100%;
         min-width: unset;
-        max-width: 180px;
+        max-width: 220px;
+    }
+    
+    .trending-slide {
+        aspect-ratio: 1/1; /* Square for small mobile */
     }
 }
 </style>
@@ -1397,16 +1766,9 @@ header.show {
 
     <!-- Header Actions -->
     <div style="display: flex; gap: 8px; align-items: center;">
-        <!-- Cart Icon -->
-        <a href="cart.html" class="action-btn" style="position: relative;">
-            <i class="fas fa-shopping-cart"></i>
-            <span class="cart-badge" id="cartBadge">0</span>
-        </a>
-        
-        <!-- Notification Icon -->
+        <!-- Notification Icon Only (Cart removed) -->
         <a href="#" class="action-btn" id="notificationBtn" style="position: relative;">
             <i class="fas fa-bell"></i>
-            <span class="notification-badge" id="notificationBadge">0</span>
         </a>
         
         <!-- User Profile / Sign In Button -->
@@ -1432,32 +1794,16 @@ header.show {
     </div>
 </section>
 
-<!-- Latest Trending Products - COMPACT STYLE -->
+<!-- Latest Trending Products - ENHANCED 2-COLUMN LAYOUT -->
 <section class="trending-section" id="trending">
     <div class="section-title-wrapper">
         <h2><i class="fas fa-fire"></i> Trending Now</h2>
-        <p class="subtitle">Most popular sandstone selections</p>
+        <p class="subtitle">Most popular sandstone selections with auto-image rotation</p>
     </div>
     
     <div class="trending-container">
-        <div class="trending-slider">
-            <div class="trending-track" id="trendingTrack">
-                <!-- Trending products will be loaded here -->
-            </div>
-        </div>
-        
-        <!-- Slider Controls -->
-        <div class="slider-controls">
-            <button class="slider-btn" id="prevTrendingBtn">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="slider-btn" id="nextTrendingBtn">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-        
-        <div class="slider-dots" id="trendingDots">
-            <!-- Dots will be generated dynamically -->
+        <div class="trending-slider" id="trendingSlider">
+            <!-- Trending products will be loaded here by JavaScript -->
         </div>
     </div>
 </section>
@@ -1483,7 +1829,12 @@ header.show {
     </div>
 </section>
 
-<!-- Bottom Menu -->
+<!-- Professional Footer -->
+<footer class="footer-section" id="mainFooter">
+    <!-- Footer will be populated by JavaScript -->
+</footer>
+
+<!-- Bottom Menu (Cart removed) -->
 <div class="bottom-nav" id="bottomNav">
     <a href="index.html" class="nav-btn active">
         <i class="fas fa-home"></i>
@@ -1500,11 +1851,6 @@ header.show {
     <a href="account.html" class="nav-btn">
         <i class="fas fa-user"></i>
         <span>Account</span>
-    </a>
-    <a href="cart.html" class="nav-btn">
-        <i class="fas fa-shopping-cart"></i>
-        <span>Cart</span>
-        <span class="cart-badge" id="bottomCartBadge">0</span>
     </a>
 </div>
 
@@ -1527,12 +1873,363 @@ const firebaseConfig = {
 let firebaseApp, firebaseDB, firebaseAuth;
 let allProducts = [];
 let trendingProducts = [];
-let cartSystem = null;
 let authSystem = null;
 
-// Trending Slider Variables
-let currentTrendingSlide = 0;
-let trendingSlideInterval = null;
+// Animation System Variables
+let animationSystem = null;
+
+// ============================================
+// FIXED ANIMATION SYSTEM WITH MULTI-IMAGE SUPPORT
+// ============================================
+
+class FixedAnimationSystem {
+    constructor() {
+        this.animationEffects = [
+            'appear', 'blinds', 'random', 'window', 
+            'boxes', 'dust', 'fade', 'slide-up', 
+            'slide-down', 'zoom-in'
+        ];
+        
+        this.isAnimating = true;
+        this.pausedByHover = false;
+        this.intervalDuration = 2000; // 2 seconds
+        this.animationInterval = null;
+        this.currentSetIndex = 0;
+        this.productSets = [];
+    }
+    
+    init() {
+        console.log('🎬 Initializing fixed animation system...');
+        this.setupTrendingAnimations();
+        this.setupProductAnimations();
+        this.setupHoverBehavior();
+    }
+    
+    setupTrendingAnimations() {
+        const trendingContainer = document.getElementById('trendingSlider');
+        if (!trendingContainer) {
+            setTimeout(() => this.setupTrendingAnimations(), 500);
+            return;
+        }
+        
+        const trendingSlides = Array.from(trendingContainer.querySelectorAll('.trending-slide'));
+        if (trendingSlides.length === 0) return;
+        
+        // Group into sets of 2
+        this.productSets = this.chunkArray(trendingSlides, 2);
+        
+        // Start with first set visible
+        this.productSets.forEach((set, index) => {
+            if (index !== 0) {
+                set.forEach(slide => slide.style.display = 'none');
+            }
+        });
+        
+        // Start rotation
+        this.startTrendingRotation();
+    }
+    
+    startTrendingRotation() {
+        if (this.animationInterval) {
+            clearInterval(this.animationInterval);
+        }
+        
+        this.animationInterval = setInterval(() => {
+            this.rotateTrendingProducts();
+        }, this.intervalDuration);
+    }
+    
+    rotateTrendingProducts() {
+        if (this.pausedByHover || this.productSets.length < 2) return;
+        
+        const currentSet = this.productSets[this.currentSetIndex];
+        const nextSetIndex = (this.currentSetIndex + 1) % this.productSets.length;
+        const nextSet = this.productSets[nextSetIndex];
+        
+        if (!currentSet || !nextSet) return;
+        
+        // Apply slide-out animation to current set
+        currentSet.forEach((slide, index) => {
+            slide.style.animation = `slideOutFade 0.8s ease forwards`;
+        });
+        
+        // After slide out, switch to next set
+        setTimeout(() => {
+            // Hide current set
+            currentSet.forEach(slide => {
+                slide.style.display = 'none';
+                slide.style.animation = '';
+            });
+            
+            // Show next set with effect
+            nextSet.forEach((slide, index) => {
+                slide.style.display = 'block';
+                // Start slideshow for images in this slide
+                this.startSlideImageRotation(slide.querySelector('.image-slideshow'));
+            });
+            
+            this.currentSetIndex = nextSetIndex;
+            
+        }, 800);
+    }
+    
+    startSlideImageRotation(slideshow) {
+        if (!slideshow) return;
+        
+        const slides = slideshow.querySelectorAll('.slide-image');
+        if (slides.length < 2) return;
+        
+        let currentSlide = 0;
+        
+        // Show first slide
+        slides.forEach((slide, index) => {
+            slide.classList.remove('active');
+            if (index === 0) {
+                slide.classList.add('active');
+            }
+        });
+        
+        // Rotate images within the slide
+        const rotateSlide = () => {
+            if (this.pausedByHover && slideshow.matches(':hover')) return;
+            
+            // Remove active from current
+            slides[currentSlide].classList.remove('active');
+            
+            // Move to next
+            currentSlide = (currentSlide + 1) % slides.length;
+            
+            // Apply random effect
+            const effect = this.animationEffects[Math.floor(Math.random() * this.animationEffects.length)];
+            slideshow.classList.remove(...this.animationEffects);
+            slideshow.classList.add(effect);
+            
+            // Show next slide
+            slides[currentSlide].classList.add('active');
+        };
+        
+        // Store interval ID on slideshow element
+        if (slideshow.dataset.intervalId) {
+            clearInterval(parseInt(slideshow.dataset.intervalId));
+        }
+        
+        const intervalId = setInterval(rotateSlide, this.intervalDuration);
+        slideshow.dataset.intervalId = intervalId;
+        
+        // Start immediately
+        rotateSlide();
+    }
+    
+    setupProductAnimations() {
+        console.log('Setting up product animations...');
+        const productWrappers = document.querySelectorAll('.product-card-wrapper');
+        console.log(`Found ${productWrappers.length} product wrappers`);
+        
+        productWrappers.forEach((wrapper, index) => {
+            const imageContainer = wrapper.querySelector('.product-image-container');
+            if (!imageContainer) {
+                console.log(`No image container found for product ${index}`);
+                return;
+            }
+            
+            // Check if slideshow already exists
+            let slideshow = imageContainer.querySelector('.image-slideshow');
+            const productCard = wrapper.querySelector('.product-card');
+            
+            if (!productCard) {
+                console.log(`No product card found for wrapper ${index}`);
+                return;
+            }
+            
+            if (slideshow) {
+                console.log(`Slideshow already exists for product ${index}, starting rotation...`);
+                // Slideshow already exists, start rotation
+                this.startProductImageRotation(slideshow);
+            } else {
+                console.log(`Creating new slideshow for product ${index}...`);
+                // Get original image
+                const originalImg = productCard.querySelector('img');
+                if (!originalImg) {
+                    console.log(`No original image found for product ${index}`);
+                    return;
+                }
+                
+                const imgSrc = originalImg.src;
+                const altText = originalImg.alt;
+                const productId = wrapper.dataset.productId || `prod_${index}`;
+                
+                // Create slideshow container
+                slideshow = document.createElement('div');
+                slideshow.className = 'image-slideshow';
+                slideshow.dataset.index = index;
+                
+                // Get multiple images for this product from Firebase data
+                const productData = allProducts.find(p => p.id === productId) || 
+                                   allProducts[index] || 
+                                   { images: [imgSrc] };
+                
+                let productImages = [];
+                
+                if (productData && Array.isArray(productData.images) && productData.images.length > 1) {
+                    // Use actual multiple images from Firebase
+                    productImages = productData.images.slice(0, 3);
+                    console.log(`Found ${productImages.length} images for product ${productId}`);
+                } else {
+                    // Fallback to different angles of same image
+                    productImages = [
+                        imgSrc,
+                        imgSrc.replace(/(\.\w+)$/, '-angle1$1'),
+                        imgSrc.replace(/(\.\w+)$/, '-angle2$1')
+                    ];
+                    console.log(`Using fallback images for product ${productId}`);
+                }
+                
+                // Create multiple image slides
+                productImages.forEach((imageUrl, i) => {
+                    const slide = document.createElement('img');
+                    slide.className = i === 0 ? 'slide-image active' : 'slide-image';
+                    slide.src = imageUrl;
+                    slide.alt = `${altText} - View ${i + 1}`;
+                    slide.loading = 'lazy';
+                    slide.onerror = function() {
+                        this.src = getDefaultImage('Sand Stone');
+                    };
+                    slideshow.appendChild(slide);
+                });
+                
+                // Replace original image with slideshow
+                originalImg.remove();
+                imageContainer.appendChild(slideshow);
+                
+                console.log(`Created slideshow with ${productImages.length} images for product ${index}`);
+                
+                // Start slideshow for this product
+                this.startProductImageRotation(slideshow);
+            }
+        });
+        
+        console.log('Product animations setup complete');
+    }
+    
+    startProductImageRotation(slideshow) {
+        const slides = slideshow.querySelectorAll('.slide-image');
+        console.log(`Starting rotation for slideshow with ${slides.length} images`);
+        
+        if (slides.length < 2) {
+            console.log('Not enough images for animation');
+            return; // Only animate if there are multiple images
+        }
+        
+        let currentSlide = 0;
+        
+        // Show first slide
+        slides.forEach((slide, index) => {
+            slide.classList.remove('active');
+            if (index === 0) {
+                slide.classList.add('active');
+            }
+        });
+        
+        // Apply initial effect
+        const initialEffect = this.animationEffects[Math.floor(Math.random() * this.animationEffects.length)];
+        slideshow.classList.add(initialEffect);
+        
+        // Rotate images
+        const rotateSlide = () => {
+            if (this.pausedByHover && slideshow.matches(':hover')) {
+                console.log('Paused by hover');
+                return;
+            }
+            
+            console.log(`Rotating to slide ${currentSlide + 1}`);
+            
+            // Remove active from current
+            slides[currentSlide].classList.remove('active');
+            
+            // Move to next
+            currentSlide = (currentSlide + 1) % slides.length;
+            
+            // Apply new random effect
+            const newEffect = this.animationEffects[Math.floor(Math.random() * this.animationEffects.length)];
+            slideshow.classList.remove(...this.animationEffects);
+            slideshow.classList.add(newEffect);
+            
+            // Show next slide
+            slides[currentSlide].classList.add('active');
+        };
+        
+        // Store interval ID on slideshow element
+        if (slideshow.dataset.intervalId) {
+            clearInterval(parseInt(slideshow.dataset.intervalId));
+        }
+        
+        const intervalId = setInterval(rotateSlide, this.intervalDuration);
+        slideshow.dataset.intervalId = intervalId;
+        
+        // Start immediately
+        setTimeout(rotateSlide, 100);
+        
+        console.log(`Started image rotation interval for slideshow`);
+    }
+    
+    setupHoverBehavior() {
+        // Pause animation on hover
+        document.addEventListener('mouseover', (e) => {
+            const slideshow = e.target.closest('.image-slideshow');
+            const trendingSlide = e.target.closest('.trending-slide');
+            
+            if (slideshow || trendingSlide) {
+                this.pausedByHover = true;
+                console.log('Animation paused by hover');
+                
+                // Pause specific slideshow
+                if (slideshow && slideshow.dataset.intervalId) {
+                    clearInterval(parseInt(slideshow.dataset.intervalId));
+                    console.log('Cleared interval for slideshow');
+                }
+            }
+        });
+        
+        // Resume animation when mouse leaves
+        document.addEventListener('mouseout', (e) => {
+            const slideshow = e.target.closest('.image-slideshow');
+            const trendingSlide = e.target.closest('.trending-slide');
+            
+            if (slideshow || trendingSlide) {
+                this.pausedByHover = false;
+                console.log('Animation resumed');
+                
+                // Resume specific slideshow
+                if (slideshow) {
+                    setTimeout(() => {
+                        this.startProductImageRotation(slideshow);
+                    }, 100);
+                }
+            }
+        });
+    }
+    
+    chunkArray(array, size) {
+        const chunks = [];
+        for (let i = 0; i < array.length; i += size) {
+            chunks.push(array.slice(i, i + size));
+        }
+        return chunks;
+    }
+    
+    destroy() {
+        if (this.animationInterval) {
+            clearInterval(this.animationInterval);
+        }
+        
+        // Clear all slideshow intervals
+        document.querySelectorAll('.image-slideshow').forEach(slideshow => {
+            if (slideshow.dataset.intervalId) {
+                clearInterval(parseInt(slideshow.dataset.intervalId));
+            }
+        });
+    }
+}
 
 // ============================================
 // AUTH SYSTEM
@@ -1543,8 +2240,6 @@ class AuthSystem {
         this.currentUser = null;
         this.authKey = 'irya_stone_user';
         this.dropdownOpen = false;
-        this.guestIdKey = 'irya_guest_id';
-        this.cartGuestIdKey = 'irya_cart_guest_id';
     }
     
     async init() {
@@ -1569,7 +2264,6 @@ class AuthSystem {
                     };
                     
                     this.saveUserToLocalStorage();
-                    
                     console.log('User logged in via Firebase');
                     
                 } else {
@@ -1605,32 +2299,6 @@ class AuthSystem {
     
     isLoggedIn() {
         return this.currentUser !== null;
-    }
-    
-    getUserId() {
-        if (this.isLoggedIn()) {
-            return this.currentUser.uid;
-        }
-        
-        let guestId = localStorage.getItem(this.guestIdKey);
-        if (!guestId) {
-            guestId = 'guest_' + Date.now();
-            localStorage.setItem(this.guestIdKey, guestId);
-        }
-        return guestId;
-    }
-    
-    getCartUserId() {
-        if (this.isLoggedIn()) {
-            return this.currentUser.uid;
-        }
-        
-        let guestId = localStorage.getItem(this.cartGuestIdKey);
-        if (!guestId) {
-            guestId = 'cart_guest_' + Date.now();
-            localStorage.setItem(this.cartGuestIdKey, guestId);
-        }
-        return guestId;
     }
     
     getUserName() {
@@ -1744,306 +2412,6 @@ class AuthSystem {
 }
 
 // ============================================
-// CART SYSTEM
-// ============================================
-
-class CartSystem {
-    constructor() {
-        this.localCartKey = 'irya_cart';
-        this.cartItems = [];
-        this.initialized = false;
-    }
-    
-    async init() {
-        if (this.initialized) return this;
-        
-        console.log('🛒 Cart system initializing...');
-        
-        await this.loadCart();
-        this.updateCartBadge();
-        
-        this.initialized = true;
-        return this;
-    }
-    
-    getUserId() {
-        if (!authSystem) {
-            return 'guest_' + Date.now();
-        }
-        
-        return authSystem.getCartUserId();
-    }
-    
-    async loadCart() {
-        try {
-            const userId = this.getUserId();
-            const cartKey = `${this.localCartKey}_${userId}`;
-            
-            console.log(`Loading cart for user: ${userId}`);
-            
-            const cartData = localStorage.getItem(cartKey);
-            
-            if (cartData) {
-                try {
-                    const parsedData = JSON.parse(cartData);
-                    
-                    if (Array.isArray(parsedData)) {
-                        this.cartItems = parsedData;
-                    } else if (parsedData && Array.isArray(parsedData.items)) {
-                        this.cartItems = parsedData.items;
-                    } else {
-                        this.cartItems = [];
-                    }
-                    
-                    console.log(`Loaded ${this.cartItems.length} items from localStorage`);
-                    
-                    this.validateCartItems();
-                    
-                } catch (e) {
-                    console.error('Error parsing cart data:', e);
-                    this.cartItems = [];
-                }
-            } else {
-                this.cartItems = [];
-                console.log('No existing cart data found');
-            }
-            
-            if (authSystem && authSystem.isLoggedIn() && firebaseDB) {
-                console.log('User is logged in, syncing with Firebase');
-                await this.syncWithFirebase(userId);
-            }
-            
-            return this.cartItems;
-            
-        } catch (error) {
-            console.error('Error loading cart:', error);
-            this.cartItems = [];
-            return [];
-        }
-    }
-    
-    validateCartItems() {
-        const originalCount = this.cartItems.length;
-        
-        this.cartItems = this.cartItems.filter(item => {
-            return item && 
-                   item.id && 
-                   item.name &&
-                   typeof item.price === 'number' &&
-                   item.price >= 0 &&
-                   (item.quantity || 1) > 0;
-        });
-        
-        const removedCount = originalCount - this.cartItems.length;
-        if (removedCount > 0) {
-            console.log(`Removed ${removedCount} invalid items`);
-        }
-    }
-    
-    async syncWithFirebase(userId) {
-        try {
-            if (!userId || userId.includes('guest') || !firebaseDB) {
-                return;
-            }
-            
-            const cartDoc = await firebaseDB.collection('userCarts').doc(userId).get();
-            
-            if (cartDoc.exists) {
-                const firebaseData = cartDoc.data();
-                const firebaseItems = firebaseData.items || [];
-                
-                console.log(`Found ${firebaseItems.length} items in Firebase`);
-                
-                await this.mergeCarts(firebaseItems);
-            }
-            
-        } catch (error) {
-            console.error('Error syncing cart with Firebase:', error);
-        }
-    }
-    
-    async mergeCarts(firebaseItems) {
-        if (firebaseItems.length === 0) return;
-        
-        const mergedItems = [...this.cartItems];
-        const existingIds = new Set(this.cartItems.map(item => item.id));
-        
-        firebaseItems.forEach(item => {
-            if (item && item.id && !existingIds.has(item.id)) {
-                mergedItems.push(item);
-                existingIds.add(item.id);
-            }
-        });
-        
-        this.cartItems = mergedItems;
-        await this.saveCart();
-    }
-    
-    async saveCart() {
-        const userId = this.getUserId();
-        const cartKey = `${this.localCartKey}_${userId}`;
-        
-        console.log(`Saving cart for user: ${userId}, items: ${this.cartItems.length}`);
-        
-        this.removeDuplicates();
-        
-        localStorage.setItem(cartKey, JSON.stringify(this.cartItems));
-        
-        if (authSystem && authSystem.isLoggedIn() && firebaseDB) {
-            await this.saveToFirebase(userId);
-        }
-        
-        this.updateCartBadge();
-        return this.cartItems;
-    }
-    
-    async saveToFirebase(userId) {
-        try {
-            if (!userId || userId.includes('guest')) {
-                return;
-            }
-            
-            await firebaseDB.collection('userCarts').doc(userId).set({
-                userId: userId,
-                items: this.cartItems,
-                updatedAt: new Date().toISOString(),
-                itemCount: this.cartItems.length,
-                totalAmount: this.cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0)
-            }, { merge: true });
-            
-        } catch (error) {
-            console.error('Error saving cart to Firebase:', error);
-        }
-    }
-    
-    removeDuplicates() {
-        const uniqueItems = [];
-        const seenIds = new Set();
-        
-        for (const item of this.cartItems) {
-            if (item && item.id && !seenIds.has(item.id)) {
-                seenIds.add(item.id);
-                uniqueItems.push(item);
-            }
-        }
-        
-        if (uniqueItems.length !== this.cartItems.length) {
-            console.log(`Removed ${this.cartItems.length - uniqueItems.length} duplicate items`);
-            this.cartItems = uniqueItems;
-        }
-    }
-    
-    async addToCart(product) {
-        try {
-            console.log(`📦 Adding product to cart: ${product.id} - ${product.stone_name}`);
-            
-            const existingIndex = this.cartItems.findIndex(item => item.id === product.id);
-            
-            if (existingIndex !== -1) {
-                this.cartItems[existingIndex].quantity = (this.cartItems[existingIndex].quantity || 1) + 1;
-                this.cartItems[existingIndex].updatedAt = new Date().toISOString();
-                console.log(`Updated quantity for: ${product.id}, new quantity: ${this.cartItems[existingIndex].quantity}`);
-            } else {
-                const newItem = {
-                    id: product.id,
-                    name: product.stone_name || 'Stone Product',
-                    stoneName: product.stone_name,
-                    price: parseFloat(product.price) || 0,
-                    priceUnit: product.price_unit || 'piece',
-                    image: getProductImage(product),
-                    category: product.category || 'Sand Stone',
-                    description: product.description || '',
-                    quantity: 1,
-                    addedAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                };
-                
-                this.cartItems.push(newItem);
-                console.log(`Added new product to cart: ${product.id}`);
-            }
-            
-            await this.saveCart();
-            
-            const cartCount = this.getCartCount();
-            showNotification(`${product.stone_name} added to cart! (${cartCount} items)`);
-            return true;
-            
-        } catch (error) {
-            console.error('Error adding to cart:', error);
-            showError('Failed to add to cart. Please try again.');
-            return false;
-        }
-    }
-    
-    getCartCount() {
-        return this.cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
-    }
-    
-    getCartTotal() {
-        return this.cartItems.reduce((total, item) => {
-            const price = parseFloat(item.price) || 0;
-            const quantity = item.quantity || 1;
-            return total + (price * quantity);
-        }, 0);
-    }
-    
-    updateCartBadge() {
-        const count = this.getCartCount();
-        const cartBadge = document.getElementById('cartBadge');
-        const bottomCartBadge = document.getElementById('bottomCartBadge');
-        
-        if (cartBadge) {
-            cartBadge.textContent = count > 99 ? '99+' : count;
-            cartBadge.style.display = count > 0 ? 'flex' : 'none';
-        }
-        
-        if (bottomCartBadge) {
-            bottomCartBadge.textContent = count > 99 ? '99+' : count;
-            bottomCartBadge.style.display = count > 0 ? 'flex' : 'none';
-        }
-    }
-    
-    async removeFromCart(productId) {
-        const initialCount = this.cartItems.length;
-        this.cartItems = this.cartItems.filter(item => item.id !== productId);
-        
-        if (this.cartItems.length < initialCount) {
-            await this.saveCart();
-            console.log(`Removed product: ${productId} from cart`);
-            return true;
-        }
-        return false;
-    }
-    
-    async updateQuantity(productId, newQuantity) {
-        const itemIndex = this.cartItems.findIndex(item => item.id === productId);
-        
-        if (itemIndex !== -1) {
-            if (newQuantity <= 0) {
-                return await this.removeFromCart(productId);
-            }
-            
-            this.cartItems[itemIndex].quantity = newQuantity;
-            this.cartItems[itemIndex].updatedAt = new Date().toISOString();
-            await this.saveCart();
-            return true;
-        }
-        return false;
-    }
-    
-    async clearCart() {
-        this.cartItems = [];
-        await this.saveCart();
-        console.log('🧹 Cart cleared completely');
-        showNotification('Cart cleared!');
-    }
-    
-    getCartItems() {
-        return [...this.cartItems];
-    }
-}
-
-// ============================================
 // FIREBASE INITIALIZATION
 // ============================================
 
@@ -2127,17 +2495,16 @@ function getDefaultImage(category) {
     if (categoryLower.includes('sand')) {
         return 'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp';
     } else if (categoryLower.includes('kota')) {
-        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300';
+        return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&h=800';
     }
     
     return 'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp';
 }
 
-// Function getProductUsageButtons में URLs बदलें:
 function getProductUsageButtons(product) {
    const usage = (product.usage || '').toLowerCase();
     const uses = [];
-    // Always add Wall Cladding button - TYPE के according URL
+    // Always add Wall Cladding button
     uses.push({
         type: 'wall',
         text: 'Wall Cladding',
@@ -2146,7 +2513,7 @@ function getProductUsageButtons(product) {
         url: `products.html?stone_name=${encodeURIComponent(product.stone_name)}&type=wall-cladding`
     });
     
-    // Always add Flooring button - TYPE के according URL
+    // Always add Flooring button
     uses.push({
         type: 'floor',
         text: 'Flooring',
@@ -2170,7 +2537,7 @@ function getProductUsageButtons(product) {
 }
 
 // ============================================
-// TRENDING PRODUCTS FETCHING - FIXED
+// TRENDING PRODUCTS FETCHING & DISPLAY
 // ============================================
 
 async function loadTrendingProducts() {
@@ -2226,7 +2593,6 @@ async function loadTrendingProducts() {
         
         if (trendingProducts.length > 0) {
             displayTrendingProducts();
-            setupTrendingSlider();
         } else {
             console.log('No trending products found');
             loadFallbackTrendingProducts();
@@ -2265,7 +2631,7 @@ function createProductObject(id, data) {
 }
 
 function displayTrendingProducts() {
-    const container = document.getElementById('trendingTrack');
+    const container = document.getElementById('trendingSlider');
     if (!container) return;
     
     if (trendingProducts.length === 0) {
@@ -2273,31 +2639,61 @@ function displayTrendingProducts() {
         return;
     }
     
-    const trendingHTML = trendingProducts.map(product => {
-        const productImage = getProductImage(product);
-        const showNewBadge = (product.latest || '').toLowerCase() === 'new';
-        
-        return `
-            <div class="trending-slide">
-                <a href="product-details.html?id=${product.id}" class="trending-card">
-                    ${showNewBadge ? '<div class="trending-badge">New</div>' : ''}
-                    <div class="trending-image-container">
-                        <img src="${productImage}" 
-                             alt="${product.stone_name}" 
-                             class="trending-image"
-                             onerror="this.src='${getDefaultImage(product.category)}'"
-                             loading="lazy">
+    // Take only 4 products for 2x2 display
+    const displayProducts = trendingProducts.slice(0, 4);
+    
+    const trendingHTML = `
+        <div class="trending-two-column" id="trendingTwoColumn">
+            ${displayProducts.map((product, index) => {
+                const productImages = getProductImagesArray(product);
+                
+                return `
+                    <div class="trending-slide" data-index="${index}" data-product-id="${product.id}">
+                        <a href="product-details.html?id=${product.id}" class="trending-card">
+                            <div class="trending-image-container">
+                                <div class="image-slideshow">
+                                    ${productImages.map((img, imgIndex) => `
+                                        <img src="${img}" 
+                                             alt="${product.stone_name} - View ${imgIndex + 1}" 
+                                             class="slide-image ${imgIndex === 0 ? 'active' : ''}"
+                                             onerror="this.src='${getDefaultImage(product.category)}'"
+                                             loading="lazy">
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                </a>
-            </div>
-        `;
-    }).join('');
+                `;
+            }).join('')}
+        </div>
+    `;
     
     container.innerHTML = trendingHTML;
+    
+    // Initialize fixed animation system
+    if (!animationSystem) {
+        animationSystem = new FixedAnimationSystem();
+        animationSystem.init();
+    }
+}
+
+function getProductImagesArray(product) {
+    // Get actual multiple images from Firebase data
+    if (Array.isArray(product.images) && product.images.length > 1) {
+        return product.images.slice(0, 3);
+    }
+    
+    // Fallback to different image variations
+    const baseImage = getProductImage(product);
+    return [
+        baseImage,
+        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&h=800',
+        'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=800&h=800'
+    ];
 }
 
 function loadFallbackTrendingProducts() {
-    const container = document.getElementById('trendingTrack');
+    const container = document.getElementById('trendingSlider');
     if (!container) return;
     
     const fallbackProducts = [
@@ -2305,149 +2701,79 @@ function loadFallbackTrendingProducts() {
             id: 'trend1',
             stone_name: 'Autumn Brown',
             category: 'Sand Stone',
-            image: 'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp',
+            images: [
+                'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp',
+                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&h=800',
+                'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=800&h=800'
+            ],
             latest: 'new'
         },
         {
             id: 'trend2',
             stone_name: 'Raj Green',
             category: 'Sand Stone',
-            image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300',
+            images: [
+                'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&h=800',
+                'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&h=800',
+                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&h=800'
+            ],
             latest: 'new'
         },
         {
             id: 'trend3',
             stone_name: 'Modak Yellow',
             category: 'Sand Stone',
-            image: 'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=400&h=300',
+            images: [
+                'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=800&h=800',
+                'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp',
+                'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&h=800'
+            ],
             latest: 'new'
         },
         {
             id: 'trend4',
             stone_name: 'Crystal White',
             category: 'Sand Stone',
-            image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300',
-            latest: 'new'
-        },
-        {
-            id: 'trend5',
-            stone_name: 'Desert Beige',
-            category: 'Sand Stone',
-            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300',
+            images: [
+                'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&h=800',
+                'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=800&h=800',
+                'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp'
+            ],
             latest: 'new'
         }
     ];
     
-    const trendingHTML = fallbackProducts.map(product => {
-        return `
-            <div class="trending-slide">
-                <a href="products.html" class="trending-card">
-                    <div class="trending-badge">New</div>
-                    <div class="trending-image-container">
-                        <img src="${product.image}" 
-                             alt="${product.stone_name}" 
-                             class="trending-image"
-                             loading="lazy">
+    const trendingHTML = `
+        <div class="trending-two-column" id="trendingTwoColumn">
+            ${fallbackProducts.map((product, index) => {
+                return `
+                    <div class="trending-slide" data-index="${index}" data-product-id="${product.id}">
+                        <a href="products.html" class="trending-card">
+                            <div class="trending-image-container">
+                                <div class="image-slideshow">
+                                    ${product.images.map((img, imgIndex) => `
+                                        <img src="${img}" 
+                                             alt="${product.stone_name} - View ${imgIndex + 1}" 
+                                             class="slide-image ${imgIndex === 0 ? 'active' : ''}"
+                                             loading="lazy">
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                </a>
-            </div>
-        `;
-    }).join('');
+                `;
+            }).join('')}
+        </div>
+    `;
     
     container.innerHTML = trendingHTML;
     trendingProducts = fallbackProducts;
-    setupTrendingSlider();
-}
-
-function setupTrendingSlider() {
-    const track = document.getElementById('trendingTrack');
-    const prevBtn = document.getElementById('prevTrendingBtn');
-    const nextBtn = document.getElementById('nextTrendingBtn');
-    const dotsContainer = document.getElementById('trendingDots');
     
-    if (!track || trendingProducts.length === 0) return;
-    
-    const calculateSlidesPerView = () => {
-        if (window.innerWidth >= 1024) return 4;
-        if (window.innerWidth >= 768) return 3;
-        if (window.innerWidth >= 480) return 2;
-        return 1;
-    };
-    
-    let slidesPerView = calculateSlidesPerView();
-    let totalSlides = trendingProducts.length;
-    let totalPages = Math.ceil(totalSlides / slidesPerView);
-    
-    dotsContainer.innerHTML = '';
-    for (let i = 0; i < totalPages; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
-        dot.addEventListener('click', () => goToSlide(i));
-        dotsContainer.appendChild(dot);
+    // Initialize fixed animation system
+    if (!animationSystem) {
+        animationSystem = new FixedAnimationSystem();
+        animationSystem.init();
     }
-    
-    const updateSlider = () => {
-        const slideWidth = document.querySelector('.trending-slide')?.offsetWidth || 220;
-        const gap = 10;
-        const totalWidth = slideWidth + gap;
-        track.style.transform = `translateX(-${currentTrendingSlide * slidesPerView * totalWidth}px)`;
-        
-        const activePage = Math.floor(currentTrendingSlide / slidesPerView);
-        document.querySelectorAll('.slider-dot').forEach((dot, index) => {
-            dot.classList.toggle('active', index === activePage);
-        });
-    };
-    
-    prevBtn.addEventListener('click', () => {
-        if (currentTrendingSlide > 0) {
-            currentTrendingSlide--;
-            updateSlider();
-        }
-    });
-    
-    nextBtn.addEventListener('click', () => {
-        if (currentTrendingSlide < totalSlides - slidesPerView) {
-            currentTrendingSlide++;
-            updateSlider();
-        }
-    });
-    
-    if (trendingSlideInterval) {
-        clearInterval(trendingSlideInterval);
-    }
-    
-    trendingSlideInterval = setInterval(() => {
-        if (currentTrendingSlide >= totalSlides - slidesPerView) {
-            currentTrendingSlide = 0;
-        } else {
-            currentTrendingSlide++;
-        }
-        updateSlider();
-    }, 4000);
-    
-    window.addEventListener('resize', () => {
-        slidesPerView = calculateSlidesPerView();
-        totalPages = Math.ceil(totalSlides / slidesPerView);
-        
-        dotsContainer.innerHTML = '';
-        for (let i = 0; i < totalPages; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
-            dot.addEventListener('click', () => goToSlide(i));
-            dotsContainer.appendChild(dot);
-        }
-        
-        updateSlider();
-    });
-    
-    function goToSlide(page) {
-        currentTrendingSlide = page * slidesPerView;
-        updateSlider();
-    }
-    
-    setTimeout(() => {
-        updateSlider();
-    }, 100);
 }
 
 // ============================================
@@ -2515,6 +2841,17 @@ async function loadAllProducts() {
             } else {
                 displayProducts(allProducts.slice(0, 8));
                 loadTrendingProducts();
+                createProfessionalFooter();
+                
+                // Initialize animations after products are displayed
+                setTimeout(() => {
+                    if (!animationSystem) {
+                        animationSystem = new FixedAnimationSystem();
+                        animationSystem.init();
+                    } else {
+                        animationSystem.setupProductAnimations();
+                    }
+                }, 1000);
             }
             
         } catch (error) {
@@ -2541,7 +2878,7 @@ function displayProducts(products) {
         return;
     }
     
-    const productsHTML = products.map(product => {
+    const productsHTML = products.map((product, index) => {
         const productImage = getProductImage(product);
         const usageButtons = getProductUsageButtons(product);
         
@@ -2557,7 +2894,7 @@ function displayProducts(products) {
         }).join('');
         
         return `
-            <div class="product-card-wrapper">
+            <div class="product-card-wrapper" data-product-id="${product.id}">
                 <div class="stone-name-box">
                     <div class="product-name">
                         <i class="fas fa-gem stone-icon"></i>
@@ -2569,7 +2906,6 @@ function displayProducts(products) {
                     <div class="product-image-container">
                         <img src="${productImage}" 
                              alt="${product.stone_name}" 
-                             class="product-image" 
                              onerror="this.src='${getDefaultImage(product.category)}'"
                              loading="lazy">
                     </div>
@@ -2591,6 +2927,8 @@ function displayProducts(products) {
         viewAllBtn.innerHTML = `<i class="fas fa-eye"></i> View All ${allProducts.length} Products`;
         viewAllBtn.href = 'products.html';
     }
+    
+    console.log(`Displayed ${products.length} products with data-product-id attributes`);
 }
 
 function showNoProducts() {
@@ -2618,7 +2956,11 @@ function showDefaultProducts() {
             color: 'Autumn Brown',
             finish: 'Natural',
             size: '30x30cm',
-            images: ['https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp'],
+            images: [
+                'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp',
+                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&h=800',
+                'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=800&h=800'
+            ],
             usage: 'Wall Cladding, Flooring'
         },
         {
@@ -2631,7 +2973,11 @@ function showDefaultProducts() {
             color: 'Green',
             finish: 'Polished',
             size: '60x30cm',
-            images: ['https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300'],
+            images: [
+                'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&h=800',
+                'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&h=800',
+                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&h=800'
+            ],
             usage: 'Wall Cladding'
         },
         {
@@ -2644,7 +2990,11 @@ function showDefaultProducts() {
             color: 'Yellow',
             finish: 'Natural',
             size: '30x30cm',
-            images: ['https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=400&h=300'],
+            images: [
+                'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=800&h=800',
+                'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp',
+                'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&h=800'
+            ],
             usage: 'Flooring'
         },
         {
@@ -2657,64 +3007,115 @@ function showDefaultProducts() {
             color: 'White',
             finish: 'Polished',
             size: '60x60cm',
-            images: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300'],
+            images: [
+                'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&h=800',
+                'https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=800&h=800',
+                'https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp'
+            ],
             usage: 'Paving, Landscaping'
-        },
-        {
-            id: 'default5',
-            stone_name: 'Sandstone Desert Beige',
-            category: 'Sand Stone',
-            description: 'Beige sandstone for exterior cladding',
-            price: 91.80,
-            price_unit: 'sqm',
-            color: 'Beige',
-            finish: 'Natural',
-            size: '40x20cm',
-            images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&h=300'],
-            usage: 'Wall Cladding, Flooring'
-        },
-        {
-            id: 'default6',
-            stone_name: 'Sandstone Copper Red',
-            category: 'Sand Stone',
-            description: 'Red sandstone for decorative purposes',
-            price: 98.50,
-            price_unit: 'sqm',
-            color: 'Red',
-            finish: 'Polished',
-            size: '30x30cm',
-            images: ['https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&h=300'],
-            usage: 'Wall Cladding'
-        },
-        {
-            id: 'default7',
-            stone_name: 'Sandstone Slate Grey',
-            category: 'Sand Stone',
-            description: 'Grey sandstone for modern architecture',
-            price: 94.25,
-            price_unit: 'sqm',
-            color: 'Grey',
-            finish: 'Honed',
-            size: '60x30cm',
-            images: ['https://images.unsplash.com/photo-1600585154340-963ed7476d07?auto=format&fit=crop&w=400&h=300'],
-            usage: 'Flooring, Paving'
-        },
-        {
-            id: 'default8',
-            stone_name: 'Sandstone Heritage Brown',
-            category: 'Sand Stone',
-            description: 'Traditional brown sandstone for heritage buildings',
-            price: 105.75,
-            price_unit: 'sqm',
-            color: 'Brown',
-            finish: 'Natural',
-            size: '40x40cm',
-            images: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&h=300'],
-            usage: 'Wall Cladding, Flooring'
         }
     ].slice(0, 8);
     
     displayProducts(products);
+}
+
+// ============================================
+// PROFESSIONAL FOOTER CREATION
+// ============================================
+
+function createProfessionalFooter() {
+    const footerSection = document.getElementById('mainFooter');
+    if (!footerSection) return;
+    
+    const currentYear = new Date().getFullYear();
+    
+    const footerHTML = `
+        <div class="footer-content">
+            <!-- Company Information -->
+            <div class="footer-column">
+                <h3><i class="fas fa-building"></i> Company</h3>
+                <ul class="footer-links">
+                    <li><a href="about-us.html"><i class="fas fa-info-circle"></i> About Us</a></li>
+                    <li><a href="our-mission.html"><i class="fas fa-bullseye"></i> Our Mission</a></li>
+                    <li><a href="our-vision.html"><i class="fas fa-eye"></i> Our Vision</a></li>
+                    <li><a href="our-team.html"><i class="fas fa-users"></i> Our Team</a></li>
+                    <li><a href="careers.html"><i class="fas fa-briefcase"></i> Careers</a></li>
+                    <li><a href="testimonials.html"><i class="fas fa-star"></i> Testimonials</a></li>
+                </ul>
+            </div>
+            
+            <!-- Products & Services -->
+            <div class="footer-column">
+                <h3><i class="fas fa-gem"></i> Products</h3>
+                <ul class="footer-links">
+                    <li><a href="sandstone-products.html"><i class="fas fa-cube"></i> Sandstone Collection</a></li>
+                    <li><a href="premium-range.html"><i class="fas fa-crown"></i> Premium Range</a></li>
+                    <li><a href="export-quality.html"><i class="fas fa-globe"></i> Export Quality</a></li>
+                    <li><a href="custom-solutions.html"><i class="fas fa-tools"></i> Custom Solutions</a></li>
+                    <li><a href="samples.html"><i class="fas fa-box-open"></i> Request Samples</a></li>
+                    <li><a href="catalog.html"><i class="fas fa-book"></i> Download Catalog</a></li>
+                </ul>
+            </div>
+            
+            <!-- Customer Support -->
+            <div class="footer-column">
+                <h3><i class="fas fa-headset"></i> Support</h3>
+                <ul class="footer-links">
+                    <li><a href="contact-us.html"><i class="fas fa-phone-alt"></i> Contact Us</a></li>
+                    <li><a href="help-center.html"><i class="fas fa-question-circle"></i> Help Center</a></li>
+                    <li><a href="faq.html"><i class="fas fa-comments"></i> FAQ</a></li>
+                    <li><a href="shipping-info.html"><i class="fas fa-shipping-fast"></i> Shipping Info</a></li>
+                    <li><a href="returns-policy.html"><i class="fas fa-exchange-alt"></i> Returns Policy</a></li>
+                    <li><a href="warranty.html"><i class="fas fa-shield-alt"></i> Warranty</a></li>
+                </ul>
+            </div>
+            
+            <!-- Legal & Policies -->
+            <div class="footer-column">
+                <h3><i class="fas fa-balance-scale"></i> Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="privacy-policy.html"><i class="fas fa-user-shield"></i> Privacy Policy</a></li>
+                    <li><a href="terms-conditions.html"><i class="fas fa-file-contract"></i> Terms & Conditions</a></li>
+                    <li><a href="cookie-policy.html"><i class="fas fa-cookie-bite"></i> Cookie Policy</a></li>
+                    <li><a href="disclaimer.html"><i class="fas fa-exclamation-triangle"></i> Disclaimer</a></li>
+                    <li><a href="gdpr-compliance.html"><i class="fas fa-lock"></i> GDPR Compliance</a></li>
+                    <li><a href="legal-notices.html"><i class="fas fa-gavel"></i> Legal Notices</a></li>
+                </ul>
+            </div>
+            
+            <!-- Resources & More -->
+            <div class="footer-column">
+                <h3><i class="fas fa-external-link-alt"></i> Resources</h3>
+                <ul class="footer-links">
+                    <li><a href="blog.html"><i class="fas fa-blog"></i> Blog & Articles</a></li>
+                    <li><a href="gallery.html"><i class="fas fa-images"></i> Project Gallery</a></li>
+                    <li><a href="case-studies.html"><i class="fas fa-chart-line"></i> Case Studies</a></li>
+                    <li><a href="installation-guide.html"><i class="fas fa-book-open"></i> Installation Guide</a></li>
+                    <li><a href="maintenance-tips.html"><i class="fas fa-toolbox"></i> Maintenance Tips</a></li>
+                    <li><a href="site-map.html"><i class="fas fa-sitemap"></i> Site Map</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; ${currentYear} IRYA STONE | Premium Sandstone UK. All rights reserved.</p>
+            <p>Registered in England & Wales | Company No: 12345678 | VAT No: GB123456789</p>
+            <div class="footer-social">
+                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                <a href="https://pinterest.com" target="_blank"><i class="fab fa-pinterest-p"></i></a>
+                <a href="https://youtube.com" target="_blank"><i class="fab fa-youtube"></i></a>
+            </div>
+            <div class="footer-contact">
+                <p><i class="fas fa-map-marker-alt"></i> Registered Office: 123 Stone Street, London, UK</p>
+                <p><i class="fas fa-phone"></i> +44 20 7123 4567 | <i class="fas fa-envelope"></i> info@iryastone.co.uk</p>
+            </div>
+        </div>
+    `;
+    
+    footerSection.innerHTML = footerHTML;
 }
 
 // ============================================
@@ -2854,9 +3255,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     authSystem = new AuthSystem();
     await authSystem.init();
     
-    cartSystem = new CartSystem();
-    await cartSystem.init();
-    
     console.log('✅ All systems initialized successfully');
     
     await loadAllProducts();
@@ -2931,13 +3329,21 @@ function handleNotificationClick(e) {
     
     if (authSystem && authSystem.isLoggedIn()) {
         const userId = authSystem.getUserId();
-        console.log('Redirecting to notifications with userId:', userId);
         window.location.href = `notification.html?userId=${userId}`;
     } else {
-        console.log('User not logged in, redirecting to sign page');
         window.location.href = 'sign.html';
     }
 }
+
+// ============================================
+// CLEANUP ON PAGE UNLOAD
+// ============================================
+
+window.addEventListener('beforeunload', function() {
+    if (animationSystem) {
+        animationSystem.destroy();
+    }
+});
 </script>
 </body>
 </html>
