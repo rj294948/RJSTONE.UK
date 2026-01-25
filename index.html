@@ -18,313 +18,1793 @@
 
 <style>
 /* ============================================
-   CRITICAL FIXES FOR TRENDING NOW SECTION - FULL BLEED
+   CSS VARIABLES
 ============================================ */
-
-/* 1. GLOBAL OVERFLOW FIX */
-html, body {
-    overflow-x: hidden !important;
-    max-width: 100vw !important;
+:root {
+    --primary-gold: #c9a227;
+    --gold-light: #f0d77c;
+    --gold-dark: #9c7c1f;
+    --stone-dark: #1a1a1a;
+    --stone-light: #f4f6f4;
+    --bg-light: #f7f9fc;
+    --text-dark: #222222;
+    --text-light: #666666;
+    --white: #ffffff;
+    --product-bg: #f8f5f0;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 20px rgba(0,0,0,0.12);
+    --transition: all 0.3s ease;
+    --border-radius: 8px;
+    --border-radius-lg: 16px;
 }
 
-/* 2. TRENDING SECTION - COMPLETE FULL BLEED FIX */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+body {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    font-size: 14px;
+    scroll-behavior: smooth;
+    padding-bottom: 70px; /* For bottom nav */
+}
+
+/* ============================================
+   ANIMATION & EFFECTS STYLES
+============================================ */
+
+/* Container for image slideshow with effects */
+.image-slideshow {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: #000;
+}
+
+.slide-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    object-fit: cover !important; /* Changed from contain to cover */
+    background: #000;
+    z-index: 1;
+}
+
+.slide-image.active {
+    opacity: 1;
+    z-index: 2;
+}
+
+.slide-image.next {
+    opacity: 0;
+    z-index: 1;
+}
+
+/* PPT Animation Effects - Enhanced */
+@keyframes pptAppear {
+    0% { 
+        opacity: 0; 
+        transform: scale(0.9); 
+        filter: blur(2px);
+    }
+    100% { 
+        opacity: 1; 
+        transform: scale(1); 
+        filter: blur(0);
+    }
+}
+
+@keyframes pptBlinds {
+    0% { 
+        opacity: 0;
+        clip-path: inset(0 100% 0 0);
+        transform: translateX(-20px);
+    }
+    100% { 
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        transform: translateX(0);
+    }
+}
+
+@keyframes pptRandom {
+    0% { 
+        opacity: 0;
+        transform: translateY(30px) rotate(8deg);
+        filter: blur(8px) brightness(1.2);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateY(0) rotate(0);
+        filter: blur(0) brightness(1);
+    }
+}
+
+@keyframes pptWindow {
+    0% { 
+        opacity: 0;
+        clip-path: circle(0% at 50% 50%);
+        transform: scale(0.8);
+    }
+    100% { 
+        opacity: 1;
+        clip-path: circle(150% at 50% 50%);
+        transform: scale(1);
+    }
+}
+
+@keyframes pptBoxes {
+    0% { 
+        opacity: 0;
+        clip-path: inset(0 0 0 0);
+        transform: scale(1.2);
+    }
+    25% { 
+        opacity: 0.3;
+        clip-path: inset(25% 25% 25% 25%);
+    }
+    50% { 
+        opacity: 0.6;
+        clip-path: inset(12.5% 12.5% 12.5% 12.5%);
+        transform: scale(1);
+    }
+    100% { 
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        transform: scale(1);
+    }
+}
+
+@keyframes pptDust {
+    0% { 
+        opacity: 0;
+        transform: scale(1.3) rotate(10deg);
+        filter: blur(15px) brightness(1.8);
+    }
+    70% { 
+        opacity: 0.7;
+        filter: blur(5px) brightness(1.3);
+    }
+    100% { 
+        opacity: 1;
+        transform: scale(1) rotate(0);
+        filter: blur(0) brightness(1);
+    }
+}
+
+@keyframes pptFade {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes pptSlideUp {
+    0% { 
+        opacity: 0;
+        transform: translateY(40px);
+        filter: blur(5px);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes pptSlideDown {
+    0% { 
+        opacity: 0;
+        transform: translateY(-40px);
+        filter: blur(5px);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes pptZoomIn {
+    0% { 
+        opacity: 0;
+        transform: scale(0.7);
+        filter: blur(3px);
+    }
+    100% { 
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes slideOutDust {
+    0% { 
+        opacity: 1;
+        transform: scale(1) rotate(0);
+        filter: blur(0);
+    }
+    100% { 
+        opacity: 0;
+        transform: scale(1.2) rotate(8deg);
+        filter: blur(12px) brightness(1.4);
+    }
+}
+
+@keyframes slideOutFade {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.95); }
+}
+
+@keyframes slideOutScatter {
+    0% { 
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        transform: scale(1);
+    }
+    100% { 
+        opacity: 0;
+        clip-path: inset(25% 25% 25% 25%);
+        transform: scale(0.85);
+    }
+}
+
+/* Apply animation classes */
+.image-slideshow.appear .slide-image.active {
+    animation: pptAppear 1.8s ease-out; /* Slower */
+}
+
+.image-slideshow.blinds .slide-image.active {
+    animation: pptBlinds 1.8s ease-out; /* Slower */
+}
+
+.image-slideshow.random .slide-image.active {
+    animation: pptRandom 1.8s ease-out; /* Slower */
+}
+
+.image-slideshow.window .slide-image.active {
+    animation: pptWindow 1.8s ease-out; /* Slower */
+}
+
+.image-slideshow.boxes .slide-image.active {
+    animation: pptBoxes 2s ease-out; /* Slower */
+}
+
+.image-slideshow.dust .slide-image.active {
+    animation: pptDust 2s ease-out; /* Slower */
+}
+
+.image-slideshow.fade .slide-image.active {
+    animation: pptFade 1.5s ease-out; /* Slower */
+}
+
+.image-slideshow.slide-up .slide-image.active {
+    animation: pptSlideUp 1.8s ease-out; /* Slower */
+}
+
+.image-slideshow.slide-down .slide-image.active {
+    animation: pptSlideDown 1.8s ease-out; /* Slower */
+}
+
+.image-slideshow.zoom-in .slide-image.active {
+    animation: pptZoomIn 1.8s ease-out; /* Slower */
+}
+
+/* Animation for product images */
+.product-image-container .image-slideshow {
+    width: 100%;
+    height: 100%;
+}
+
+/* ============================================
+   HEADER STYLES
+============================================ */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.95);
+    backdrop-filter: blur(10px);
+    padding: 8px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    height: 60px;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Slower */
+}
+
+header.scrolled {
+    background: rgba(0, 0, 0, 0.98);
+    backdrop-filter: blur(15px);
+}
+
+header.hidden {
+    transform: translateY(-100%);
+}
+
+header.show {
+    transform: translateY(0);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Slower */
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    min-width: 120px;
+}
+
+.logo i {
+    color: var(--primary-gold);
+    font-size: 18px;
+}
+
+.logo span {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    font-family: 'Roboto Slab', serif;
+}
+
+/* ============================================
+   SEARCH BOX
+============================================ */
+.search-box {
+    flex: 1;
+    margin: 0 10px;
+    position: relative;
+    max-width: 450px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 8px 35px 8px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 12px;
+    transition: var(--transition);
+    color: var(--white);
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.2);
+}
+
+.search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-box i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 1001;
+    display: none;
+    margin-top: 5px;
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-result-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--white);
+    text-decoration: none;
+}
+
+.search-result-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.search-result-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-result-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #f5f5f5;
+}
+
+.search-result-info {
+    flex: 1;
+}
+
+.search-result-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 2px;
+}
+
+.search-result-category {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.search-result-price {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary-gold);
+    white-space: nowrap;
+}
+
+.no-results {
+    padding: 15px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+}
+
+/* ============================================
+   USER PROFILE
+============================================ */
+.user-profile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    color: var(--white);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: var(--transition);
+    white-space: nowrap;
+    min-width: 70px;
+}
+
+.profile-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-btn i {
+    font-size: 11px;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    min-width: 180px;
+    z-index: 1001;
+    display: none;
+    margin-top: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-dropdown.active {
+    display: block;
+}
+
+.profile-info {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-info .user-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 3px;
+    color: var(--white);
+}
+
+.profile-info .user-email {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.dropdown-menu {
+    padding: 8px 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    color: var(--white);
+    text-decoration: none;
+    transition: var(--transition);
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--primary-gold);
+}
+
+.dropdown-item i {
+    width: 18px;
+    text-align: center;
+    color: var(--primary-gold);
+    font-size: 14px;
+}
+
+.signout-btn {
+    color: #ff4757 !important;
+}
+
+.signout-btn:hover {
+    background: #ff4757 !important;
+    color: white !important;
+}
+
+.signout-btn:hover i {
+    color: white !important;
+}
+
+/* ============================================
+   BUTTONS
+============================================ */
+.signin-btn {
+    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    color: var(--white);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: var(--transition);
+    white-space: nowrap;
+    min-width: 70px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.signin-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    background: var(--primary-gold);
+    color: var(--white);
+    transform: scale(1.05);
+}
+
+/* ============================================
+   HERO SECTION
+============================================ */
+.hero {
+    padding: 70px 15px 25px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    height: 280px;
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)),
+        url('https://regattaexports.com/wp-content/uploads/2024/10/Autumn-Brown-Sandstone-Quarry.webp');
+    background-size: cover;
+    background-position: center 35%;
+    background-repeat: no-repeat;
+    color: var(--white);
+    margin-top: 60px;
+    margin-bottom: 0;
+}
+
+.hero-content {
+    max-width: 700px;
+    padding: 0 15px;
+    z-index: 2;
+}
+
+.hero h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    font-family: 'Roboto Slab', serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    line-height: 1.2;
+}
+
+.hero p {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 20px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.4;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.hero-buttons .signin-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+/* ============================================
+   TRENDING SECTION - FULL BLEED UPDATE
+============================================ */
 .trending-section {
-    background: #ffffff !important;
+    background: #000 !important;
     padding: 0 !important;
     margin: 0 !important;
-    width: 100vw !important;
+}
+
+.trending-section .section-title-wrapper {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    padding: 20px 10px !important;
+    margin: 0 !important;
+    height: 80px;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     position: relative;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw !important;
-    margin-right: -50vw !important;
+    overflow: hidden;
+}
+
+.trending-section .section-title-wrapper h2 {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: var(--primary-gold);
+    font-family: 'Roboto Slab', serif;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-transform: uppercase;
+}
+
+.trending-section .section-title-wrapper .subtitle {
+    font-size: 13px !important;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 6px auto 0;
+    line-height: 1.3;
+    font-weight: 400;
+    max-width: 500px;
 }
 
 .trending-container {
     padding: 0 !important;
     margin: 0 !important;
-    background: #ffffff !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: hidden !important;
+    background: #000 !important;
+    position: relative;
+    overflow: hidden;
 }
 
 .trending-slider {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    background: #ffffff !important;
     position: relative;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 !important;
+    background: #000;
 }
 
-/* 3. FULL BLEED GRID - NO RIGHT GAP */
+/* Two column layout for trending products - FULL BLEED */
 .trending-two-column {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
-    width: 100% !important;
-    background: #ffffff !important;
-    position: relative;
+    width: 100%;
+    background: #000;
 }
 
-/* 4. TRENDING SLIDE - ABSOLUTE FULL COVER */
 .trending-slide {
     width: 100% !important;
-    position: relative !important;
+    position: relative;
+    aspect-ratio: 1/1;
     margin: 0 !important;
     padding: 0 !important;
-    border: none !important;
-    overflow: hidden !important;
-    background: #ffffff !important;
-    aspect-ratio: 1/1 !important;
-    display: block !important;
+    background: #000;
+    overflow: hidden;
 }
 
-/* 5. TRENDING CARD - REMOVE ALL DECORATION */
 .trending-card {
     width: 100% !important;
     height: 100% !important;
+    background: #000 !important;
+    border-radius: 0 !important;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
-    border-radius: 0 !important;
     box-shadow: none !important;
-    background: #ffffff !important;
-    display: block !important;
-    position: relative !important;
-    overflow: hidden !important;
+    display: block;
 }
 
-/* NO HOVER EFFECTS */
 .trending-card:hover {
     transform: none !important;
     box-shadow: none !important;
     z-index: auto !important;
 }
 
-/* 6. IMAGE CONTAINER - FULL BLEED */
-.trending-image-container {
-    width: 100% !important;
-    height: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    border-radius: 0 !important;
-    background: #ffffff !important;
-    position: relative !important;
-    overflow: hidden !important;
-}
-
-/* 7. SLIDESHOW - WHITE BACKGROUND FOR SMOOTH TRANSITIONS */
-.trending-image-container .image-slideshow {
-    width: 100% !important;
-    height: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    border-radius: 0 !important;
-    background: #ffffff !important; /* WHITE BACKGROUND - NO BLACK FLASH */
-    position: relative !important;
-}
-
-/* 8. SLIDE IMAGES - ABSOLUTE COVER */
-.trending-image-container .slide-image {
-    width: 100% !important;
-    height: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    object-fit: cover !important;
-    object-position: center center !important;
-    background: #ffffff !important; /* WHITE FALLBACK */
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    display: block !important;
-    opacity: 0;
-    transition: opacity 0.8s ease-in-out !important; /* SMOOTHER TRANSITION */
-    z-index: 1;
-}
-
-/* ACTIVE IMAGE - VISIBLE WITH SMOOTH OPACITY */
-.trending-image-container .slide-image.active {
-    opacity: 1 !important;
-    z-index: 3 !important;
-}
-
-/* NEXT IMAGE - PRELOADED BUT HIDDEN */
-.trending-image-container .slide-image.next {
-    opacity: 0 !important;
-    z-index: 2 !important;
-}
-
-/* 9. ENSURE AT LEAST ONE IMAGE IS VISIBLE DURING TRANSITIONS */
-.image-slideshow:has(.slide-image.active) {
-    background: #ffffff !important;
-}
-
-/* 10. FIX FOR EXISTING ANIMATION CLASSES - PREVENT BLACK FLASH */
-.image-slideshow.appear,
-.image-slideshow.blinds,
-.image-slideshow.random,
-.image-slideshow.window,
-.image-slideshow.boxes,
-.image-slideshow.dust,
-.image-slideshow.fade,
-.image-slideshow.slide-up,
-.image-slideshow.slide-down,
-.image-slideshow.zoom-in {
-    background: #ffffff !important;
-}
-
-/* 11. REMOVE ALL BADGES AND DECORATIVE ELEMENTS */
-.trending-badge,
-.new-badge,
-.badge,
-[class*="badge"] {
+/* Remove all badges including NEW tag */
+.trending-badge, .new-badge {
     display: none !important;
 }
 
-/* 12. RESPONSIVE FIXES - MAINTAIN FULL BLEED */
-@media (max-width: 767px) {
-    .trending-two-column {
-        grid-template-columns: repeat(2, 1fr) !important;
-    }
-    
-    .trending-slide {
-        aspect-ratio: 1/1 !important;
-    }
-}
-
-@media (min-width: 768px) {
-    .trending-two-column {
-        grid-template-columns: repeat(2, 1fr) !important;
-    }
-    
-    .trending-slide {
-        aspect-ratio: 1/1 !important;
-    }
-}
-
-/* 13. FIX FOR SLIDEOUT ANIMATIONS - WHITE BACKGROUND */
-@keyframes slideOutFadeWhite {
-    0% { 
-        opacity: 1; 
-        transform: scale(1); 
-        background: #ffffff;
-    }
-    100% { 
-        opacity: 0; 
-        transform: scale(0.95); 
-        background: #ffffff;
-    }
-}
-
-.trending-slide[style*="animation"] {
-    background: #ffffff !important;
-}
-
-/* 14. ENSURE NO BACKGROUND COLOR LEAK */
-.trending-section *,
-.trending-container *,
-.trending-slider *,
-.trending-two-column *,
-.trending-slide *,
-.trending-card *,
-.trending-image-container *,
-.image-slideshow * {
-    box-sizing: border-box !important;
-}
-
-/* 15. FORCE WHITE BACKGROUND ON ALL ELEMENTS DURING TRANSITIONS */
-.trending-section,
-.trending-container,
-.trending-slider,
-.trending-two-column,
-.trending-slide,
-.trending-card,
-.trending-image-container,
-.image-slideshow {
-    background-color: #ffffff !important;
-    background-image: none !important;
-}
-
-/* 16. FIX FOR IMAGE LOADING - PREVENT BLACK FLASH */
-.slide-image {
-    background: #ffffff !important;
-}
-
-.slide-image[src] {
-    background: transparent !important;
-}
-
-/* 17. ENSURE SMOOTH Z-INDEX STACKING */
-.image-slideshow {
-    isolation: isolate !important;
-}
-
-.slide-image.active {
-    z-index: 10 !important;
-}
-
-.slide-image:not(.active) {
-    z-index: 1 !important;
-}
-
-/* 18. PREVENT LAYOUT SHIFTS */
-.trending-slide {
-    contain: layout paint style !important;
-}
-
-/* 19. ADDITIONAL SAFETY FOR EDGE-TO-EDGE */
-.trending-section .section-title-wrapper {
-    width: 100% !important;
-    max-width: 100% !important;
-}
-
-/* 20. FIX FOR VERY SMALL SCREENS */
-@media (max-width: 360px) {
-    .trending-two-column {
-        grid-template-columns: repeat(2, 1fr) !important;
-    }
-}
-
-/* 21. ENSURE IMAGES DON'T CREATE HORIZONTAL SCROLL */
-img {
-    max-width: 100% !important;
-    height: auto !important;
-}
-
-/* 22. SMOOTHER TRANSITION BETWEEN SETS */
-.trending-slide[style*="animation: slideOutFade"] {
-    animation: slideOutFadeWhite 1s ease forwards !important;
-}
-
-/* 23. FIX FOR POTENTIAL MARGIN/PADDING LEAK */
-body {
-    margin: 0 !important;
-}
-
-/* 24. ENSURE PROPER STACKING DURING ANIMATIONS */
-.image-slideshow .slide-image {
-    will-change: opacity, transform;
-    backface-visibility: hidden;
-}
-
-/* 25. FINAL OVERRIDE - GUARANTEE WHITE BACKGROUND */
-.trending-image-container::before {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+.trending-image-container {
     width: 100% !important;
     height: 100% !important;
-    background: #ffffff !important;
-    z-index: 0 !important;
-    pointer-events: none !important;
+    position: relative;
+    overflow: hidden;
+    background: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+}
+
+/* Remove rotation controls completely */
+.rotation-controls,
+.rotation-btn,
+.rotation-info {
+    display: none !important;
+}
+
+/* ============================================
+   ALL PRODUCTS SECTION
+============================================ */
+.products-section {
+    background: var(--white);
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.products-section .section-title-wrapper {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.75));
+    padding: 20px 15px !important;
+    margin: 0 !important;
+    height: 80px;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.products-section .section-title-wrapper h2 {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin-bottom: 6px !important;
+    color: var(--white);
+    font-family: 'Roboto Slab', serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.products-content {
+    padding: 20px 15px;
+}
+
+/* ============================================
+   PRODUCT CARD ENHANCEMENTS WITH ANIMATIONS
+============================================ */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.product-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--white);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    border: 1px solid #e8e2d8;
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card-wrapper:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-gold);
+}
+
+/* Stone name box styling - ABOVE IMAGE */
+.stone-name-box {
+    width: 100%;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, #ffffff 0%, #f5f1eb 100%);
+    border-radius: 8px;
+    border: 1px solid #e0d9ce;
+    text-align: center;
+    margin: 0;
+    order: 1;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+}
+
+.stone-name-box .product-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--stone-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.stone-name-box .stone-icon {
+    font-size: 14px;
+    color: var(--primary-gold);
+}
+
+.product-card {
+    background: var(--white);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    height: 200px; /* Increased height */
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    order: 2;
+    border: 1px solid #e0d9ce;
+}
+
+.product-card:hover .product-image-container::after {
+    opacity: 0.1;
+}
+
+.product-image-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: var(--white);
+    border-radius: 8px;
+}
+
+.product-image-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--primary-gold);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* ============================================
+   USAGE BUTTONS - FIXED FOR DESKTOP
+============================================ */
+.usage-buttons-container {
+    margin-top: 8px;
+    order: 3;
+    width: 100%;
+}
+
+.usage-buttons {
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping on desktop */
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+}
+
+.usage-btn {
+    padding: 9px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+    overflow: hidden;
+    flex: 1; /* Make all buttons equal width */
+    min-width: 0;
+    max-width: 100%;
+    justify-content: center;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* For mobile: allow wrapping */
+@media (max-width: 767px) {
+    .usage-buttons {
+        flex-wrap: wrap;
+    }
+    
+    .usage-btn {
+        flex: 0 0 calc(50% - 6px);
+        max-width: calc(50% - 6px);
+    }
+}
+
+/* For tablet: keep in one row */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .usage-buttons {
+        flex-wrap: nowrap;
+    }
+    
+    .usage-btn {
+        padding: 10px 8px;
+        font-size: 11px;
+    }
+}
+
+/* For desktop: keep in one row with optimized spacing */
+@media (min-width: 1024px) {
+    .usage-buttons {
+        flex-wrap: nowrap;
+        gap: 6px; /* Reduce gap */
+    }
+    
+    .usage-btn {
+        padding: 10px 6px; /* Reduce padding */
+        font-size: 11px; /* Slightly smaller font */
+        flex: 1;
+        min-width: 100px; /* Minimum width */
+    }
+    
+    /* Adjust icon size on desktop */
+    .usage-btn i {
+        font-size: 11px;
+    }
+}
+
+.usage-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.18);
+}
+
+/* Button types */
+.wall-cladding-btn {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.wall-cladding-btn:hover {
+    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+    border-color: #9ca3af;
+}
+
+.flooring-btn {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+}
+
+.flooring-btn:hover {
+    background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+    border-color: #60a5fa;
+}
+
+.other-btn {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.other-btn:hover {
+    background: linear-gradient(135deg, #fde68a 0%, #fbbf24 100%);
+    border-color: #f59e0b;
+}
+
+/* Remove price display */
+.product-price {
+    display: none;
+}
+
+/* ============================================
+   FOOTER SECTION - INDIAN MARKETING DETAILS
+============================================ */
+.footer-section {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    color: white;
+    padding: 40px 15px 30px;
+    margin-top: 40px;
+    position: relative;
+    border-top: 4px solid var(--primary-gold);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.footer-column {
+    padding: 0 10px;
+}
+
+.footer-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: var(--primary-gold);
+    font-family: 'Roboto Slab', serif;
+    position: relative;
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0.5px;
+}
+
+.footer-section h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: var(--primary-gold);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 13px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+}
+
+.footer-links a:hover {
+    color: var(--primary-gold);
+    transform: translateX(5px);
+}
+
+.footer-links i {
+    font-size: 13px;
+    width: 18px;
+    color: var(--primary-gold);
+    opacity: 0.9;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 30px;
+    margin-top: 40px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.footer-bottom p {
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+
+.footer-social {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.footer-social a {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer-social a:hover {
+    color: var(--primary-gold);
+    transform: translateY(-3px) scale(1.1);
+    background: rgba(201, 162, 39, 0.2);
+}
+
+.footer-contact {
+    margin-top: 15px;
+    font-size: 12px;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+.footer-contact i {
+    margin: 0 4px;
+    color: var(--primary-gold);
+}
+
+.footer-contact a {
+    color: var(--primary-gold);
+    text-decoration: none;
+}
+
+.footer-contact a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================
+   BOTTOM NAVIGATION (CART REMOVED)
+============================================ */
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 999;
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.35);
+    transform: translateY(0);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.3s ease; /* Slower */
+    height: 70px;
+}
+
+.bottom-nav.scrolled {
+    background: rgba(0, 0, 0, 0.98);
+    backdrop-filter: blur(20px);
+}
+
+.bottom-nav.hidden {
+    transform: translateY(100%);
+}
+
+.bottom-nav.show {
+    transform: translateY(0);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Slower */
+}
+
+.nav-btn {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 10px;
+    min-width: 65px;
+    text-decoration: none;
+    height: 50px;
+    justify-content: center;
+    position: relative;
+}
+
+.nav-btn:hover {
+    color: var(--primary-gold);
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+}
+
+.nav-btn.active {
+    color: var(--primary-gold);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-btn i {
+    font-size: 18px;
+}
+
+/* Remove cart badge completely */
+.cart-badge,
+.notification-badge {
+    display: none !important;
+}
+
+/* ============================================
+   UTILITY CLASSES
+============================================ */
+.loading-spinner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(201, 162, 39, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-gold);
+    animation: spin 1s ease-in-out infinite;
+    z-index: 9999;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.notification {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: var(--primary-gold);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    max-width: 280px;
+    display: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.notification.show {
+    transform: translateX(0);
+    display: block;
+}
+
+.error-message {
+    position: fixed;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff4757;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    display: none;
+    max-width: 280px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.scroll-top {
+    position: fixed;
+    bottom: 85px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    background: var(--primary-gold);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 998;
+    opacity: 0;
+    transform: translateY(15px);
+    box-shadow: 0 4px 15px rgba(201, 162, 39, 0.4);
+    font-size: 18px;
+}
+
+.scroll-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.scroll-top:hover {
+    background: var(--gold-dark);
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(201, 162, 39, 0.6);
+}
+
+.view-all-container {
+    text-align: center;
+    margin-top: 25px;
+}
+
+.view-all-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
+    color: white;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: var(--transition);
+    border: none;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(201, 162, 39, 0.3);
+}
+
+.view-all-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(201, 162, 39, 0.5);
+    opacity: 0.95;
+}
+
+.no-products {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-light);
+}
+
+.no-products i {
+    font-size: 45px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+    color: var(--primary-gold);
+}
+
+.no-products h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: var(--stone-dark);
+    font-weight: 700;
+}
+
+.no-products p {
+    font-size: 14px;
+    max-width: 350px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+============================================ */
+@media (min-width: 768px) {
+    header {
+        padding: 12px 25px;
+        height: 70px;
+    }
+    
+    .logo {
+        min-width: 150px;
+    }
+    
+    .logo i {
+        font-size: 22px;
+    }
+    
+    .logo span {
+        font-size: 20px;
+    }
+    
+    .search-box {
+        max-width: 550px;
+    }
+    
+    .search-box input {
+        font-size: 14px;
+        padding: 11px 45px 11px 18px;
+    }
+    
+    .hero {
+        height: 350px;
+        min-height: 350px;
+        padding: 90px 25px 40px;
+        margin-top: 70px;
+    }
+    
+    .hero h1 {
+        font-size: 32px;
+    }
+    
+    .hero p {
+        font-size: 16px;
+        max-width: 600px;
+    }
+    
+    .hero-buttons .signin-btn {
+        padding: 12px 25px;
+        font-size: 15px;
+    }
+    
+    .trending-slide {
+        aspect-ratio: 1/1; /* Square for trending */
+    }
+    
+    .trending-section .section-title-wrapper,
+    .products-section .section-title-wrapper {
+        height: 90px;
+        min-height: 90px;
+        padding: 25px 20px !important;
+    }
+    
+    .trending-section .section-title-wrapper h2,
+    .products-section .section-title-wrapper h2 {
+        font-size: 22px !important;
+    }
+    
+    .trending-section .section-title-wrapper .subtitle {
+        font-size: 15px !important;
+    }
+    
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    
+    .product-card-wrapper {
+        padding: 18px;
+    }
+    
+    .product-card {
+        height: 240px; /* Increased for desktop */
+    }
+    
+    .product-image-container {
+        height: 240px;
+    }
+    
+    .stone-name-box {
+        padding: 15px 18px;
+    }
+    
+    .stone-name-box .product-name {
+        font-size: 17px;
+    }
+    
+    .usage-btn {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+    
+    .footer-content {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 35px;
+    }
+    
+    .footer-column {
+        padding: 0;
+    }
+    
+    .footer-section {
+        padding: 50px 25px 40px;
+    }
+    
+    .footer-section h3 {
+        font-size: 18px;
+    }
+    
+    .footer-links a {
+        font-size: 14px;
+    }
+    
+    .footer-social a {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .trending-two-column {
+        max-width: 1000px;
+        margin: 0 auto;
+        gap: 0 !important;
+    }
+    
+    .trending-slide {
+        aspect-ratio: 1/1;
+    }
+    
+    .product-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+    
+    .footer-content {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 1400px;
+    }
+    
+    .trending-section .section-title-wrapper h2,
+    .products-section .section-title-wrapper h2 {
+        font-size: 24px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .trending-slide {
+        aspect-ratio: 1/1; /* Square for mobile trending */
+    }
+    
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+    
+    .trending-section .section-title-wrapper {
+        padding: 15px 8px !important;
+        height: 75px;
+    }
+    
+    .trending-section .section-title-wrapper h2 {
+        font-size: 16px !important;
+    }
+    
+    .trending-section .section-title-wrapper .subtitle {
+        font-size: 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 6px 12px;
+        height: 60px;
+        gap: 6px;
+    }
+    
+    .logo {
+        min-width: 110px;
+    }
+    
+    .logo i {
+        font-size: 17px;
+    }
+    
+    .logo span {
+        font-size: 15px;
+    }
+    
+    .search-box {
+        margin: 0 6px;
+    }
+    
+    .search-box input {
+        font-size: 12px;
+        padding: 8px 35px 8px 12px;
+    }
+    
+    .profile-btn,
+    .signin-btn {
+        padding: 7px 12px;
+        font-size: 12px;
+        min-width: 70px;
+    }
+    
+    .action-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    .hero {
+        height: 250px;
+        min-height: 250px;
+        padding: 70px 15px 25px;
+        margin-top: 60px;
+    }
+    
+    .hero h1 {
+        font-size: 22px;
+    }
+    
+    .hero p {
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+    
+    .hero-buttons {
+        gap: 8px;
+    }
+    
+    .hero-buttons .signin-btn {
+        padding: 9px 16px;
+        font-size: 13px;
+    }
+    
+    .trending-slide {
+        aspect-ratio: 1/1; /* Square for mobile */
+    }
+    
+    .product-grid {
+        gap: 12px;
+    }
+    
+    .product-card-wrapper {
+        padding: 12px;
+    }
+    
+    .product-card {
+        height: 180px; /* Adjusted for mobile */
+    }
+    
+    .product-image-container {
+        height: 180px;
+    }
+    
+    .stone-name-box {
+        padding: 10px 12px;
+    }
+    
+    .stone-name-box .product-name {
+        font-size: 14px;
+    }
+    
+    .usage-buttons {
+        gap: 6px;
+    }
+    
+    .usage-btn {
+        padding: 8px 10px;
+        font-size: 11px;
+        gap: 4px;
+    }
+    
+    .usage-btn i {
+        font-size: 11px;
+    }
+    
+    .bottom-nav {
+        height: 65px;
+        padding: 10px 0;
+    }
+    
+    .nav-btn {
+        min-width: 60px;
+        font-size: 10px;
+        padding: 6px 8px;
+    }
+    
+    .nav-btn i {
+        font-size: 16px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+}
+
+@media (max-width: 360px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .usage-buttons {
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+    }
+    
+    .usage-btn {
+        width: 100%;
+        min-width: unset;
+        max-width: 220px;
+    }
+    
+    .trending-slide {
+        aspect-ratio: 1/1; /* Square for small mobile */
+    }
 }
 </style>
 </head>
